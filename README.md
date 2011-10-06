@@ -17,12 +17,12 @@ API
 
 Let's start with getting things:
 
-    Http.get("http://www.google.com")
+    Http.get "http://www.google.com"
 
 That's it! The result is the response body.
 
 Don't like "Http"? No worries, this works as well:
 
-    HTTP.get("http://www.google.com")
+    HTTP.get "http://www.google.com"
 
 After all, There Is More Than One Way To Do It!
