@@ -37,9 +37,10 @@ One way we could do this is by tacking a filename on the end of the URL:
     Http.get "https://github.com/tarcieri/http/commit/HEAD.json"
 
 The Github API happens to support this approach, but really this is a bit of a
-hack that makes it easy for people using browsers to perform the act of
-content negotiation. HTTP would really prefer we do this using the Accept
-header. How do we send that with the Http library?
+hack that makes it easy for people typing URLs into the address bars of
+browsers to perform the act of content negotiation. Since we have access to
+the full, raw power of HTTP, we can perform content negotiation the way HTTP
+intends us to, by using the Accept header:
 
     Http.with_headers(:accept => 'application/json').
       get("https://github.com/tarcieri/http/commit/HEAD")
