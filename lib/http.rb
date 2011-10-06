@@ -8,12 +8,15 @@ require 'uri'
 
 # Http, it can be simple!
 module Http
-  def self.get(uri, options = {})
-    Client.new(uri).get(options = {})
-  end
+  class << self
+    def get(uri, options = {})
+      Client.new(uri).get(options = {})
+    end
 
-  def self.with_headers(headers)
-    Headers.new(headers)
+    def with_headers(headers)
+      Headers.new(headers)
+    end
+    alias_method :with, :with_headers
   end
 end
 

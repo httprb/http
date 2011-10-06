@@ -11,7 +11,7 @@ describe Http do
 
     context "with headers" do
       it "should be easy" do
-        response = Http.with_headers(:accept => 'application/json').
+        response = Http.with(:accept => 'application/json').
           get("https://github.com/tarcieri/http/commit/HEAD")
 
         # Congratulations first committer, your prize is to break the build!

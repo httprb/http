@@ -40,7 +40,7 @@ module Http
       response = http.request(request)
 
       if response['content-type'].match(/^application\/json/)
-        return JSON.parse response.body if defined? JSON
+        return JSON.parse response.body if defined? JSON and JSON.respond_to? :parse
       end
 
       response.body
