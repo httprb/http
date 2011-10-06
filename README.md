@@ -54,3 +54,15 @@ A shorter alias exists for HTTP.with_headers:
 
 	Http.with(:accept => 'application/json').
 	  get("https://github.com/tarcieri/http/commit/HEAD")
+
+Content Negotiation
+-------------------
+
+As important a concept as content negotiation is HTTP, it sure should be easy,
+right? But usually it's not, and so we end up adding ".json" onto the ends of
+our URLs because the existing mechanisms make it too hard. It should be easy:
+
+    Http.accept(:json).get("https://github.com/tarcieri/http/commit/HEAD")
+
+This adds the appropriate Accept header for retrieving a JSON response for the
+given resource.

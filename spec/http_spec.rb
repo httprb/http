@@ -11,8 +11,7 @@ describe Http do
 
     context "with headers" do
       it "should be easy" do
-        response = Http.with(:accept => 'application/json').
-          get("https://github.com/tarcieri/http/commit/HEAD")
+        response = Http.accept(:json).get("https://github.com/tarcieri/http/commit/HEAD")
 
         # Congratulations first committer, your prize is to break the build!
         response['commit']['author']['name'].should == "Tony Arcieri"
