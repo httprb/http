@@ -21,12 +21,29 @@ module Http
       @options = options
     end
 
+    # Make an HTTP get request
     def get(options = {})
-      # Trolol these don't do anything yet
+      # Red, green, refactor tomorrow :/
       options = @options.merge(options)
+      raw_headers = options[:headers] || {}
 
-      # NO! Don't even thing about reusing the Net::HTTP options hash
-      Net::HTTP.get(@uri)
+      # Stringify keys :/
+      headers = {}
+      raw_headers.each { |k,v| headers[k.to_s] = v }
+
+      http = Net::HTTP.new(@uri.host, @uri.port)
+
+      # Why the FUCK can't Net::HTTP do this either?!
+      http.use_ssl = true if @uri.is_a? URI::HTTPS
+
+      request = Net::HTTP::Get.new(@uri.request_uri, headers)
+      response = http.request(request)
+
+      if response['content-type'].match(/^application\/json/)
+        return JSON.parse response.body if defined? JSON
+      end
+
+      response.body
     end
   end
 end
