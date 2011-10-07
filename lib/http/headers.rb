@@ -1,5 +1,7 @@
 module Http
   class Headers
+    include Chainable
+
     def initialize(headers = {})
       @headers = headers
     end
@@ -10,13 +12,6 @@ module Http
 
     def [](field)
       @headers[field.downcase]
-    end
-
-    # Get a URL with the current headers
-    def get(uri, options = {})
-      headers = @headers.merge(options[:headers] || {})
-      options = options.merge(:headers => headers)
-      Client.new(uri).get(options)
     end
   end
 end
