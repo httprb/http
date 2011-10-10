@@ -3,26 +3,18 @@ module Http
   class Client
     # I swear I'll document that nebulous options hash
     def initialize(uri, options = {})
-      # Argument coersion is a bit gnarly, isn't it?
-      case uri
-      when String
-        # Why the FUCK can't Net::HTTP do this?
-        @uri = URI.parse(uri)
-      when URI
+      if uri.is_a? URI
         @uri = uri
       else
-        if uri.respond_to :to_uri
-          @uri = uri.to_uri
-        else
-          raise ArgumentError, "can't convert #{uri.class} to a URI"
-        end
+        # Why the FUCK can't Net::HTTP do this?
+        @uri = URI(uri)
       end
 
-      @options = options
+      @options = {:parse_response => true}.merge(options)
     end
 
-    # Make an HTTP get request
-    def get(options = {})
+    # Make an HTTP request
+    def request(verb, options = {})
       # Red, green, refactor tomorrow :/
       options = @options.merge(options)
       raw_headers = options[:headers] || {}
@@ -36,9 +28,21 @@ module Http
       # Why the FUCK can't Net::HTTP do this either?!
       http.use_ssl = true if @uri.is_a? URI::HTTPS
 
-      request = Net::HTTP::Get.new(@uri.request_uri, headers)
+      request_class = Net::HTTP.const_get(verb.to_s.capitalize)
+      request = request_class.new(@uri.request_uri, headers)
+      request.set_form_data(options[:form]) if options[:form]
+
       response = http.request(request)
 
+      if options[:parse_response]
+        parse_response response
+      else
+        response.body
+      end
+    end
+
+    # Parse the response body according to its content type
+    def parse_response(response)
       if response['content-type'].match(/^application\/json/)
         return JSON.parse response.body if defined? JSON and JSON.respond_to? :parse
       end

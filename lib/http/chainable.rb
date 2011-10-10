@@ -1,18 +1,29 @@
 module Http
   module Chainable
-    # Get a URL
+    # Get a resource
     def get(uri, options = {})
-      headers = defined?(@headers) ? @headers : {}
-      headers = headers.merge(options[:headers] || {})
-      options = options.merge(:headers => headers)
+      request :get, uri, options
+    end
 
-      Client.new(uri).get(options)
+    # Post to a resource
+    def post(uri, options = {})
+      request :post, uri, options
+    end
+
+    # Make an HTTP request with the given verb
+    def request(verb, uri, options = {})
+      if options[:headers]
+        headers = default_headers.merge options[:headers]
+      else
+        headers = default_headers
+      end
+
+      Client.new(uri).request verb, options.merge(:headers => headers)
     end
 
     # Make a request with the given headers
     def with_headers(headers)
-      old_headers = defined?(@headers) ? @headers : {}
-      Headers.new old_headers.merge(headers)
+      Headers.new default_headers.merge(headers)
     end
     alias_method :with, :with_headers
 
@@ -25,6 +36,14 @@ module Http
       end
 
       with :accept => mime_type
+    end
+
+    def default_headers
+      @default_headers ||= {}
+    end
+
+    def default_headers=(headers)
+      @default_headers = headers
     end
   end
 end

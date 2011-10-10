@@ -3,15 +3,15 @@ module Http
     include Chainable
 
     def initialize(headers = {})
-      @headers = headers
+      self.default_headers = headers
     end
 
     def []=(field, value)
-      @headers[field.downcase] = value
+      default_headers[field.downcase] = value
     end
 
     def [](field)
-      @headers[field.downcase]
+      default_headers[field.downcase]
     end
   end
 end
