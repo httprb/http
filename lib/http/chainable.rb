@@ -23,7 +23,7 @@ module Http
 
     # Make a request with the given headers
     def with_headers(headers)
-      Headers.new default_headers.merge(headers)
+      Parameters.new default_headers.merge(headers)
     end
     alias_method :with, :with_headers
 

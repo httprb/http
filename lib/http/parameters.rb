@@ -1,5 +1,5 @@
 module Http
-  class Headers
+  class Parameters
     include Chainable
 
     def initialize(headers = {})
