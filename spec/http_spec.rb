@@ -6,7 +6,7 @@ describe Http do
     it "should be easy" do
       # Fuck it, we'll do it live! (Testing against WEBRick or something coming soon)
       response = Http.get "http://www.google.com"
-      response.should match(/<!doctype html>/)
+      response.body.should match(/<!doctype html>/)
     end
 
     context "with headers" do
@@ -14,7 +14,7 @@ describe Http do
         response = Http.accept(:json).get("https://github.com/tarcieri/http/commit/HEAD")
 
         # Congratulations first committer, your prize is to break the build!
-        response['commit']['author']['name'].should == "Tony Arcieri"
+        response.body['commit']['author']['name'].should == "Tony Arcieri"
       end
     end
   end
@@ -24,7 +24,7 @@ describe Http do
       fragment = "<!doctype html><html><head><title>example</title></head></html>"
       response = Http.post "http://validator.w3.org/check", :form => {:fragment => fragment}
 
-      response.should match(/HTML5/)
+      response.body.should match(/HTML5/)
     end
   end
 end

@@ -81,10 +81,11 @@ module Http
 
       case options[:response]
       when :parsed_body
-        parse_response response
+        response.body = parse_response(response)
       else
         response.body
       end
+      Http::Response.new(response.body, response.code)
     end
 
     # Parse the response body according to its content type
