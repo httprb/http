@@ -10,7 +10,7 @@ module Http
         @uri = URI(uri)
       end
 
-      @options = {:parse_response => true}.merge(options)
+      @options = {:response => :parsed_body}.merge(options)
     end
 
     # Request a get sans response body
@@ -79,7 +79,8 @@ module Http
 
       response = http.request(request)
 
-      if options[:parse_response]
+      case options[:response]
+      when :parsed_body
         parse_response response
       else
         response.body
