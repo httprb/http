@@ -29,7 +29,7 @@ After all, There Is More Than One Way To Do It!
 
 Making POST requests is simple too. Want to POST a form?
 
-	HTTP.post "http://example.com/resource", :form => {:foo => "42"}
+	Http.post "http://example.com/resource", :form => {:foo => "42"}
 
 It's easy!
 
