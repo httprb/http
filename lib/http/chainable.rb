@@ -63,14 +63,14 @@ module Http
     alias_method :with, :with_headers
 
     # Accept the given MIME type(s)
-    def accept(mime_type)
-      # Handle shorthand
-      case mime_type
-      when :json, "json"
-        mime_type = "application/json"
+    def accept(type)
+      if type.is_a? String
+        with :accept => type
+      else
+        mime_type = Http::MimeType[type]
+        raise ArgumentError, "unknown MIME type: #{type}" unless mime_type
+        with :accept => mime_type.type
       end
-
-      with :accept => mime_type
     end
 
     def default_headers
