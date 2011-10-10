@@ -43,8 +43,9 @@ module Http
 
     # Parse the response body according to its content type
     def parse_response(response)
-      if response['content-type'].match(/^application\/json/)
-        return JSON.parse response.body if defined? JSON and JSON.respond_to? :parse
+      if response['content-type']
+        mime_type = MimeType[response['content-type'].split(/;\s*/).first]
+        return mime_type.parse(response.body) if mime_type
       end
 
       response.body

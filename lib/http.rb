@@ -2,6 +2,7 @@ require 'http/version'
 require 'http/chainable'
 require 'http/client'
 require 'http/headers'
+require 'http/mime_type'
 
 # THIS IS ENTIRELY TEMPORARY, I ASSURE YOU
 require 'net/https'
