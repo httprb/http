@@ -13,6 +13,51 @@ module Http
       @options = {:parse_response => true}.merge(options)
     end
 
+    # Request a get sans response body
+    def head(uri, options = {})
+      request :head, options
+    end
+
+    # Get a resource
+    def get(uri, options = {})
+      request :get, options
+    end
+
+    # Post to a resource
+    def post(uri, options = {})
+      request :post, options
+    end
+
+    # Put to a resource
+    def put(uri, options = {})
+      request :put, options
+    end
+
+    # Delete a resource
+    def delete(uri, options = {})
+      request :delete, options
+    end
+
+    # Echo the request back to the client
+    def trace(uri, options = {})
+      request :trace, options
+    end
+
+    # Return the methods supported on the given URI
+    def options(uri, options = {})
+      request :options, options
+    end
+
+    # Convert to a transparent TCP/IP tunnel
+    def connect(uri, options = {})
+      request :connect, options
+    end
+
+    # Apply partial modifications to a resource
+    def patch(uri, options = {})
+      request :patch, options
+    end
+
     # Make an HTTP request
     def request(verb, options = {})
       # Red, green, refactor tomorrow :/
