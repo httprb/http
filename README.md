@@ -72,3 +72,15 @@ our URLs because the existing mechanisms make it too hard. It should be easy:
 
 This adds the appropriate Accept header for retrieving a JSON response for the
 given resource.
+
+Contributing to Http
+--------------------
+
+* Fork Http on github
+* Make your changes and send me a pull request
+* If I like them I'll merge them and give you commit access to my repository
+
+Copyright
+---------
+
+Copyright (c) 2011 Tony Arcieri, Carl Lerche. See LICENSE.txt for further details.
