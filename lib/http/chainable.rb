@@ -2,7 +2,7 @@ module Http
   module Chainable
     # Request a get sans response body
     def head(uri, options = {})
-      request :head, uri, options
+      request :head, uri, {:response => :object}.merge(options)
     end
 
     # Get a resource
@@ -47,6 +47,8 @@ module Http
 
     # Make an HTTP request with the given verb
     def request(verb, uri, options = {})
+      options[:response] ||= :parsed_body
+
       if options[:headers]
         headers = default_headers.merge options[:headers]
       else

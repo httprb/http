@@ -10,7 +10,7 @@ module Http
         @uri = URI(uri)
       end
 
-      @options = {:response => :parsed_body}.merge(options)
+      @options = {:response => :object}.merge(options)
     end
 
     # Request a get sans response body
@@ -77,25 +77,24 @@ module Http
       request = request_class.new(@uri.request_uri, headers)
       request.set_form_data(options[:form]) if options[:form]
 
-      response = http.request(request)
+      net_http_response = http.request(request)
+
+      response = Http::Response.new
+      net_http_response.each_header do |header, value|
+        response[header] = value
+      end
+      response.status = Integer(net_http_response.code) # WTF again Net::HTTP
+      response.body   = net_http_response.body
 
       case options[:response]
+      when :object
+        response
       when :parsed_body
-        response.body = parse_response(response)
-      else
+        response.parse_body
+      when :body
         response.body
+      else raise ArgumentError, "invalid response type: #{options[:response]}"
       end
-      Http::Response.new(response.body, response.code)
-    end
-
-    # Parse the response body according to its content type
-    def parse_response(response)
-      if response['content-type']
-        mime_type = MimeType[response['content-type'].split(/;\s*/).first]
-        return mime_type.parse(response.body) if mime_type
-      end
-
-      response.body
     end
   end
 end
