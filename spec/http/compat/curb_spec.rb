@@ -7,4 +7,12 @@ describe Curl::Easy do
     response = Curl::Easy.http_get "http://www.google.com"
     response.body_str.should match(/<!doctype html>/)
   end
+
+  context :errors do
+    it "raises Curl::Err::ConnectionFailedError if the connection failed" do
+      expect {
+        Curl::Easy.http_get "http://totallynonexistentdomain.com"
+      }.to raise_exception(Curl::Err::ConnectionFailedError)
+    end
+  end
 end

@@ -2,6 +2,11 @@ require 'http'
 
 # Compatibility with the Curb gem
 module Curl
+  module Err
+    class CurlError < RuntimeError; end
+    class ConnectionFailedError < CurlError; end
+  end
+
   class Easy
     attr_accessor :headers, :encoding
     attr_reader   :response_code, :body_str
@@ -28,6 +33,9 @@ module Curl
       response = @client.send @method
       @response_code, @body_str = response.code, response.body
       true
+    rescue SocketError => ex
+      raise Err::ConnectionFailedError, ex.message
+
     end
 
     def http_get(request_body = nil)
