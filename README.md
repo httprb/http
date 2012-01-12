@@ -17,19 +17,25 @@ Making Requests
 
 Let's start with getting things:
 
-    Http.get "http://www.google.com"
+```ruby
+Http.get "http://www.google.com"
+```
 
 That's it! The result is the response body.
 
 Don't like "Http"? No worries, this works as well:
 
-    HTTP.get "http://www.google.com"
+```ruby
+HTTP.get "http://www.google.com"
+```
 
 After all, There Is More Than One Way To Do It!
 
 Making POST requests is simple too. Want to POST a form?
 
-	Http.post "http://example.com/resource", :form => {:foo => "42"}
+```ruby
+Http.post "http://example.com/resource", :form => {:foo => "42"}
+```
 
 It's easy!
 
@@ -40,7 +46,9 @@ The Http library uses the concept of chaining to simplify requests. Let's say
 you want to get the latest commit of this library from Github in JSON format.
 One way we could do this is by tacking a filename on the end of the URL:
 
-    Http.get "https://github.com/tarcieri/http/commit/HEAD.json"
+```ruby
+Http.get "https://github.com/tarcieri/http/commit/HEAD.json"
+```
 
 The Github API happens to support this approach, but really this is a bit of a
 hack that makes it easy for people typing URLs into the address bars of
@@ -48,8 +56,10 @@ browsers to perform the act of content negotiation. Since we have access to
 the full, raw power of HTTP, we can perform content negotiation the way HTTP
 intends us to, by using the Accept header:
 
-    Http.with_headers(:accept => 'application/json').
-      get("https://github.com/tarcieri/http/commit/HEAD")
+```ruby
+Http.with_headers(:accept => 'application/json').
+  get("https://github.com/tarcieri/http/commit/HEAD")
+```
 
 This requests JSON from Github. Github is smart enough to understand our
 request and returns a response with Content-Type: application/json. If you
@@ -58,8 +68,10 @@ JSON.parse, the Http library will attempt to parse the JSON response.
 
 A shorter alias exists for HTTP.with_headers:
 
-	Http.with(:accept => 'application/json').
-	  get("https://github.com/tarcieri/http/commit/HEAD")
+```ruby
+Http.with(:accept => 'application/json').
+  get("https://github.com/tarcieri/http/commit/HEAD")
+```
 
 Content Negotiation
 -------------------
@@ -68,7 +80,9 @@ As important a concept as content negotiation is HTTP, it sure should be easy,
 right? But usually it's not, and so we end up adding ".json" onto the ends of
 our URLs because the existing mechanisms make it too hard. It should be easy:
 
-    Http.accept(:json).get("https://github.com/tarcieri/http/commit/HEAD")
+```ruby
+Http.accept(:json).get("https://github.com/tarcieri/http/commit/HEAD")
+```
 
 This adds the appropriate Accept header for retrieving a JSON response for the
 given resource.
