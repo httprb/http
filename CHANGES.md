@@ -1,3 +1,7 @@
+0.0.2
+-----
+* Curb compatibility (require 'http/compat/curb')
+
 0.0.1
 -----
 * Initial half-baked release
