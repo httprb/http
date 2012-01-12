@@ -7,54 +7,54 @@ module Http
         @uri = uri
       else
         # Why the FUCK can't Net::HTTP do this?
-        @uri = URI(uri)
+        @uri = URI(uri.to_s)
       end
 
       @options = {:response => :object}.merge(options)
     end
 
     # Request a get sans response body
-    def head(uri, options = {})
+    def head(options = {})
       request :head, options
     end
 
     # Get a resource
-    def get(uri, options = {})
+    def get(options = {})
       request :get, options
     end
 
     # Post to a resource
-    def post(uri, options = {})
+    def post(options = {})
       request :post, options
     end
 
     # Put to a resource
-    def put(uri, options = {})
+    def put(options = {})
       request :put, options
     end
 
     # Delete a resource
-    def delete(uri, options = {})
+    def delete(options = {})
       request :delete, options
     end
 
     # Echo the request back to the client
-    def trace(uri, options = {})
+    def trace(options = {})
       request :trace, options
     end
 
     # Return the methods supported on the given URI
-    def options(uri, options = {})
+    def options(options = {})
       request :options, options
     end
 
     # Convert to a transparent TCP/IP tunnel
-    def connect(uri, options = {})
+    def connect(options = {})
       request :connect, options
     end
 
     # Apply partial modifications to a resource
-    def patch(uri, options = {})
+    def patch(options = {})
       request :patch, options
     end
 

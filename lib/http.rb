@@ -5,7 +5,6 @@ require 'http/mime_type'
 require 'http/parameters'
 require 'http/response'
 
-
 # THIS IS ENTIRELY TEMPORARY, I ASSURE YOU
 require 'net/https'
 require 'uri'
