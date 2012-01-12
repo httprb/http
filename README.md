@@ -87,6 +87,19 @@ Http.accept(:json).get("https://github.com/tarcieri/http/commit/HEAD")
 This adds the appropriate Accept header for retrieving a JSON response for the
 given resource.
 
+Curb Compatibility
+------------------
+
+The Http gem provides partial compatibility with the Curb::Easy API. This is
+great if you're transitioning to JRuby and need a drop-in API-compatible
+replacement for Curb.
+
+To use the Curb compatibility, do:
+
+```ruby
+require 'http/compat/curb'
+```
+
 Contributing to Http
 --------------------
 
