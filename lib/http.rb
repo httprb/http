@@ -15,5 +15,5 @@ module Http
 end
 
 # TIMTOWTDI!
-HTTP = Http
-HttpClient = Http::Client
+HTTP = Http unless defined? HTTP
+HttpClient = Http::Client unless defined? HttpClient
