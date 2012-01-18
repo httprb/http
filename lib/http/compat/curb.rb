@@ -19,23 +19,22 @@ module Curl
       Easy.new(url).tap { |e| e.http_get(request_body) }
     end
 
-    def initialize(url, method = nil, request_body = nil, headers = {})
+    def initialize(url = nil, method = nil, request_body = nil, headers = {})
       @url = url
       @method = method
       @request_body = request_body
       @headers = headers
       @response_code = @body_str = nil
 
-      @client = Http::Client.new @url, :headers => @headers
     end
 
     def perform
-      response = @client.send @method
+      client = Http::Client.new @url, :headers => @headers
+      response = client.send @method
       @response_code, @body_str = response.code, response.body
       true
     rescue SocketError => ex
       raise Err::ConnectionFailedError, ex.message
-
     end
 
     def http_get(request_body = nil)
