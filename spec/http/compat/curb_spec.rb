@@ -11,7 +11,7 @@ describe Curl::Easy do
   end
 
   context :errors do
-    it "raises Curl::Err::HostResolutionError if asked to connect to a nonexistent domainwh" do
+    it "raises Curl::Err::HostResolutionError if asked to connect to a nonexistent domain" do
       expect {
         Curl::Easy.http_get "http://totallynonexistentdomain.com"
       }.to raise_exception(Curl::Err::HostResolutionError)

@@ -35,7 +35,7 @@ module Curl
       @response_code, @body_str = response.code, response.body
       true
     rescue SocketError => ex
-      if ex.message['getaddrinfo'] || ex.message['name or service not known']
+      if ex.message['getaddrinfo'] || ex.message['ame or service not known']
         raise Err::HostResolutionError, ex.message
       else
         raise Err::ConnectionFailedError, ex.message
