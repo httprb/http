@@ -5,6 +5,7 @@ module Curl
   module Err
     class CurlError < RuntimeError; end
     class ConnectionFailedError < CurlError; end
+    class HostResolutionError < CurlError; end
   end
 
   class Easy
@@ -34,7 +35,11 @@ module Curl
       @response_code, @body_str = response.code, response.body
       true
     rescue SocketError => ex
-      raise Err::ConnectionFailedError, ex.message
+      if ex.message['getaddrinfo']
+        raise Err::HostResolutionError, ex.message
+      else
+        raise Err::ConnectionFailedError, ex.message
+      end
     end
 
     def http_get(request_body = nil)

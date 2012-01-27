@@ -1,18 +1,20 @@
 require 'spec_helper'
+
 require 'http/compat/curb'
 
 describe Curl::Easy do
+  let(:test_endpoint) { "http://127.0.0.1:#{TEST_SERVER_PORT}/" }
+    
   it "gets resources" do
-    # Fuck it, we'll do it live! (Testing against WEBRick or something coming soon)
-    response = Curl::Easy.http_get "http://www.google.com"
+    response = Curl::Easy.http_get test_endpoint
     response.body_str.should match(/<!doctype html>/)
   end
 
   context :errors do
-    it "raises Curl::Err::ConnectionFailedError if the connection failed" do
+    it "raises Curl::Err::HostResolutionError if asked to connect to a nonexistent domainwh" do
       expect {
         Curl::Easy.http_get "http://totallynonexistentdomain.com"
-      }.to raise_exception(Curl::Err::ConnectionFailedError)
+      }.to raise_exception(Curl::Err::HostResolutionError)
     end
   end
 end
