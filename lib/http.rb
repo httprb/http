@@ -13,7 +13,3 @@ require 'uri'
 module Http
   extend Chainable
 end
-
-# TIMTOWTDI!
-HTTP = Http unless defined? HTTP
-HttpClient = Http::Client unless defined? HttpClient
