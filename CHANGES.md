@@ -1,5 +1,6 @@
-0.0.2
+0.1.0
 -----
+* Testing against WEBrick
 * Curb compatibility (require 'http/compat/curb')
 
 0.0.1
