@@ -28,7 +28,7 @@ describe Curl do
       multi = Curl::Multi.new
       
       requests.each do |url|
-        response = Curl::Easy.new(url)
+        response = Curl::Easy.new url, :get
         multi.add response
         responses << response
       end
