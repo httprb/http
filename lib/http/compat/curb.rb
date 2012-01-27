@@ -78,7 +78,7 @@ module Curl
       return if @done
       
       @clients.map do |client|
-        Thread.new { client.http_get }
+        Thread.new { client.perform }
       end.each(&:join)
 
       @done = true
