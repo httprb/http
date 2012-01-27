@@ -64,14 +64,24 @@ module Curl
   end
   
   class Multi
-    class << self
-      def get(urls, easy_options={}, multi_options={})
-        Array(urls).map do |url|
-          Thread.new { yield Curl::Easy.http_get(url) }
-        end.each(&:join)
-        
-        nil
-      end
+    def initialize
+      @clients = []
+      @done = false
+    end
+    
+    def add(client)
+      @clients << client
+    end
+    
+    
+    def perform
+      return if @done
+      
+      @clients.map do |client|
+        Thread.new { client.http_get }
+      end.each(&:join)
+
+      @done = true
     end
   end
 end

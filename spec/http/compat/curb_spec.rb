@@ -22,15 +22,19 @@ describe Curl do
   
   describe Curl::Multi do
     it "gets resources" do
-      called = false
+      requests  = [test_endpoint]
+      responses = []
       
-      Curl::Multi.get(test_endpoint) do |response|
-        called = true
-        response.should be_a Curl::Easy
-        response.body_str.should match(/<!doctype html>/)
+      multi = Curl::Multi.new
+      
+      requests.each do |url|
+        response = Curl::Easy.new(url)
+        multi.add response
+        responses << response
       end
-      
-      called.should be_true
+
+      multi.perform
+      responses.first.body_str.should match(/<!doctype html>/)
     end
   end
 end
