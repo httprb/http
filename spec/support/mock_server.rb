@@ -23,6 +23,21 @@ class MockService < WEBrick::HTTPServlet::AbstractServlet
     end
   end
   
+  def do_POST(request, response)
+    case request.path
+    when "/"
+      if request.query['example'] == 'testing'
+        response.status = 200
+        response.body   = "passed :)"
+      else
+        response.status = 400
+        response.vody   = "invalid! >:E"
+      end
+    else
+      response.status = 404
+    end
+  end
+  
   def do_HEAD(request, response)
     case request.path
     when "/"

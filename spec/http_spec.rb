@@ -20,10 +20,8 @@ describe Http do
 
   context "posting to resources" do
     it "should be easy" do
-      fragment = "<!doctype html><html><head><title>example</title></head></html>"
-      response = Http.post "http://validator.w3.org/check", :form => {:fragment => fragment}
-
-      response.should match(/HTML5/)
+      response = Http.post test_endpoint, :form => {:example => 'testing'}
+      response.should == "passed :)"
     end
   end
 
