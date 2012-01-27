@@ -1,5 +1,6 @@
 Http
 ====
+[![Build Status](http://travis-ci.org/tarcieri/http.png)](http://travis-ci.org/tarcieri/http)
 
 Ruby has always been this extremely web-focused language, and yet despite the
 selection of HTTP libraries out there, I always find myself falling back on
