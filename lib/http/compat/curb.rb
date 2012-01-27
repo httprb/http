@@ -26,7 +26,6 @@ module Curl
       @request_body = request_body
       @headers = headers
       @response_code = @body_str = nil
-
     end
 
     def perform
