@@ -2,19 +2,18 @@ require 'spec_helper'
 require 'json'
 
 describe Http do
+  let(:test_endpoint) { "http://127.0.0.1:#{TEST_SERVER_PORT}/" }
+  
   context "getting resources" do
     it "should be easy" do
-      # Fuck it, we'll do it live! (Testing against WEBRick or something coming soon)
-      response = Http.get "http://www.google.com"
+      response = Http.get test_endpoint
       response.should match(/<!doctype html>/)
     end
 
     context "with headers" do
       it "should be easy" do
-        response = Http.accept(:json).get("https://github.com/tarcieri/http/commit/HEAD")
-
-        # Congratulations first committer, your prize is to break the build!
-        response['commit']['author']['name'].should == "Tony Arcieri"
+        response = Http.accept(:json).get test_endpoint
+        response['json'].should be_true
       end
     end
   end
@@ -30,7 +29,7 @@ describe Http do
 
   context "head requests" do
     it "should be easy" do
-      response = Http.head "http://www.google.com"
+      response = Http.head test_endpoint
       response.status.should == 200
       response['content-type'].should match(/html/)
     end
