@@ -66,7 +66,11 @@ module Curl
   class Multi
     class << self
       def get(urls, easy_options={}, multi_options={})
-        Array(urls).map { |url| Thread.new { yield Curl::Easy.http_get(url) } }.map(&:value)
+        Array(urls).map do |url|
+          Thread.new { yield Curl::Easy.http_get(url) }
+        end.each(&:join)
+        
+        nil
       end
     end
   end
