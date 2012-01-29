@@ -3,8 +3,6 @@ require 'webrick'
 TEST_SERVER_PORT = 65432
 
 class MockService < WEBrick::HTTPServlet::AbstractServlet
-  class << self; attr_accessor :post_handler; end
-  
   def do_GET(request, response)
     case request.path
     when "/"
@@ -31,7 +29,7 @@ class MockService < WEBrick::HTTPServlet::AbstractServlet
         response.body   = "passed :)"
       else
         response.status = 400
-        response.vody   = "invalid! >:E"
+        response.body   = "invalid! >:E"
       end
     else
       response.status = 404
@@ -52,8 +50,7 @@ end
 MockServer = WEBrick::HTTPServer.new(:Port => TEST_SERVER_PORT, :AccessLog => [])
 MockServer.mount "/", MockService
 
-Thread.new  { MockServer.start }
-trap("INT") { MockServer.shutdown; exit }
+t = Thread.new { MockServer.start }
+trap("INT")    { MockServer.shutdown; exit }
 
-# hax: wait for webrick to start
-sleep 0.1
+Thread.pass while t.status and t.status != "sleep"
