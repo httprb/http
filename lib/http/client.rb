@@ -77,7 +77,12 @@ module Http
       request = request_class.new(@uri.request_uri, headers)
       request.set_form_data(options[:form]) if options[:form]
 
+      callbacks = options[:callbacks] || {}
+      (callbacks[:request] || []).each{|c| c.invoke(request)}
+
       net_http_response = http.request(request)
+
+      (callbacks[:response] || []).each{|c| c.invoke(net_http_response)}
 
       response = Http::Response.new
       net_http_response.each_header do |header, value|
