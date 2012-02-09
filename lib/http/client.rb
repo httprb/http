@@ -3,13 +3,7 @@ module Http
   class Client
     # I swear I'll document that nebulous options hash
     def initialize(uri, options = {})
-      if uri.is_a? URI
-        @uri = uri
-      else
-        # Why the FUCK can't Net::HTTP do this?
-        @uri = URI(uri.to_s)
-      end
-
+      @uri = uri
       @options = {:response => :object}.merge(options)
     end
 
@@ -88,8 +82,10 @@ module Http
     private
 
     def raw_http_call(method, uri, headers, form_data = nil)
-      # Ensure uri and stringify keys :/
-      uri     = URI(uri.to_s) unless uri.is_a? URI
+      # Why the FUCK can't Net::HTTP do this?
+      uri = URI(uri.to_s) unless uri.is_a? URI
+
+      # Stringify keys :/
       headers = Hash[headers.map{|k,v| [k.to_s, v]}]
 
       http = Net::HTTP.new(uri.host, uri.port)
