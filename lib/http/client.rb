@@ -3,14 +3,8 @@ module Http
   class Client
     # I swear I'll document that nebulous options hash
     def initialize(uri, options = {})
-      if uri.is_a? URI
-        @uri = uri
-      else
-        # Why the FUCK can't Net::HTTP do this?
-        @uri = URI(uri.to_s)
-      end
-
-      @options = {:response => :object}.merge(options)
+      @uri     = uri
+      @options = options
     end
 
     # Request a get sans response body
@@ -60,41 +54,64 @@ module Http
 
     # Make an HTTP request
     def request(verb, options = {})
-      # Red, green, refactor tomorrow :/
       options = @options.merge(options)
-      raw_headers = options[:headers] || {}
+
+      # prepare raw call arguments
+      method    = verb
+      uri       = @uri
+      headers   = options[:headers] || {}
+      form_data = options[:form]
+
+      # make raw call
+      net_http_response = raw_http_call(method, uri, headers, form_data)
+
+      # convert and return the response
+      http_response = convert_response(net_http_response)
+      post_process_response(http_response, options[:response])
+    end
+
+    private
+
+    def raw_http_call(method, uri, headers, form_data = nil)
+      # Why the FUCK can't Net::HTTP do this?
+      uri = URI(uri.to_s) unless uri.is_a? URI
 
       # Stringify keys :/
-      headers = {}
-      raw_headers.each { |k,v| headers[k.to_s] = v }
+      headers = Hash[headers.map{|k,v| [k.to_s, v]}]
 
-      http = Net::HTTP.new(@uri.host, @uri.port)
+      http = Net::HTTP.new(uri.host, uri.port)
 
       # Why the FUCK can't Net::HTTP do this either?!
-      http.use_ssl = true if @uri.is_a? URI::HTTPS
+      http.use_ssl = true if uri.is_a? URI::HTTPS
 
-      request_class = Net::HTTP.const_get(verb.to_s.capitalize)
-      request = request_class.new(@uri.request_uri, headers)
-      request.set_form_data(options[:form]) if options[:form]
+      request_class = Net::HTTP.const_get(method.to_s.capitalize)
+      request = request_class.new(uri.request_uri, headers)
+      request.set_form_data(form_data) if form_data
 
-      net_http_response = http.request(request)
+      http.request(request)
+    end
 
-      response = Http::Response.new
-      net_http_response.each_header do |header, value|
-        response[header] = value
+    def convert_response(net_http_response)
+      Http::Response.new.tap do |res|
+        net_http_response.each_header do |header, value|
+          res[header] = value
+        end
+        res.status = Integer(net_http_response.code) # WTF again Net::HTTP
+        res.body   = net_http_response.body
       end
-      response.status = Integer(net_http_response.code) # WTF again Net::HTTP
-      response.body   = net_http_response.body
+    end
 
-      case options[:response]
-      when :object
+    def post_process_response(response, option)
+      case option
+      when :object, NilClass
         response
       when :parsed_body
         response.parse_body
       when :body
         response.body
-      else raise ArgumentError, "invalid response type: #{options[:response]}"
+      else raise ArgumentError, "invalid response type: #{option}"
       end
     end
+
   end
 end
