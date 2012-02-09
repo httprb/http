@@ -65,18 +65,9 @@ module Http
       # make raw call
       net_http_response = raw_http_call(method, uri, headers, form_data)
 
-      # convert the response
+      # convert and return the response
       http_response = convert_response(net_http_response)
-
-      case options[:response]
-      when :object
-        http_response
-      when :parsed_body
-        http_response.parse_body
-      when :body
-        http_response.body
-      else raise ArgumentError, "invalid response type: #{options[:response]}"
-      end
+      post_process_response(http_response, options[:response])
     end
 
     private
@@ -107,6 +98,18 @@ module Http
         end
         res.status = Integer(net_http_response.code) # WTF again Net::HTTP
         res.body   = net_http_response.body
+      end
+    end
+
+    def post_process_response(response, option)
+      case option
+      when :object, NilClass
+        response
+      when :parsed_body
+        response.parse_body
+      when :body
+        response.body
+      else raise ArgumentError, "invalid response type: #{option}"
       end
     end
 
