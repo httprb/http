@@ -3,8 +3,8 @@ module Http
   class Client
     # I swear I'll document that nebulous options hash
     def initialize(uri, options = {})
-      @uri = uri
-      @options = {:response => :object}.merge(options)
+      @uri     = uri
+      @options = options
     end
 
     # Request a get sans response body
