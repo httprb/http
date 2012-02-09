@@ -34,4 +34,36 @@ describe Http::Response do
 
   end
 
+  describe "to_a" do
+
+    it 'mimics Rack' do
+      subject.tap do |r|
+        r.status  = 200
+        r.headers = {"content-type" => "text/plain"}
+        r.body    = "Hello world"
+      end
+      expected = [
+        200,
+        {"content-type" => "text/plain"},
+        "Hello world"
+      ]
+      subject.to_a.should eq(expected)
+    end
+
+    it 'uses parse_body if known mime-type' do
+      subject.tap do |r|
+        r.status  = 200
+        r.headers = {"content-type" => "application/json"}
+        r.body    = ::JSON.dump("hello" => "World")
+      end
+      expected = [
+        200,
+        {"content-type" => "application/json"},
+        {"hello" => "World"}
+      ]
+      subject.to_a.should eq(expected)
+    end
+
+  end
+
 end

@@ -42,5 +42,10 @@ module Http
 
       @body
     end
+
+    # Returns an Array ala Rack: `[status, headers, body]`
+    def to_a
+      [status, headers, parse_body]
+    end
   end
 end
