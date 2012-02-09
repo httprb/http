@@ -55,7 +55,7 @@ module Http
         headers = default_headers
       end
 
-      Client.new(uri).request verb, options.merge(:headers => headers, :callbacks => event_callbacks)
+      Client.new.request verb, uri, options.merge(:headers => headers, :callbacks => event_callbacks)
     end
 
     # Make a request invoking the given event callbacks

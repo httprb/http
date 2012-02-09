@@ -29,8 +29,8 @@ module Curl
     end
 
     def perform
-      client = Http::Client.new @url, :headers => @headers
-      response = client.send @method
+      client = Http::Client.new
+      response = client.send @method, @url, :headers => @headers
       @response_code, @body_str = response.code, response.body
       true
     rescue SocketError => ex
