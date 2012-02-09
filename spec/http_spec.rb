@@ -16,6 +16,20 @@ describe Http do
         response['json'].should be_true
       end
     end
+
+    context "with callbacks" do
+      it "should be easy" do
+        request = nil
+        response = nil
+
+        Http.on(:request)  {|r| request = r}
+            .on(:response)  {|r| response = r}
+            .get test_endpoint
+
+        request.should_not be_nil
+        response.should_not be_nil
+      end
+    end
   end
 
   context "posting to resources" do
