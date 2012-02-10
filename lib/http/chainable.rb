@@ -53,7 +53,7 @@ module Http
       options[:headers]    = default_headers.merge(options[:headers] || {})
       options[:callbacks]  = event_callbacks
 
-      Client.new.request verb, uri, options
+      default_client.request verb, uri, options
     end
 
     # Make a request invoking the given event callbacks
@@ -85,6 +85,14 @@ module Http
         raise ArgumentError, "unknown MIME type: #{type}" unless mime_type
         with :accept => mime_type.type
       end
+    end
+
+    def default_client
+      @default_client ||= Client.new
+    end
+
+    def default_client=(default_client)
+      @default_client = default_client
     end
 
     def default_headers
