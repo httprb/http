@@ -61,6 +61,21 @@ module Http
       end
     end
 
+    def [](option)
+      if self.respond_to?(option)
+        send(option)
+      else
+        nil
+      end
+    end
+
+    def to_hash
+      {:response  => response,
+       :headers   => headers,
+       :form      => form,
+       :callbacks => callbacks}
+    end
+
     def dup
       dupped = super
       yield(dupped) if block_given?
