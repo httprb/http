@@ -1,9 +1,16 @@
 module Http
   # We all know what HTTP clients are, right?
   class Client
+    include Chainable
+
+    def initialize(options = {})
+      @options = options
+    end
 
     # Make an HTTP request
     def request(method, uri, options = {})
+      options = @options.merge(options)
+
       # prepare raw call arguments
       headers   = options[:headers] || {}
       form_data = options[:form]
