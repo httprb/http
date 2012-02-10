@@ -3,19 +3,21 @@ module Http
   class Client
     include Chainable
 
-    def initialize(options = {})
-      @options = options
+    attr_reader :default_options
+
+    def initialize(default_options = {})
+      @default_options = Options.new(default_options)
     end
 
     # Make an HTTP request
     def request(method, uri, options = {})
-      opts = Options.new(@options).merge(options)
+      opts = @default_options.merge(options)
 
       # this will have to wait until we have an Http::Request object to yield
-      #opts.callbacks[:request].each  { |c| c.invoke(request) }
+      #opts.callbacks[:request].each  { |c| c.call(request) }
 
       response = perform method, uri, opts.headers, opts.form
-      opts.callbacks[:response].each { |c| c.invoke(response) }
+      opts.callbacks[:response].each { |c| c.call(response) }
 
       format_response response, opts.response
     end
