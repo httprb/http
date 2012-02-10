@@ -48,4 +48,12 @@ describe Http do
       response['content-type'].should match(/html/)
     end
   end
+
+  it 'should be truly chainable' do
+    response = Http.accept(:json).on(:response){|r| seen = r}.get(test_endpoint)
+    pending("Chainable is not chainable so far.") {
+      response['json'].should be_true
+    }
+  end
+
 end
