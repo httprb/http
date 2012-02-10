@@ -55,6 +55,9 @@ module Http
       unless callback.respond_to?(:call)
         raise ArgumentError, "invalid callback: #{callback}"
       end
+      unless callback.respond_to?(:arity) and callback.arity == 1
+        raise ArgumentError, "callback must accept only one argument"
+      end
       unless [:request, :response].include?(event)
         raise ArgumentError, "invalid callback event: #{event}"
       end

@@ -15,6 +15,9 @@ describe Http::Options, "callbacks" do
     lambda{
       opts.with_callback(:request, Object.new)
     }.should raise_error(ArgumentError, /invalid callback/)
+    lambda{
+      opts.with_callback(:request, Proc.new{|a,b| nil})
+    }.should raise_error(ArgumentError, /only one argument/)
   end
 
   describe "request" do

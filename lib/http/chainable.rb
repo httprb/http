@@ -52,15 +52,6 @@ module Http
 
     # Make a request invoking the given event callbacks
     def on(event, &block)
-      unless [:request, :response].include?(event)
-        raise ArgumentError, "only :request and :response are valid events"
-      end
-      unless block_given?
-        raise ArgumentError, "no block specified for #{event} event"
-      end
-      unless block.arity == 1
-        raise ArgumentError, "block must accept only one argument"
-      end
       branch default_options.with_callback(event, block)
     end
 
