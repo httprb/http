@@ -9,20 +9,15 @@ module Http
 
     # Make an HTTP request
     def request(method, uri, options = {})
-      options = @options.merge(options)
-
-      # prepare raw call arguments
-      headers   = options[:headers] || {}
-      form_data = options[:form]
-      callbacks = options[:callbacks] || {}
+      opts = Options.new(@options).merge(options)
 
       # this will have to wait until we have an Http::Request object to yield
-      #callbacks[:request].each  { |c| c.invoke(request) } if callbacks[:request]
+      #opts.callbacks[:request].each  { |c| c.invoke(request) }
 
-      response = perform method, uri, headers, form_data
-      callbacks[:response].each { |c| c.invoke(response) } if callbacks[:response]
+      response = perform method, uri, opts.headers, opts.form
+      opts.callbacks[:response].each { |c| c.invoke(response) }
 
-      format_response response, options[:response]
+      format_response response, opts.response
     end
 
     #######
