@@ -53,30 +53,30 @@ module Http
     end
 
     # Make an HTTP request
-    def request(verb, options = {})
+    def request(method, options = {})
       options = @options.merge(options)
 
       # prepare raw call arguments
-      method    = verb
       uri       = @uri
       headers   = options[:headers] || {}
       form_data = options[:form]
+      callbacks = options[:callbacks] || {}
 
-      # make raw call
-      net_http_response = raw_http_call(method, uri, headers, form_data)
+      # this will have to wait until we have an Http::Request object to yield
+      #callbacks[:request].each  { |c| c.invoke(request) } if callbacks[:request]
 
-      # convert and return the response
-      http_response = convert_response(net_http_response)
-      post_process_response(http_response, options[:response])
+      response = perform method, uri, headers, form_data
+      callbacks[:response].each { |c| c.invoke(response) } if callbacks[:response]
+
+      format_response response, options[:response]
     end
 
+    #######
     private
+    #######
 
-    def raw_http_call(method, uri, headers, form_data = nil)
-      # Why the FUCK can't Net::HTTP do this?
+    def perform(method, uri, headers, form_data = nil)
       uri = URI(uri.to_s) unless uri.is_a? URI
-
-      # Stringify keys :/
       headers = Hash[headers.map{|k,v| [k.to_s, v]}]
 
       http = Net::HTTP.new(uri.host, uri.port)
@@ -88,20 +88,19 @@ module Http
       request = request_class.new(uri.request_uri, headers)
       request.set_form_data(form_data) if form_data
 
-      http.request(request)
-    end
+      response = http.request(request)
 
-    def convert_response(net_http_response)
       Http::Response.new.tap do |res|
-        net_http_response.each_header do |header, value|
+        response.each_header do |header, value|
           res[header] = value
         end
-        res.status = Integer(net_http_response.code) # WTF again Net::HTTP
-        res.body   = net_http_response.body
+
+        res.status = Integer(response.code)
+        res.body   = response.body
       end
     end
 
-    def post_process_response(response, option)
+    def format_response(response, option)
       case option
       when :object, NilClass
         response
@@ -112,6 +111,5 @@ module Http
       else raise ArgumentError, "invalid response type: #{option}"
       end
     end
-
   end
 end

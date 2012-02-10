@@ -55,7 +55,21 @@ module Http
         headers = default_headers
       end
 
-      Client.new(uri).request verb, options.merge(:headers => headers)
+      Client.new(uri).request verb, options.merge(:headers => headers, :callbacks => event_callbacks)
+    end
+
+    # Make a request invoking the given event callbacks
+    def on(event, &block)
+      unless [:request, :response].include?(event)
+        raise ArgumentError, "only :request and :response are valid events"
+      end
+      unless block_given?
+        raise ArgumentError, "no block specified for #{event} event"
+      end
+      unless block.arity == 1
+        raise ArgumentError, "block must accept only one argument"
+      end
+      EventCallback.new event, event_callbacks, &block
     end
 
     # Make a request with the given headers
@@ -81,6 +95,14 @@ module Http
 
     def default_headers=(headers)
       @default_headers = headers
+    end
+
+    def event_callbacks
+      @event_callbacks ||= {}
+    end
+
+    def event_callbacks=(callbacks)
+      @event_callbacks = callbacks
     end
   end
 end
