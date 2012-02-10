@@ -15,7 +15,10 @@ module Http
 
     protected :response=, :headers=, :form=, :callbacks=
 
-    protected :response=, :headers=, :form=, :before=, :after=
+    def self.new(default = {})
+      return default if default.is_a?(Options)
+      super
+    end
 
     def initialize(default = {})
       @response  = default[:response]  || :object
