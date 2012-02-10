@@ -14,4 +14,13 @@ describe Http::Options do
     options.to_hash[:response].should eq(:body)
   end
 
+  it 'is stacktrace friendly' do
+    begin
+      options.with_response(:notrecognized)
+      true.should be_false
+    rescue ArgumentError => ex
+      puts ex.backtrace.first.should match(/options_spec/)
+    end
+  end
+
 end

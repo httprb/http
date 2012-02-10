@@ -29,7 +29,7 @@ module Http
 
     def with_response(response)
       unless [:auto, :object, :body, :parsed_body].include?(response)
-        raise ArgumentError, "invalid response type: #{response}"
+        argument_error! "invalid response type: #{response}"
       end
       dup do |opts| 
         opts.response = response
@@ -38,7 +38,7 @@ module Http
 
     def with_headers(headers)
       unless headers.respond_to?(:to_hash)
-        raise ArgumentError, "invalid headers: #{headers}"
+        argument_error! "invalid headers: #{headers}"
       end
       dup do |opts|
         opts.headers = self.headers.merge(headers.to_hash)
@@ -53,13 +53,13 @@ module Http
 
     def with_callback(event, callback)
       unless callback.respond_to?(:call)
-        raise ArgumentError, "invalid callback: #{callback}"
+        argument_error! "invalid callback: #{callback}"
       end
       unless callback.respond_to?(:arity) and callback.arity == 1
-        raise ArgumentError, "callback must accept only one argument"
+        argument_error! "callback must accept only one argument"
       end
       unless [:request, :response].include?(event)
-        raise ArgumentError, "invalid callback event: #{event}"
+        argument_error! "invalid callback event: #{event}"
       end
       dup do |opts|
         opts.callbacks = callbacks.dup
@@ -97,6 +97,12 @@ module Http
       dupped = super
       yield(dupped) if block_given?
       dupped
+    end
+
+    private
+
+    def argument_error!(message)
+      raise ArgumentError, message, caller[1..-1]
     end
 
   end
