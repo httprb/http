@@ -47,15 +47,12 @@ module Http
 
     # Make an HTTP request with the given verb
     def request(verb, uri, options = {})
+      options = options.dup
       options[:response] ||= :parsed_body
+      options[:headers]    = default_headers.merge(options[:headers] || {})
+      options[:callbacks]  = event_callbacks
 
-      if options[:headers]
-        headers = default_headers.merge options[:headers]
-      else
-        headers = default_headers
-      end
-
-      Client.new.request verb, uri, options.merge(:headers => headers, :callbacks => event_callbacks)
+      Client.new.request verb, uri, options
     end
 
     # Make a request invoking the given event callbacks
