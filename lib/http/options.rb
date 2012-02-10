@@ -21,14 +21,14 @@ module Http
     end
 
     def initialize(default = {})
-      @response  = default[:response]  || :object
+      @response  = default[:response]  || :auto
       @headers   = default[:headers]   || {}
       @form      = default[:form]      || nil
       @callbacks = default[:callbacks] || {:request => [], :response => []}
     end
 
     def with_response(response)
-      unless [:object, :body, :parsed_body].include?(response)
+      unless [:auto, :object, :body, :parsed_body].include?(response)
         raise ArgumentError, "invalid response type: #{response}"
       end
       dup do |opts| 

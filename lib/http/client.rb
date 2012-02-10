@@ -19,7 +19,7 @@ module Http
       response = perform method, uri, opts.headers, opts.form
       opts.callbacks[:response].each { |c| c.call(response) }
 
-      format_response response, opts.response
+      format_response method, response, opts.response
     end
 
     #######
@@ -51,9 +51,11 @@ module Http
       end
     end
 
-    def format_response(response, option)
+    def format_response(method, response, option)
       case option
-      when :object, NilClass
+      when :auto, NilClass
+        method == :head ? response : response.parse_body
+      when :object
         response
       when :parsed_body
         response.parse_body

@@ -4,13 +4,13 @@ describe Http::Options, "response" do
 
   let(:opts){ Http::Options.new }
 
-  it 'defaults to :object' do
-    opts.response.should eq(:object)
+  it 'defaults to :auto' do
+    opts.response.should eq(:auto)
   end
 
   it 'may be specified with with_response' do
     opts2 = opts.with_response(:body)
-    opts.response.should eq(:object)
+    opts.response.should eq(:auto)
     opts2.response.should eq(:body)
   end
 
