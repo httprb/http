@@ -11,19 +11,17 @@ module Http
     attr_accessor :form
 
     # Before callbacks 
-    attr_accessor :before
+    attr_accessor :callbacks
 
-    # After callbacks 
-    attr_accessor :after
+    protected :response=, :headers=, :form=, :callbacks=
 
     protected :response=, :headers=, :form=, :before=, :after=
 
-    def initialize
-      @response = :object
-      @headers  = {}
-      @form     = nil
-      @before   = []
-      @after    = []
+    def initialize(default = {})
+      @response  = default[:response]  || :object
+      @headers   = default[:headers]   || {}
+      @form      = default[:form]      || nil
+      @callbacks = default[:callbacks] || {:request => [], :response => []}
     end
 
     def with_response(response)
@@ -54,13 +52,12 @@ module Http
       unless callback.respond_to?(:call)
         raise ArgumentError, "invalid callback: #{callback}"
       end
-      case event
-      when :request, :before
-        dup{|opts| opts.before = (self.before.dup << callback) }
-      when :response, :after
-        dup{|opts| opts.after  = (self.after.dup << callback)  }
-      else
+      unless [:request, :response].include?(event)
         raise ArgumentError, "invalid callback event: #{event}"
+      end
+      dup do |opts|
+        opts.callbacks = callbacks.dup
+        opts.callbacks[event] = (callbacks[event].dup << callback)
       end
     end
 
