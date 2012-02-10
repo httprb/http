@@ -89,6 +89,26 @@ module Http
       @default_options = Options.new(opts)
     end
 
+    def default_headers
+      default_options.headers
+    end
+
+    def default_headers=(headers)
+      @default_options = default_options.dup do |opts|
+        opts.headers = headers
+      end
+    end
+
+    def default_callbacks
+      default_options.callbacks
+    end
+
+    def default_callbacks=(callbacks)
+      @default_options = default_options.dup do |opts|
+        opts.callbacks = callbacks
+      end
+    end
+
     private
 
     def branch(options)
