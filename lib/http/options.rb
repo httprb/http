@@ -68,6 +68,21 @@ module Http
       send(option) rescue nil
     end
 
+    def merge(other)
+      h1, h2 = to_hash, other.to_hash
+      merged = h1.merge(h2) do |k,v1,v2|
+        case k
+        when :headers
+          v1.merge(v2)
+        when :callbacks
+          v1.merge(v2){|event,l,r| (l+r).uniq}
+        else
+          v2
+        end
+      end
+      Options.new(merged)
+    end
+
     def to_hash
       {:response  => response,
        :headers   => headers,
