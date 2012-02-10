@@ -47,13 +47,7 @@ module Http
 
     # Make an HTTP request with the given verb
     def request(verb, uri, options = {})
-      options = options.dup
-
-      options[:response] ||= (verb == :head ? :object : :parsed_body)
-      options[:headers]    = default_headers.merge(options[:headers] || {})
-      options[:callbacks]  = event_callbacks
-
-      default_client.request verb, uri, options
+      branch(options).request verb, uri
     end
 
     # Make a request invoking the given event callbacks
@@ -67,12 +61,12 @@ module Http
       unless block.arity == 1
         raise ArgumentError, "block must accept only one argument"
       end
-      EventCallback.new event, event_callbacks, &block
+      branch default_options.with_callback(event, block)
     end
 
     # Make a request with the given headers
     def with_headers(headers)
-      Parameters.new default_headers.merge(headers)
+      branch default_options.with_headers(headers)
     end
     alias_method :with, :with_headers
 
@@ -87,28 +81,19 @@ module Http
       end
     end
 
-    def default_client
-      @default_client ||= Client.new
+    def default_options
+      @default_options ||= Options.new
     end
 
-    def default_client=(default_client)
-      @default_client = default_client
+    def default_options=(opts)
+      @default_options = Options.new(opts)
     end
 
-    def default_headers
-      @default_headers ||= {}
+    private
+
+    def branch(options)
+      Client.new(options)
     end
 
-    def default_headers=(headers)
-      @default_headers = headers
-    end
-
-    def event_callbacks
-      @event_callbacks ||= {}
-    end
-
-    def event_callbacks=(callbacks)
-      @event_callbacks = callbacks
-    end
   end
 end

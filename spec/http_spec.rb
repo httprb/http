@@ -51,9 +51,7 @@ describe Http do
 
   it 'should be truly chainable' do
     response = Http.accept(:json).on(:response){|r| seen = r}.get(test_endpoint)
-    pending("Chainable is not chainable so far.") {
-      response['json'].should be_true
-    }
+    response['json'].should be_true
   end
 
 end
