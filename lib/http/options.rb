@@ -65,11 +65,7 @@ module Http
     end
 
     def [](option)
-      if self.respond_to?(option)
-        send(option)
-      else
-        nil
-      end
+      send(option) rescue nil
     end
 
     def to_hash

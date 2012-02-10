@@ -6,6 +6,7 @@ describe Http::Options do
 
   it 'behaves like a Hash for reading' do
     options[:response].should eq(:body)
+    options[:nosuchone].should be_nil
   end
 
   it 'is able to coerce to a Hash' do
