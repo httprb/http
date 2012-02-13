@@ -2,16 +2,10 @@ Http
 ====
 [![Build Status](http://travis-ci.org/tarcieri/http.png)](http://travis-ci.org/tarcieri/http)
 
-Ruby has always been this extremely web-focused language, and yet despite the
-selection of HTTP libraries out there, I always find myself falling back on
-Net::HTTP, and Net::HTTP sucks.
-
-Ruby should be simple and elegant and beautiful. Net::HTTP is not. I've often
-found myself falling back on the Perlish horrors of open-uri just because I
-found Net::HTTP to be too much of a pain. This shouldn't be!
-
 HTTP should be simple and easy! It should be so straightforward it makes
-you happy with how delightful it is to use!
+you happy every time you use it.
+
+The Http library makes it easy to construct requests using a simple chaining system.
 
 Making Requests
 ---------------
@@ -98,7 +92,8 @@ Contributing to Http
 
 * Fork Http on github
 * Make your changes and send me a pull request
-* If I like them I'll merge them and give you commit access to my repository
+* If I like them I'll merge them
+* If I've accepted a patch, feel free to ask for a commit bit!
 
 Copyright
 ---------
