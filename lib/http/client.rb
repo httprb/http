@@ -31,8 +31,6 @@ module Http
       headers = Hash[headers.map{|k,v| [k.to_s, v]}]
 
       http = Net::HTTP.new(uri.host, uri.port)
-
-      # Why the FUCK can't Net::HTTP do this either?!
       http.use_ssl = true if uri.is_a? URI::HTTPS
 
       request_class = Net::HTTP.const_get(method.to_s.capitalize)
