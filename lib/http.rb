@@ -8,6 +8,7 @@ require 'http/response'
 # THIS IS ENTIRELY TEMPORARY, I ASSURE YOU
 require 'net/https'
 require 'uri'
+require 'certified'
 
 # Http, it can be simple!
 module Http
