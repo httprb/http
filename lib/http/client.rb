@@ -1,74 +1,25 @@
 module Http
   # We all know what HTTP clients are, right?
   class Client
-    # I swear I'll document that nebulous options hash
-    def initialize(uri, options = {})
-      @uri     = uri
-      @options = options
-    end
+    include Chainable
 
-    # Request a get sans response body
-    def head(options = {})
-      request :head, options
-    end
+    attr_reader :default_options
 
-    # Get a resource
-    def get(options = {})
-      request :get, options
-    end
-
-    # Post to a resource
-    def post(options = {})
-      request :post, options
-    end
-
-    # Put to a resource
-    def put(options = {})
-      request :put, options
-    end
-
-    # Delete a resource
-    def delete(options = {})
-      request :delete, options
-    end
-
-    # Echo the request back to the client
-    def trace(options = {})
-      request :trace, options
-    end
-
-    # Return the methods supported on the given URI
-    def options(options = {})
-      request :options, options
-    end
-
-    # Convert to a transparent TCP/IP tunnel
-    def connect(options = {})
-      request :connect, options
-    end
-
-    # Apply partial modifications to a resource
-    def patch(options = {})
-      request :patch, options
+    def initialize(default_options = {})
+      @default_options = Options.new(default_options)
     end
 
     # Make an HTTP request
-    def request(method, options = {})
-      options = @options.merge(options)
-
-      # prepare raw call arguments
-      uri       = @uri
-      headers   = options[:headers] || {}
-      form_data = options[:form]
-      callbacks = options[:callbacks] || {}
+    def request(method, uri, options = {})
+      opts = @default_options.merge(options)
 
       # this will have to wait until we have an Http::Request object to yield
-      #callbacks[:request].each  { |c| c.invoke(request) } if callbacks[:request]
+      #opts.callbacks[:request].each  { |c| c.call(request) }
 
-      response = perform method, uri, headers, form_data
-      callbacks[:response].each { |c| c.invoke(response) } if callbacks[:response]
+      response = perform method, uri, opts.headers, opts.form
+      opts.callbacks[:response].each { |c| c.call(response) }
 
-      format_response response, options[:response]
+      format_response method, response, opts.response
     end
 
     #######
@@ -100,9 +51,11 @@ module Http
       end
     end
 
-    def format_response(response, option)
+    def format_response(method, response, option)
       case option
-      when :object, NilClass
+      when :auto, NilClass
+        method == :head ? response : response.parse_body
+      when :object
         response
       when :parsed_body
         response.parse_body

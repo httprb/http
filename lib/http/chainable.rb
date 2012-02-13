@@ -2,7 +2,7 @@ module Http
   module Chainable
     # Request a get sans response body
     def head(uri, options = {})
-      request :head, uri, {:response => :object}.merge(options)
+      request :head, uri, options
     end
 
     # Get a resource
@@ -47,34 +47,17 @@ module Http
 
     # Make an HTTP request with the given verb
     def request(verb, uri, options = {})
-      options[:response] ||= :parsed_body
-
-      if options[:headers]
-        headers = default_headers.merge options[:headers]
-      else
-        headers = default_headers
-      end
-
-      Client.new(uri).request verb, options.merge(:headers => headers, :callbacks => event_callbacks)
+      branch(options).request verb, uri
     end
 
     # Make a request invoking the given event callbacks
     def on(event, &block)
-      unless [:request, :response].include?(event)
-        raise ArgumentError, "only :request and :response are valid events"
-      end
-      unless block_given?
-        raise ArgumentError, "no block specified for #{event} event"
-      end
-      unless block.arity == 1
-        raise ArgumentError, "block must accept only one argument"
-      end
-      EventCallback.new event, event_callbacks, &block
+      branch default_options.with_callback(event, block)
     end
 
     # Make a request with the given headers
     def with_headers(headers)
-      Parameters.new default_headers.merge(headers)
+      branch default_options.with_headers(headers)
     end
     alias_method :with, :with_headers
 
@@ -89,20 +72,39 @@ module Http
       end
     end
 
+    def default_options
+      @default_options ||= Options.new
+    end
+
+    def default_options=(opts)
+      @default_options = Options.new(opts)
+    end
+
     def default_headers
-      @default_headers ||= {}
+      default_options.headers
     end
 
     def default_headers=(headers)
-      @default_headers = headers
+      @default_options = default_options.dup do |opts|
+        opts.headers = headers
+      end
     end
 
-    def event_callbacks
-      @event_callbacks ||= {}
+    def default_callbacks
+      default_options.callbacks
     end
 
-    def event_callbacks=(callbacks)
-      @event_callbacks = callbacks
+    def default_callbacks=(callbacks)
+      @default_options = default_options.dup do |opts|
+        opts.callbacks = callbacks
+      end
     end
+
+    private
+
+    def branch(options)
+      Client.new(options)
+    end
+
   end
 end
