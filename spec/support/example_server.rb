@@ -1,13 +1,13 @@
 require 'webrick'
 
-TEST_SERVER_PORT = 65432
+class ExampleService < WEBrick::HTTPServlet::AbstractServlet
+  PORT = 65432
 
-class MockService < WEBrick::HTTPServlet::AbstractServlet
   def do_GET(request, response)
     case request.path
     when "/"
       response.status = 200
-      
+
       case request['Accept']
       when 'application/json'
         response['Content-Type'] = 'application/json'
@@ -20,7 +20,7 @@ class MockService < WEBrick::HTTPServlet::AbstractServlet
       response.status = 404
     end
   end
-  
+
   def do_POST(request, response)
     case request.path
     when "/"
@@ -35,7 +35,7 @@ class MockService < WEBrick::HTTPServlet::AbstractServlet
       response.status = 404
     end
   end
-  
+
   def do_HEAD(request, response)
     case request.path
     when "/"
@@ -47,10 +47,10 @@ class MockService < WEBrick::HTTPServlet::AbstractServlet
   end
 end
 
-MockServer = WEBrick::HTTPServer.new(:Port => TEST_SERVER_PORT, :AccessLog => [])
-MockServer.mount "/", MockService
+ExampleServer = WEBrick::HTTPServer.new(:Port => ExampleService::PORT, :AccessLog => [])
+ExampleServer.mount "/", ExampleService
 
-t = Thread.new { MockServer.start }
-trap("INT")    { MockServer.shutdown; exit }
+t = Thread.new { ExampleServer.start }
+trap("INT")    { ExampleServer.shutdown; exit }
 
 Thread.pass while t.status and t.status != "sleep"

@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'json'
 
 describe Http do
-  let(:test_endpoint) { "http://127.0.0.1:#{TEST_SERVER_PORT}/" }
+  let(:test_endpoint) { "http://127.0.0.1:#{ExampleService::PORT}/" }
 
   context "getting resources" do
     it "should be easy" do

@@ -3,7 +3,7 @@ require 'spec_helper'
 require 'http/compat/curb'
 
 describe Curl do
-  let(:test_endpoint)  { "http://127.0.0.1:#{TEST_SERVER_PORT}/" }
+  let(:test_endpoint)  { "http://127.0.0.1:#{ExampleService::PORT}/" }
 
   describe Curl::Easy do
     it "gets resources" do
