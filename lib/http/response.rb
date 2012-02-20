@@ -15,9 +15,13 @@ module Http
       @headers = {}
     end
 
-    # Set a header value
-    def []=(header, value)
-      key = header.to_s.downcase
+    # Set a header
+    def []=(name, value)
+      # If we have a canonical header, we're done
+      key = name[CANONICAL_HEADER]
+
+      # Convert to canonical capitalization
+      key ||= canonicalize(name)
 
       # Check if the header has already been set and group
       old_value = @headers[key]
@@ -29,14 +33,14 @@ module Http
     end
 
     # Get a header value
-    def [](header)
-      @headers[header.to_s.downcase]
+    def [](name)
+      @headers[name] || @headers[canonicalize(name)]
     end
 
     # Parse the response body according to its content type
     def parse_body
-      if @headers['content-type']
-        mime_type = MimeType[@headers['content-type'].split(/;\s*/).first]
+      if @headers['Content-Type']
+        mime_type = MimeType[@headers['Content-Type'].split(/;\s*/).first]
         return mime_type.parse(@body) if mime_type
       end
 
@@ -46,6 +50,15 @@ module Http
     # Returns an Array ala Rack: `[status, headers, body]`
     def to_a
       [status, headers, parse_body]
+    end
+
+    #######
+    private
+    #######
+
+    # Transform to canonical HTTP header capitalization
+    def canonicalize(header)
+      header.split('-').map(&:capitalize).join('-')
     end
   end
 end

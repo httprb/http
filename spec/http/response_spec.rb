@@ -7,13 +7,13 @@ describe Http::Response do
   describe "the response headers" do
 
     it 'are available through Hash-like methods' do
-      subject["content-type"] = "text/plain"
-      subject["content-type"].should eq("text/plain")
+      subject["Content-Type"] = "text/plain"
+      subject["Content-Type"].should eq("text/plain")
     end
 
     it 'are available through a `headers` accessor' do
-      subject["content-type"] = "text/plain"
-      subject.headers.should eq("content-type" => "text/plain")
+      subject["Content-Type"] = "text/plain"
+      subject.headers.should eq("Content-Type" => "text/plain")
     end
 
   end
@@ -21,13 +21,13 @@ describe Http::Response do
   describe "parse_body" do
 
     it 'works on a registered mime-type' do
-      subject["content-type"] = "application/json"
+      subject["Content-Type"] = "application/json"
       subject.body = ::JSON.dump("hello" => "World")
       subject.parse_body.should eq("hello" => "World")
     end
 
     it 'returns the body on an unregistered mime-type' do
-      subject["content-type"] = "text/plain"
+      subject["Content-Type"] = "text/plain"
       subject.body = "Hello world"
       subject.parse_body.should eq("Hello world")
     end
@@ -39,12 +39,12 @@ describe Http::Response do
     it 'mimics Rack' do
       subject.tap do |r|
         r.status  = 200
-        r.headers = {"content-type" => "text/plain"}
+        r.headers = {"Content-Type" => "text/plain"}
         r.body    = "Hello world"
       end
       expected = [
         200,
-        {"content-type" => "text/plain"},
+        {"Content-Type" => "text/plain"},
         "Hello world"
       ]
       subject.to_a.should eq(expected)
@@ -53,12 +53,12 @@ describe Http::Response do
     it 'uses parse_body if known mime-type' do
       subject.tap do |r|
         r.status  = 200
-        r.headers = {"content-type" => "application/json"}
+        r.headers = {"Content-Type" => "application/json"}
         r.body    = ::JSON.dump("hello" => "World")
       end
       expected = [
         200,
-        {"content-type" => "application/json"},
+        {"Content-Type" => "application/json"},
         {"hello" => "World"}
       ]
       subject.to_a.should eq(expected)
