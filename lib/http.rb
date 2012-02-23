@@ -1,8 +1,10 @@
 require 'http/version'
-require 'http/options'
+
 require 'http/chainable'
 require 'http/client'
 require 'http/mime_type'
+require 'http/options'
+require 'http/request'
 require 'http/response'
 
 # THIS IS ENTIRELY TEMPORARY, I ASSURE YOU
@@ -14,6 +16,17 @@ require 'certified'
 module Http
   extend Chainable
 
+  # The method given was not understood
+  class UnsupportedMethodError < ArgumentError; end
+
+  # Valid HTTP methods
+  METHODS = [:get, :head, :post, :put, :delete, :trace, :options, :connect, :patch]
+
   # Matches HTTP header names when in "Canonical-Http-Format"
   CANONICAL_HEADER = /^[A-Z][a-z]*(-[A-Z][a-z]*)*$/
+
+  # Transform to canonical HTTP header capitalization
+  def self.canonicalize_header(header)
+    header.to_s.split('-').map(&:capitalize).join('-')
+  end
 end

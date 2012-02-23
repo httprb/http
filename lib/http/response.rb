@@ -21,7 +21,7 @@ module Http
       key = name[CANONICAL_HEADER]
 
       # Convert to canonical capitalization
-      key ||= canonicalize(name)
+      key ||= Http.canonicalize_header(name)
 
       # Check if the header has already been set and group
       old_value = @headers[key]
@@ -34,7 +34,7 @@ module Http
 
     # Get a header value
     def [](name)
-      @headers[name] || @headers[canonicalize(name)]
+      @headers[name] || @headers[Http.canonicalize_header(name)]
     end
 
     # Parse the response body according to its content type
@@ -50,15 +50,6 @@ module Http
     # Returns an Array ala Rack: `[status, headers, body]`
     def to_a
       [status, headers, parse_body]
-    end
-
-    #######
-    private
-    #######
-
-    # Transform to canonical HTTP header capitalization
-    def canonicalize(header)
-      header.split('-').map(&:capitalize).join('-')
     end
   end
 end
