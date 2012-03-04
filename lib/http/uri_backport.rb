@@ -3,6 +3,9 @@
 # License:
 #   You can redistribute it and/or modify it under the same term as Ruby.
 
+require 'uri'
+
+# Backport Ruby 1.9's form encoding/decoding functionality
 module URI
   TBLENCWWWCOMP_ = {} # :nodoc:
   256.times do |i|
