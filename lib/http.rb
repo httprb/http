@@ -6,6 +6,7 @@ require 'http/mime_type'
 require 'http/options'
 require 'http/request'
 require 'http/response'
+require 'http/uri_backport' if RUBY_VERSION < "1.9.0"
 
 # THIS IS ENTIRELY TEMPORARY, I ASSURE YOU
 require 'net/https'
