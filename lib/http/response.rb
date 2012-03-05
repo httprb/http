@@ -54,8 +54,10 @@ module Http
       507 => 'Insufficient Storage',
       510 => 'Not Extended'
     }
+    STATUS_CODES.freeze
 
     SYMBOL_TO_STATUS_CODE = Hash[STATUS_CODES.map { |code, msg| [msg.downcase.gsub(/\s|-/, '_').to_sym, code] }]
+    SYMBOL_TO_STATUS_CODE.freeze
 
     attr_accessor :status
     attr_accessor :headers
