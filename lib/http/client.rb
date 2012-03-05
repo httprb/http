@@ -1,7 +1,7 @@
 require 'uri'
 
 module Http
-  # We all know what HTTP clients are, right?
+  # Clients make requests and receive responses
   class Client
     include Chainable
 
