@@ -26,8 +26,13 @@ module Http
   # Matches HTTP header names when in "Canonical-Http-Format"
   CANONICAL_HEADER = /^[A-Z][a-z]*(-[A-Z][a-z]*)*$/
 
-  # Transform to canonical HTTP header capitalization
-  def self.canonicalize_header(header)
-    header.to_s.split('-').map(&:capitalize).join('-')
+  class << self
+    # Http[:accept => 'text/html'].get(...)
+    alias_method :[], :with_headers
+
+    # Transform to canonical HTTP header capitalization
+    def canonicalize_header(header)
+      header.to_s.split('-').map(&:capitalize).join('-')
+    end
   end
 end

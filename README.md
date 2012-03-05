@@ -53,10 +53,13 @@ request and returns a response with Content-Type: application/json. If you
 happen to have a library loaded which defines the JSON constant and implements
 JSON.parse, the Http library will attempt to parse the JSON response.
 
-A shorter alias exists for HTTP.with_headers:
+Shorter aliases exists for HTTP.with_headers:
 
 ```ruby
 Http.with(:accept => 'application/json').
+  get("https://github.com/tarcieri/http/commit/HEAD")
+
+Http[:accept => 'application/json'].
   get("https://github.com/tarcieri/http/commit/HEAD")
 ```
 
