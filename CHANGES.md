@@ -3,6 +3,7 @@
 * Request and response objects
 * Callback system
 * Internal refactoring ensuring true chainability
+* Use the certified gem to ensure SSL certificate verification
 
 0.1.0
 -----
