@@ -1,7 +1,8 @@
-HEAD
-----
+0.2.0
+-----
+* Request and response objects
 * Callback system
-* Minor refactoring
+* Internal refactoring ensuring true chainability
 
 0.1.0
 -----
