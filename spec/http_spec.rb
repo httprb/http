@@ -32,6 +32,13 @@ describe Http do
         response.should be_a Http::Response
       end
     end
+    
+    context "with http proxy" do
+      it "should proxy the request" do
+        response = Http.via("127.0.0.1","8080").get(test_endpoint)
+        response.should == "passed :)"
+      end
+    end
   end
 
   context "posting to resources" do
