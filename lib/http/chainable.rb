@@ -54,6 +54,22 @@ module Http
     def on(event, &block)
       branch default_options.with_callback(event, block)
     end
+    
+    # Make a request through an HTTP proxy
+    def via(*proxy)
+      proxy_hash = {}    
+      proxy_hash[:proxy_address] = proxy[0] if proxy[0].is_a? String
+      proxy_hash[:proxy_port]    = proxy[1] if proxy[1].is_a? Integer
+      proxy_hash[:proxy_username]= proxy[2] if proxy[2].is_a? String
+      proxy_hash[:proxy_password]= proxy[3] if proxy[3].is_a? String
+      
+      if proxy_hash.keys.size >=2
+        with proxy_hash
+      else
+        raise ArgumentError, "invalid HTTP proxy: #{proxy_hash}"
+      end
+    end
+    alias_method :through, :via
 
     # Make a request with the given headers
     def with_headers(headers)
@@ -105,6 +121,5 @@ module Http
     def branch(options)
       Client.new(options)
     end
-
   end
 end

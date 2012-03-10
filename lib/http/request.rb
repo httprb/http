@@ -17,12 +17,14 @@ module Http
 
       @headers = {}
       headers.each do |name, value|
-        name = name.to_s
-        key = name[CANONICAL_HEADER]
-        key ||= Http.canonicalize_header(name)
-        @headers[key] = value
-      end
-
+        unless name =~ /proxy/
+          name = name.to_s
+          key = name[CANONICAL_HEADER]
+          key ||= Http.canonicalize_header(name)
+          @headers[key] = value
+        end
+      end      
+      
       @body, @version = body, version
     end
 
@@ -34,7 +36,9 @@ module Http
     # Create a Net::HTTP request from this request
     def to_net_http_request
       request_class = Net::HTTP.const_get(@method.to_s.capitalize)
+
       request = request_class.new(@uri.request_uri, @headers)
+      
       request.body = @body
       request
     end

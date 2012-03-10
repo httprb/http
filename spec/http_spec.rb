@@ -31,13 +31,26 @@ describe Http do
         Http.on(:response) {|r| response = r}.get test_endpoint
         response.should be_a Http::Response
       end
+    end    
+  end
+  
+  context "with http proxy address and port" do
+    it "should proxy the request" do
+      response = Http.via("127.0.0.1", 65432).get test_endpoint
+      response.should match(/<!doctype html>/)
     end
-    
-    context "with http proxy" do
-      it "should proxy the request" do
-        response = Http.via("127.0.0.1","8080").get(test_endpoint)
-        response.should == "passed :)"
-      end
+  end
+  
+  context "with http proxy address, port username and password" do
+    it "should proxy the request" do
+      response = Http.via("127.0.0.1", 65432, "username", "password").get test_endpoint
+      response.should match(/<!doctype html>/)
+    end
+  end
+  
+  context "without proxy port" do
+    it "should raise an argument error" do
+      expect { Http.via("127.0.0.1") }.to raise_error ArgumentError
     end
   end
 
