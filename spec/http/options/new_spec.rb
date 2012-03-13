@@ -18,6 +18,11 @@ describe Http::Options, "new" do
       opts = Http::Options.new(:headers => {:accept => "json"})
       opts.headers.should eq(:accept => "json")
     end
+    
+    it 'coerces :proxy correctly' do
+      opts = Http::Options.new(:proxy => {:proxy_address => "127.0.0.1", :proxy_port => 8080})
+      opts.proxy.should eq(:proxy_address => "127.0.0.1", :proxy_port => 8080)
+    end
 
     it 'coerces :form correctly' do
       opts = Http::Options.new(:form => {:foo => 42})

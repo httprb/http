@@ -20,16 +20,19 @@ describe Http::Options, "merge" do
       :response  => :body,
       :form      => {:foo => 'foo'},
       :headers   => {:accept  => "json",  :foo => 'foo'},
+      :proxy     => {},
       :callbacks => {:request => ["common"], :response => ["foo"]})
     bar = Http::Options.new(
       :response  => :parsed_body,
       :form      => {:bar => 'bar'},
       :headers   => {:accept  => "xml", :bar => 'bar'},
+      :proxy     => {:proxy_address => "127.0.0.1", :proxy_port => 8080},
       :callbacks => {:request => ["common"], :response => ["bar"]})
     foo.merge(bar).to_hash.should eq(
       :response  => :parsed_body,
       :form      => {:bar => 'bar'},
       :headers   => {:accept  => "xml", :foo => "foo", :bar => 'bar'},
+      :proxy     => {:proxy_address => "127.0.0.1", :proxy_port => 8080},
       :callbacks => {:request => ["common"], :response => ["foo", "bar"]}
     )
   end
