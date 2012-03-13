@@ -6,10 +6,10 @@ module Http
     # "Request URI" as per RFC 2616
     # http://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html
     attr_reader :uri
-    attr_reader :headers, :body, :version
+    attr_reader :headers, :proxy, :body, :version
 
     # :nodoc:
-    def initialize(method, uri, headers = {}, body = nil, version = "1.1")
+    def initialize(method, uri, headers = {}, proxy = {}, body = nil, version = "1.1")
       @method = method.to_s.downcase.to_sym
       raise UnsupportedMethodError, "unknown method: #{method}" unless METHODS.include? @method
 
@@ -17,15 +17,13 @@ module Http
 
       @headers = {}
       headers.each do |name, value|
-        unless name =~ /proxy/
-          name = name.to_s
-          key = name[CANONICAL_HEADER]
-          key ||= Http.canonicalize_header(name)
-          @headers[key] = value
-        end
+        name = name.to_s
+        key = name[CANONICAL_HEADER]
+        key ||= Http.canonicalize_header(name)
+        @headers[key] = value
       end      
       
-      @body, @version = body, version
+      @proxy, @body, @version = proxy, body, version
     end
 
     # Obtain the given header

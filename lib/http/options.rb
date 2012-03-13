@@ -9,11 +9,14 @@ module Http
 
     # Form data to embed in the request
     attr_accessor :form
+    
+    # Http proxy to route request
+    attr_accessor :proxy
 
     # Before callbacks 
     attr_accessor :callbacks
 
-    protected :response=, :headers=, :form=, :callbacks=
+    protected :response=, :headers=, :proxy=, :form=,  :callbacks=
 
     def self.new(default = {})
       return default if default.is_a?(Options)
@@ -23,6 +26,7 @@ module Http
     def initialize(default = {})
       @response  = default[:response]  || :auto
       @headers   = default[:headers]   || {}
+      @proxy     = default[:proxy]     || {}
       @form      = default[:form]      || nil
       @callbacks = default[:callbacks] || {:request => [], :response => []}
     end
@@ -42,6 +46,12 @@ module Http
       end
       dup do |opts|
         opts.headers = self.headers.merge(headers.to_hash)
+      end
+    end
+    
+    def with_proxy(proxy_hash)
+      dup do |opts|
+        opts.proxy = proxy_hash
       end
     end
 
@@ -89,6 +99,7 @@ module Http
     def to_hash
       {:response  => response,
        :headers   => headers,
+       :proxy     => proxy,
        :form      => form,
        :callbacks => callbacks}
     end

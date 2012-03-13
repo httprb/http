@@ -15,13 +15,14 @@ module Http
     def request(method, uri, options = {})
       opts = @default_options.merge(options)
       headers = opts.headers
-
+      proxy = opts.proxy
+      
       if opts.form
         body = URI.encode_www_form(opts.form)
         headers['Content-Type'] ||= 'application/x-www-form-urlencoded'
       end
 
-      request = Request.new method, uri, headers, body
+      request = Request.new method, uri, headers, proxy, body
 
       opts.callbacks[:request].each { |c| c.call(request) }
       response = perform request
@@ -32,7 +33,10 @@ module Http
 
     def perform(request)
       uri = request.uri
-      http = Net::HTTP.new(uri.host, uri.port)
+      proxy = request.proxy
+
+      http = Net::HTTP.new(uri.host, uri.port, proxy[:proxy_address], proxy[:proxy_port], proxy[:proxy_username], proxy[:proxy_password])
+      
       http.use_ssl = true if uri.is_a? URI::HTTPS
       response = http.request request.to_net_http_request
 
