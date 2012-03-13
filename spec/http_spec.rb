@@ -2,7 +2,8 @@ require 'spec_helper'
 require 'json'
 
 describe Http do
-  let(:test_endpoint) { "http://127.0.0.1:#{ExampleService::PORT}/" }
+  let(:test_endpoint)  { "http://127.0.0.1:#{ExampleService::PORT}/" }
+  let(:proxy_endpoint) { "#{test_endpoint}proxy" }
 
   context "getting resources" do
     it "should be easy" do
@@ -36,15 +37,22 @@ describe Http do
   
   context "with http proxy address and port" do
     it "should proxy the request" do
-      response = Http.via("127.0.0.1", 65432).get test_endpoint
-      response.should match(/<!doctype html>/)
+      response = Http.via("127.0.0.1", 8080).get proxy_endpoint
+      response.should match(/Proxy!/)
     end
   end
   
   context "with http proxy address, port username and password" do
     it "should proxy the request" do
-      response = Http.via("127.0.0.1", 65432, "username", "password").get test_endpoint
-      response.should match(/<!doctype html>/)
+      response = Http.via("127.0.0.1", 8081, "username", "password").get proxy_endpoint
+      response.should match(/Proxy!/)
+    end
+  end
+  
+  context "with http proxy address, port, with wrong username and password" do
+    it "should proxy the request" do
+      response = Http.via("127.0.0.1", 8081, "user", "pass").get proxy_endpoint
+      response.should match(/Proxy Authentication Required/)
     end
   end
   
