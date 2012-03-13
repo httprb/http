@@ -16,6 +16,9 @@ class ExampleService < WEBrick::HTTPServlet::AbstractServlet
         response['Content-Type'] = 'text/html'
         response.body   = "<!doctype html>"
       end
+    when "/proxy"
+      response.status = 200
+      response.body     = "Proxy!"
     else
       response.status = 404
     end
@@ -54,3 +57,5 @@ t = Thread.new { ExampleServer.start }
 trap("INT")    { ExampleServer.shutdown; exit }
 
 Thread.pass while t.status and t.status != "sleep"
+
+
