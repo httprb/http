@@ -32,7 +32,7 @@ module Http
 
     # Transform to canonical HTTP header capitalization
     def canonicalize_header(header)
-      header.to_s.split('-').map(&:capitalize).join('-')
+      header.to_s.split(/[\-_]/).map(&:capitalize).join('-')
     end
   end
 end
