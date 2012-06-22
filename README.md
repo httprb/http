@@ -1,6 +1,6 @@
 Http
 ====
-[![Build Status](http://travis-ci.org/tarcieri/http.png)](http://travis-ci.org/tarcieri/http)
+[![Build Status](https://secure.travis-ci.org/tarcieri/http.png?branch=master)](http://travis-ci.org/tarcieri/http)
 
 HTTP should be simple and easy! It should be so straightforward it makes
 you happy every time you use it.
