@@ -66,15 +66,5 @@ module Http
       else raise TypeError, "invalid body type: #{body.class}"
       end
     end
-
-    # Create a Net::HTTP request from this request
-    def to_net_http_request
-      request_class = Net::HTTP.const_get(@method.to_s.capitalize)
-
-      request = request_class.new(@uri.request_uri, @headers)
-
-      request.body = @body
-      request
-    end
   end
 end
