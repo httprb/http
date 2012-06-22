@@ -46,8 +46,14 @@ module Http
       socket << request_header
 
       if body.respond_to? :each
-        # TODO: this automatically assumes Transfer-Encoding: chunked
-        # It should probably make sure that's really the case
+        encoding = @headers['Transfer-Encoding']
+        if encoding
+          raise ArgumentError, "invalid transfer encoding" unless encoding == "chunked"
+          socket << CRLF
+        else
+          socket << "Transfer-Encoding: chunked#{CRLF * 2}"
+        end
+
         body.each do |chunk|
           socket << chunk.bytesize.to_s(16) << CRLF
           socket << chunk
@@ -55,6 +61,8 @@ module Http
 
         socket << "0" << CRLF * 2
       else
+        socket << "Content-Length: #{body.length}#{CRLF}" unless @headers['Content-Length']
+        socket << CRLF
         socket << body.to_s
         socket << CRLF
       end

@@ -66,8 +66,6 @@ describe Http do
 
   context "posting to resources" do
     it "should be easy" do
-      pending "broken :("
-
       response = Http.post test_endpoint, :form => {:example => 'testing'}
       response.should == "passed :)"
     end
