@@ -59,19 +59,20 @@ module Http
     SYMBOL_TO_STATUS_CODE = Hash[STATUS_CODES.map { |code, msg| [msg.downcase.gsub(/\s|-/, '_').to_sym, code] }]
     SYMBOL_TO_STATUS_CODE.freeze
 
-    attr_accessor :status
-    attr_accessor :headers
-    attr_accessor :body
+    attr_reader :status
+    attr_reader :headers
 
     # Status aliases! TIMTOWTDI!!! (Want to be idiomatic? Just use status :)
-    alias_method :code,  :status
-    alias_method :code=, :status=
+    alias_method :code,        :status
+    alias_method :status_code, :status
 
-    alias_method :status_code,  :status
-    alias_method :status_code=, :status
+    def initialize(status = nil, version = "1.1", headers = {}, body = nil, &body_proc)
+      @status, @version, @body, @body_proc = status, version, body, body_proc
 
-    def initialize
       @headers = {}
+      headers.each do |field, value|
+        @headers[Http.canonicalize_header(field)] = value
+      end
     end
 
     # Set a header
@@ -96,14 +97,31 @@ module Http
       @headers[name] || @headers[Http.canonicalize_header(name)]
     end
 
+    # Obtain the response body
+    def body
+      @body ||= begin
+        raise "no body available for this response" unless @body_proc
+
+        body = "" unless block_given?
+        while (chunk = @body_proc.call)
+          if block_given?
+            yield chunk
+          else
+            body << chunk
+          end
+        end
+        body unless block_given?
+      end
+    end
+
     # Parse the response body according to its content type
     def parse_body
       if @headers['Content-Type']
         mime_type = MimeType[@headers['Content-Type'].split(/;\s*/).first]
-        return mime_type.parse(@body) if mime_type
+        return mime_type.parse(body) if mime_type
       end
 
-      @body
+      body
     end
 
     # Returns an Array ala Rack: `[status, headers, body]`

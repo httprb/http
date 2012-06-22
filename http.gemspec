@@ -15,7 +15,8 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = Http::VERSION
 
-  gem.add_dependency 'certified'
+  gem.add_runtime_dependency 'http_parser.rb'
+  gem.add_runtime_dependency 'certified'
 
   gem.add_development_dependency 'rake'
   gem.add_development_dependency 'rspec'

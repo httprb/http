@@ -1,69 +1,57 @@
 require 'spec_helper'
 
 describe Http::Response do
+  describe "headers" do
+    subject { Http::Response.new(200, "1.1", "Content-Type" => "text/plain") }
 
-  let(:subject){ Http::Response.new }
-
-  describe "the response headers" do
-
-    it 'are available through Hash-like methods' do
-      subject["Content-Type"] = "text/plain"
+    it "exposes header fields for easy access" do
       subject["Content-Type"].should eq("text/plain")
     end
 
-    it 'are available through a `headers` accessor' do
-      subject["Content-Type"] = "text/plain"
+    it "provides a #headers accessor too" do
       subject.headers.should eq("Content-Type" => "text/plain")
     end
-
   end
 
-  describe "parse_body" do
+  describe "#parse_body" do
+    context "on a registered MIME type" do
+      let(:body) { ::JSON.dump("Hello" => "World") }
+      subject { Http::Response.new(200, "1.1", {"Content-Type" => "application/json"}, body) }
 
-    it 'works on a registered mime-type' do
-      subject["Content-Type"] = "application/json"
-      subject.body = ::JSON.dump("hello" => "World")
-      subject.parse_body.should eq("hello" => "World")
+      it "returns a parsed response body" do
+        subject.parse_body.should eq ::JSON.parse(body)
+      end
     end
 
-    it 'returns the body on an unregistered mime-type' do
-      subject["Content-Type"] = "text/plain"
-      subject.body = "Hello world"
-      subject.parse_body.should eq("Hello world")
-    end
+    context "on an unregistered MIME type" do
+      let(:body) { "Hello world" }
+      subject { Http::Response.new(200, "1.1", {"Content-Type" => "text/plain"}, body) }
 
+      it "returns the raw body as a String" do
+        subject.parse_body.should eq(body)
+      end
+    end
   end
 
   describe "to_a" do
+    context "on a registered MIME type" do
+      let(:body) { ::JSON.dump("Hello" => "World") }
+      let(:content_type) { "application/json" }
+      subject { Http::Response.new(200, "1.1", {"Content-Type" => content_type}, body) }
 
-    it 'mimics Rack' do
-      subject.tap do |r|
-        r.status  = 200
-        r.headers = {"Content-Type" => "text/plain"}
-        r.body    = "Hello world"
+      it "retuns a Rack-like array with a parsed response body" do
+        subject.to_a.should eq([200, {"Content-Type" => content_type}, ::JSON.parse(body)])
       end
-      expected = [
-        200,
-        {"Content-Type" => "text/plain"},
-        "Hello world"
-      ]
-      subject.to_a.should eq(expected)
     end
 
-    it 'uses parse_body if known mime-type' do
-      subject.tap do |r|
-        r.status  = 200
-        r.headers = {"Content-Type" => "application/json"}
-        r.body    = ::JSON.dump("hello" => "World")
-      end
-      expected = [
-        200,
-        {"Content-Type" => "application/json"},
-        {"hello" => "World"}
-      ]
-      subject.to_a.should eq(expected)
-    end
+    context "on an unregistered MIME type" do
+      let(:body)         { "Hello world" }
+      let(:content_type) { "text/plain" }
+      subject { Http::Response.new(200, "1.1", {"Content-Type" => content_type}, body) }
 
+      it "returns a Rack-like array" do
+        subject.to_a.should eq([200, {"Content-Type" => content_type}, body])
+      end
+    end
   end
-
 end

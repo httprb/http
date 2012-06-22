@@ -21,8 +21,8 @@ module Http
         key = name[CANONICAL_HEADER]
         key ||= Http.canonicalize_header(name)
         @headers[key] = value
-      end      
-      
+      end
+
       @proxy, @body, @version = proxy, body, version
     end
 
@@ -31,12 +31,41 @@ module Http
       @headers[Http.canonicalize_header(header)]
     end
 
+    # Stream the request to a socket
+    def stream(socket)
+      request_header = "#{method.to_s.upcase} #{uri} HTTP/#{version}#{CRLF}"
+      @headers.each do |field, value|
+        request_header << "#{field}: #{value}#{CRLF}"
+      end
+
+      unless body
+        socket << request_header << CRLF
+        return
+      end
+
+      socket << request_header
+
+      if body.respond_to? :each
+        # TODO: this automatically assumes Transfer-Encoding: chunked
+        # It should probably make sure that's really the case
+        body.each do |chunk|
+          socket << chunk.bytesize.to_s(16) << CRLF
+          socket << chunk
+        end
+
+        socket << "0" << CRLF * 2
+      else
+        socket << body.to_s
+        socket << CRLF
+      end
+    end
+
     # Create a Net::HTTP request from this request
     def to_net_http_request
       request_class = Net::HTTP.const_get(@method.to_s.capitalize)
 
       request = request_class.new(@uri.request_uri, @headers)
-      
+
       request.body = @body
       request
     end

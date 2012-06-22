@@ -1,3 +1,6 @@
+require 'uri'
+require 'certified'
+require 'http/parser'
 require 'http/version'
 
 require 'http/chainable'
@@ -6,14 +9,10 @@ require 'http/mime_type'
 require 'http/options'
 require 'http/request'
 require 'http/response'
+require 'http/response_parser'
 require 'http/uri_backport' if RUBY_VERSION < "1.9.0"
 
-# THIS IS ENTIRELY TEMPORARY, I ASSURE YOU
-require 'net/https'
-require 'uri'
-require 'certified'
-
-# Http, it can be simple!
+# HTTP should be easy
 module Http
   extend Chainable
 
@@ -25,6 +24,9 @@ module Http
 
   # Matches HTTP header names when in "Canonical-Http-Format"
   CANONICAL_HEADER = /^[A-Z][a-z]*(-[A-Z][a-z]*)*$/
+
+  # CRLF is the universal HTTP delimiter
+  CRLF = "\r\n"
 
   class << self
     # Http[:accept => 'text/html'].get(...)
