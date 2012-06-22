@@ -38,33 +38,33 @@ module Http
         request_header << "#{field}: #{value}#{CRLF}"
       end
 
-      unless body
+      case body
+      when NilClass
         socket << request_header << CRLF
         return
-      end
+      when String
+        request_header << "Content-Length: #{body.length}#{CRLF}" unless @headers['Content-Length']
+        request_header << CRLF
 
-      socket << request_header
-
-      if body.respond_to? :each
-        encoding = @headers['Transfer-Encoding']
-        if encoding
+        socket << request_header
+        socket << body.to_s
+        socket << CRLF
+      when Enumerable
+        if encoding = @headers['Transfer-Encoding']
           raise ArgumentError, "invalid transfer encoding" unless encoding == "chunked"
-          socket << CRLF
+          request_header << CRLF
         else
-          socket << "Transfer-Encoding: chunked#{CRLF * 2}"
+          request_header << "Transfer-Encoding: chunked#{CRLF * 2}"
         end
 
+        socket << request_header
         body.each do |chunk|
           socket << chunk.bytesize.to_s(16) << CRLF
           socket << chunk
         end
 
         socket << "0" << CRLF * 2
-      else
-        socket << "Content-Length: #{body.length}#{CRLF}" unless @headers['Content-Length']
-        socket << CRLF
-        socket << body.to_s
-        socket << CRLF
+      else raise TypeError, "invalid body type: #{body.class}"
       end
     end
 
