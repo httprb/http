@@ -11,6 +11,13 @@ describe Http do
       response.should match(/<!doctype html>/)
     end
 
+    context "with_response" do
+      it 'allows specifying :object' do
+        res = Http.with_response(:object).get test_endpoint
+        res.should be_a(Http::Response)
+      end
+    end
+
     context "with headers" do
       it "should be easy" do
         response = Http.accept(:json).get test_endpoint
@@ -32,6 +39,14 @@ describe Http do
         Http.on(:response) {|r| response = r}.get test_endpoint
         response.should be_a Http::Response
       end
+    end
+
+    it "should not mess with the returned status" do
+      client = Http.with_response(:object)
+      res = client.get test_endpoint
+      res.status.should == 200
+      res = client.get "#{test_endpoint}/not-found"
+      res.status.should == 404
     end
   end
 

@@ -1,6 +1,7 @@
 master
 ------
 * Support for request body through {:body => ...} option
+* Http#with_response (through Chainable)
 
 0.2.0
 -----

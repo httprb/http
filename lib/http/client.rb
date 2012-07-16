@@ -11,7 +11,6 @@ module Http
 
     def initialize(default_options = {})
       @default_options = Options.new(default_options)
-      @parser = Http::Response::Parser.new
     end
 
     # Make an HTTP request
@@ -37,6 +36,7 @@ module Http
     end
 
     def perform(request, options)
+      parser = Http::Response::Parser.new
       uri, proxy = request.uri, request.proxy
       socket = options[:socket_class].open(uri.host, uri.port) # TODO: proxy support
 
@@ -48,18 +48,18 @@ module Http
       request.stream socket
 
       begin
-        @parser << socket.readpartial(BUFFER_SIZE) until @parser.headers
+        parser << socket.readpartial(BUFFER_SIZE) until parser.headers
       rescue IOError, Errno::ECONNRESET, Errno::EPIPE
         # TODO: handle errors
         raise 'zomg IO troubles'
       end
 
-      response = Http::Response.new(@parser.status_code, @parser.http_version, @parser.headers) do
+      response = Http::Response.new(parser.status_code, parser.http_version, parser.headers) do
         if @body_remaining and @body_remaining > 0
-          chunk = @parser.chunk
+          chunk = parser.chunk
           unless chunk
-            @parser << socket.readpartial(BUFFER_SIZE)
-            chunk = @parser.chunk
+            parser << socket.readpartial(BUFFER_SIZE)
+            chunk = parser.chunk
             return unless chunk
           end
 
