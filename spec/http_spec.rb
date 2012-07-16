@@ -45,7 +45,7 @@ describe Http do
       client = Http.with_response(:object)
       res = client.get test_endpoint
       res.status.should == 200
-      res = client.get "#{test_endpoint}/not-found"
+      res = client.get "#{test_endpoint}not-found"
       res.status.should == 404
     end
   end
@@ -81,7 +81,14 @@ describe Http do
 
   context "posting to resources" do
     it "should be easy" do
-      response = Http.post test_endpoint, :form => {:example => 'testing'}
+      response = Http.post "#{test_endpoint}form", :form => {:example => 'testing-form'}
+      response.should == "passed :)"
+    end
+  end
+
+  context "posting with an explicit body" do
+    it "should be easy" do
+      response = Http.post "#{test_endpoint}body", :body => "testing-body"
       response.should == "passed :)"
     end
   end

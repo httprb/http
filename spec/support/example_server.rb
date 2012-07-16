@@ -29,8 +29,16 @@ class ExampleService < WEBrick::HTTPServlet::AbstractServlet
 
   def do_POST(request, response)
     case request.path
-    when "/"
-      if request.query['example'] == 'testing'
+    when "/form"
+      if request.query['example'] == 'testing-form'
+        response.status = 200
+        response.body   = "passed :)"
+      else
+        response.status = 400
+        response.body   = "invalid! >:E"
+      end
+    when "/body"
+      if request.body == 'testing-body'
         response.status = 200
         response.body   = "passed :)"
       else

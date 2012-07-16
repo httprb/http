@@ -13,6 +13,9 @@ module Http
     # Form data to embed in the request
     attr_accessor :form
 
+    # Explicit request body of the request
+    attr_accessor :body
+
     # Http proxy to route request
     attr_accessor :proxy
 
@@ -44,6 +47,7 @@ module Http
       @headers   = options[:headers]   || {}
       @proxy     = options[:proxy]     || {}
       @callbacks = options[:callbacks] || {:request => [], :response => []}
+      @body      = options[:body]
       @form      = options[:form]
 
       @socket_class     = options[:socket_class]     || self.class.default_socket_class
@@ -78,6 +82,12 @@ module Http
     def with_form(form)
       dup do |opts|
         opts.form = form
+      end
+    end
+
+    def with_body(body)
+      dup do |opts|
+        opts.body = body
       end
     end
 
@@ -121,6 +131,7 @@ module Http
        :headers   => headers,
        :proxy     => proxy,
        :form      => form,
+       :body      => body,
        :callbacks => callbacks}
     end
 
