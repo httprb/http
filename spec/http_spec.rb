@@ -40,6 +40,14 @@ describe Http do
         response.should be_a Http::Response
       end
     end
+
+    it "should not mess with the returned status" do
+      client = Http.with_response(:object)
+      res = client.get test_endpoint
+      res.status.should == 200
+      res = client.get "#{test_endpoint}/not-found"
+      res.status.should == 404
+    end
   end
 
   context "with http proxy address and port" do
