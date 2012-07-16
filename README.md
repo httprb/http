@@ -24,6 +24,11 @@ Making POST requests is simple too. Want to POST a form?
 Http.post "http://example.com/resource", :form => {:foo => "42"}
 ```
 
+Want to POST with a specific body, JSON for instance?
+```ruby
+Http.post "http://example.com/resource", :body => JSON.dump(:foo => "42")
+```
+
 It's easy!
 
 Adding Headers
