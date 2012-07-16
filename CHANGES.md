@@ -1,3 +1,7 @@
+master
+------
+* Support for request body through {:body => ...} option
+
 0.2.0
 -----
 * Request and response objects

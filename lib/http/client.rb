@@ -20,7 +20,9 @@ module Http
       headers = opts.headers
       proxy = opts.proxy
 
-      if opts.form
+      if opts.body
+        body = opts.body
+      elsif opts.form
         body = URI.encode_www_form(opts.form)
         headers['Content-Type'] ||= 'application/x-www-form-urlencoded'
       end

@@ -66,7 +66,14 @@ describe Http do
 
   context "posting to resources" do
     it "should be easy" do
-      response = Http.post test_endpoint, :form => {:example => 'testing'}
+      response = Http.post "#{test_endpoint}/form", :form => {:example => 'testing-form'}
+      response.should == "passed :)"
+    end
+  end
+
+  context "posting with an explicit body" do
+    it "should be easy" do
+      response = Http.post "#{test_endpoint}/body", :body => "testing-body"
       response.should == "passed :)"
     end
   end
