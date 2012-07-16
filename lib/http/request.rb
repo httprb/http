@@ -33,7 +33,7 @@ module Http
 
     # Stream the request to a socket
     def stream(socket)
-      request_header = "#{method.to_s.upcase} #{uri} HTTP/#{version}#{CRLF}"
+      request_header = "#{method.to_s.upcase} #{uri.path} HTTP/#{version}#{CRLF}"
       @headers.each do |field, value|
         request_header << "#{field}: #{value}#{CRLF}"
       end
