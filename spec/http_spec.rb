@@ -11,6 +11,13 @@ describe Http do
       response.should match(/<!doctype html>/)
     end
 
+    context "with_response" do
+      it 'allows specifying :object' do
+        res = Http.with_response(:object).get test_endpoint
+        res.should be_a(Http::Response)
+      end
+    end
+
     context "with headers" do
       it "should be easy" do
         response = Http.accept(:json).get test_endpoint

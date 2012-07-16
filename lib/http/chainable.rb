@@ -71,6 +71,11 @@ module Http
     end
     alias_method :through, :via
 
+    # Specify the kind of response to return (:auto, :object, :body, :parsed_body)
+    def with_response(response_type)
+      branch default_options.with_response(response_type)
+    end
+
     # Make a request with the given headers
     def with_headers(headers)
       branch default_options.with_headers(headers)
