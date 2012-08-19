@@ -80,14 +80,14 @@ describe Http do
   end
 
   context "posting to resources" do
-    it "should be easy" do
+    it "should be easy to post forms" do
       response = Http.post "#{test_endpoint}form", :form => {:example => 'testing-form'}
       response.should == "passed :)"
     end
   end
 
   context "posting with an explicit body" do
-    it "should be easy" do
+    it "should be easy to post" do
       response = Http.post "#{test_endpoint}body", :body => "testing-body"
       response.should == "passed :)"
     end
