@@ -36,7 +36,8 @@ describe Http::Options, "merge" do
       :body      => "body-bar",
       :headers   => {:accept  => "xml", :foo => "foo", :bar => 'bar'},
       :proxy     => {:proxy_address => "127.0.0.1", :proxy_port => 8080},
-      :callbacks => {:request => ["common"], :response => ["foo", "bar"]}
+      :callbacks => {:request => ["common"], :response => ["foo", "bar"]},
+      :follow => nil
     )
   end
 
