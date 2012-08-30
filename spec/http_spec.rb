@@ -93,6 +93,19 @@ describe Http do
     end
   end
 
+  context "with redirects" do
+    it "should be easy for 301" do
+      response = Http.with_follow(true).get("#{test_endpoint}redirect-301")
+      response.should match(/<!doctype html>/)
+    end
+
+    it "should be easy for 302" do
+      response = Http.with_follow(true).get("#{test_endpoint}redirect-302")
+      response.should match(/<!doctype html>/)
+    end
+
+  end
+
   context "head requests" do
     it "should be easy" do
       response = Http.head test_endpoint

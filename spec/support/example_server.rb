@@ -22,6 +22,12 @@ class ExampleService < WEBrick::HTTPServlet::AbstractServlet
     when "/not-found"
       response.body   = "not found"
       response.status = 404
+    when "/redirect-301"
+      response.status = 301
+      response["Location"] = "http://127.0.0.1:#{PORT}/"
+    when "/redirect-302"
+      response.status = 302
+      response["Location"] = "http://127.0.0.1:#{PORT}/"
     else
       response.status = 404
     end
