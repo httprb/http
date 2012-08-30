@@ -76,6 +76,10 @@ module Http
       branch default_options.with_response(response_type)
     end
 
+    def with_follow(follow)
+      branch default_options.with_follow(follow)
+    end
+
     # Make a request with the given headers
     def with_headers(headers)
       branch default_options.with_headers(headers)
