@@ -28,7 +28,10 @@ module Http
     # SSL context
     attr_accessor :ssl_context
 
-    protected :response=, :headers=, :proxy=, :form=,  :callbacks=
+    # Follow redirects
+    attr_accessor :follow
+
+    protected :response=, :headers=, :proxy=, :form=,  :callbacks=, :follow=
 
     @default_socket_class     = TCPSocket
     @default_ssl_socket_class = OpenSSL::SSL::SSLSocket
@@ -49,6 +52,7 @@ module Http
       @callbacks = options[:callbacks] || {:request => [], :response => []}
       @body      = options[:body]
       @form      = options[:form]
+      @follow    = options[:follow]
 
       @socket_class     = options[:socket_class]     || self.class.default_socket_class
       @ssl_socket_class = options[:ssl_socket_class] || self.class.default_ssl_socket_class
@@ -88,6 +92,12 @@ module Http
     def with_body(body)
       dup do |opts|
         opts.body = body
+      end
+    end
+
+    def with_follow(follow)
+      dup do |opts|
+        opts.follow = follow
       end
     end
 
@@ -132,7 +142,8 @@ module Http
        :proxy     => proxy,
        :form      => form,
        :body      => body,
-       :callbacks => callbacks}
+       :callbacks => callbacks,
+       :follow    => follow}
     end
 
     def dup
