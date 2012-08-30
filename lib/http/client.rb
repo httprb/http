@@ -13,20 +13,36 @@ module Http
       @default_options = Options.new(default_options)
     end
 
+    def body(opts,headers)
+      if opts.body
+        body = opts.body
+      elsif opts.form
+        headers['Content-Type'] ||= 'application/x-www-form-urlencoded'
+        body = URI.encode_www_form(opts.form)
+      end
+    end
+
     # Make an HTTP request
     def request(method, uri, options = {})
       opts = @default_options.merge(options)
       headers = opts.headers
       proxy = opts.proxy
 
-      if opts.body
-        body = opts.body
-      elsif opts.form
-        body = URI.encode_www_form(opts.form)
-        headers['Content-Type'] ||= 'application/x-www-form-urlencoded'
-      end
+      method_body = body(opts, headers)
+      puts method_body
+      request = Request.new method, uri, headers, proxy, method_body
 
-      request = Request.new method, uri, headers, proxy, body
+      if opts.follow
+        code = 302
+        while code == 302 or code == 301
+          puts uri
+          method_body = body(opts, headers)
+          request = Request.new method, uri, headers, proxy, method_body
+          response = perform request, opts
+          code = response.code
+          uri = response.headers["Location"]
+        end
+      end
 
       opts.callbacks[:request].each { |c| c.call(request) }
       response = perform request, opts
