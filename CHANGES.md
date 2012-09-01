@@ -1,5 +1,7 @@
-master
-------
+HEAD
+----
+* New implementation based on tmm1's http_parser.rb instead of Net::HTTP
+* Support for following redirects
 * Support for request body through {:body => ...} option
 * Http#with_response (through Chainable)
 
