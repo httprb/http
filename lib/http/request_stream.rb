@@ -16,6 +16,7 @@ module Http
     def add_body_type_headers
       case @body
       when NilClass
+        @request_header << CRLF
       when String
         @request_header << "Content-Length: #{@body.length}#{CRLF}" unless @headers['Content-Length']
         @request_header << CRLF
@@ -36,7 +37,7 @@ module Http
 
       case @body
       when NilClass
-        @socket << @request_header << CRLF
+        @socket << @request_header
       when String
         @socket << @request_header
         @socket << @body
