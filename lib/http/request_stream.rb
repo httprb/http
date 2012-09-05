@@ -7,11 +7,15 @@ module Http
       @request_header = headerstart
     end
 
-    # Stream the request to a socket
-    def stream
+    def add_headers
       @headers.each do |field, value|
         @request_header << "#{field}: #{value}#{CRLF}"
       end
+    end
+
+    # Stream the request to a socket
+    def stream
+      self.add_headers
 
       case @body
       when NilClass
