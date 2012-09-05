@@ -8,6 +8,7 @@ require 'http/client'
 require 'http/mime_type'
 require 'http/options'
 require 'http/request'
+require 'http/request_stream'
 require 'http/response'
 require 'http/response_parser'
 require 'http/uri_backport' if RUBY_VERSION < "1.9.0"
