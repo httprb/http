@@ -19,14 +19,14 @@ describe Curl do
       end
     end
   end
-  
+
   describe Curl::Multi do
     it "gets resources" do
       requests  = [test_endpoint]
       responses = []
-      
+
       multi = Curl::Multi.new
-      
+
       requests.each do |url|
         response = Curl::Easy.new url, :get
         multi.add response

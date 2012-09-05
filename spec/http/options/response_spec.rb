@@ -15,7 +15,7 @@ describe Http::Options, "response" do
   end
 
   it 'recognizes invalid responses' do
-    lambda{ 
+    lambda{
       opts.with_response(:not_a_valid_response)
     }.should raise_error(ArgumentError, /not_a_valid_response/)
   end
