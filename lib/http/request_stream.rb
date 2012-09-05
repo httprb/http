@@ -8,12 +8,15 @@ module Http
       @request_header = [headerstart]
     end
 
+    #Adds headers to the request header from the headers array
     def add_headers
       @headers.each do |field, value|
         @request_header << "#{field}: #{value}"
       end
     end
 
+    # Adds the headers to the header array for the given request body we are working
+    # with
     def add_body_type_headers
       if @body.class == String and not @headers['Content-Length']
         @request_header << "Content-Length: #{@body.length}"
@@ -26,6 +29,8 @@ module Http
       end
     end
 
+    # Joins the headers specified in the request into a correctly formatted
+    # http request header string
     def join_headers
       # join the headers array with crlfs, stick two on the end because
       # that ends the request header
