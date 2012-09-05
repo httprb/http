@@ -1,6 +1,7 @@
 module Http
   class RequestStream
     def initialize(socket, body, headers, headerstart)
+      raise ArgumentError unless [String, Enumerable, NilClass].include? body.class
       @socket         = socket
       @body           = body
       @headers        = headers
@@ -15,7 +16,6 @@ module Http
 
     def add_body_type_headers
       case @body
-      when NilClass
       when String
         @request_header << "Content-Length: #{@body.length}" unless @headers['Content-Length']
       when Enumerable
@@ -41,7 +41,6 @@ module Http
 
       @socket << header
       case @body
-      when NilClass
       when String
         @socket << @body
       when Enumerable
@@ -51,7 +50,6 @@ module Http
         end
 
         @socket << "0" << CRLF * 2
-      else raise TypeError, "invalid @body type: #{@body.class}"
       end
     end
   end
