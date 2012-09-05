@@ -62,21 +62,21 @@ module Curl
       perform
     end
   end
-  
+
   class Multi
     def initialize
       @clients = []
       @done = false
     end
-    
+
     def add(client)
       @clients << client
     end
-    
-    
+
+
     def perform
       return if @done
-      
+
       @clients.map do |client|
         Thread.new { client.perform }
       end.each(&:join)

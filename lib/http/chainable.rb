@@ -54,15 +54,15 @@ module Http
     def on(event, &block)
       branch default_options.with_callback(event, block)
     end
-    
+
     # Make a request through an HTTP proxy
     def via(*proxy)
-      proxy_hash = {}    
+      proxy_hash = {}
       proxy_hash[:proxy_address] = proxy[0] if proxy[0].is_a? String
       proxy_hash[:proxy_port]    = proxy[1] if proxy[1].is_a? Integer
       proxy_hash[:proxy_username]= proxy[2] if proxy[2].is_a? String
       proxy_hash[:proxy_password]= proxy[3] if proxy[3].is_a? String
-      
+
       if proxy_hash.keys.size >=2
         branch default_options.with_proxy(proxy_hash)
       else
