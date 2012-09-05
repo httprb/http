@@ -1,11 +1,17 @@
 module Http
   class RequestStream
     def initialize(socket, body, headers, headerstart)
-      raise ArgumentError unless [String, Enumerable, NilClass].include? body.class
-      @socket         = socket
       @body           = body
+      raise ArgumentError, "body of wrong type" unless valid_body_type
+      @socket         = socket
       @headers        = headers
       @request_header = [headerstart]
+    end
+
+    def valid_body_type
+      valid_types= [String, NilClass, Enumerable]
+      checks = valid_types.map {|type| @body.is_a? type}
+      checks.any?
     end
 
     #Adds headers to the request header from the headers array
