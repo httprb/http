@@ -37,14 +37,15 @@ module Http
       @request_header.join(CRLF) + (CRLF)*2
     end
 
-    # Stream the request to a socket
-    def stream
+    def send_request_header
       self.add_headers
       self.add_body_type_headers
       header = self.join_headers
 
       @socket << header
+    end
 
+    def send_request_body
       if @body.class == String
         @socket << @body
       elsif @body.class == Enumerable
@@ -55,6 +56,12 @@ module Http
 
         @socket << "0" << CRLF * 2
       end
+    end
+
+    # Stream the request to a socket
+    def stream
+      self.send_request_header
+      self.send_request_body
     end
   end
 end
