@@ -18,7 +18,6 @@ module Http
       case @body
       when NilClass
         socket << request_header << CRLF
-        return
       when String
         request_header << "Content-Length: #{@body.length}#{CRLF}" unless @headers['Content-Length']
         request_header << CRLF
