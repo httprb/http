@@ -15,12 +15,11 @@ module Http
     end
 
     def add_body_type_headers
-      case @body
-      when String
-        @request_header << "Content-Length: #{@body.length}" unless @headers['Content-Length']
-      when Enumerable
-        if encoding = @headers['Transfer-Encoding']
-          raise ArgumentError, "invalid transfer encoding" unless encoding == "chunked"
+      if @body.class == String and not @headers['Content-Length']
+        @request_header << "Content-Length: #{@body.length}"
+      elsif @body.class == Enumerable
+        if encoding = @headers['Transfer-Encoding'] and not encoding == "chunked"
+          raise ArgumentError, "invalid transfer encoding"
         else
           @request_header << "Transfer-Encoding: chunked"
         end
@@ -40,10 +39,10 @@ module Http
       header = self.join_headers
 
       @socket << header
-      case @body
-      when String
+
+      if @body.class == String
         @socket << @body
-      when Enumerable
+      elsif @body.class == Enumerable
         @body.each do |chunk|
           @socket << chunk.bytesize.to_s(16) << CRLF
           @socket << chunk
