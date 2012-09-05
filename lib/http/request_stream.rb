@@ -30,9 +30,9 @@ module Http
     # Adds the headers to the header array for the given request body we are working
     # with
     def add_body_type_headers
-      if @body.class == String and not @headers['Content-Length']
+      if @body.is_a? String and not @headers['Content-Length']
         @request_header << "Content-Length: #{@body.length}"
-      elsif @body.class == Enumerable
+      elsif @body.is_a? Enumerable
         if encoding = @headers['Transfer-Encoding'] and not encoding == "chunked"
           raise ArgumentError, "invalid transfer encoding"
         else
