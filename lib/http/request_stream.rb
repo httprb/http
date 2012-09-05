@@ -58,9 +58,9 @@ module Http
     end
 
     def send_request_body
-      if @body.class == String
+      if @body.is_a? String
         @socket << @body
-      elsif @body.class == Enumerable
+      elsif @body.is_a? Enumerable
         @body.each do |chunk|
           @socket << chunk.bytesize.to_s(16) << CRLF
           @socket << chunk
