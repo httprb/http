@@ -15,6 +15,12 @@ module Http
       end
     end
 
+    # Stream the request to a socket
+    def stream
+      self.send_request_header
+      self.send_request_body
+    end
+
     # Adds the headers to the header array for the given request body we are working
     # with
     def add_body_type_headers
@@ -56,12 +62,6 @@ module Http
 
         @socket << "0" << CRLF * 2
       end
-    end
-
-    # Stream the request to a socket
-    def stream
-      self.send_request_header
-      self.send_request_body
     end
   end
 end
