@@ -13,19 +13,12 @@ module Http
       end
     end
 
-    # Stream the request to a socket
-    def stream
-      self.add_headers
-
+    def add_body_type_headers
       case @body
       when NilClass
-        @socket << @request_header << CRLF
       when String
         @request_header << "Content-Length: #{@body.length}#{CRLF}" unless @headers['Content-Length']
         @request_header << CRLF
-
-        @socket << @request_header
-        @socket << @body
       when Enumerable
         if encoding = @headers['Transfer-Encoding']
           raise ArgumentError, "invalid transfer encoding" unless encoding == "chunked"
@@ -33,7 +26,21 @@ module Http
         else
           @request_header << "Transfer-Encoding: chunked#{CRLF * 2}"
         end
+      end
+    end
 
+    # Stream the request to a socket
+    def stream
+      self.add_headers
+      self.add_body_type_headers
+
+      case @body
+      when NilClass
+        @socket << @request_header << CRLF
+      when String
+        @socket << @request_header
+        @socket << @body
+      when Enumerable
         @socket << @request_header
         @body.each do |chunk|
           @socket << chunk.bytesize.to_s(16) << CRLF
