@@ -23,7 +23,7 @@ module Http
         request_header << CRLF
 
         socket << request_header
-        socket << @body.to_s
+        socket << @body
       when Enumerable
         if encoding = @headers['Transfer-Encoding']
           raise ArgumentError, "invalid transfer encoding" unless encoding == "chunked"
