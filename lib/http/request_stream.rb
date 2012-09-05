@@ -35,14 +35,12 @@ module Http
       self.add_headers
       self.add_body_type_headers
 
+      @socket << @request_header
       case @body
       when NilClass
-        @socket << @request_header
       when String
-        @socket << @request_header
         @socket << @body
       when Enumerable
-        @socket << @request_header
         @body.each do |chunk|
           @socket << chunk.bytesize.to_s(16) << CRLF
           @socket << chunk
