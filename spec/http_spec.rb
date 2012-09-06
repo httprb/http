@@ -11,6 +11,19 @@ describe Http do
       response.should match(/<!doctype html>/)
     end
 
+    it "should be easy to get a https resource" do
+      response = Http.with_headers(:accept => 'application/json').get "https://api.github.com/users/samphippen"
+      response["type"].should == "User"
+    end
+
+    it "can get some real world sites, following redirects if necessary" do
+      sites = ["http://github.com/", "http://xkcd.com/", "http://www.spotify.com/"]
+      sites.each do |site|
+        resp = Http.with_response(:object).with_follow(true).get site
+        resp.status.should == 200
+      end
+    end
+
     context "with_response" do
       it 'allows specifying :object' do
         res = Http.with_response(:object).get test_endpoint
