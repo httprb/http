@@ -11,6 +11,11 @@ describe Http do
       response.should match(/<!doctype html>/)
     end
 
+    it "should be easy to get a https resource" do
+      response = Http.get "https://api.github.com/user/samphippen"
+      response.should match(/"type": "User"/)
+    end
+
     context "with_response" do
       it 'allows specifying :object' do
         res = Http.with_response(:object).get test_endpoint
