@@ -25,7 +25,8 @@ module Http
     # Make an HTTP request
     def request(method, uri, options = {})
       opts = @default_options.merge(options)
-      opts.headers["Host"] = URI.parse(uri).host
+      host = URI.parse(uri).host
+      opts.headers["Host"] = host
       headers = opts.headers
       proxy = opts.proxy
 
@@ -35,7 +36,12 @@ module Http
       if opts.follow
         code = 302
         while code == 302 or code == 301
-          opts.headers["Host"] = URI.parse(uri).host
+          # if the uri isn't fully formed complete it
+          if not uri.match /\./
+            uri = "http://#{host}#{uri}"
+          end
+          host = URI.parse(uri).host
+          opts.headers["Host"] = host
           method_body = body(opts, headers)
           request = Request.new method, uri, headers, proxy, method_body
           response = perform request, opts
