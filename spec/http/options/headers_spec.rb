@@ -4,14 +4,14 @@ describe Http::Options, "headers" do
 
   let(:opts){ Http::Options.new }
 
-  it 'defaults to {}' do
-    opts.headers.should eq({})
+  it 'defaults to just the user agent' do
+    opts.headers.should eq({"User-Agent" => "HTTP Gem"})
   end
 
   it 'may be specified with with_headers' do
     opts2 = opts.with_headers("accept" => "json")
-    opts.headers.should eq({})
-    opts2.headers.should eq("accept" => "json")
+    opts.headers.should eq({"User-Agent"=>"HTTP Gem"})
+    opts2.headers.should eq("accept" => "json", "User-Agent"=>"HTTP Gem")
   end
 
   it 'accepts any object that respond to :to_hash' do

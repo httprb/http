@@ -25,17 +25,23 @@ module Http
     # Make an HTTP request
     def request(method, uri, options = {})
       opts = @default_options.merge(options)
+      host = URI.parse(uri).host
+      opts.headers["Host"] = host
       headers = opts.headers
       proxy = opts.proxy
 
       method_body = body(opts, headers)
-      puts method_body
       request = Request.new method, uri, headers, proxy, method_body
 
       if opts.follow
         code = 302
         while code == 302 or code == 301
-          puts uri
+          # if the uri isn't fully formed complete it
+          if not uri.match /\./
+            uri = "http://#{host}#{uri}"
+          end
+          host = URI.parse(uri).host
+          opts.headers["Host"] = host
           method_body = body(opts, headers)
           request = Request.new method, uri, headers, proxy, method_body
           response = perform request, opts
@@ -57,7 +63,12 @@ module Http
       socket = options[:socket_class].open(uri.host, uri.port) # TODO: proxy support
 
       if uri.is_a?(URI::HTTPS)
-        socket = options[:ssl_socket_class].open(socket, options[:ssl_context])
+        if options[:ssl_context] == nil
+          context = OpenSSL::SSL::SSLContext.new
+        else
+          context = options[:ssl_context]
+        end
+        socket = options[:ssl_socket_class].new(socket, context)
         socket.connect
       end
 
