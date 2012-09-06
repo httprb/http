@@ -12,7 +12,7 @@ describe Http do
     end
 
     it "should be easy to get a https resource" do
-      response = Http.get "https://api.github.com/user/samphippen"
+      response = Http.with_headers(:accept => 'application/json').get "https://api.github.com/users/samphippen"
       response.should match(/"type": "User"/)
     end
 
