@@ -16,7 +16,7 @@ describe Http::Options, "new" do
 
     it 'coerces :headers correctly' do
       opts = Http::Options.new(:headers => {:accept => "json"})
-      opts.headers.should eq(:accept => "json")
+      opts.headers.should eq(:accept => "json", "User-Agent"=>"HTTP Gem")
     end
 
     it 'coerces :proxy correctly' do
