@@ -1,4 +1,4 @@
-module Http
+module HTTP
   class Request
     # Method is given as a lowercase symbol e.g. :get, :post
     attr_reader :method

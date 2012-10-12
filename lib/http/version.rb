@@ -1,3 +1,3 @@
-module Http
+module HTTP
   VERSION = "0.4.0"
 end

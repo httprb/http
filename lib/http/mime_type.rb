@@ -1,4 +1,4 @@
-module Http
+module HTTP
   # Yes, Http bundles its own MIME type library. Maybe it should be spun off
   # as a separate gem or something.
   class MimeType

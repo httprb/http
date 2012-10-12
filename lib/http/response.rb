@@ -1,4 +1,4 @@
-module Http
+module HTTP
   class Response
     STATUS_CODES = {
       100 => 'Continue',

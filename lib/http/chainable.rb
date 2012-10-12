@@ -1,4 +1,4 @@
-module Http
+module HTTP
   module Chainable
     # Request a get sans response body
     def head(uri, options = {})

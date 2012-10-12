@@ -14,7 +14,7 @@ require 'http/response_parser'
 require 'http/uri_backport' if RUBY_VERSION < "1.9.0"
 
 # HTTP should be easy
-module Http
+module HTTP
   extend Chainable
 
   # The method given was not understood
@@ -39,3 +39,5 @@ module Http
     end
   end
 end
+
+Http = HTTP unless defined?(Http)

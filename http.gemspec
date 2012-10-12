@@ -13,7 +13,7 @@ Gem::Specification.new do |gem|
   gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   gem.name          = "http"
   gem.require_paths = ["lib"]
-  gem.version       = Http::VERSION
+  gem.version       = HTTP::VERSION
 
   gem.add_runtime_dependency 'http_parser.rb'
   gem.add_runtime_dependency 'certified'

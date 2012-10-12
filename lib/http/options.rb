@@ -1,7 +1,7 @@
 require 'socket'
 require 'openssl'
 
-module Http
+module HTTP
   class Options
 
     # How to format the response [:object, :body, :parse_body]

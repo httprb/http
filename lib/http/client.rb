@@ -1,6 +1,6 @@
 require 'uri'
 
-module Http
+module HTTP
   # Clients make requests and receive responses
   class Client
     include Chainable

@@ -1,4 +1,4 @@
-module Http
+module HTTP
   class RequestStream
     def initialize(socket, body, headers, headerstart)
       @body           = body

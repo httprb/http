@@ -1,4 +1,4 @@
-module Http
+module HTTP
   class Response
     class Parser
       attr_reader :headers
