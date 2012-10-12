@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 describe Http::Options, "new" do
+  let(:user_agent) { "RubyHttpGem/#{Http::VERSION}" }
 
   it 'supports a Options instance' do
     opts = Http::Options.new
@@ -8,7 +9,6 @@ describe Http::Options, "new" do
   end
 
   context 'with a Hash' do
-
     it 'coerces :response correctly' do
       opts = Http::Options.new(:response => :object)
       opts.response.should eq(:object)
@@ -16,7 +16,7 @@ describe Http::Options, "new" do
 
     it 'coerces :headers correctly' do
       opts = Http::Options.new(:headers => {:accept => "json"})
-      opts.headers.should eq(:accept => "json", "User-Agent"=>"HTTP Gem")
+      opts.headers.should eq(:accept => "json", "User-Agent" => user_agent)
     end
 
     it 'coerces :proxy correctly' do

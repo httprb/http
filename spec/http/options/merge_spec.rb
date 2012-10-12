@@ -2,7 +2,8 @@ require 'spec_helper'
 
 describe Http::Options, "merge" do
 
-  let(:opts){ Http::Options.new }
+  let(:opts)       { Http::Options.new }
+  let(:user_agent) { "RubyHttpGem/#{Http::VERSION}" }
 
   it 'supports a Hash' do
     old_response = opts.response
@@ -34,7 +35,7 @@ describe Http::Options, "merge" do
       :response  => :parsed_body,
       :form      => {:bar => 'bar'},
       :body      => "body-bar",
-      :headers   => {:accept  => "xml", :foo => "foo", :bar => 'bar', "User-Agent"=>"HTTP Gem"},
+      :headers   => {:accept  => "xml", :foo => "foo", :bar => 'bar', "User-Agent" => user_agent},
       :proxy     => {:proxy_address => "127.0.0.1", :proxy_port => 8080},
       :callbacks => {:request => ["common"], :response => ["foo", "bar"]},
       :follow => nil
