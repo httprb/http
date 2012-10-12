@@ -1,3 +1,10 @@
+0.4.0
+-----
+* Fix bug accessing https URLs
+* Fix several instances of broken redirect handling
+* Add default user agent
+* Many additional minor bugfixes
+
 0.3.0
 -----
 * New implementation based on tmm1's http_parser.rb instead of Net::HTTP
