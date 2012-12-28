@@ -104,13 +104,17 @@ module HTTP
     def format_response(method, response, option)
       case option
       when :auto, NilClass
-        method == :head ? response : response.parse_body
+        if method == :head
+          response
+        else
+          Http::Response::BodyDelegator.new(response, response.parse_body)
+        end
       when :object
         response
       when :parsed_body
-        response.parse_body
+        Http::Response::BodyDelegator.new(response, response.parse_body)
       when :body
-        response.body
+        Http::Response::BodyDelegator.new(response)
       else raise ArgumentError, "invalid response type: #{option}"
       end
     end

@@ -1,3 +1,5 @@
+require 'delegate'
+
 module HTTP
   class Response
     STATUS_CODES = {
@@ -138,6 +140,18 @@ module HTTP
     # Inspect a response
     def inspect
       "#<HTTP/#{@version} #{status} #{reason} @headers=#{@headers.inspect}>"
+    end
+
+    class BodyDelegator < ::Delegator
+      attr_reader :response
+
+      def initialize(response, body = response.body)
+        super(body)
+        @response, @body = response, body
+      end
+
+      def __getobj__; @body; end
+      def __setobj__(obj); @body = obj; end
     end
   end
 end

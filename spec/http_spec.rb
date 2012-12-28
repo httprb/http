@@ -11,6 +11,11 @@ describe Http do
       response.should match(/<!doctype html>/)
     end
 
+    it "should be easy to get a response object" do
+      response = Http.get(test_endpoint).response
+      response.should be_a Http::Response
+    end
+
     it "should be easy to get a https resource" do
       response = Http.with_headers(:accept => 'application/json').get "https://api.github.com/users/samphippen"
       response["type"].should == "User"

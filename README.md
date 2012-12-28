@@ -2,10 +2,9 @@ Http
 ====
 [![Build Status](https://secure.travis-ci.org/tarcieri/http.png?branch=master)](http://travis-ci.org/tarcieri/http)
 
-HTTP should be simple and easy! It should be so straightforward it makes
-you happy every time you use it.
-
-The Http library makes it easy to construct requests using a simple chaining system.
+Http is an easy-to-use client library for making requests from Ruby. It uses
+a simple method chaining system for building requests, similar to libraries
+like JQuery or Python's [Requests](http://docs.python-requests.org/en/latest/).
 
 Making Requests
 ---------------
@@ -13,11 +12,17 @@ Making Requests
 Let's start with getting things:
 
 ```ruby
->> Http.get "http://www.google.com"
+>> Http.get("http://www.google.com")
 => "<html><head><meta http-equiv=\"content-type\" content=..."
 ```
 
-That's it! The result is the response body as a string.
+That's it! The result is the response body as a string. To obtain an Http::Response object
+instead of the response body, chain `.response` on the end of the request:
+
+```ruby
+>> Http.get("http://www.google.com").response
+=> #<HTTP/1.0 200 OK @headers={"Content-Type"=>"text/html; charset=UTF-8", "Date"=>"Fri, ...>
+```
 
 Making POST requests is simple too. Want to POST a form?
 
