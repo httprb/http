@@ -92,6 +92,12 @@ module HTTP
       end
     end
 
+    # Obtain the 'Reason-Phrase' for the response
+    def reason
+      # FIXME: should get the real reason phrase from the parser
+      STATUS_CODES[@status]
+    end
+
     # Get a header value
     def [](name)
       @headers[name] || @headers[Http.canonicalize_header(name)]
@@ -127,6 +133,11 @@ module HTTP
     # Returns an Array ala Rack: `[status, headers, body]`
     def to_a
       [status, headers, parse_body]
+    end
+
+    # Inspect a response
+    def inspect
+      "#<HTTP/#{@version} #{status} #{reason} @headers=#{@headers.inspect}>"
     end
   end
 end
