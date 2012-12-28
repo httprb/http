@@ -13,10 +13,11 @@ Making Requests
 Let's start with getting things:
 
 ```ruby
-Http.get "http://www.google.com"
+>> Http.get "http://www.google.com"
+=> "<html><head><meta http-equiv=\"content-type\" content=..."
 ```
 
-That's it! The result is the response body.
+That's it! The result is the response body as a string.
 
 Making POST requests is simple too. Want to POST a form?
 
