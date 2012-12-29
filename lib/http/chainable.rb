@@ -76,6 +76,9 @@ module HTTP
       branch default_options.with_response(response_type)
     end
 
+    # Alias for with_response(:object)
+    def stream; with_response(:object); end
+
     def with_follow(follow)
       branch default_options.with_follow(follow)
     end

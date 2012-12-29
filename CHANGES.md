@@ -1,6 +1,8 @@
 HEAD
 ----
 * New response delegator allows Http.get(uri).response
+* Http::Chainable#stream provides a shorter alias for
+  with_response(:object)
 * Better string inspect for Http::Response
 
 0.4.0
