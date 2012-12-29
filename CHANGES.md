@@ -1,3 +1,8 @@
+HEAD
+----
+* New response delegator allows Http.get(uri).response
+* Better string inspect for Http::Response
+
 0.4.0
 -----
 * Fix bug accessing https URLs
