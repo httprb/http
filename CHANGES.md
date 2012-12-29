@@ -1,5 +1,5 @@
-0.5.0
------
+1.0.0.pre
+---------
 * New response delegator allows Http.get(uri).response
 * Http::Chainable#stream provides a shorter alias for
   with_response(:object)
