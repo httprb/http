@@ -1,10 +1,35 @@
-Http
-====
+[The Http Gem*]
+==============
 [![Build Status](https://secure.travis-ci.org/tarcieri/http.png?branch=master)](http://travis-ci.org/tarcieri/http)
 
-Http is an easy-to-use client library for making requests from Ruby. It uses
+*NOTE: this gem has the worst name in the history of SEO. But perhaps we can fix
+that if we all refer to it as "The HTTP Gem". Entering that phrase into Google
+actually pulls it up as #4 for me!
+
+The Http Gem is an easy-to-use client library for making requests from Ruby. It uses
 a simple method chaining system for building requests, similar to libraries
 like JQuery or Python's [Requests](http://docs.python-requests.org/en/latest/).
+
+Installation
+------------
+
+Add this line to your application's Gemfile:
+
+    gem 'http'
+
+And then execute:
+
+    $ bundle
+
+Or install it yourself as:
+
+    $ gem install http
+
+Inside of your Ruby program do:
+
+    require 'http'
+
+...to pull it in as a dependency.
 
 Making Requests
 ---------------
