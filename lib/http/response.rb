@@ -139,7 +139,7 @@ module HTTP
 
     # Inspect a response
     def inspect
-      "#<HTTP/#{@version} #{status} #{reason} @headers=#{@headers.inspect}>"
+      "#<#{self.class}/#{@version} #{status} #{reason} @headers=#{@headers.inspect}>"
     end
 
     class BodyDelegator < ::Delegator
