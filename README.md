@@ -1,4 +1,4 @@
-[The Http Gem*]
+The Http Gem*
 ==============
 [![Build Status](https://secure.travis-ci.org/tarcieri/http.png?branch=master)](http://travis-ci.org/tarcieri/http)
 
