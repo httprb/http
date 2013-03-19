@@ -1,6 +1,9 @@
 The Http Gem*
 ==============
 [![Build Status](https://secure.travis-ci.org/tarcieri/http.png?branch=master)](http://travis-ci.org/tarcieri/http)
+[![Dependency Status](https://gemnasium.com/tarcieri/http.png)](https://gemnasium.com/tarcieri/http)
+[![Code Climate](https://codeclimate.com/github/tarcieri/http.png)](https://codeclimate.com/github/tarcieri/http)
+[![Coverage Status](https://coveralls.io/repos/tarcieri/http/badge.png?branch=master)](https://coveralls.io/r/tarcieri/http)
 
 *NOTE: this gem has the worst name in the history of SEO. But perhaps we can fix
 that if we all refer to it as "The HTTP Gem". Entering that phrase into Google
