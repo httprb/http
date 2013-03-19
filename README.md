@@ -148,4 +148,4 @@ Contributing to Http
 Copyright
 ---------
 
-Copyright (c) 2013 Tony Arcieri, Carl Lerche. See LICENSE.txt for further details.
+Copyright (c) 2013 Tony Arcieri. See LICENSE.txt for further details.
