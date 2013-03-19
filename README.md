@@ -1,5 +1,6 @@
 The Http Gem*
 ==============
+[![Gem Version](https://badge.fury.io/rb/http.png)](http://rubygems.org/gems/http)
 [![Build Status](https://secure.travis-ci.org/tarcieri/http.png?branch=master)](http://travis-ci.org/tarcieri/http)
 [![Dependency Status](https://gemnasium.com/tarcieri/http.png)](https://gemnasium.com/tarcieri/http)
 [![Code Climate](https://codeclimate.com/github/tarcieri/http.png)](https://codeclimate.com/github/tarcieri/http)
