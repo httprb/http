@@ -57,6 +57,10 @@ module HTTP
         @headers  = nil
         @chunk    = nil
       end
+
+      def finished?
+        @finished
+      end
     end
   end
 end
