@@ -82,22 +82,14 @@ module HTTP
       end
 
       response = Http::Response.new(parser.status_code, parser.http_version, parser.headers) do
-        if @body_remaining and @body_remaining > 0
-          chunk = parser.chunk
-          unless chunk
+        if !parser.finished?
+          parser.chunk || begin
             parser << socket.readpartial(BUFFER_SIZE)
-            chunk = parser.chunk
-            return unless chunk
+            parser.chunk || ""
           end
-
-          @body_remaining -= chunk.length
-          @body_remaining = nil if @body_remaining < 1
-
-          chunk
         end
       end
 
-      @body_remaining = Integer(response['Content-Length']) if response['Content-Length']
       response
     end
 
