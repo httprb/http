@@ -82,7 +82,7 @@ module HTTP
       end
 
       response = Http::Response.new(parser.status_code, parser.http_version, parser.headers) do
-        if !parser.finished? || @body_remaining and @body_remaining > 0
+        if !parser.finished? || (@body_remaining && @body_remaining > 0)
           chunk = parser.chunk || begin
             parser << socket.readpartial(BUFFER_SIZE)
             parser.chunk || ""
