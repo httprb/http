@@ -16,7 +16,6 @@ Gem::Specification.new do |gem|
   gem.version       = HTTP::VERSION
 
   gem.add_runtime_dependency 'http_parser.rb'
-  gem.add_runtime_dependency 'certified'
 
   gem.add_development_dependency 'rake'
   gem.add_development_dependency 'rspec'
