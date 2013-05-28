@@ -1,5 +1,4 @@
 require 'uri'
-require 'certified'
 require 'http/parser'
 require 'http/version'
 
