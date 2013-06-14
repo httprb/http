@@ -38,7 +38,7 @@ module HTTP
         while code == 302 or code == 301
           # if the uri isn't fully formed complete it
           if not uri.match /\./
-            uri = "http://#{host}#{uri}"
+            uri = "#{method}://#{host}#{uri}"
           end
           host = URI.parse(uri).host
           opts.headers["Host"] = host
