@@ -17,4 +17,17 @@ describe Http::Options do
     expect { subject.with_response(:notrecognized) }.to raise_exception(ArgumentError)
   end
 
+  it "merges options correctly" do
+    example_class = Object
+    merged_options = subject.merge(:socket_class => example_class)
+    merged_options[:socket_class].should eq example_class
+  end
+
+  it "doesn't override options when merging" do
+    example_class = Object
+    subject = described_class.new(:socket_class => example_class)
+    merged_options = subject.merge({})
+    merged_options[:socket_class].should eq example_class    
+  end
+
 end
