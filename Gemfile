@@ -5,3 +5,7 @@ gem 'coveralls', :require => false
 
 # Specify your gem's dependencies in http.gemspec
 gemspec
+
+group :development do
+  gem 'guard-rspec'
+end
