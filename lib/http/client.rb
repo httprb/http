@@ -76,9 +76,8 @@ module HTTP
 
       begin
         parser << socket.readpartial(BUFFER_SIZE) until parser.headers
-      rescue IOError, Errno::ECONNRESET, Errno::EPIPE
-        # TODO: handle errors
-        raise "zomg IO troubles: #{$!.message}"
+      rescue IOError, Errno::ECONNRESET, Errno::EPIPE => ex
+        raise IOError, "problem making HTTP request: #{ex}"
       end
 
       response = Http::Response.new(parser.status_code, parser.http_version, parser.headers) do
