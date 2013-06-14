@@ -8,4 +8,5 @@ gemspec
 
 group :development do
   gem 'guard-rspec'
+  gem 'celluloid-io'
 end
