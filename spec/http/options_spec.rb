@@ -1,26 +1,20 @@
 require 'spec_helper'
 
 describe Http::Options do
+  subject { described_class.new(:response => :body) }
 
-  let(:options){ Http::Options.new(:response => :body) }
-
-  it 'behaves like a Hash for reading' do
-    options[:response].should eq(:body)
-    options[:nosuchone].should be_nil
+  it "behaves like a Hash for reading" do
+    subject[:response].should eq(:body)
+    subject[:nosuchone].should be_nil
   end
 
-  it 'is able to coerce to a Hash' do
-    options.to_hash.should be_a(Hash)
-    options.to_hash[:response].should eq(:body)
+  it "it's gois able to coerce to a Hash" do
+    subject.to_hash.should be_a(Hash)
+    subject.to_hash[:response].should eq(:body)
   end
 
-  it 'is stacktrace friendly' do
-    begin
-      options.with_response(:notrecognized)
-      true.should be_false
-    rescue ArgumentError => ex
-      puts ex.backtrace.first.should match(/options_spec/)
-    end
+  it "raises ArgumentError with invalid options" do
+    expect { subject.with_response(:notrecognized) }.to raise_exception(ArgumentError)
   end
 
 end
