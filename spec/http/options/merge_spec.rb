@@ -17,6 +17,8 @@ describe Http::Options, "merge" do
   end
 
   it 'merges as excepted in complex cases' do
+    # FIXME: yuck :(
+
     foo = Http::Options.new(
       :response  => :body,
       :form      => {:foo => 'foo'},
@@ -38,8 +40,10 @@ describe Http::Options, "merge" do
       :headers   => {:accept  => "xml", :foo => "foo", :bar => 'bar', "User-Agent" => user_agent},
       :proxy     => {:proxy_address => "127.0.0.1", :proxy_port => 8080},
       :callbacks => {:request => ["common"], :response => ["foo", "bar"]},
-      :follow => nil
+      :follow => nil,
+      :socket_class     => described_class.default_socket_class,
+      :ssl_socket_class => described_class.default_ssl_socket_class,
+      :ssl_context      => nil
     )
   end
-
 end
