@@ -8,5 +8,5 @@ gemspec
 
 group :development do
   gem 'guard-rspec'
-  gem 'celluloid-io'
+  gem 'celluloid-io' if RUBY_VERSION >= "1.9.3"
 end
