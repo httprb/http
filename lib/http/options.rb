@@ -135,17 +135,26 @@ module HTTP
           v2
         end
       end
+
       Options.new(merged)
     end
 
     def to_hash
-      {:response  => response,
-       :headers   => headers,
-       :proxy     => proxy,
-       :form      => form,
-       :body      => body,
-       :callbacks => callbacks,
-       :follow    => follow}
+      # FIXME: hardcoding these fields blows! We should have a declarative
+      # way of specifying all the options fields, and ensure they *all*
+      # get serialized here, rather than manually having to add them each time
+      {
+        :response         => response,
+        :headers          => headers,
+        :proxy            => proxy,
+        :form             => form,
+        :body             => body,
+        :callbacks        => callbacks,
+        :follow           => follow,
+        :socket_class     => socket_class,
+        :ssl_socket_class => ssl_socket_class,
+        :ssl_context      => ssl_context
+     }
     end
 
     def dup
