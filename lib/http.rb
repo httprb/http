@@ -4,6 +4,7 @@ require 'http/version'
 
 require 'http/chainable'
 require 'http/client'
+require 'http/methods'
 require 'http/mime_type'
 require 'http/options'
 require 'http/request'
@@ -18,9 +19,6 @@ module HTTP
 
   # The method given was not understood
   class UnsupportedMethodError < ArgumentError; end
-
-  # Valid HTTP methods
-  METHODS = [:get, :head, :post, :put, :delete, :trace, :options, :connect, :patch]
 
   # Matches HTTP header names when in "Canonical-Http-Format"
   CANONICAL_HEADER = /^[A-Z][a-z]*(-[A-Z][a-z]*)*$/
