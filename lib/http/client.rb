@@ -13,7 +13,7 @@ module HTTP
       @default_options = Options.new(default_options)
     end
 
-    def body(opts,headers)
+    def body(opts, headers)
       if opts.body
         body = opts.body
       elsif opts.form
@@ -31,8 +31,11 @@ module HTTP
       proxy = opts.proxy
 
       method_body = body(opts, headers)
-      request = Request.new method, uri, headers, proxy, method_body
+      if opts.params
+        uri="#{uri}?#{URI.encode_www_form(opts.params)}"
+      end
 
+      request = Request.new method, uri, headers, proxy, method_body
       if opts.follow
         code = 302
         while code == 302 or code == 301

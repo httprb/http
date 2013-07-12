@@ -21,6 +21,7 @@ describe Http::Options, "merge" do
 
     foo = Http::Options.new(
       :response  => :body,
+      :params      => {:baz => 'bar'},
       :form      => {:foo => 'foo'},
       :body      => "body-foo",
       :headers   => {:accept  => "json",  :foo => 'foo'},
@@ -28,6 +29,7 @@ describe Http::Options, "merge" do
       :callbacks => {:request => ["common"], :response => ["foo"]})
     bar = Http::Options.new(
       :response  => :parsed_body,
+      :params      => {:plop => 'plip'},
       :form      => {:bar => 'bar'},
       :body      => "body-bar",
       :headers   => {:accept  => "xml", :bar => 'bar'},
@@ -35,6 +37,7 @@ describe Http::Options, "merge" do
       :callbacks => {:request => ["common"], :response => ["bar"]})
     foo.merge(bar).to_hash.should eq(
       :response  => :parsed_body,
+      :params=>{:plop=>"plip"}, 
       :form      => {:bar => 'bar'},
       :body      => "body-bar",
       :headers   => {:accept  => "xml", :foo => "foo", :bar => 'bar', "User-Agent" => user_agent},

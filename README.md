@@ -57,6 +57,11 @@ Making POST requests is simple too. Want to POST a form?
 ```ruby
 Http.post "http://example.com/resource", :form => {:foo => "42"}
 ```
+Making GET requests with query string parameters is as simple.
+
+```ruby
+Http.get "http://example.com/resource", :params => {:foo => "bar"}
+```
 
 Want to POST with a specific body, JSON for instance?
 

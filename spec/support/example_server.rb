@@ -1,9 +1,10 @@
 require 'webrick'
-
+require 'pry'
 class ExampleService < WEBrick::HTTPServlet::AbstractServlet
   PORT = 65432
 
   def do_GET(request, response)
+
     case request.path
     when "/"
       response.status = 200
@@ -15,6 +16,11 @@ class ExampleService < WEBrick::HTTPServlet::AbstractServlet
       else
         response['Content-Type'] = 'text/html'
         response.body   = "<!doctype html>"
+      end
+    when "/params"
+      if request.query_string="foo=bar"
+        response.status = 200
+        response.body     = "Params!"
       end
     when "/proxy"
       response.status = 200
