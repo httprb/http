@@ -1,5 +1,5 @@
 require 'webrick'
-require 'pry'
+
 class ExampleService < WEBrick::HTTPServlet::AbstractServlet
   PORT = 65432
 
