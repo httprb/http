@@ -1,5 +1,6 @@
 1.0.0.pre
 ---------
+* Add query string support
 * New response delegator allows Http.get(uri).response
 * Http::Chainable#stream provides a shorter alias for
   with_response(:object)
