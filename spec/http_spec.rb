@@ -10,19 +10,19 @@ describe Http do
       response = Http.get test_endpoint
       response.should match(/<!doctype html>/)
     end
-    
+
     it "should be easy to get a response object" do
       response = Http.get(test_endpoint).response
       response.should be_a Http::Response
     end
-    
+
     context "with_response" do
       it 'allows specifying :object' do
         res = Http.with_response(:object).get test_endpoint
         res.should be_a(Http::Response)
       end
     end
-    
+
     context "with query string parameters" do
 
       it "should be easy" do
@@ -30,7 +30,7 @@ describe Http do
         response.should  match(/Params!/)
       end
     end
-    
+
     context "with headers" do
       it "should be easy" do
         response = Http.accept(:json).get test_endpoint

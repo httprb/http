@@ -15,7 +15,7 @@ module HTTP
 
     # Form data to embed in the request
     attr_accessor :form
-    
+
     # Explicit request body of the request
     attr_accessor :body
 
@@ -94,7 +94,7 @@ module HTTP
         opts.params = params
       end
     end
-    
+
     def with_form(form)
       dup do |opts|
         opts.form = form
