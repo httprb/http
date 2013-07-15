@@ -33,7 +33,8 @@ module HTTP
 
     # Stream the request to a socket
     def stream(socket)
-      path = uri.query ? "#{uri.path}?#{uri.query}" :uri.path
+      path = uri.query ? "#{uri.path}?#{uri.query}" : uri.path
+      path = "/" if path.empty?
       request_header = "#{method.to_s.upcase} #{path} HTTP/#{version}"
       rs = Http::RequestStream.new socket, body, @headers, request_header
       rs.stream
