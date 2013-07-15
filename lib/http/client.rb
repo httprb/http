@@ -84,7 +84,7 @@ module HTTP
         if !parser.finished? || (@body_remaining && @body_remaining > 0)
           chunk = parser.chunk || begin
             parser << socket.readpartial(BUFFER_SIZE)
-            parser.chunk || ""
+            parser.chunk
           end
 
           @body_remaining -= chunk.length if @body_remaining
