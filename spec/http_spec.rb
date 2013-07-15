@@ -23,6 +23,14 @@ describe Http do
       end
     end
 
+    context "with query string parameters" do
+
+      it "should be easy" do
+        response = Http.get "#{test_endpoint}params" , :params => {:foo => 'bar'}
+        response.should  match(/Params!/)
+      end
+    end
+
     context "with headers" do
       it "should be easy" do
         response = Http.accept(:json).get test_endpoint

@@ -10,6 +10,9 @@ module HTTP
     # Http headers to include in the request
     attr_accessor :headers
 
+    # Query string params to add to the url
+    attr_accessor :params
+
     # Form data to embed in the request
     attr_accessor :form
 
@@ -31,7 +34,7 @@ module HTTP
     # Follow redirects
     attr_accessor :follow
 
-    protected :response=, :headers=, :proxy=, :form=,  :callbacks=, :follow=
+    protected :response=, :headers=, :proxy=, :params=, :form=,  :callbacks=, :follow=
 
     @default_socket_class     = TCPSocket
     @default_ssl_socket_class = OpenSSL::SSL::SSLSocket
@@ -51,6 +54,7 @@ module HTTP
       @proxy     = options[:proxy]     || {}
       @callbacks = options[:callbacks] || {:request => [], :response => []}
       @body      = options[:body]
+      @params      = options[:params]
       @form      = options[:form]
       @follow    = options[:follow]
 
@@ -82,6 +86,12 @@ module HTTP
     def with_proxy(proxy_hash)
       dup do |opts|
         opts.proxy = proxy_hash
+      end
+    end
+
+    def with_params(params)
+      dup do |opts|
+        opts.params = params
       end
     end
 
@@ -147,6 +157,7 @@ module HTTP
         :response         => response,
         :headers          => headers,
         :proxy            => proxy,
+        :params           => params,
         :form             => form,
         :body             => body,
         :callbacks        => callbacks,
