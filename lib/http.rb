@@ -4,7 +4,6 @@ require 'http/version'
 
 require 'http/chainable'
 require 'http/client'
-require 'http/methods'
 require 'http/mime_type'
 require 'http/options'
 require 'http/request'
