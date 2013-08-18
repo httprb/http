@@ -22,9 +22,6 @@ module HTTP
   # Matches HTTP header names when in "Canonical-Http-Format"
   CANONICAL_HEADER = /^[A-Z][a-z]*(-[A-Z][a-z]*)*$/
 
-  # CRLF is the universal HTTP delimiter
-  CRLF = "\r\n"
-
   class << self
     # Http[:accept => 'text/html'].get(...)
     alias_method :[], :with_headers
