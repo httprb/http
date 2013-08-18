@@ -1,3 +1,5 @@
+require 'http/request_stream'
+
 module HTTP
   class Request
     # RFC 2616: Hypertext Transfer Protocol -- HTTP/1.1

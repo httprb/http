@@ -1,5 +1,9 @@
 module HTTP
   class RequestStream
+
+    # CRLF is the universal HTTP delimiter
+    CRLF = "\r\n"
+
     def initialize(socket, body, headers, headerstart)
       @body           = body
       raise ArgumentError, "body of wrong type" unless valid_body_type
