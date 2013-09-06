@@ -1,4 +1,4 @@
-1.0.0.pre
+0.5.0.pre
 ---------
 * Add query string support
 * New response delegator allows Http.get(uri).response
