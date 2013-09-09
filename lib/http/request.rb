@@ -42,6 +42,7 @@ module HTTP
         key ||= Http.canonicalize_header(name)
         @headers[key] = value
       end
+      @headers["Host"] ||= @uri.host
 
       @proxy, @body, @version = proxy, body, version
     end
