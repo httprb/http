@@ -6,6 +6,9 @@ module HTTP
   class Request
     include HTTP::Header
 
+    # The method given was not understood
+    class UnsupportedMethodError < ArgumentError; end
+
     # RFC 2616: Hypertext Transfer Protocol -- HTTP/1.1
     METHODS = [:options, :get, :head, :post, :put, :delete, :trace, :connect]
 

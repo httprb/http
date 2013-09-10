@@ -14,9 +14,6 @@ require 'http/uri_backport' if RUBY_VERSION < "1.9.0"
 module HTTP
   extend Chainable
 
-  # The method given was not understood
-  class UnsupportedMethodError < ArgumentError; end
-
   class << self
     # Http[:accept => 'text/html'].get(...)
     alias_method :[], :with_headers
