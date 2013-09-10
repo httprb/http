@@ -44,7 +44,7 @@ module HTTP
       attr_accessor :default_socket_class, :default_ssl_socket_class
 
       def new(options = {})
-        return options if options.is_a?(Options)
+        return options if options.is_a?(self)
         super
       end
     end
@@ -147,7 +147,7 @@ module HTTP
         end
       end
 
-      Options.new(merged)
+      self.class.new(merged)
     end
 
     def to_hash

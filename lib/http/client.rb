@@ -11,7 +11,7 @@ module HTTP
     attr_reader :default_options
 
     def initialize(default_options = {})
-      @default_options = Options.new(default_options)
+      @default_options = HTTP::Options.new(default_options)
     end
 
     def body(opts, headers)
@@ -36,7 +36,7 @@ module HTTP
         uri="#{uri}?#{URI.encode_www_form(opts.params)}"
       end
 
-      request = Request.new method, uri, headers, proxy, method_body
+      request = HTTP::Request.new method, uri, headers, proxy, method_body
       if opts.follow
         code = 302
         while code == 302 or code == 301
@@ -47,7 +47,7 @@ module HTTP
           host = URI.parse(uri).host
           opts.headers["Host"] = host
           method_body = body(opts, headers)
-          request = Request.new method, uri, headers, proxy, method_body
+          request = HTTP::Request.new method, uri, headers, proxy, method_body
           response = perform request, opts
           code = response.code
           uri = response.headers["Location"]

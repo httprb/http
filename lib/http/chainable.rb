@@ -101,11 +101,11 @@ module HTTP
     end
 
     def default_options
-      @default_options ||= Options.new
+      @default_options ||= HTTP::Options.new
     end
 
     def default_options=(opts)
-      @default_options = Options.new(opts)
+      @default_options = HTTP::Options.new(opts)
     end
 
     def default_headers
@@ -131,7 +131,7 @@ module HTTP
     private
 
     def branch(options)
-      Client.new(options)
+      HTTP::Client.new(options)
     end
   end
 end
