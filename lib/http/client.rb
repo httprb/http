@@ -1,3 +1,4 @@
+require 'http/options'
 require 'uri'
 
 module HTTP
