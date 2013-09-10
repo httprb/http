@@ -19,17 +19,9 @@ module HTTP
   # The method given was not understood
   class UnsupportedMethodError < ArgumentError; end
 
-  # Matches HTTP header names when in "Canonical-Http-Format"
-  CANONICAL_HEADER = /^[A-Z][a-z]*(-[A-Z][a-z]*)*$/
-
   class << self
     # Http[:accept => 'text/html'].get(...)
     alias_method :[], :with_headers
-
-    # Transform to canonical HTTP header capitalization
-    def canonicalize_header(header)
-      header.to_s.split(/[\-_]/).map(&:capitalize).join('-')
-    end
   end
 end
 

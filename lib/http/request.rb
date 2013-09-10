@@ -1,7 +1,10 @@
+require 'http/header'
 require 'http/request_stream'
 
 module HTTP
   class Request
+    include HTTP::Header
+
     # RFC 2616: Hypertext Transfer Protocol -- HTTP/1.1
     METHODS = [:options, :get, :head, :post, :put, :delete, :trace, :connect]
 
@@ -39,7 +42,7 @@ module HTTP
       headers.each do |name, value|
         name = name.to_s
         key = name[CANONICAL_HEADER]
-        key ||= Http.canonicalize_header(name)
+        key ||= canonicalize_header(name)
         @headers[key] = value
       end
       @headers["Host"] ||= @uri.host
@@ -49,7 +52,7 @@ module HTTP
 
     # Obtain the given header
     def [](header)
-      @headers[Http.canonicalize_header(header)]
+      @headers[canonicalize_header(header)]
     end
 
     # Stream the request to a socket

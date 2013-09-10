@@ -1,7 +1,10 @@
 require 'delegate'
+require 'http/header'
 
 module HTTP
   class Response
+    include HTTP::Header
+
     STATUS_CODES = {
       100 => 'Continue',
       101 => 'Switching Protocols',
@@ -73,7 +76,7 @@ module HTTP
 
       @headers = {}
       headers.each do |field, value|
-        @headers[Http.canonicalize_header(field)] = value
+        @headers[canonicalize_header(field)] = value
       end
     end
 
@@ -83,7 +86,7 @@ module HTTP
       key = name[CANONICAL_HEADER]
 
       # Convert to canonical capitalization
-      key ||= Http.canonicalize_header(name)
+      key ||= canonicalize_header(name)
 
       # Check if the header has already been set and group
       old_value = @headers[key]
@@ -102,7 +105,7 @@ module HTTP
 
     # Get a header value
     def [](name)
-      @headers[name] || @headers[Http.canonicalize_header(name)]
+      @headers[name] || @headers[canonicalize_header(name)]
     end
 
     # Obtain the response body
