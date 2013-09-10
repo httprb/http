@@ -52,7 +52,7 @@ module Curl
       perform
     end
 
-     def http_post(request_body = nil)
+    def http_post(request_body = nil)
       @method, @request_body = :post, request_body
       perform
     end

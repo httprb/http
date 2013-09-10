@@ -41,7 +41,7 @@ module HTTP
         code = 302
         while code == 302 or code == 301
           # if the uri isn't fully formed complete it
-          if not uri.match /\./
+          if not uri.match(/\./)
             uri = "#{method}://#{host}#{uri}"
           end
           host = URI.parse(uri).host
@@ -63,7 +63,7 @@ module HTTP
 
     def perform(request, options)
       parser = HTTP::Response::Parser.new
-      uri, proxy = request.uri, request.proxy
+      uri = request.uri
       socket = options[:socket_class].open(uri.host, uri.port) # TODO: proxy support
 
       if uri.is_a?(URI::HTTPS)

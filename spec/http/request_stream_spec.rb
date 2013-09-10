@@ -7,20 +7,19 @@ describe HTTP::RequestStream do
     end
 
     it "doesn't throw on a nil body" do
-      expect {construct []}.to_not raise_error(ArgumentError)
+      expect {construct []}.not_to raise_error
     end
 
     it "doesn't throw on a String body" do
-      expect {construct "string body"}.to_not raise_error(ArgumentError)
+      expect {construct "string body"}.not_to raise_error
     end
 
     it "doesn't throw on an Enumerable body" do
-      expect {construct ["bees", "cows"]}.to_not raise_error(ArgumentError)
+      expect {construct ["bees", "cows"]}.not_to raise_error
     end
 
     it "does throw on a body that isn't string, enumerable or nil" do
-      expect {construct true}.to raise_error(ArgumentError)
-
+      expect {construct true}.to raise_error
     end
   end
 end
