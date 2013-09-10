@@ -1,6 +1,4 @@
-require 'uri'
 require 'http/parser'
-require 'http/version'
 
 require 'http/chainable'
 require 'http/client'
@@ -11,6 +9,7 @@ require 'http/request_stream'
 require 'http/response'
 require 'http/response_parser'
 require 'http/uri_backport' if RUBY_VERSION < "1.9.0"
+require 'http/version'
 
 # HTTP should be easy
 module HTTP

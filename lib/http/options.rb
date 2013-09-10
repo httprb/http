@@ -1,5 +1,5 @@
-require 'socket'
 require 'openssl'
+require 'socket'
 
 module HTTP
   class Options

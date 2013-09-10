@@ -1,5 +1,6 @@
 require 'http/header'
 require 'http/request_stream'
+require 'uri'
 
 module HTTP
   class Request
