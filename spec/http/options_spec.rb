@@ -4,13 +4,13 @@ describe HTTP::Options do
   subject { described_class.new(:response => :body) }
 
   it "behaves like a Hash for reading" do
-    subject[:response].should eq(:body)
-    subject[:nosuchone].should be_nil
+    expect(subject[:response]).to eq(:body)
+    expect(subject[:nosuchone]).to be_nil
   end
 
   it "it's gois able to coerce to a Hash" do
-    subject.to_hash.should be_a(Hash)
-    subject.to_hash[:response].should eq(:body)
+    expect(subject.to_hash).to be_a(Hash)
+    expect(subject.to_hash[:response]).to eq(:body)
   end
 
   it "raises ArgumentError with invalid options" do

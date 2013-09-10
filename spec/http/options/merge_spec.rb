@@ -7,13 +7,13 @@ describe HTTP::Options, "merge" do
 
   it 'supports a Hash' do
     old_response = opts.response
-    opts.merge(:response => :body).response.should eq(:body)
-    opts.response.should eq(old_response)
+    expect(opts.merge(:response => :body).response).to eq(:body)
+    expect(opts.response).to eq(old_response)
   end
 
   it 'supports another Options' do
     merged = opts.merge(HTTP::Options.new(:response => :body))
-    merged.response.should eq(:body)
+    expect(merged.response).to eq(:body)
   end
 
   it 'merges as excepted in complex cases' do
@@ -35,7 +35,7 @@ describe HTTP::Options, "merge" do
       :headers   => {:accept  => "xml", :bar => 'bar'},
       :proxy     => {:proxy_address => "127.0.0.1", :proxy_port => 8080},
       :callbacks => {:request => ["common"], :response => ["bar"]})
-    foo.merge(bar).to_hash.should eq(
+    expect(foo.merge(bar).to_hash).to eq(
       :response  => :parsed_body,
       :params=>{:plop=>"plip"},
       :form      => {:bar => 'bar'},

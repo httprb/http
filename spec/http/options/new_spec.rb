@@ -5,35 +5,35 @@ describe HTTP::Options, "new" do
 
   it 'supports a Options instance' do
     opts = HTTP::Options.new
-    HTTP::Options.new(opts).should eq(opts)
+    expect(HTTP::Options.new(opts)).to eq(opts)
   end
 
   context 'with a Hash' do
     it 'coerces :response correctly' do
       opts = HTTP::Options.new(:response => :object)
-      opts.response.should eq(:object)
+      expect(opts.response).to eq(:object)
     end
 
     it 'coerces :headers correctly' do
       opts = HTTP::Options.new(:headers => {:accept => "json"})
-      opts.headers.should eq(:accept => "json", "User-Agent" => user_agent)
+      expect(opts.headers).to eq(:accept => "json", "User-Agent" => user_agent)
     end
 
     it 'coerces :proxy correctly' do
       opts = HTTP::Options.new(:proxy => {:proxy_address => "127.0.0.1", :proxy_port => 8080})
-      opts.proxy.should eq(:proxy_address => "127.0.0.1", :proxy_port => 8080)
+      expect(opts.proxy).to eq(:proxy_address => "127.0.0.1", :proxy_port => 8080)
     end
 
     it 'coerces :form correctly' do
       opts = HTTP::Options.new(:form => {:foo => 42})
-      opts.form.should eq(:foo => 42)
+      expect(opts.form).to eq(:foo => 42)
     end
 
     it 'coerces :callbacks correctly' do
       before, after = Proc.new{|r| :before}, Proc.new{|r| :after}
       callbacks = {:request => [before], :response => [after]}
       opts = HTTP::Options.new(:callbacks => callbacks)
-      opts.callbacks.should eq({
+      expect(opts.callbacks).to eq({
         :request  => [before],
         :response => [after]
       })

@@ -8,7 +8,7 @@ describe Curl do
   describe Curl::Easy do
     it "gets resources" do
       response = Curl::Easy.http_get test_endpoint
-      response.body_str.should match(/<!doctype html>/)
+      expect(response.body_str).to match(/<!doctype html>/)
     end
 
     context :errors do
@@ -34,7 +34,7 @@ describe Curl do
       end
 
       multi.perform
-      responses.first.body_str.should match(/<!doctype html>/)
+      expect(responses.first.body_str).to match(/<!doctype html>/)
     end
   end
 end

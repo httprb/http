@@ -18,6 +18,6 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency 'http_parser.rb'
 
   gem.add_development_dependency 'rake'
-  gem.add_development_dependency 'rspec'
+  gem.add_development_dependency 'rspec', '>= 2.11'
   gem.add_development_dependency 'json'
 end

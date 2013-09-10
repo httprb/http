@@ -8,18 +8,18 @@ describe HTTP do
   context "getting resources" do
     it "should be easy" do
       response = HTTP.get test_endpoint
-      response.should match(/<!doctype html>/)
+      expect(response).to match(/<!doctype html>/)
     end
 
     it "should be easy to get a response object" do
       response = HTTP.get(test_endpoint).response
-      response.should be_a HTTP::Response
+      expect(response).to be_a HTTP::Response
     end
 
     context "with_response" do
       it 'allows specifying :object' do
         res = HTTP.with_response(:object).get test_endpoint
-        res.should be_a(HTTP::Response)
+        expect(res).to be_a(HTTP::Response)
       end
     end
 
@@ -27,14 +27,14 @@ describe HTTP do
 
       it "should be easy" do
         response = HTTP.get "#{test_endpoint}params" , :params => {:foo => 'bar'}
-        response.should  match(/Params!/)
+        expect(response).to  match(/Params!/)
       end
     end
 
     context "with headers" do
       it "should be easy" do
         response = HTTP.accept(:json).get test_endpoint
-        response['json'].should be_true
+        expect(response['json']).to be_true
       end
     end
 
@@ -44,36 +44,36 @@ describe HTTP do
 
         request = nil
         HTTP.on(:request) {|r| request = r}.get test_endpoint
-        request.should be_a HTTP::Request
+        expect(request).to be_a HTTP::Request
       end
 
       it "fires a response callback" do
         response = nil
         HTTP.on(:response) {|r| response = r}.get test_endpoint
-        response.should be_a HTTP::Response
+        expect(response).to be_a HTTP::Response
       end
     end
 
     it "should not mess with the returned status" do
       client = HTTP.with_response(:object)
       res = client.get test_endpoint
-      res.status.should == 200
+      expect(res.status).to eq(200)
       res = client.get "#{test_endpoint}not-found"
-      res.status.should == 404
+      expect(res.status).to eq(404)
     end
   end
 
   context "with http proxy address and port" do
     it "should proxy the request" do
       response = HTTP.via("127.0.0.1", 8080).get proxy_endpoint
-      response.should match(/Proxy!/)
+      expect(response).to match(/Proxy!/)
     end
   end
 
   context "with http proxy address, port username and password" do
     it "should proxy the request" do
       response = HTTP.via("127.0.0.1", 8081, "username", "password").get proxy_endpoint
-      response.should match(/Proxy!/)
+      expect(response).to match(/Proxy!/)
     end
   end
 
@@ -82,7 +82,7 @@ describe HTTP do
       pending "fixing proxy support"
 
       response = HTTP.via("127.0.0.1", 8081, "user", "pass").get proxy_endpoint
-      response.should match(/Proxy Authentication Required/)
+      expect(response).to match(/Proxy Authentication Required/)
     end
   end
 
@@ -95,26 +95,26 @@ describe HTTP do
   context "posting to resources" do
     it "should be easy to post forms" do
       response = HTTP.post "#{test_endpoint}form", :form => {:example => 'testing-form'}
-      response.should == "passed :)"
+      expect(response).to eq("passed :)")
     end
   end
 
   context "posting with an explicit body" do
     it "should be easy to post" do
       response = HTTP.post "#{test_endpoint}body", :body => "testing-body"
-      response.should == "passed :)"
+      expect(response).to eq("passed :)")
     end
   end
 
   context "with redirects" do
     it "should be easy for 301" do
       response = HTTP.with_follow(true).get("#{test_endpoint}redirect-301")
-      response.should match(/<!doctype html>/)
+      expect(response).to match(/<!doctype html>/)
     end
 
     it "should be easy for 302" do
       response = HTTP.with_follow(true).get("#{test_endpoint}redirect-302")
-      response.should match(/<!doctype html>/)
+      expect(response).to match(/<!doctype html>/)
     end
 
   end
@@ -122,14 +122,14 @@ describe HTTP do
   context "head requests" do
     it "should be easy" do
       response = HTTP.head test_endpoint
-      response.status.should == 200
-      response['content-type'].should match(/html/)
+      expect(response.status).to eq(200)
+      expect(response['content-type']).to match(/html/)
     end
   end
 
   it "should be chainable" do
-    response = HTTP.accept(:json).on(:response){|r| seen = r}.get(test_endpoint)
-    response['json'].should be_true
+    response = HTTP.accept(:json).on(:response){|r| r}.get(test_endpoint)
+    expect(response['json']).to be_true
   end
 
 end

@@ -5,15 +5,15 @@ describe HTTP::Request do
     subject { HTTP::Request.new(:get, "http://example.com/", :accept => "text/html") }
 
     it "sets explicit headers" do
-      subject["Accept"].should eq("text/html")
+      expect(subject["Accept"]).to eq("text/html")
     end
 
     it "sets implicit headers" do
-      subject["Host"].should eq("example.com")
+      expect(subject["Host"]).to eq("example.com")
     end
 
     it "provides a #headers accessor" do
-      subject.headers.should eq("Accept" => "text/html", "Host" => "example.com")
+      expect(subject.headers).to eq("Accept" => "text/html", "Host" => "example.com")
     end
   end
 end

@@ -6,35 +6,35 @@ describe HTTP::Options, "callbacks" do
   let(:callback){ Proc.new{|r| nil } }
 
   it 'recognizes invalid events' do
-    lambda{
+    expect {
       opts.with_callback(:notacallback, callback)
-    }.should raise_error(ArgumentError, /notacallback/)
+    }.to raise_error(ArgumentError, /notacallback/)
   end
 
   it 'recognizes invalid callbacks' do
-    lambda{
+    expect {
       opts.with_callback(:request, Object.new)
-    }.should raise_error(ArgumentError, /invalid callback/)
-    lambda{
+    }.to raise_error(ArgumentError, /invalid callback/)
+    expect {
       opts.with_callback(:request, Proc.new{|a,b| nil})
-    }.should raise_error(ArgumentError, /only one argument/)
+    }.to raise_error(ArgumentError, /only one argument/)
   end
 
   describe "request" do
 
     it 'defaults to []' do
-      opts.callbacks[:request].should eq([])
+      expect(opts.callbacks[:request]).to eq([])
     end
 
     it 'may be specified with with_callback(:request, ...)' do
 
       opts2 = opts.with_callback(:request, callback)
-      opts.callbacks[:request].should eq([])
-      opts2.callbacks[:request].should eq([callback])
+      expect(opts.callbacks[:request]).to eq([])
+      expect(opts2.callbacks[:request]).to eq([callback])
 
       opts3 = opts2.with_callback(:request, callback)
-      opts2.callbacks[:request].should eq([callback])
-      opts3.callbacks[:request].should eq([callback, callback])
+      expect(opts2.callbacks[:request]).to eq([callback])
+      expect(opts3.callbacks[:request]).to eq([callback, callback])
     end
 
   end
@@ -42,18 +42,18 @@ describe HTTP::Options, "callbacks" do
   describe "response" do
 
     it 'defaults to []' do
-      opts.callbacks[:response].should eq([])
+      expect(opts.callbacks[:response]).to eq([])
     end
 
     it 'may be specified with with_callback(:response, ...)' do
 
       opts2 = opts.with_callback(:response, callback)
-      opts.callbacks[:response].should eq([])
-      opts2.callbacks[:response].should eq([callback])
+      expect(opts.callbacks[:response]).to eq([])
+      expect(opts2.callbacks[:response]).to eq([callback])
 
       opts3 = opts2.with_callback(:response, callback)
-      opts2.callbacks[:response].should eq([callback])
-      opts3.callbacks[:response].should eq([callback, callback])
+      expect(opts2.callbacks[:response]).to eq([callback])
+      expect(opts3.callbacks[:response]).to eq([callback, callback])
     end
 
   end

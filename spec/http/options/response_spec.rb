@@ -5,19 +5,19 @@ describe HTTP::Options, "response" do
   let(:opts){ HTTP::Options.new }
 
   it 'defaults to :auto' do
-    opts.response.should eq(:auto)
+    expect(opts.response).to eq(:auto)
   end
 
   it 'may be specified with with_response' do
     opts2 = opts.with_response(:body)
-    opts.response.should eq(:auto)
-    opts2.response.should eq(:body)
+    expect(opts.response).to eq(:auto)
+    expect(opts2.response).to eq(:body)
   end
 
   it 'recognizes invalid responses' do
-    lambda{
+    expect {
       opts.with_response(:not_a_valid_response)
-    }.should raise_error(ArgumentError, /not_a_valid_response/)
+    }.to raise_error(ArgumentError, /not_a_valid_response/)
   end
 
 end
