@@ -1,3 +1,4 @@
+require 'http/version'
 require 'openssl'
 require 'socket'
 
