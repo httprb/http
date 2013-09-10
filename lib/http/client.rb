@@ -61,7 +61,7 @@ module HTTP
     end
 
     def perform(request, options)
-      parser = Http::Response::Parser.new
+      parser = HTTP::Response::Parser.new
       uri, proxy = request.uri, request.proxy
       socket = options[:socket_class].open(uri.host, uri.port) # TODO: proxy support
 
@@ -83,7 +83,7 @@ module HTTP
         raise IOError, "problem making HTTP request: #{ex}"
       end
 
-      response = Http::Response.new(parser.status_code, parser.http_version, parser.headers) do
+      response = HTTP::Response.new(parser.status_code, parser.http_version, parser.headers) do
         if !parser.finished? || (@body_remaining && @body_remaining > 0)
           chunk = parser.chunk || begin
             parser << socket.readpartial(BUFFER_SIZE)
@@ -107,14 +107,14 @@ module HTTP
         if method == :head
           response
         else
-          Http::Response::BodyDelegator.new(response, response.parse_body)
+          HTTP::Response::BodyDelegator.new(response, response.parse_body)
         end
       when :object
         response
       when :parsed_body
-        Http::Response::BodyDelegator.new(response, response.parse_body)
+        HTTP::Response::BodyDelegator.new(response, response.parse_body)
       when :body
-        Http::Response::BodyDelegator.new(response)
+        HTTP::Response::BodyDelegator.new(response)
       else raise ArgumentError, "invalid response type: #{option}"
       end
     end

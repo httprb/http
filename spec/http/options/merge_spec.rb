@@ -1,9 +1,9 @@
 require 'spec_helper'
 
-describe Http::Options, "merge" do
+describe HTTP::Options, "merge" do
 
-  let(:opts)       { Http::Options.new }
-  let(:user_agent) { "RubyHttpGem/#{Http::VERSION}" }
+  let(:opts)       { HTTP::Options.new }
+  let(:user_agent) { "RubyHTTPGem/#{HTTP::VERSION}" }
 
   it 'supports a Hash' do
     old_response = opts.response
@@ -12,14 +12,14 @@ describe Http::Options, "merge" do
   end
 
   it 'supports another Options' do
-    merged = opts.merge(Http::Options.new(:response => :body))
+    merged = opts.merge(HTTP::Options.new(:response => :body))
     merged.response.should eq(:body)
   end
 
   it 'merges as excepted in complex cases' do
     # FIXME: yuck :(
 
-    foo = Http::Options.new(
+    foo = HTTP::Options.new(
       :response  => :body,
       :params      => {:baz => 'bar'},
       :form      => {:foo => 'foo'},
@@ -27,7 +27,7 @@ describe Http::Options, "merge" do
       :headers   => {:accept  => "json",  :foo => 'foo'},
       :proxy     => {},
       :callbacks => {:request => ["common"], :response => ["foo"]})
-    bar = Http::Options.new(
+    bar = HTTP::Options.new(
       :response  => :parsed_body,
       :params      => {:plop => 'plip'},
       :form      => {:bar => 'bar'},
@@ -37,7 +37,7 @@ describe Http::Options, "merge" do
       :callbacks => {:request => ["common"], :response => ["bar"]})
     foo.merge(bar).to_hash.should eq(
       :response  => :parsed_body,
-      :params=>{:plop=>"plip"}, 
+      :params=>{:plop=>"plip"},
       :form      => {:bar => 'bar'},
       :body      => "body-bar",
       :headers   => {:accept  => "xml", :foo => "foo", :bar => 'bar', "User-Agent" => user_agent},

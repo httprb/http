@@ -1,9 +1,9 @@
 require 'spec_helper'
 
-describe Http::RequestStream do
+describe HTTP::RequestStream do
   describe "#initalize" do
     def construct(body)
-      Http::RequestStream.new(nil, body, [], "")
+      HTTP::RequestStream.new(nil, body, [], "")
     end
 
     it "doesn't throw on a nil body" do

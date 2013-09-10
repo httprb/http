@@ -8,7 +8,7 @@ module HTTP
     # How to format the response [:object, :body, :parse_body]
     attr_accessor :response
 
-    # Http headers to include in the request
+    # HTTP headers to include in the request
     attr_accessor :headers
 
     # Query string params to add to the url
@@ -20,7 +20,7 @@ module HTTP
     # Explicit request body of the request
     attr_accessor :body
 
-    # Http proxy to route request
+    # HTTP proxy to route request
     attr_accessor :proxy
 
     # Before callbacks
@@ -63,7 +63,7 @@ module HTTP
       @ssl_socket_class = options[:ssl_socket_class] || self.class.default_ssl_socket_class
       @ssl_context      = options[:ssl_context]
 
-      @headers["User-Agent"] ||= "RubyHttpGem/#{Http::VERSION}"
+      @headers["User-Agent"] ||= "RubyHTTPGem/#{HTTP::VERSION}"
     end
 
     def with_response(response)

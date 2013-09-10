@@ -94,7 +94,7 @@ module HTTP
       if type.is_a? String
         with :accept => type
       else
-        mime_type = Http::MimeType[type]
+        mime_type = HTTP::MimeType[type]
         raise ArgumentError, "unknown MIME type: #{type}" unless mime_type
         with :accept => mime_type.type
       end

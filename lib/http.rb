@@ -15,7 +15,7 @@ module HTTP
   extend Chainable
 
   class << self
-    # Http[:accept => 'text/html'].get(...)
+    # HTTP[:accept => 'text/html'].get(...)
     alias_method :[], :with_headers
   end
 end

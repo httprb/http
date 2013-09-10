@@ -1,8 +1,8 @@
 require 'spec_helper'
 
-describe Http::Options, "body" do
+describe HTTP::Options, "body" do
 
-  let(:opts){ Http::Options.new }
+  let(:opts){ HTTP::Options.new }
 
   it 'defaults to nil' do
     opts.body.should be_nil

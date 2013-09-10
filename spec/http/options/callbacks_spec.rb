@@ -1,8 +1,8 @@
 require 'spec_helper'
 
-describe Http::Options, "callbacks" do
+describe HTTP::Options, "callbacks" do
 
-  let(:opts){ Http::Options.new }
+  let(:opts){ HTTP::Options.new }
   let(:callback){ Proc.new{|r| nil } }
 
   it 'recognizes invalid events' do

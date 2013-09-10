@@ -1,8 +1,8 @@
 require 'spec_helper'
 
-describe Http::Request do
+describe HTTP::Request do
   describe "headers" do
-    subject { Http::Request.new(:get, "http://example.com/", :accept => "text/html") }
+    subject { HTTP::Request.new(:get, "http://example.com/", :accept => "text/html") }
 
     it "sets explicit headers" do
       subject["Accept"].should eq("text/html")

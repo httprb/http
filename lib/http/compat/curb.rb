@@ -29,7 +29,7 @@ module Curl
     end
 
     def perform
-      client   = Http::Client.new
+      client   = HTTP::Client.new
       options  = {:response => :object, :headers => @headers}
       response = client.request @method, @url, options
       @response_code, @body_str = response.code, response.body

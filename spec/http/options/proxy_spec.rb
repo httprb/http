@@ -1,8 +1,8 @@
 require 'spec_helper'
 
-describe Http::Options, "proxy" do
+describe HTTP::Options, "proxy" do
 
-  let(:opts){ Http::Options.new }
+  let(:opts){ HTTP::Options.new }
 
   it 'defaults to {}' do
     opts.proxy.should eq({})

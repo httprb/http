@@ -1,10 +1,10 @@
 0.5.0.pre
 ---------
 * Add query string support
-* New response delegator allows Http.get(uri).response
-* Http::Chainable#stream provides a shorter alias for
+* New response delegator allows HTTP.get(uri).response
+* HTTP::Chainable#stream provides a shorter alias for
   with_response(:object)
-* Better string inspect for Http::Response
+* Better string inspect for HTTP::Response
 
 0.4.0
 -----
@@ -18,7 +18,7 @@
 * New implementation based on tmm1's http_parser.rb instead of Net::HTTP
 * Support for following redirects
 * Support for request body through {:body => ...} option
-* Http#with_response (through Chainable)
+* HTTP#with_response (through Chainable)
 
 0.2.0
 -----

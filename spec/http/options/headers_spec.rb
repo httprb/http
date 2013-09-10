@@ -1,9 +1,9 @@
 require 'spec_helper'
 
-describe Http::Options, "headers" do
+describe HTTP::Options, "headers" do
 
-  let(:opts)       { Http::Options.new }
-  let(:user_agent) { "RubyHttpGem/#{Http::VERSION}" }
+  let(:opts)       { HTTP::Options.new }
+  let(:user_agent) { "RubyHTTPGem/#{HTTP::VERSION}" }
 
   it 'defaults to just the user agent' do
     opts.headers.should eq("User-Agent" => user_agent)

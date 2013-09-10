@@ -1,8 +1,8 @@
 require 'spec_helper'
 
-describe Http::Options, "response" do
+describe HTTP::Options, "response" do
 
-  let(:opts){ Http::Options.new }
+  let(:opts){ HTTP::Options.new }
 
   it 'defaults to :auto' do
     opts.response.should eq(:auto)

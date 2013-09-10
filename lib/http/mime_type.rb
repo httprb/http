@@ -1,5 +1,5 @@
 module HTTP
-  # Yes, Http bundles its own MIME type library. Maybe it should be spun off
+  # Yes, HTTP bundles its own MIME type library. Maybe it should be spun off
   # as a separate gem or something.
   class MimeType
     @mime_types, @shortcuts = {}, {}

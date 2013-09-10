@@ -1,4 +1,4 @@
-json = Http::MimeType.new 'application/json', :json
+json = HTTP::MimeType.new 'application/json', :json
 
 json.parse_with do |obj|
   if defined?(JSON) and JSON.respond_to? :parse

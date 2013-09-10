@@ -4,7 +4,7 @@ module HTTP
       attr_reader :headers
 
       def initialize
-        @parser = Http::Parser.new(self)
+        @parser = HTTP::Parser.new(self)
         reset
       end
 
@@ -26,7 +26,7 @@ module HTTP
       end
 
       #
-      # Http::Parser callbacks
+      # HTTP::Parser callbacks
       #
 
       def on_headers_complete(headers)
