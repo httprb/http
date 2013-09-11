@@ -5,6 +5,7 @@
 * HTTP::Chainable#stream provides a shorter alias for
   with_response(:object)
 * Better string inspect for HTTP::Response
+* Curb compatibility layer removed
 
 0.4.0
 -----
