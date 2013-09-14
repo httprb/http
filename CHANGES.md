@@ -1,5 +1,5 @@
-0.5.0.pre2
-----------
+0.5.0
+-----
 * Add query string support
 * New response delegator allows HTTP.get(uri).response
 * HTTP::Chainable#stream provides a shorter alias for
