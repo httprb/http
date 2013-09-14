@@ -32,18 +32,14 @@ module HTTP
       proxy = opts.proxy
 
       method_body = body(opts, headers)
-      if opts.params
-        uri="#{uri}?#{URI.encode_www_form(opts.params)}"
-      end
+      uri = "#{uri}?#{URI.encode_www_form(opts.params)}" if opts.params
 
       request = HTTP::Request.new method, uri, headers, proxy, method_body
       if opts.follow
         code = 302
         while code == 302 or code == 301
           # if the uri isn't fully formed complete it
-          if not uri.match(/\./)
-            uri = "#{method}://#{host}#{uri}"
-          end
+          uri = "#{method}://#{host}#{uri}" if not uri.match(/\./)
           host = URI.parse(uri).host
           opts.headers["Host"] = host
           method_body = body(opts, headers)
