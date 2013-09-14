@@ -2,3 +2,4 @@
 --format documentation
 --backtrace
 --warnings
+--order random
