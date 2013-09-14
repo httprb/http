@@ -22,9 +22,6 @@ module HTTP
     # HTTP proxy to route request
     attr_accessor :proxy
 
-    # Before callbacks
-    attr_accessor :callbacks
-
     # Socket classes
     attr_accessor :socket_class, :ssl_socket_class
 
@@ -34,7 +31,7 @@ module HTTP
     # Follow redirects
     attr_accessor :follow
 
-    protected :response=, :headers=, :proxy=, :params=, :form=,  :callbacks=, :follow=
+    protected :response=, :headers=, :proxy=, :params=, :form=, :follow=
 
     @default_socket_class     = TCPSocket
     @default_ssl_socket_class = OpenSSL::SSL::SSLSocket
@@ -52,9 +49,8 @@ module HTTP
       @response  = options[:response]  || :auto
       @headers   = options[:headers]   || {}
       @proxy     = options[:proxy]     || {}
-      @callbacks = options[:callbacks] || {:request => [], :response => []}
       @body      = options[:body]
-      @params      = options[:params]
+      @params    = options[:params]
       @form      = options[:form]
       @follow    = options[:follow]
 
@@ -63,15 +59,6 @@ module HTTP
       @ssl_context      = options[:ssl_context]
 
       @headers['User-Agent'] ||= "RubyHTTPGem/#{HTTP::VERSION}"
-    end
-
-    def with_response(response)
-      unless [:auto, :object, :body, :parsed_body].include?(response)
-        argument_error! "invalid response type: #{response}"
-      end
-      dup do |opts|
-        opts.response = response
-      end
     end
 
     def with_headers(headers)
@@ -113,22 +100,6 @@ module HTTP
       end
     end
 
-    def with_callback(event, callback)
-      unless callback.respond_to?(:call)
-        argument_error! "invalid callback: #{callback}"
-      end
-      unless callback.respond_to?(:arity) && callback.arity == 1
-        argument_error! 'callback must accept only one argument'
-      end
-      unless [:request, :response].include?(event)
-        argument_error! "invalid callback event: #{event}"
-      end
-      dup do |opts|
-        opts.callbacks = callbacks.dup
-        opts.callbacks[event] = (callbacks[event].dup << callback)
-      end
-    end
-
     def [](option)
       send(option) rescue nil
     end
@@ -139,8 +110,6 @@ module HTTP
         case k
         when :headers
           v1.merge(v2)
-        when :callbacks
-          v1.merge(v2) { |event, l, r| (l + r).uniq }
         else
           v2
         end
@@ -160,7 +129,6 @@ module HTTP
         :params           => params,
         :form             => form,
         :body             => body,
-        :callbacks        => callbacks,
         :follow           => follow,
         :socket_class     => socket_class,
         :ssl_socket_class => ssl_socket_class,

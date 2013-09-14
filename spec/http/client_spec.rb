@@ -27,7 +27,7 @@ describe HTTP::Client do
         'http://example.com/index'      => redirect_response('/index.html'),
         'http://example.com/index.html' => simple_response('OK')
       })
-      expect(client.get('http://example.com/').response.body).to eq 'OK'
+      expect(client.get('http://example.com/').body).to eq 'OK'
     end
   end
 end

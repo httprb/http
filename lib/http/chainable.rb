@@ -50,11 +50,6 @@ module HTTP
       branch(options).request verb, uri
     end
 
-    # Make a request invoking the given event callbacks
-    def on(event, &block)
-      branch default_options.with_callback(event, block)
-    end
-
     # Make a request through an HTTP proxy
     def via(*proxy)
       proxy_hash = {}
@@ -135,5 +130,6 @@ module HTTP
     def branch(options)
       HTTP::Client.new(options)
     end
+    private :branch
   end
 end

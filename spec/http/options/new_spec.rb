@@ -28,17 +28,5 @@ describe HTTP::Options, 'new' do
       opts = HTTP::Options.new(:form => {:foo => 42})
       expect(opts.form).to eq(:foo => 42)
     end
-
-    it 'coerces :callbacks correctly' do
-      before, after = proc { |r| :before }, proc { |r| :after }
-      callbacks = {:request => [before], :response => [after]}
-      opts = HTTP::Options.new(:callbacks => callbacks)
-      expect(opts.callbacks).to eq(
-        :request  => [before],
-        :response => [after]
-      )
-    end
-
   end
-
 end
