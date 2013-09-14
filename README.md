@@ -80,7 +80,7 @@ It's easy!
 Adding Headers
 --------------
 
-The HTTP library uses the concept of chaining to simplify requests. Let's say
+The HTTP gem uses the concept of chaining to simplify requests. Let's say
 you want to get the latest commit of this library from Github in JSON format.
 One way we could do this is by tacking a filename on the end of the URL:
 
@@ -102,7 +102,7 @@ HTTP.with_headers(:accept => 'application/json').
 This requests JSON from Github. Github is smart enough to understand our
 request and returns a response with Content-Type: application/json. If you
 happen to have a library loaded which defines the JSON constant and implements
-JSON.parse, the HTTP library will attempt to parse the JSON response.
+JSON.parse, the HTTP gem will attempt to parse the JSON response.
 
 Shorter aliases exists for HTTP.with_headers:
 
@@ -128,10 +128,10 @@ HTTP.accept(:json).get("https://github.com/tarcieri/http/commit/HEAD")
 This adds the appropriate Accept header for retrieving a JSON response for the
 given resource.
 
-Contributing to HTTP
+Contributing to the HTTP gem
 --------------------
 
-* Fork HTTP on github
+* Fork the HTTP gem on github
 * Make your changes and send me a pull request
 * If I like them I'll merge them
 * If I've accepted a patch, feel free to ask for a commit bit!
