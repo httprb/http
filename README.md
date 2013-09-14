@@ -117,7 +117,7 @@ HTTP[:accept => 'application/json'].
 Content Negotiation
 -------------------
 
-As important a concept as content negotiation is HTTP, it sure should be easy,
+As important a concept as content negotiation is to HTTP, it sure should be easy,
 right? But usually it's not, and so we end up adding ".json" onto the ends of
 our URLs because the existing mechanisms make it too hard. It should be easy:
 
