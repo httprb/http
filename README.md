@@ -128,6 +128,34 @@ HTTP.accept(:json).get("https://github.com/tarcieri/http/commit/HEAD")
 This adds the appropriate Accept header for retrieving a JSON response for the
 given resource.
 
+Celluloid::IO Support
+---------------------
+
+
+The HTTP Gem makes it simple to make multiple concurrent HTTP requests from a
+Celluloid::IO actor. Here's a parallel HTTP fetcher with the HTTP Gem and
+Celluloid::IO:
+
+```ruby
+require 'celluloid/io'
+require 'http'
+
+class HttpFetcher
+  include Celluloid::IO
+
+  def fetch(url)
+    # Note: For SSL support specify:
+    # ssl_socket_class: Celluloid::IO::SSLSocket
+    HTTP.get(url, socket_class: Celluloid::IO::TCPSocket).response
+  end
+end
+```
+
+There's a little more to it, but that's the core idea!
+
+* [Full parallel HTTP fetcher example](https://github.com/tarcieri/http/wiki/Parallel-requests-with-Celluloid%3A%3AIO)
+* See also: [Celluloid::IO](https://github.com/celluloid/celluloid-io)
+
 Contributing to the HTTP gem
 --------------------
 
