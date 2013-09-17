@@ -131,7 +131,6 @@ given resource.
 Celluloid::IO Support
 ---------------------
 
-
 The HTTP Gem makes it simple to make multiple concurrent HTTP requests from a
 Celluloid::IO actor. Here's a parallel HTTP fetcher with the HTTP Gem and
 Celluloid::IO:
