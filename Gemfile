@@ -12,6 +12,7 @@ end
 
 group :test do
   gem 'coveralls', :require => false
+  gem 'json', '>= 1.8.1'
   gem 'mime-types', '~> 1.25', :platforms => :ruby_18
   gem 'rspec', '>= 2.14'
 end
