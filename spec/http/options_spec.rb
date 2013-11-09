@@ -5,7 +5,7 @@ describe HTTP::Options do
 
   it "behaves like a Hash for reading" do
     expect(subject[:response]).to eq(:body)
-    expect(subject[:nosuchone]).to be_nil
+    expect(subject[:nosuchone]).to be nil
   end
 
   it "it's gois able to coerce to a Hash" do
