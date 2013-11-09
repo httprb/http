@@ -34,7 +34,7 @@ describe HTTP do
     context "with headers" do
       it "should be easy" do
         response = HTTP.accept(:json).get test_endpoint
-        expect(response['json']).to be_true
+        expect(response['json']).to be true
       end
     end
 
@@ -129,7 +129,7 @@ describe HTTP do
 
   it "should be chainable" do
     response = HTTP.accept(:json).on(:response){|r| r}.get(test_endpoint)
-    expect(response['json']).to be_true
+    expect(response['json']).to be true
   end
 
 end
