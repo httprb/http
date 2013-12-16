@@ -7,6 +7,7 @@ Gem::Specification.new do |gem|
   gem.description   = "HTTP so awesome it will lure Catherine Zeta Jones into your unicorn petting zoo"
   gem.summary       = "HTTP should be easy"
   gem.homepage      = "https://github.com/tarcieri/http"
+  gem.license       = "MIT"
 
   gem.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   gem.files         = `git ls-files`.split("\n")
