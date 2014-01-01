@@ -12,27 +12,38 @@ require 'http'
 class HttpFetcher
   include Celluloid::IO
 
-  def fetch(url)
-    # Note: For SSL support specify:
-    # ssl_socket_class: Celluloid::IO::SSLSocket
-    HTTP.get(url, socket_class: Celluloid::IO::TCPSocket).response
+  def initialize
+    # Follow HTTP redirects and set socket classes to Celluloid::IO ones
+    @options = HTTP::Options.new(follow: true, socket_class: Celluloid::IO::TCPSocket, ssl_socket_class: Celluloid::IO::SSLSocket)
+  end
+
+  # Calls the Condition block as soon as we get a response
+  def fetch(url, blk)
+    blk.call(url: url, response: HTTP.get(url, @options).response)
   end
 end
 
-fetcher = HttpFetcher.new
+class ParallelFetcher
+  include Celluloid
 
-urls = %w(http://www.ruby-lang.org/ http://www.rubygems.org/ http://celluloid.io/)
+  def parallel_fetch(urls, http_fetcher)
+    # See Celluloid::Condition https://github.com/celluloid/celluloid/wiki/Conditions
+    # Conditions have the advantage that they are processed the the order they are completed
+    # unlike Futures which get processed in the order they are started
+    condition = Condition.new
 
-# Kick off a bunch of future calls to HttpFetcher to grab the URLs in parallel
-futures = urls.map { |u| [u, fetcher.future.fetch(u)] }
+    blk = lambda { |result| condition.signal(result) }
 
-# Consume the results as they come in
-futures.each do |url, future|
-  # Wait for HttpFetcher#fetch to complete for this request
-  response = future.value
-  puts "Got #{url}: #{response.inspect}"
+    # Fires off a bunch of parallel HTTP gets
+    fetchers = urls.map { |url| http_fetcher.async.fetch(url, blk) }
+
+    # Consume the results as they come in
+    fetchers.each do |url|
+      result = condition.wait
+      puts "Got url: #{result[:url]}, response: #{result[:response].inspect}"
+    end
+  end
 end
 
-# Suppress Celluloid's shutdown messages
-# Otherwise the example is a bit noisy :|
+ParallelFetcher.new.parallel_fetch(%w(https://rubygems.org/ https://ruby-lang.org/ https://www.github.com/), HttpFetcher.new)
 exit!
