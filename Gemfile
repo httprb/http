@@ -12,9 +12,11 @@ end
 
 group :test do
   gem 'coveralls', :require => false
-  gem 'json', '>= 1.8.1', :platforms => [:jruby, :ruby_18]
-  gem 'mime-types', '~> 1.25', :platforms => :ruby_18
   gem 'rspec', '>= 2.14'
+  platforms :jruby, :ruby_18 do
+    gem 'json', '>= 1.8.1'
+    gem 'mime-types', '~> 1.25'
+  end
 end
 
 # Specify your gem's dependencies in http.gemspec
