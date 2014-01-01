@@ -4,6 +4,12 @@ gem 'rake'
 gem 'jruby-openssl' if defined? JRUBY_VERSION
 
 group :development do
+  gem 'pry'
+  gem 'pry-rescue'
+  platforms :ruby_19, :ruby_20 do
+    gem 'pry-debugger'
+    gem 'pry-stack_explorer'
+  end
   platforms :ruby_19, :ruby_20, :ruby_21 do
     gem 'celluloid-io'
     gem 'guard-rspec'
