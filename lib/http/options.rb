@@ -4,7 +4,6 @@ require 'socket'
 
 module HTTP
   class Options
-
     # How to format the response [:object, :body, :parse_body]
     attr_accessor :response
 
@@ -63,7 +62,7 @@ module HTTP
       @ssl_socket_class = options[:ssl_socket_class] || self.class.default_ssl_socket_class
       @ssl_context      = options[:ssl_context]
 
-      @headers["User-Agent"] ||= "RubyHTTPGem/#{HTTP::VERSION}"
+      @headers['User-Agent'] ||= "RubyHTTPGem/#{HTTP::VERSION}"
     end
 
     def with_response(response)
@@ -118,8 +117,8 @@ module HTTP
       unless callback.respond_to?(:call)
         argument_error! "invalid callback: #{callback}"
       end
-      unless callback.respond_to?(:arity) and callback.arity == 1
-        argument_error! "callback must accept only one argument"
+      unless callback.respond_to?(:arity) && callback.arity == 1
+        argument_error! 'callback must accept only one argument'
       end
       unless [:request, :response].include?(event)
         argument_error! "invalid callback event: #{event}"
@@ -136,12 +135,12 @@ module HTTP
 
     def merge(other)
       h1, h2 = to_hash, other.to_hash
-      merged = h1.merge(h2) do |k,v1,v2|
+      merged = h1.merge(h2) do |k, v1, v2|
         case k
         when :headers
           v1.merge(v2)
         when :callbacks
-          v1.merge(v2){|event,l,r| (l+r).uniq}
+          v1.merge(v2) { |event, l, r| (l + r).uniq }
         else
           v2
         end
@@ -175,11 +174,10 @@ module HTTP
       dupped
     end
 
-    private
+  private
 
     def argument_error!(message)
-      raise ArgumentError, message, caller[1..-1]
+      fail(ArgumentError, message, caller[1..-1])
     end
-
   end
 end

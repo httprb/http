@@ -71,7 +71,7 @@ module HTTP
     alias_method :code,        :status
     alias_method :status_code, :status
 
-    def initialize(status = nil, version = "1.1", headers = {}, body = nil, &body_proc)
+    def initialize(status = nil, version = '1.1', headers = {}, body = nil, &body_proc) # rubocop:disable ParameterLists
       @status, @version, @body, @body_proc = status, version, body, body_proc
 
       @headers = {}
@@ -111,9 +111,9 @@ module HTTP
     # Obtain the response body
     def body
       @body ||= begin
-        raise "no body available for this response" unless @body_proc
+        fail('no body available for this response') unless @body_proc
 
-        body = "" unless block_given?
+        body = '' unless block_given?
         while (chunk = @body_proc.call)
           if block_given?
             yield chunk
@@ -153,8 +153,13 @@ module HTTP
         @response, @body = response, body
       end
 
-      def __getobj__; @body; end
-      def __setobj__(obj); @body = obj; end
+      def __getobj__
+        @body
+      end
+
+      def __setobj__(obj)
+        @body = obj
+      end
     end
   end
 end

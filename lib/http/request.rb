@@ -36,9 +36,9 @@ module HTTP
     attr_reader :headers, :proxy, :body, :version
 
     # :nodoc:
-    def initialize(method, uri, headers = {}, proxy = {}, body = nil, version = "1.1")
+    def initialize(method, uri, headers = {}, proxy = {}, body = nil, version = '1.1') # rubocop:disable ParameterLists
       @method = method.to_s.downcase.to_sym
-      raise UnsupportedMethodError, "unknown method: #{method}" unless METHODS.include? @method
+      fail(UnsupportedMethodError, "unknown method: #{method}") unless METHODS.include?(@method)
 
       @uri = uri.is_a?(URI) ? uri : URI(uri.to_s)
 
@@ -49,7 +49,7 @@ module HTTP
         key ||= canonicalize_header(name)
         @headers[key] = value
       end
-      @headers["Host"] ||= @uri.host
+      @headers['Host'] ||= @uri.host
 
       @proxy, @body, @version = proxy, body, version
     end
@@ -62,7 +62,7 @@ module HTTP
     # Stream the request to a socket
     def stream(socket)
       path = uri.query ? "#{uri.path}?#{uri.query}" : uri.path
-      path = "/" if path.empty?
+      path = '/' if path.empty?
       request_header = "#{method.to_s.upcase} #{path} HTTP/#{version}"
       rs = HTTP::RequestStream.new socket, body, @headers, request_header
       rs.stream

@@ -1,8 +1,8 @@
 require 'spec_helper'
 
-describe HTTP::Options, "response" do
+describe HTTP::Options, 'response' do
 
-  let(:opts){ HTTP::Options.new }
+  let(:opts) { HTTP::Options.new }
 
   it 'defaults to :auto' do
     expect(opts.response).to eq(:auto)
@@ -15,10 +15,9 @@ describe HTTP::Options, "response" do
   end
 
   it 'recognizes invalid responses' do
-    expect {
+    expect do
       opts.with_response(:not_a_valid_response)
-    }.to raise_error(ArgumentError, /not_a_valid_response/)
+    end.to raise_error(ArgumentError, /not_a_valid_response/)
   end
 
 end
-

@@ -15,7 +15,7 @@ class HttpFetcher
   def fetch(url)
     # Note: For SSL support specify:
     # ssl_socket_class: Celluloid::IO::SSLSocket
-    HTTP.get(url, socket_class: Celluloid::IO::TCPSocket).response
+    HTTP.get(url, :socket_class => Celluloid::IO::TCPSocket).response
   end
 end
 

@@ -1,26 +1,26 @@
 require 'spec_helper'
 
-describe HTTP::Options, "callbacks" do
+describe HTTP::Options, 'callbacks' do
 
-  let(:opts){ HTTP::Options.new }
-  let(:callback){ Proc.new{|r| nil } }
+  let(:opts) { HTTP::Options.new }
+  let(:callback) { proc { |r| nil } }
 
   it 'recognizes invalid events' do
-    expect {
+    expect do
       opts.with_callback(:notacallback, callback)
-    }.to raise_error(ArgumentError, /notacallback/)
+    end.to raise_error(ArgumentError, /notacallback/)
   end
 
   it 'recognizes invalid callbacks' do
-    expect {
+    expect do
       opts.with_callback(:request, Object.new)
-    }.to raise_error(ArgumentError, /invalid callback/)
-    expect {
-      opts.with_callback(:request, Proc.new{|a,b| nil})
-    }.to raise_error(ArgumentError, /only one argument/)
+    end.to raise_error(ArgumentError, /invalid callback/)
+    expect do
+      opts.with_callback(:request, proc { |a, b| nil })
+    end.to raise_error(ArgumentError, /only one argument/)
   end
 
-  describe "request" do
+  describe 'request' do
 
     it 'defaults to []' do
       expect(opts.callbacks[:request]).to eq([])
@@ -39,7 +39,7 @@ describe HTTP::Options, "callbacks" do
 
   end
 
-  describe "response" do
+  describe 'response' do
 
     it 'defaults to []' do
       expect(opts.callbacks[:response]).to eq([])
@@ -59,4 +59,3 @@ describe HTTP::Options, "callbacks" do
   end
 
 end
-

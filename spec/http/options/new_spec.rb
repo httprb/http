@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe HTTP::Options, "new" do
+describe HTTP::Options, 'new' do
   let(:user_agent) { "RubyHTTPGem/#{HTTP::VERSION}" }
 
   it 'supports a Options instance' do
@@ -15,13 +15,13 @@ describe HTTP::Options, "new" do
     end
 
     it 'coerces :headers correctly' do
-      opts = HTTP::Options.new(:headers => {:accept => "json"})
-      expect(opts.headers).to eq(:accept => "json", "User-Agent" => user_agent)
+      opts = HTTP::Options.new(:headers => {:accept => 'json'})
+      expect(opts.headers).to eq(:accept => 'json', 'User-Agent' => user_agent)
     end
 
     it 'coerces :proxy correctly' do
-      opts = HTTP::Options.new(:proxy => {:proxy_address => "127.0.0.1", :proxy_port => 8080})
-      expect(opts.proxy).to eq(:proxy_address => "127.0.0.1", :proxy_port => 8080)
+      opts = HTTP::Options.new(:proxy => {:proxy_address => '127.0.0.1', :proxy_port => 8080})
+      expect(opts.proxy).to eq(:proxy_address => '127.0.0.1', :proxy_port => 8080)
     end
 
     it 'coerces :form correctly' do
@@ -30,13 +30,13 @@ describe HTTP::Options, "new" do
     end
 
     it 'coerces :callbacks correctly' do
-      before, after = Proc.new{|r| :before}, Proc.new{|r| :after}
+      before, after = proc { |r| :before }, proc { |r| :after }
       callbacks = {:request => [before], :response => [after]}
       opts = HTTP::Options.new(:callbacks => callbacks)
-      expect(opts.callbacks).to eq({
+      expect(opts.callbacks).to eq(
         :request  => [before],
         :response => [after]
-      })
+      )
     end
 
   end

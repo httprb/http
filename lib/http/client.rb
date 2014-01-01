@@ -16,10 +16,10 @@ module HTTP
 
     def body(opts, headers)
       if opts.body
-        body = opts.body
+        opts.body
       elsif opts.form
         headers['Content-Type'] ||= 'application/x-www-form-urlencoded'
-        body = URI.encode_www_form(opts.form)
+        URI.encode_www_form(opts.form)
       end
     end
 
@@ -27,7 +27,7 @@ module HTTP
     def request(method, uri, options = {})
       opts = @default_options.merge(options)
       host = URI.parse(uri).host
-      opts.headers["Host"] = host
+      opts.headers['Host'] = host
       headers = opts.headers
       proxy = opts.proxy
 
@@ -37,16 +37,16 @@ module HTTP
       request = HTTP::Request.new method, uri, headers, proxy, method_body
       if opts.follow
         code = 302
-        while code == 302 or code == 301
+        while code == 302 || code == 301
           # if the uri isn't fully formed complete it
-          uri = "#{method}://#{host}#{uri}" if not uri.match(/\./)
+          uri = "#{method}://#{host}#{uri}" unless uri.match(/\./)
           host = URI.parse(uri).host
-          opts.headers["Host"] = host
+          opts.headers['Host'] = host
           method_body = body(opts, headers)
           request = HTTP::Request.new method, uri, headers, proxy, method_body
           response = perform request, opts
           code = response.code
-          uri = response.headers["Location"]
+          uri = response.headers['Location']
         end
       end
 
@@ -63,7 +63,7 @@ module HTTP
       socket = options[:socket_class].open(uri.host, uri.port) # TODO: proxy support
 
       if uri.is_a?(URI::HTTPS)
-        if options[:ssl_context] == nil
+        if options[:ssl_context].nil?
           context = OpenSSL::SSL::SSLContext.new
         else
           context = options[:ssl_context]
@@ -112,7 +112,8 @@ module HTTP
         HTTP::Response::BodyDelegator.new(response, response.parse_body)
       when :body
         HTTP::Response::BodyDelegator.new(response)
-      else raise ArgumentError, "invalid response type: #{option}"
+      else
+        fail(ArgumentError, "invalid response type: #{option}")
       end
     end
   end

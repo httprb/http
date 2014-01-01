@@ -1,3 +1,3 @@
 module HTTP
-  VERSION = "0.6.0.pre" unless defined?(HTTP::VERSION)
+  VERSION = '0.6.0.pre'
 end

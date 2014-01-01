@@ -11,7 +11,7 @@ module HTTP
       end
 
       def [](type)
-        if type.is_a? Symbol
+        if type.is_a?(Symbol)
           @shortcuts[type]
         else
           @mime_types[type]

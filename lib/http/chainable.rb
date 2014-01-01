@@ -58,15 +58,15 @@ module HTTP
     # Make a request through an HTTP proxy
     def via(*proxy)
       proxy_hash = {}
-      proxy_hash[:proxy_address] = proxy[0] if proxy[0].is_a? String
-      proxy_hash[:proxy_port]    = proxy[1] if proxy[1].is_a? Integer
-      proxy_hash[:proxy_username]= proxy[2] if proxy[2].is_a? String
-      proxy_hash[:proxy_password]= proxy[3] if proxy[3].is_a? String
+      proxy_hash[:proxy_address]  = proxy[0] if proxy[0].is_a?(String)
+      proxy_hash[:proxy_port]     = proxy[1] if proxy[1].is_a?(Integer)
+      proxy_hash[:proxy_username] = proxy[2] if proxy[2].is_a?(String)
+      proxy_hash[:proxy_password] = proxy[3] if proxy[3].is_a?(String)
 
-      if proxy_hash.keys.size >=2
+      if proxy_hash.keys.size >= 2
         branch default_options.with_proxy(proxy_hash)
       else
-        raise ArgumentError, "invalid HTTP proxy: #{proxy_hash}"
+        fail(ArgumentError, "invalid HTTP proxy: #{proxy_hash}")
       end
     end
     alias_method :through, :via
@@ -77,7 +77,9 @@ module HTTP
     end
 
     # Alias for with_response(:object)
-    def stream; with_response(:object); end
+    def stream
+      with_response(:object)
+    end
 
     def with_follow(follow)
       branch default_options.with_follow(follow)
@@ -91,11 +93,11 @@ module HTTP
 
     # Accept the given MIME type(s)
     def accept(type)
-      if type.is_a? String
+      if type.is_a?(String)
         with :accept => type
       else
         mime_type = HTTP::MimeType[type]
-        raise ArgumentError, "unknown MIME type: #{type}" unless mime_type
+        fail(ArgumentError, "unknown MIME type: #{type}") unless mime_type
         with :accept => mime_type.type
       end
     end
@@ -128,7 +130,7 @@ module HTTP
       end
     end
 
-    private
+  private
 
     def branch(options)
       HTTP::Client.new(options)

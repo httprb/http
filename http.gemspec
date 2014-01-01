@@ -1,19 +1,20 @@
-# -*- encoding: utf-8 -*-
-require File.expand_path('../lib/http/version', __FILE__)
+lib = File.expand_path('../lib', __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+require 'http/version'
 
 Gem::Specification.new do |gem|
-  gem.authors       = ["Tony Arcieri"]
-  gem.email         = ["tony.arcieri@gmail.com"]
-  gem.description   = "HTTP so awesome it will lure Catherine Zeta Jones into your unicorn petting zoo"
-  gem.summary       = "HTTP should be easy"
-  gem.homepage      = "https://github.com/tarcieri/http"
-  gem.license       = "MIT"
+  gem.authors       = %w[Tony Arcieri]
+  gem.email         = %w[tony.arcieri@gmail.com]
+  gem.description   = 'HTTP so awesome it will lure Catherine Zeta Jones into your unicorn petting zoo'
+  gem.summary       = 'HTTP should be easy'
+  gem.homepage      = 'https://github.com/tarcieri/http'
+  gem.licenses      = %w[MIT]
 
-  gem.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
+  gem.executables   = `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) }
   gem.files         = `git ls-files`.split("\n")
   gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
-  gem.name          = "http"
-  gem.require_paths = ["lib"]
+  gem.name          = 'http'
+  gem.require_paths = %w[lib]
   gem.version       = HTTP::VERSION
 
   gem.add_runtime_dependency 'http_parser.rb', '~> 0.6.0'

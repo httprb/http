@@ -9,17 +9,17 @@ require 'uri'
 module URI
   TBLENCWWWCOMP_ = {} # :nodoc:
   256.times do |i|
-    TBLENCWWWCOMP_[i.chr] = '%%%02X' % i
+    TBLENCWWWCOMP_[i.chr] = format('%%%02X', i)
   end
   TBLENCWWWCOMP_[' '] = '+'
   TBLENCWWWCOMP_.freeze
   TBLDECWWWCOMP_ = {} # :nodoc:
   256.times do |i|
-    h, l = i>>4, i&15
-    TBLDECWWWCOMP_['%%%X%X' % [h, l]] = i.chr
-    TBLDECWWWCOMP_['%%%x%X' % [h, l]] = i.chr
-    TBLDECWWWCOMP_['%%%X%x' % [h, l]] = i.chr
-    TBLDECWWWCOMP_['%%%x%x' % [h, l]] = i.chr
+    h, l = i >> 4, i & 15
+    TBLDECWWWCOMP_[format('%%%X%X', h, l)] = i.chr
+    TBLDECWWWCOMP_[format('%%%x%X', h, l)] = i.chr
+    TBLDECWWWCOMP_[format('%%%X%x', h, l)] = i.chr
+    TBLDECWWWCOMP_[format('%%%x%x', h, l)] = i.chr
   end
   TBLDECWWWCOMP_['+'] = ' '
   TBLDECWWWCOMP_.freeze
@@ -43,7 +43,7 @@ module URI
   #
   # See URI.encode_www_form_component, URI.decode_www_form
   def self.decode_www_form_component(str)
-    raise ArgumentError, "invalid %-encoding (#{str})" unless /\A[^%]*(?:%\h\h[^%]*)*\z/ =~ str
+    fail(ArgumentError, "invalid %-encoding (#{str})") unless /\A[^%]*(?:%\h\h[^%]*)*\z/ =~ str
     str.gsub(/\+|%\h\h/) { |chr| TBLDECWWWCOMP_[chr] }
   end
 
@@ -76,7 +76,7 @@ module URI
   #
   # See URI.encode_www_form_component, URI.decode_www_form
   def self.encode_www_form(enum)
-    enum.map do |k,v|
+    enum.map do |k, v|
       if v.nil?
         encode_www_form_component(k)
       elsif v.respond_to?(:to_ary)
@@ -120,11 +120,11 @@ module URI
   def self.decode_www_form(str)
     return [] if str.empty?
     unless /\A#{WFKV_}=#{WFKV_}(?:[;&]#{WFKV_}=#{WFKV_})*\z/o =~ str
-      raise ArgumentError, "invalid data of application/x-www-form-urlencoded (#{str})"
+      fail(ArgumentError, "invalid data of application/x-www-form-urlencoded (#{str})")
     end
     ary = []
     $&.scan(/([^=;&]+)=([^;&]*)/) do
-      ary << [decode_www_form_component($1), decode_www_form_component($2)]
+      ary << [decode_www_form_component(Regexp.last_match[1]), decode_www_form_component(Regexp.last_match[2])]
     end
     ary
   end
