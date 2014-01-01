@@ -4,7 +4,7 @@ gem 'rake'
 gem 'jruby-openssl' if defined? JRUBY_VERSION
 
 group :development do
-  platforms :ruby_19, :ruby_20 do
+  platforms :ruby_19, :ruby_20, :ruby_21 do
     gem 'celluloid-io'
     gem 'guard-rspec'
   end
