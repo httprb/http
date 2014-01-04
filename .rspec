@@ -1,5 +1,5 @@
---color
---format documentation
 --backtrace
---warnings
+--color
+--format=documentation
 --order random
+--warnings

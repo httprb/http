@@ -20,3 +20,15 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 end
+
+def capture_warning(&block)
+  begin
+    old_stderr = $stderr
+    $stderr = StringIO.new
+    block.call
+    result = $stderr.string
+  ensure
+    $stderr = old_stderr
+  end
+  result
+end

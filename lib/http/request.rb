@@ -30,6 +30,17 @@ module HTTP
     # Method is given as a lowercase symbol e.g. :get, :post
     attr_reader :verb
 
+    # The following alias may be removed in three minor versions (0.8.0) or one
+    # major version (1.0.0)
+    alias_method :__method__, :method
+
+    # The following method may be removed in two minor versions (0.7.0) or one
+    # major version (1.0.0)
+    def method(*args)
+      warn "#{Kernel.caller.first}: [DEPRECATION] HTTP::Request#method is deprecated. Use #verb instead. For Object#method, use #__method__."
+      @verb
+    end
+
     # "Request URI" as per RFC 2616
     # http://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html
     attr_reader :uri
