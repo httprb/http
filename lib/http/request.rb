@@ -28,7 +28,7 @@ module HTTP
     METHODS.concat [:search]
 
     # Method is given as a lowercase symbol e.g. :get, :post
-    attr_reader :method
+    attr_reader :verb
 
     # "Request URI" as per RFC 2616
     # http://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html
@@ -36,9 +36,9 @@ module HTTP
     attr_reader :headers, :proxy, :body, :version
 
     # :nodoc:
-    def initialize(method, uri, headers = {}, proxy = {}, body = nil, version = '1.1') # rubocop:disable ParameterLists
-      @method = method.to_s.downcase.to_sym
-      fail(UnsupportedMethodError, "unknown method: #{method}") unless METHODS.include?(@method)
+    def initialize(verb, uri, headers = {}, proxy = {}, body = nil, version = '1.1') # rubocop:disable ParameterLists
+      @verb = verb.to_s.downcase.to_sym
+      fail(UnsupportedMethodError, "unknown method: #{verb}") unless METHODS.include?(@verb)
 
       @uri = uri.is_a?(URI) ? uri : URI(uri.to_s)
 
@@ -63,7 +63,7 @@ module HTTP
     def stream(socket)
       path = uri.query ? "#{uri.path}?#{uri.query}" : uri.path
       path = '/' if path.empty?
-      request_header = "#{method.to_s.upcase} #{path} HTTP/#{version}"
+      request_header = "#{verb.to_s.upcase} #{path} HTTP/#{version}"
       rs = HTTP::RequestStream.new socket, body, @headers, request_header
       rs.stream
     end
