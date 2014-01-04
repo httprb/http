@@ -24,7 +24,7 @@ module HTTP
     end
 
     # Make an HTTP request
-    def request(method, uri, options = {})
+    def request(verb, uri, options = {})
       opts = @default_options.merge(options)
       host = URI.parse(uri).host
       opts.headers['Host'] = host
@@ -34,16 +34,16 @@ module HTTP
       method_body = body(opts, headers)
       uri = "#{uri}?#{URI.encode_www_form(opts.params)}" if opts.params
 
-      request = HTTP::Request.new method, uri, headers, proxy, method_body
+      request = HTTP::Request.new(verb, uri, headers, proxy, method_body)
       if opts.follow
         code = 302
         while code == 302 || code == 301
           # if the uri isn't fully formed complete it
-          uri = "#{method}://#{host}#{uri}" unless uri.match(/\./)
+          uri = "#{verb}://#{host}#{uri}" unless uri.match(/\./)
           host = URI.parse(uri).host
           opts.headers['Host'] = host
           method_body = body(opts, headers)
-          request = HTTP::Request.new method, uri, headers, proxy, method_body
+          request = HTTP::Request.new(verb, uri, headers, proxy, method_body)
           response = perform request, opts
           code = response.code
           uri = response.headers['Location']
@@ -54,7 +54,7 @@ module HTTP
       response = perform request, opts
       opts.callbacks[:response].each { |c| c.call(response) }
 
-      format_response method, response, opts.response
+      format_response verb, response, opts.response
     end
 
     def perform(request, options)
@@ -98,10 +98,10 @@ module HTTP
       response
     end
 
-    def format_response(method, response, option)
+    def format_response(verb, response, option)
       case option
       when :auto, NilClass
-        if method == :head
+        if verb == :head
           response
         else
           HTTP::Response::BodyDelegator.new(response, response.parse_body)
