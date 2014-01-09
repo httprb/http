@@ -21,11 +21,11 @@ RSpec.configure do |config|
   end
 end
 
-def capture_warning(&block)
+def capture_warning
   begin
     old_stderr = $stderr
     $stderr = StringIO.new
-    block.call
+    yield
     result = $stderr.string
   ensure
     $stderr = old_stderr
