@@ -6,7 +6,7 @@ describe HTTP::Request do
       .to raise_error(HTTP::Request::UnsupportedSchemeError)
   end
 
-  it "provides a #scheme accessor" do
+  it 'provides a #scheme accessor' do
     request = HTTP::Request.new(:get, 'http://example.com/')
     expect(request.scheme).to eq(:http)
   end

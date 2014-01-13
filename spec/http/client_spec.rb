@@ -12,24 +12,21 @@ describe HTTP::Client do
     end
   end
 
-
   def redirect_response(location, status = 302)
-    HTTP::Response.new(status, '1.1', { 'Location' => location }, '')
+    HTTP::Response.new(status, '1.1', {'Location' => location}, '')
   end
-
 
   def simple_response(body, status = 200)
     HTTP::Response.new(status, '1.1', {}, body)
   end
 
-
   describe 'following redirects' do
     it 'prepends previous request uri scheme and host if needed' do
-      client = StubbedClient.new({ :follow => true, :stubs  => {
+      client = StubbedClient.new(:follow => true, :stubs  => {
         'http://example.com/'           => redirect_response('/index'),
         'http://example.com/index'      => redirect_response('/index.html'),
         'http://example.com/index.html' => simple_response('OK')
-      } })
+      })
       expect(client.get('http://example.com/').response.body).to eq 'OK'
     end
   end
