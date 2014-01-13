@@ -27,6 +27,7 @@ module HTTP
     def request(verb, uri, options = {})
       opts = @default_options.merge(options)
       host = URI.parse(uri).host
+      scheme = URI.parse(uri).scheme
       opts.headers['Host'] = host
       headers = opts.headers
       proxy = opts.proxy
@@ -39,9 +40,10 @@ module HTTP
         code = 302
         while code == 302 || code == 301
           # if the uri isn't fully formed complete it
-          uri = "#{verb}://#{host}#{uri}" unless uri.match(/\./)
-          host = URI.parse(uri).host
-          opts.headers['Host'] = host
+          uri = URI.parse(uri.to_s)
+          uri.scheme ||= scheme
+          uri.host   ||= host
+          opts.headers['Host'] = uri.host
           method_body = body(opts, headers)
           request = HTTP::Request.new(verb, uri, headers, proxy, method_body)
           response = perform request, opts
