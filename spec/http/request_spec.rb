@@ -2,9 +2,8 @@ require 'spec_helper'
 
 describe HTTP::Request do
   it 'requires URI to have scheme part' do
-    expect {
-      HTTP::Request.new(:get, 'example.com/')
-    }.to raise_error(HTTP::Request::UnsupportedSchemeError)
+    expect { HTTP::Request.new(:get, 'example.com/') }.to \
+      raise_error(HTTP::Request::UnsupportedSchemeError)
   end
 
   it 'provides a #scheme accessor' do
