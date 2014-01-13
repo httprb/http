@@ -9,6 +9,9 @@ module HTTP
     # The method given was not understood
     class UnsupportedMethodError < ArgumentError; end
 
+    # The Uscheme of given URI was not understood
+    class UnsupportedSchemeError < ArgumentError; end
+
     # RFC 2616: Hypertext Transfer Protocol -- HTTP/1.1
     METHODS = [:options, :get, :head, :post, :put, :delete, :trace, :connect]
 
@@ -27,8 +30,14 @@ module HTTP
     # draft-reschke-webdav-search: WebDAV Search
     METHODS.concat [:search]
 
+    # Allowed schemes
+    SCHEMES = [:http, :https]
+
     # Method is given as a lowercase symbol e.g. :get, :post
     attr_reader :verb
+
+    # Scheme is normalized to be a lowercase symbol e.g. :http, :https
+    attr_reader :scheme
 
     # The following alias may be removed in three minor versions (0.8.0) or one
     # major version (1.0.0)
@@ -48,10 +57,12 @@ module HTTP
 
     # :nodoc:
     def initialize(verb, uri, headers = {}, proxy = {}, body = nil, version = '1.1') # rubocop:disable ParameterLists
-      @verb = verb.to_s.downcase.to_sym
-      fail(UnsupportedMethodError, "unknown method: #{verb}") unless METHODS.include?(@verb)
+      @verb   = verb.to_s.downcase.to_sym
+      @uri    = uri.is_a?(URI) ? uri : URI(uri.to_s)
+      @scheme = @uri.scheme.to_s.downcase.to_sym
 
-      @uri = uri.is_a?(URI) ? uri : URI(uri.to_s)
+      fail(UnsupportedMethodError, "unknown method: #{verb}") unless METHODS.include?(@verb)
+      fail(UnsupportedSchemeError, "unknown scheme: #{@uri.scheme}") unless SCHEMES.include?(@scheme)
 
       @headers = {}
       headers.each do |name, value|
