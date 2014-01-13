@@ -6,7 +6,6 @@ before_install:
 bundler_args: --without development
 language: ruby
 rvm:
-  - 1.8.7
   - 1.9.2
   - 1.9.3
   - 2.0.0
@@ -15,8 +14,6 @@ rvm:
   - ruby-head
 matrix:
   include:
-    - rvm: jruby-18mode
-      env: JRUBY_OPTS="$JRUBY_OPTS --debug"
     - rvm: jruby-19mode
       env: JRUBY_OPTS="$JRUBY_OPTS --debug"
     - rvm: jruby-head
