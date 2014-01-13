@@ -59,7 +59,7 @@ module HTTP
     def initialize(verb, uri, headers = {}, proxy = {}, body = nil, version = '1.1') # rubocop:disable ParameterLists
       @verb   = verb.to_s.downcase.to_sym
       @uri    = uri.is_a?(URI) ? uri : URI(uri.to_s)
-      @scheme = @uri.scheme.to_s.downcase.to_sym
+      @scheme = @uri.scheme.to_s.downcase.to_sym if @uri.scheme
 
       fail(UnsupportedMethodError, "unknown method: #{verb}") unless METHODS.include?(@verb)
       fail(UnsupportedSchemeError, "unknown scheme: #{@uri.scheme}") unless SCHEMES.include?(@scheme)
