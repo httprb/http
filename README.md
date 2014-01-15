@@ -1,13 +1,19 @@
-The HTTP Gem*
+![The HTTP Gem](https://raw.github.com/tarcieri/http/master/logo.png)
 ==============
 [![Gem Version](https://badge.fury.io/rb/http.png)](http://rubygems.org/gems/http)
 [![Build Status](https://secure.travis-ci.org/tarcieri/http.png?branch=master)](http://travis-ci.org/tarcieri/http)
 [![Code Climate](https://codeclimate.com/github/tarcieri/http.png)](https://codeclimate.com/github/tarcieri/http)
 [![Coverage Status](https://coveralls.io/repos/tarcieri/http/badge.png?branch=master)](https://coveralls.io/r/tarcieri/http)
 
-*NOTE: this gem has the worst name in the history of SEO. But perhaps we can fix
-that if we all refer to it as "The HTTP Gem". Entering that phrase into Google
-actually pulls it up as #4 for me!
+SEO Note
+--------
+
+This Gem has the worst name in the history of SEO. But perhaps we can fix that if we
+all refer to it as "The HTTP Gem". Entering that phrase into Google actually pulls it
+up as #1 for me!
+
+About
+-----
 
 The HTTP Gem is an easy-to-use client library for making requests from Ruby. It uses
 a simple method chaining system for building requests, similar to libraries
@@ -164,4 +170,4 @@ Contributing to the HTTP gem
 Copyright
 ---------
 
-Copyright (c) 2013 Tony Arcieri. See LICENSE.txt for further details.
+Copyright (c) 2014 Tony Arcieri. See LICENSE.txt for further details.
