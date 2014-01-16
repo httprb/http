@@ -6,7 +6,11 @@ module HTTP
   class Client
     include Chainable
 
-    BUFFER_SIZE = 16_384 # Input buffer size
+    # HTTP status codes which indicate redirects
+    REDIRECT_CODES = 301..303
+
+    # Input buffer size
+    BUFFER_SIZE = 16_384
 
     attr_reader :default_options
 
@@ -14,15 +18,6 @@ module HTTP
       @default_options = HTTP::Options.new(default_options)
       @parser = HTTP::Response::Parser.new
       @socket = nil
-    end
-
-    def body(opts, headers)
-      if opts.body
-        opts.body
-      elsif opts.form
-        headers['Content-Type'] ||= 'application/x-www-form-urlencoded'
-        URI.encode_www_form(opts.form)
-      end
     end
 
     # Make an HTTP request
@@ -34,32 +29,16 @@ module HTTP
       headers = opts.headers
       proxy = opts.proxy
 
-      method_body = body(opts, headers)
+      request_body = make_request_body(opts, headers)
       uri = "#{uri}?#{URI.encode_www_form(opts.params)}" if opts.params
 
-      request = HTTP::Request.new(verb, uri, headers, proxy, method_body)
-
-      if opts.follow
-        code = 302
-        while code == 302 || code == 301
-          # if the uri isn't fully formed complete it
-          uri = URI.parse(uri.to_s)
-          uri.scheme ||= scheme
-          uri.host   ||= host
-          opts.headers['Host'] = uri.host
-          method_body = body(opts, headers)
-          request = HTTP::Request.new(verb, uri, headers, proxy, method_body)
-          response = perform request, opts
-          code = response.code
-          uri = response.headers['Location']
-        end
-      end
-
+      request = HTTP::Request.new(verb, uri, headers, proxy, request_body)
       perform request, opts
     end
 
-    def perform(request, options)
-      uri = request.uri
+    # Perform the HTTP request
+    def perform(req, options)
+      uri = req.uri
 
       # TODO: proxy support, keep-alive support
       @socket = options[:socket_class].open(uri.host, uri.port) 
@@ -76,7 +55,7 @@ module HTTP
         @socket.connect
       end
 
-      request.stream @socket
+      req.stream @socket
 
       begin
         @parser << @socket.readpartial(BUFFER_SIZE) until @parser.headers
@@ -86,6 +65,16 @@ module HTTP
 
       body = HTTP::ResponseBody.new(self)
       response = HTTP::Response.new(@parser.status_code, @parser.http_version, @parser.headers, body)
+
+      if options.follow && REDIRECT_CODES.include?(response.code)
+        uri = response.headers['Location']
+        raise StateError, "no Location header in #{response.code} redirect" unless uri
+
+        # TODO: keep-alive
+        @parser.reset
+        finish_response
+        return request(req.verb, uri, options)
+      end
 
       @body_remaining = Integer(response['Content-Length']) if response['Content-Length']
       response
@@ -124,10 +113,21 @@ module HTTP
       chunk
     end
 
+  private
+
+    # Create the request body object to send
+    def make_request_body(opts, headers)
+      if opts.body
+        opts.body
+      elsif opts.form
+        headers['Content-Type'] ||= 'application/x-www-form-urlencoded'
+        URI.encode_www_form(opts.form)
+      end
+    end
+
     # Callback for when we've reached the end of a response
     def finish_response
       # TODO: keep-alive support
-      @socket.close if @socket
       @socket = nil
     end
   end

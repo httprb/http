@@ -58,7 +58,6 @@ describe HTTP do
   context 'posting to resources' do
     it 'should be easy to post forms' do
       response = HTTP.post "#{test_endpoint}form", :form => {:example => 'testing-form'}
-      p response
       expect(response.to_s).to eq('passed :)')
     end
   end
@@ -72,15 +71,11 @@ describe HTTP do
 
   context 'with redirects' do
     it 'should be easy for 301' do
-      pending 'redirects are borked'
-
       response = HTTP.with_follow(true).get("#{test_endpoint}redirect-301")
       expect(response.to_s).to match(/<!doctype html>/)
     end
 
     it 'should be easy for 302' do
-      pending 'redirects are borked'
-
       response = HTTP.with_follow(true).get("#{test_endpoint}redirect-302")
       expect(response.to_s).to match(/<!doctype html>/)
     end
