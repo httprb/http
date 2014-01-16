@@ -24,7 +24,6 @@ module HTTP
     def request(verb, uri, options = {})
       opts = @default_options.merge(options)
       host = URI.parse(uri).host
-      scheme = URI.parse(uri).scheme
       opts.headers['Host'] = host
       headers = opts.headers
       proxy = opts.proxy
@@ -41,7 +40,7 @@ module HTTP
       uri = req.uri
 
       # TODO: proxy support, keep-alive support
-      @socket = options[:socket_class].open(uri.host, uri.port) 
+      @socket = options[:socket_class].open(uri.host, uri.port)
 
       if uri.is_a?(URI::HTTPS)
         if options[:ssl_context].nil?
@@ -68,7 +67,7 @@ module HTTP
 
       if options.follow && REDIRECT_CODES.include?(response.code)
         uri = response.headers['Location']
-        raise StateError, "no Location header in #{response.code} redirect" unless uri
+        fail StateError, "no Location header in #{response.code} redirect" unless uri
 
         # TODO: keep-alive
         @parser.reset
@@ -81,19 +80,19 @@ module HTTP
     end
 
     # Read a chunk of the body
-    def readpartial(size = BUFFER_SIZE)
+    def readpartial(size = BUFFER_SIZE) # rubocop:disable CyclomaticComplexity
       if @parser.finished? || (@body_remaining && @body_remaining.zero?)
         chunk = @parser.chunk
 
         if !chunk && @body_remaining && !@body_remaining.zero?
-          raise StateError, "expected #{@body_remaining} more bytes of body"
+          fail StateError, "expected #{@body_remaining} more bytes of body"
         end
 
         @body_remaining -= chunk.bytesize if chunk
         return chunk
       end
 
-      raise StateError, "not connected" unless @socket
+      fail StateError, 'not connected' unless @socket
 
       chunk = @parser.chunk
       unless chunk

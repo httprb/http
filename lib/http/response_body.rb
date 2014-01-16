@@ -23,7 +23,7 @@ module HTTP
 
     # Iterate over the body, allowing it to be enumerable
     def each
-      while chunk = readpartial
+      while (chunk = readpartial)
         yield chunk
       end
     end
@@ -31,12 +31,12 @@ module HTTP
     # Eagerly consume the entire body as a string
     def to_s
       return @contents if @contents
-      raise "body is being streamed" unless @streaming.nil?
+      fail StateError, 'body is being streamed' unless @streaming.nil?
 
       begin
         @streaming = false
-        @contents = ""
-        while chunk = @client.readpartial
+        @contents = ''
+        while (chunk = @client.readpartial)
           @contents << chunk
         end
       rescue
@@ -49,7 +49,7 @@ module HTTP
 
     # Assert that the body is actively being streamed
     def stream!
-      raise "body has already been consumed" if @streaming == false
+      fail StateError, 'body has already been consumed' if @streaming == false
       @streaming = true
     end
 

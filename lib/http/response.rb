@@ -72,7 +72,7 @@ module HTTP
     alias_method :code,        :status
     alias_method :status_code, :status
 
-    def initialize(status = nil, version = "1.1", headers = {}, body)
+    def initialize(status, version, headers, body) # rubocop:disable ParameterLists
       @status, @version, @body = status, version, body
 
       @headers = {}
