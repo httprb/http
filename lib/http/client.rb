@@ -6,7 +6,7 @@ module HTTP
   class Client
     include Chainable
 
-    BUFFER_SIZE = 16384 # Input buffer size
+    BUFFER_SIZE = 16_384 # Input buffer size
 
     attr_reader :default_options
 
