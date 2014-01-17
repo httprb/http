@@ -43,20 +43,42 @@ Inside of your Ruby program do:
 Making Requests
 ---------------
 
-Let's start with getting things:
+### GET requests
+
+Let's start with getting the response body as a string:
 
 ```ruby
->> HTTP.get("http://www.google.com")
+>> HTTP.get("http://www.google.com").to_s
 => "<html><head><meta http-equiv=\"content-type\" content=..."
 ```
 
-That's it! The result is the response body as a string. To obtain an HTTP::Response object
-instead of the response body, chain `.response` on the end of the request:
+That's all it takes! To obtain an `HTTP::Response` object instead of the response
+body, all we have to do is omit the #to_s on the end:
 
 ```ruby
->> HTTP.get("http://www.google.com").response
+>> HTTP.get("http://www.google.com")
 => #<HTTP/1.0 200 OK @headers={"Content-Type"=>"text/html; charset=UTF-8", "Date"=>"Fri, ...>
+ => #<HTTP::Response/1.1 200 OK @headers={"Content-Type"=>"text/html; ...>
 ```
+
+We can also obtain an `HTTP::ResponseBody` object for this response:
+
+```ruby
+>> HTTP.get("http://www.google.com").body
+ => #<HTTP::ResponseBody:814d7aac @streaming=false>
+```
+
+The response body can be streamed with `HTTP::ResponseBody#readpartial`:
+
+```ruby
+>> HTTP.get("http://www.google.com").body.readpartial
+ => "<!doctype html><html "
+```
+
+In practice you'll want to bind the HTTP::ResponseBody to a local variable (e.g.
+"body") and call readpartial on it repeatedly until it returns nil.
+
+### POST requests
 
 Making POST requests is simple too. Want to POST a form?
 
