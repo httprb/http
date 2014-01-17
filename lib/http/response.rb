@@ -99,7 +99,6 @@ module HTTP
 
     # Obtain the 'Reason-Phrase' for the response
     def reason
-      # FIXME: should get the real reason phrase from the parser
       STATUS_CODES[@status]
     end
 
