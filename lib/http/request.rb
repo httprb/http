@@ -9,7 +9,7 @@ module HTTP
     # The method given was not understood
     class UnsupportedMethodError < ArgumentError; end
 
-    # The Uscheme of given URI was not understood
+    # The scheme of given URI was not understood
     class UnsupportedSchemeError < ArgumentError; end
 
     # RFC 2616: Hypertext Transfer Protocol -- HTTP/1.1
@@ -62,7 +62,7 @@ module HTTP
       @scheme = @uri.scheme.to_s.downcase.to_sym if @uri.scheme
 
       fail(UnsupportedMethodError, "unknown method: #{verb}") unless METHODS.include?(@verb)
-      fail(UnsupportedSchemeError, "unknown scheme: #{@uri.scheme}") unless SCHEMES.include?(@scheme)
+      fail(UnsupportedSchemeError, "unknown scheme: #{@uri.scheme}") unless SCHEMES.include?(scheme)
 
       @headers = {}
       headers.each do |name, value|
