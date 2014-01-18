@@ -99,21 +99,17 @@ module HTTP
 
     # Initialize TLS connection
     def start_tls(socket, options)
-      if options[:ssl_context].nil?
-        context = OpenSSL::SSL::SSLContext.new
-      else
-        # TODO: abstract away SSLContexts so we can use other TLS libraries
-        context = options[:ssl_context]
-      end
+      # TODO: abstract away SSLContexts so we can use other TLS libraries
+      context = options[:ssl_context] || OpenSSL::SSL::SSLContext.new
+      socket  = options[:ssl_socket_class].new(socket, context)
 
-      socket = options[:ssl_socket_class].new(socket, context)
       socket.connect
       socket
     end
 
     # Recurse through redirects
     def follow_redirect(verb, uri, options)
-      fail StateError, "no Location header in redirect" unless uri
+      fail StateError, 'no Location header in redirect' unless uri
 
       # TODO: keep-alive
       @parser.reset
