@@ -55,13 +55,7 @@ module HTTP
       response = HTTP::Response.new(@parser.status_code, @parser.http_version, @parser.headers, body)
 
       if options.follow && REDIRECT_CODES.include?(response.code)
-        uri = response.headers['Location']
-        fail StateError, "no Location header in #{response.code} redirect" unless uri
-
-        # TODO: keep-alive
-        @parser.reset
-        finish_response
-        return request(req.verb, uri, options)
+        return follow_redirect(req.verb, response.headers['Location'], options)
       end
 
       @body_remaining = Integer(response['Content-Length']) if response['Content-Length']
@@ -115,6 +109,16 @@ module HTTP
       socket = options[:ssl_socket_class].new(socket, context)
       socket.connect
       socket
+    end
+
+    # Recurse through redirects
+    def follow_redirect(verb, uri, options)
+      fail StateError, "no Location header in redirect" unless uri
+
+      # TODO: keep-alive
+      @parser.reset
+      finish_response
+      request(verb, uri, options)
     end
 
     # Create the request body object to send
