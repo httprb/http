@@ -37,10 +37,10 @@ module HTTP
     # Follow redirects
     def follow
       while REDIRECT_CODES.include?(response.code)
-        fail EndlessRedirectError if @visited.include? request.uri
-        @visited << request.uri
+        @visited << request.uri.to_s
 
         fail TooManyRedirectsError if too_many_hops?
+        fail EndlessRedirectError  if endless_loop?
 
         uri = response.headers['Location']
         fail StateError, 'no Location header in redirect' unless uri
@@ -56,6 +56,12 @@ module HTTP
     def too_many_hops?
       return false if @max_redirects.is_a?(TrueClass)
       @max_redirects.to_i < @visited.count
+    end
+
+    # Check if we got into an endless loop
+    def endless_loop?
+      # pretty naive condition
+      2 < @visited.count(@visited.last)
     end
   end
 end
