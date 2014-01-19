@@ -119,6 +119,17 @@ module HTTP
       body.to_s
     end
 
+    # Return parsed response body according to its content type
+    def parse
+      @parsed ||= MimeType[mimetype] ? MimeType[mimetype].parse(to_s) : to_s
+    end
+
+    # MIME type of response (if any)
+    # @return [String, nil]
+    def mimetype
+      @mimetype ||= @headers['Content-Type'].split(/;\s*/).first
+    end
+
     # Inspect a response
     def inspect
       "#<#{self.class}/#{@version} #{status} #{reason} @headers=#{@headers.inspect}>"
