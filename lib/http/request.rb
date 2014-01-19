@@ -82,7 +82,9 @@ module HTTP
     # Returns new Request with updated uri
     def redirect(uri)
       uri = "#{@uri.to_s[PREFIX_RE]}#{uri}" unless uri.to_s[PREFIX_RE]
-      self.class.new(verb, uri, headers, proxy, body, version)
+      req = self.class.new(verb, uri, headers, body, version)
+      req.headers['Host'] = req.uri.host
+      req
     end
 
     # Obtain the given header
