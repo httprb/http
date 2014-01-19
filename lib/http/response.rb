@@ -67,13 +67,14 @@ module HTTP
     attr_reader :status
     attr_reader :headers
     attr_reader :body
+    attr_reader :uri
 
     # Status aliases! TIMTOWTDI!!! (Want to be idiomatic? Just use status :)
     alias_method :code,        :status
     alias_method :status_code, :status
 
-    def initialize(status, version, headers, body) # rubocop:disable ParameterLists
-      @status, @version, @body = status, version, body
+    def initialize(status, version, headers, body, uri = nil) # rubocop:disable ParameterLists
+      @status, @version, @body, @uri = status, version, body, uri
 
       @headers = {}
       headers.each do |field, value|
