@@ -12,6 +12,9 @@ module HTTP
     # The scheme of given URI was not understood
     class UnsupportedSchemeError < ArgumentError; end
 
+    # Prefix for relative URLs
+    PREFIX_RE = %r{^[^:]+://[^/]+}
+
     # RFC 2616: Hypertext Transfer Protocol -- HTTP/1.1
     METHODS = [:options, :get, :head, :post, :put, :delete, :trace, :connect]
 
@@ -74,6 +77,12 @@ module HTTP
       @headers['Host'] ||= @uri.host
 
       @body, @version = body, version
+    end
+
+    # Returns new Request with updated uri
+    def redirect(uri)
+      uri = "#{@uri.to_s[PREFIX_RE]}#{uri}" unless uri.to_s[PREFIX_RE]
+      self.class.new(verb, uri, headers, proxy, body, version)
     end
 
     # Obtain the given header
