@@ -53,10 +53,10 @@ module HTTP
     # "Request URI" as per RFC 2616
     # http://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html
     attr_reader :uri
-    attr_reader :headers, :proxy, :body, :version
+    attr_reader :headers, :body, :version
 
     # :nodoc:
-    def initialize(verb, uri, headers = {}, proxy = {}, body = nil, version = '1.1') # rubocop:disable ParameterLists
+    def initialize(verb, uri, headers = {}, body = nil, version = '1.1') # rubocop:disable ParameterLists
       @verb   = verb.to_s.downcase.to_sym
       @uri    = uri.is_a?(URI) ? uri : URI(uri.to_s)
       @scheme = @uri.scheme.to_s.downcase.to_sym if @uri.scheme
@@ -73,7 +73,7 @@ module HTTP
       end
       @headers['Host'] ||= @uri.host
 
-      @proxy, @body, @version = proxy, body, version
+      @body, @version = body, version
     end
 
     # Obtain the given header

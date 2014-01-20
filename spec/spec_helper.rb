@@ -13,7 +13,6 @@ end
 
 require 'http'
 require 'support/example_server'
-require 'support/proxy_server'
 
 RSpec.configure do |config|
   config.expect_with :rspec do |c|
