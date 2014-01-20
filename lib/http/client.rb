@@ -1,13 +1,11 @@
 require 'http/options'
+require 'http/redirector'
 require 'uri'
 
 module HTTP
   # Clients make requests and receive responses
   class Client
     include Chainable
-
-    # HTTP status codes which indicate redirects
-    REDIRECT_CODES = 301..303
 
     # Input buffer size
     BUFFER_SIZE = 16_384
@@ -34,31 +32,22 @@ module HTTP
       perform request, opts
     end
 
-    # Perform the HTTP request
+    # Perform the HTTP request (following redirects if needed)
     def perform(req, options)
-      uri = req.uri
+      res = perform_without_following_redirects req, options
 
-      # TODO: proxy support, keep-alive support
-      @socket = options[:socket_class].open(uri.host, uri.port)
-      @socket = start_tls(@socket, options) if uri.is_a?(URI::HTTPS)
+      if options.follow
+        res = Redirector.new(options.follow).perform req, res do |request|
+          # TODO: keep-alive
+          @parser.reset
+          finish_response
 
-      req.stream @socket
-
-      begin
-        @parser << @socket.readpartial(BUFFER_SIZE) until @parser.headers
-      rescue IOError, Errno::ECONNRESET, Errno::EPIPE => ex
-        raise IOError, "problem making HTTP request: #{ex}"
+          perform_without_following_redirects request, options
+        end
       end
 
-      body = HTTP::ResponseBody.new(self)
-      response = HTTP::Response.new(@parser.status_code, @parser.http_version, @parser.headers, body)
-
-      if options.follow && REDIRECT_CODES.include?(response.code)
-        return follow_redirect(req.verb, response.headers['Location'], options)
-      end
-
-      @body_remaining = Integer(response['Content-Length']) if response['Content-Length']
-      response
+      @body_remaining = Integer(res['Content-Length']) if res['Content-Length']
+      res
     end
 
     # Read a chunk of the body
@@ -96,6 +85,26 @@ module HTTP
 
   private
 
+    # Perform a single (no follow) HTTP request
+    def perform_without_following_redirects(req, options)
+      uri = req.uri
+
+      # TODO: proxy support, keep-alive support
+      @socket = options[:socket_class].open(uri.host, uri.port)
+      @socket = start_tls(@socket, options) if uri.is_a?(URI::HTTPS)
+
+      req.stream @socket
+
+      begin
+        @parser << @socket.readpartial(BUFFER_SIZE) until @parser.headers
+      rescue IOError, Errno::ECONNRESET, Errno::EPIPE => ex
+        raise IOError, "problem making HTTP request: #{ex}"
+      end
+
+      body = HTTP::ResponseBody.new(self)
+      HTTP::Response.new(@parser.status_code, @parser.http_version, @parser.headers, body, uri)
+    end
+
     # Initialize TLS connection
     def start_tls(socket, options)
       # TODO: abstract away SSLContexts so we can use other TLS libraries
@@ -104,16 +113,6 @@ module HTTP
 
       socket.connect
       socket
-    end
-
-    # Recurse through redirects
-    def follow_redirect(verb, uri, options)
-      fail StateError, 'no Location header in redirect' unless uri
-
-      # TODO: keep-alive
-      @parser.reset
-      finish_response
-      request(verb, uri, options)
     end
 
     # Create the request body object to send

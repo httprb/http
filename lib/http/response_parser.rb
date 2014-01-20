@@ -53,6 +53,8 @@ module HTTP
       end
 
       def reset
+        @parser.reset!
+
         @finished = false
         @headers  = nil
         @chunk    = nil
