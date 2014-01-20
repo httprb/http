@@ -19,9 +19,6 @@ module HTTP
     # Explicit request body of the request
     attr_accessor :body
 
-    # HTTP proxy to route request
-    attr_accessor :proxy
-
     # Socket classes
     attr_accessor :socket_class, :ssl_socket_class
 
@@ -31,7 +28,7 @@ module HTTP
     # Follow redirects
     attr_accessor :follow
 
-    protected :response=, :headers=, :proxy=, :params=, :form=, :follow=
+    protected :response=, :headers=, :params=, :form=, :follow=
 
     @default_socket_class     = TCPSocket
     @default_ssl_socket_class = OpenSSL::SSL::SSLSocket
@@ -48,7 +45,6 @@ module HTTP
     def initialize(options = {})
       @response  = options[:response]  || :auto
       @headers   = options[:headers]   || {}
-      @proxy     = options[:proxy]     || {}
       @body      = options[:body]
       @params    = options[:params]
       @form      = options[:form]
@@ -67,12 +63,6 @@ module HTTP
       end
       dup do |opts|
         opts.headers = self.headers.merge(headers.to_hash)
-      end
-    end
-
-    def with_proxy(proxy_hash)
-      dup do |opts|
-        opts.proxy = proxy_hash
       end
     end
 
@@ -125,7 +115,6 @@ module HTTP
       {
         :response         => response,
         :headers          => headers,
-        :proxy            => proxy,
         :params           => params,
         :form             => form,
         :body             => body,

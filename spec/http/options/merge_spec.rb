@@ -21,28 +21,25 @@ describe HTTP::Options, 'merge' do
 
     foo = HTTP::Options.new(
       :response  => :body,
-      :params      => {:baz => 'bar'},
+      :params    => {:baz => 'bar'},
       :form      => {:foo => 'foo'},
       :body      => 'body-foo',
-      :headers   => {:accept  => 'json',  :foo => 'foo'},
-      :proxy     => {})
+      :headers   => {:accept  => 'json',  :foo => 'foo'})
 
     bar = HTTP::Options.new(
       :response  => :parsed_body,
-      :params      => {:plop => 'plip'},
+      :params    => {:plop => 'plip'},
       :form      => {:bar => 'bar'},
       :body      => 'body-bar',
-      :headers   => {:accept  => 'xml', :bar => 'bar'},
-      :proxy     => {:proxy_address => '127.0.0.1', :proxy_port => 8080})
+      :headers   => {:accept  => 'xml', :bar => 'bar'})
 
     expect(foo.merge(bar).to_hash).to eq(
       :response  => :parsed_body,
-      :params => {:plop => 'plip'},
+      :params    => {:plop => 'plip'},
       :form      => {:bar => 'bar'},
       :body      => 'body-bar',
       :headers   => {:accept  => 'xml', :foo => 'foo', :bar => 'bar', 'User-Agent' => user_agent},
-      :proxy     => {:proxy_address => '127.0.0.1', :proxy_port => 8080},
-      :follow => nil,
+      :follow    => nil,
       :socket_class     => described_class.default_socket_class,
       :ssl_socket_class => described_class.default_ssl_socket_class,
       :ssl_context      => nil)

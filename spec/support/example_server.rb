@@ -21,9 +21,6 @@ class ExampleService < WEBrick::HTTPServlet::AbstractServlet
         response.status = 200
         response.body     = 'Params!'
       end
-    when '/proxy'
-      response.status = 200
-      response.body     = 'Proxy!'
     when '/not-found'
       response.body   = 'not found'
       response.status = 404
