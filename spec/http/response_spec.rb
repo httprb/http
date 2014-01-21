@@ -24,4 +24,26 @@ describe HTTP::Response do
       expect(subject.to_a).to eq([200, {'Content-Type' => content_type}, body])
     end
   end
+
+  describe '#parse' do
+    let(:response) { HTTP::Response.new(200, '1.1', headers, body) }
+
+    context 'with known MIME type' do
+      let(:body)     { '{"hello":"world"}' }
+      let(:headers)  { {'Content-Type' => 'application/json'} }
+
+      it 'returns body parsed with proper MIME type adapter' do
+        expect(response.parse).to eq 'hello' => 'world'
+      end
+    end
+
+    context 'with unknown MIME type' do
+      let(:body)     { '{"hello":"world"}' }
+      let(:headers)  { {'Content-Type' => 'unknown/type'} }
+
+      it 'returns stringified body as is' do
+        expect(response.parse).to eq body
+      end
+    end
+  end
 end
