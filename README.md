@@ -97,12 +97,6 @@ Want to POST with a specific body, JSON for instance?
 HTTP.post "http://example.com/resource", :body => JSON.dump(:foo => '42')
 ```
 
-Or have it serialize JSON for you:
-
-```ruby
-HTTP.post "http://example.com/resource", :json => {:foo => '42'}
-```
-
 It's easy!
 
 Adding Headers
@@ -150,7 +144,8 @@ right? But usually it's not, and so we end up adding ".json" onto the ends of
 our URLs because the existing mechanisms make it too hard. It should be easy:
 
 ```ruby
-HTTP.accept(:json).get("https://github.com/tarcieri/http/commit/HEAD")
+HTTP.accept('application/json').
+  get("https://github.com/tarcieri/http/commit/HEAD")
 ```
 
 This adds the appropriate Accept header for retrieving a JSON response for the

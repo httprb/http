@@ -19,7 +19,7 @@ describe HTTP do
 
     context 'with headers' do
       it 'should be easy' do
-        response = HTTP.accept(:json).get test_endpoint
+        response = HTTP.accept('application/json').get test_endpoint
         expect(response.to_s.include?('json')).to be true
       end
     end
