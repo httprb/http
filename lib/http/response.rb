@@ -119,6 +119,12 @@ module HTTP
       body.to_s
     end
 
+    # MIME type of response (if any)
+    # @return [String, nil]
+    def mime_type
+      @mime_type ||= @headers['Content-Type'].split(/;\s*/).first
+    end
+
     # Inspect a response
     def inspect
       "#<#{self.class}/#{@version} #{status} #{reason} @headers=#{@headers.inspect}>"

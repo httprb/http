@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'json'
 
 describe HTTP::Response do
   describe 'headers' do
@@ -22,6 +21,14 @@ describe HTTP::Response do
 
     it 'returns a Rack-like array' do
       expect(subject.to_a).to eq([200, {'Content-Type' => content_type}, body])
+    end
+  end
+
+  describe 'mime_type' do
+    it 'strips out charset' do
+      headers  = {'Content-Type' => 'text/html; charset=utf8'}
+      response = HTTP::Response.new 200, '1.1', headers, ''
+      expect(response.mime_type).to eq 'text/html'
     end
   end
 end
