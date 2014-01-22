@@ -72,13 +72,7 @@ module HTTP
 
     # Accept the given MIME type(s)
     def accept(type)
-      if type.is_a?(String)
-        with :accept => type
-      else
-        mime_type = HTTP::MimeType[type]
-        fail(ArgumentError, "unknown MIME type: #{type}") unless mime_type
-        with :accept => mime_type.type
-      end
+      with :accept => type
     end
 
     def default_options

@@ -2,7 +2,6 @@ require 'http/parser'
 
 require 'http/chainable'
 require 'http/client'
-require 'http/mime_type'
 require 'http/options'
 require 'http/request'
 require 'http/request_stream'
