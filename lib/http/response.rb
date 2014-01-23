@@ -118,6 +118,7 @@ module HTTP
     def to_s
       body.to_s
     end
+    alias_method :to_str, :to_s
 
     # MIME type of response (if any)
     # @return [String, nil]
