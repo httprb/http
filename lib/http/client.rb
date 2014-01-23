@@ -26,7 +26,7 @@ module HTTP
       headers = opts.headers
 
       request_body = make_request_body(opts, headers)
-      uri = "#{uri}?#{URI.encode_www_form(opts.params)}" if opts.params
+      uri = "#{uri}?#{URI.encode_www_form(opts.params)}" if opts.params && !opts.params.empty?
 
       request = HTTP::Request.new(verb, uri, headers, request_body)
       perform request, opts

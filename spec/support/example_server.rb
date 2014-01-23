@@ -73,6 +73,9 @@ ExampleServer = WEBrick::HTTPServer.new(:Port => ExampleService::PORT, :AccessLo
 ExampleServer.mount '/', ExampleService
 
 t = Thread.new { ExampleServer.start }
-trap('INT')    { ExampleServer.shutdown; exit }
+trap('INT') do
+  ExampleServer.shutdown
+  exit
+end
 
 Thread.pass while t.status && t.status != 'sleep'
