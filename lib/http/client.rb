@@ -68,8 +68,12 @@ module HTTP
 
       chunk = @parser.chunk
       unless chunk
-        @parser << @socket.readpartial(BUFFER_SIZE)
-        chunk = @parser.chunk
+        begin
+          @parser << @socket.readpartial(BUFFER_SIZE)
+          chunk = @parser.chunk
+        rescue EOFError
+          chunk = nil
+        end
 
         # TODO: consult @body_remaining here and raise if appropriate
         return unless chunk
