@@ -128,7 +128,10 @@ module HTTP
     # Callback for when we've reached the end of a response
     def finish_response
       # TODO: keep-alive support
-      @socket = nil
+      if @socket
+        @socket.close()
+        @socket = nil
+      end
     end
   end
 end
