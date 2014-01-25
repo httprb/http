@@ -3,6 +3,7 @@ require 'json'
 
 describe HTTP do
   let(:test_endpoint)  { "http://127.0.0.1:#{ExampleService::PORT}/" }
+  let(:proxy_endpoint) { "#{test_endpoint}proxy" }
 
   context 'getting resources' do
     it 'should be easy' do
@@ -22,6 +23,35 @@ describe HTTP do
         response = HTTP.accept('application/json').get test_endpoint
         expect(response.to_s.include?('json')).to be true
       end
+    end
+  end
+
+  context 'with http proxy address and port' do
+    it 'should proxy the request' do
+      response = HTTP.via('127.0.0.1', 8080).get proxy_endpoint
+      expect(response.to_s).to match(/Proxy!/)
+    end
+  end
+
+  context 'with http proxy address, port username and password' do
+    it 'should proxy the request' do
+      response = HTTP.via('127.0.0.1', 8081, 'username', 'password').get proxy_endpoint
+      expect(response.to_s).to match(/Proxy!/)
+    end
+  end
+
+  context 'with http proxy address, port, with wrong username and password' do
+    it 'should proxy the request' do
+      pending 'fixing proxy support'
+
+      response = HTTP.via('127.0.0.1', 8081, 'user', 'pass').get proxy_endpoint
+      expect(response.to_s).to match(/Proxy Authentication Required/)
+    end
+  end
+
+  context 'without proxy port' do
+    it 'should raise an argument error' do
+      expect { HTTP.via('127.0.0.1') }.to raise_error ArgumentError
     end
   end
 
