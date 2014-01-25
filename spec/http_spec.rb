@@ -3,7 +3,6 @@ require 'json'
 
 describe HTTP do
   let(:test_endpoint)  { "http://127.0.0.1:#{ExampleService::PORT}/" }
-  let(:proxy_endpoint) { "#{test_endpoint}proxy" }
 
   context 'getting resources' do
     it 'should be easy' do
@@ -28,24 +27,27 @@ describe HTTP do
 
   context 'with http proxy address and port' do
     it 'should proxy the request' do
-      response = HTTP.via('127.0.0.1', 8080).get proxy_endpoint
-      expect(response.to_s).to match(/Proxy!/)
+      response = HTTP.via('127.0.0.1', 8080).get test_endpoint
+      expect(response.headers['X-Proxied']).to eq 'true'
     end
   end
 
   context 'with http proxy address, port username and password' do
     it 'should proxy the request' do
-      response = HTTP.via('127.0.0.1', 8081, 'username', 'password').get proxy_endpoint
-      expect(response.to_s).to match(/Proxy!/)
+      response = HTTP.via('127.0.0.1', 8081, 'username', 'password').get test_endpoint
+      expect(response.headers['X-Proxied']).to eq 'true'
+    end
+
+    it 'responds with the endpoint\'s body' do
+      response = HTTP.via('127.0.0.1', 8081, 'username', 'password').get test_endpoint
+      expect(response.to_s).to match(/<!doctype html>/)
     end
   end
 
   context 'with http proxy address, port, with wrong username and password' do
-    it 'should proxy the request' do
-      pending 'fixing proxy support'
-
-      response = HTTP.via('127.0.0.1', 8081, 'user', 'pass').get proxy_endpoint
-      expect(response.to_s).to match(/Proxy Authentication Required/)
+    it 'responds with 407' do
+      response = HTTP.via('127.0.0.1', 8081, 'user', 'pass').get test_endpoint
+      expect(response.status).to eq(407)
     end
   end
 

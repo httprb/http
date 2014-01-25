@@ -1,9 +1,14 @@
 require 'webrick/httpproxy'
 
-ProxyServer = WEBrick::HTTPProxyServer.new(:Port => 8080, :AccessLog => [])
+handler = proc do | req, res |
+  res['X-PROXIED'] = true
+end
 
-Thread.new  { ProxyServer.start }
-trap('INT') { ProxyServer.shutdown; exit }
+ProxyServer = WEBrick::HTTPProxyServer.new(
+  :Port => 8080,
+  :AccessLog => [],
+  :RequestCallback => handler
+)
 
 AuthenticatedProxyServer = WEBrick::HTTPProxyServer.new(
   :Port => 8081,
@@ -11,8 +16,18 @@ AuthenticatedProxyServer = WEBrick::HTTPProxyServer.new(
     WEBrick::HTTPAuth.proxy_basic_auth(req, res, 'proxy') do | user, pass |
       user == 'username' && pass == 'password'
     end
-  end
+  end,
+  :RequestCallback => handler
 )
 
+Thread.new  { ProxyServer.start }
+trap('INT') do
+  ProxyServer.shutdown
+  exit
+end
+
 Thread.new  { AuthenticatedProxyServer.start }
-trap('INT') { AuthenticatedProxyServer.shutdown; exit }
+trap('INT') do
+  AuthenticatedProxyServer.shutdown
+  exit
+end
