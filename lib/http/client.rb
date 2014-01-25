@@ -90,8 +90,8 @@ module HTTP
     def perform_without_following_redirects(req, options)
       uri = req.uri
 
-      # TODO: proxy support, keep-alive support
-      @socket = options[:socket_class].open(uri.host, uri.port)
+      # TODO: keep-alive support
+      @socket = options[:socket_class].open(req.socket_host, req.socket_port)
       @socket = start_tls(@socket, options) if uri.is_a?(URI::HTTPS)
 
       req.stream @socket

@@ -1,6 +1,7 @@
 require 'http/header'
 require 'http/request_stream'
 require 'uri'
+require 'base64'
 
 module HTTP
   class Request
@@ -94,11 +95,46 @@ module HTTP
 
     # Stream the request to a socket
     def stream(socket)
-      path = uri.query && !uri.query.empty? ? "#{uri.path}?#{uri.query}" : uri.path
-      path = '/' if path.empty?
-      request_header = "#{verb.to_s.upcase} #{path} HTTP/#{version}"
+      include_proxy_authorization_header if using_authenticated_proxy?
       rs = HTTP::RequestStream.new socket, body, @headers, request_header
       rs.stream
+    end
+
+    # Is this request using a proxy?
+    def using_proxy?
+      proxy && proxy.keys.size >= 2
+    end
+
+    # Is this request using an authenticated proxy?
+    def using_authenticated_proxy?
+      proxy && proxy.keys.size == 4
+    end
+
+    # Compute and add the Proxy-Authorization header
+    def include_proxy_authorization_header
+      digest = Base64.encode64("#{proxy[:proxy_username]}:#{proxy[:proxy_password]}").chomp
+      @headers['Proxy-Authorization'] = "Basic #{digest}"
+    end
+
+    # Compute HTTP request header for direct or proxy request
+    def request_header
+      if using_proxy?
+        "#{verb.to_s.upcase} #{uri.to_s} HTTP/#{version}"
+      else
+        path = uri.query && !uri.query.empty? ? "#{uri.path}?#{uri.query}" : uri.path
+        path = '/' if path.empty?
+        "#{verb.to_s.upcase} #{path} HTTP/#{version}"
+      end
+    end
+
+    # Host for tcp socket
+    def socket_host
+      using_proxy? ? proxy[:proxy_address] : uri.host
+    end
+
+    # Port for tcp socket
+    def socket_port
+      using_proxy? ? proxy[:proxy_port] : uri.port
     end
   end
 end
