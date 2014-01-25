@@ -58,7 +58,7 @@ module HTTP
       proxy_hash[:proxy_username] = proxy[2] if proxy[2].is_a?(String)
       proxy_hash[:proxy_password] = proxy[3] if proxy[3].is_a?(String)
 
-      if proxy_hash.keys.size >= 2
+      if [2,4].include?(proxy_hash.keys.size)
         branch default_options.with_proxy(proxy_hash)
       else
         fail(ArgumentError, "invalid HTTP proxy: #{proxy_hash}")
