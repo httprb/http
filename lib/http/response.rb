@@ -1,5 +1,6 @@
 require 'delegate'
 require 'http/header'
+require 'http/content_type'
 
 module HTTP
   class Response
@@ -120,10 +121,22 @@ module HTTP
     end
     alias_method :to_str, :to_s
 
+    # Parsed Content-Type header
+    # @return [HTTP::ContentType]
+    def content_type
+      @content_type ||= ContentType.parse @headers['Content-Type']
+    end
+
     # MIME type of response (if any)
     # @return [String, nil]
     def mime_type
-      @mime_type ||= @headers['Content-Type'].split(/;\s*/).first
+      @mime_type ||= content_type.mime_type
+    end
+
+    # Charset of response (if any)
+    # @return [String, nil]
+    def charset
+      @mime_type ||= content_type.charset
     end
 
     # Inspect a response
