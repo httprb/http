@@ -25,10 +25,40 @@ describe HTTP::Response do
   end
 
   describe 'mime_type' do
-    it 'strips out charset' do
-      headers  = {'Content-Type' => 'text/html; charset=utf8'}
-      response = HTTP::Response.new 200, '1.1', headers, ''
-      expect(response.mime_type).to eq 'text/html'
+    subject { HTTP::Response.new(200, '1.1', headers, '').mime_type }
+
+    context 'without Content-Type header' do
+      let(:headers) { {} }
+      it { should be_nil }
+    end
+
+    context 'with Content-Type: text/html' do
+      let(:headers) { {'Content-Type' => 'text/html'} }
+      it { should eq 'text/html' }
+    end
+
+    context 'with Content-Type: text/html; charset=utf-8' do
+      let(:headers) { {'Content-Type' => 'text/html; charset=utf-8'} }
+      it { should eq 'text/html' }
+    end
+  end
+
+  describe 'charset' do
+    subject { HTTP::Response.new(200, '1.1', headers, '').charset }
+
+    context 'without Content-Type header' do
+      let(:headers) { {} }
+      it { should be_nil }
+    end
+
+    context 'with Content-Type: text/html' do
+      let(:headers) { {'Content-Type' => 'text/html'} }
+      it { should be_nil }
+    end
+
+    context 'with Content-Type: text/html; charset=utf-8' do
+      let(:headers) { {'Content-Type' => 'text/html; charset=utf-8'} }
+      it { should eq 'utf-8' }
     end
   end
 end
