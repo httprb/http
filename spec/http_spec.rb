@@ -25,6 +25,38 @@ describe HTTP do
     end
   end
 
+  context 'with http proxy address and port' do
+    it 'should proxy the request' do
+      response = HTTP.via('127.0.0.1', 8080).get test_endpoint
+      expect(response.headers['X-Proxied']).to eq 'true'
+    end
+  end
+
+  context 'with http proxy address, port username and password' do
+    it 'should proxy the request' do
+      response = HTTP.via('127.0.0.1', 8081, 'username', 'password').get test_endpoint
+      expect(response.headers['X-Proxied']).to eq 'true'
+    end
+
+    it 'responds with the endpoint\'s body' do
+      response = HTTP.via('127.0.0.1', 8081, 'username', 'password').get test_endpoint
+      expect(response.to_s).to match(/<!doctype html>/)
+    end
+  end
+
+  context 'with http proxy address, port, with wrong username and password' do
+    it 'responds with 407' do
+      response = HTTP.via('127.0.0.1', 8081, 'user', 'pass').get test_endpoint
+      expect(response.status).to eq(407)
+    end
+  end
+
+  context 'without proxy port' do
+    it 'should raise an argument error' do
+      expect { HTTP.via('127.0.0.1') }.to raise_error ArgumentError
+    end
+  end
+
   context 'posting to resources' do
     it 'should be easy to post forms' do
       response = HTTP.post "#{test_endpoint}form", :form => {:example => 'testing-form'}
