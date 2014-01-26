@@ -74,8 +74,14 @@ module HTTP
     alias_method :code,        :status
     alias_method :status_code, :status
 
-    def initialize(status, version, headers, body, uri = nil) # rubocop:disable ParameterLists
-      @status, @version, @body, @uri = status, version, body, uri
+    def initialize(connection, status, version, headers, uri = nil) # rubocop:disable ParameterLists
+      @connection    = connection
+      @status        = status
+      @version       = version
+      @uri           = uri
+      @finished_read = false
+      @buffer        = ""
+      @body          = Response::Body.new(self)
 
       @headers = {}
       headers.each { |field, value| self[field] = value }
@@ -136,26 +142,66 @@ module HTTP
       @mime_type ||= content_type.charset
     end
 
+    # Returns true if request fully finished reading
+    def finished_reading?; @finished_read; end
+
+    # When HTTP Parser marks the message parsing as complete, this will be set.
+    def finish_reading!
+      raise StateError, "already finished" if @finished_read
+      @finished_read = true
+    end
+
+    # Fill the request buffer with data as it becomes available
+    def fill_buffer(chunk)
+      @buffer << chunk
+    end
+
+    # Read a number of bytes, looping until they are available or until
+    # readpartial returns nil, indicating there are no more bytes to read
+    def read(length = nil, buffer = nil)
+      raise ArgumentError, "negative length #{length} given" if length && length < 0
+
+      return '' if length == 0
+      res = buffer.nil? ? '' : buffer.clear
+
+      chunk_size = length.nil? ? @connection.buffer_size : length
+      begin
+        while chunk_size > 0
+          chunk = readpartial(chunk_size)
+          break unless chunk
+          res << chunk
+          chunk_size = length - res.length unless length.nil?
+        end
+      rescue EOFError
+      end
+      return length && res.length == 0 ? nil : res
+    end
+
+    # Read a string up to the given number of bytes, blocking until some
+    # data is available but returning immediately if some data is available
+    def readpartial(length = nil)
+      if length.nil? && @buffer.length > 0
+        slice = @buffer
+        @buffer = ""
+      else
+        unless finished_reading? || (length && length <= @buffer.length)
+          @connection.readpartial(length ? length - @buffer.length : @connection.buffer_size)
+        end
+
+        if length
+          slice = @buffer.slice!(0, length)
+        else
+          slice = @buffer
+          @buffer = ""
+        end
+      end
+
+      slice && slice.length == 0 ? nil : slice
+    end
+
     # Inspect a response
     def inspect
       "#<#{self.class}/#{@version} #{status} #{reason} @headers=#{@headers.inspect}>"
-    end
-
-    class BodyDelegator < ::Delegator
-      attr_reader :response
-
-      def initialize(response, body = response.body)
-        super(body)
-        @response, @body = response, body
-      end
-
-      def __getobj__
-        @body
-      end
-
-      def __setobj__(obj)
-        @body = obj
-      end
     end
   end
 end

@@ -2,6 +2,7 @@ require 'http/parser'
 
 require 'http/chainable'
 require 'http/client'
+require 'http/connection'
 require 'http/options'
 require 'http/request'
 require 'http/request/writer'

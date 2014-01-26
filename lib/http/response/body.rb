@@ -8,8 +8,8 @@ module HTTP
       include Enumerable
       def_delegator :to_s, :empty?
 
-      def initialize(client)
-        @client    = client
+      def initialize(response)
+        @response  = response
         @streaming = nil
         @contents  = nil
       end
@@ -17,13 +17,13 @@ module HTTP
       # Read exactly the given amount of data
       def read(length)
         stream!
-        @client.read(length)
+        @response.read(length)
       end
 
       # Read up to length bytes, but return any data that's available
       def readpartial(length = nil)
         stream!
-        @client.readpartial(length)
+        @response.readpartial(length)
       end
 
       # Iterate over the body, allowing it to be enumerable
@@ -34,14 +34,14 @@ module HTTP
       end
 
       # Eagerly consume the entire body as a string
-      def to_s
+      def to_str
         return @contents if @contents
         fail StateError, 'body is being streamed' unless @streaming.nil?
 
         begin
           @streaming = false
           @contents = ''
-          while (chunk = @client.readpartial)
+          while (chunk = @response.readpartial)
             @contents << chunk
           end
         rescue
@@ -51,18 +51,19 @@ module HTTP
 
         @contents
       end
-      alias_method :to_str, :to_s
+      alias_method :to_s, :to_str
+
+      # Easier to interpret string inspect
+      def inspect
+        "#<#{self.class}:#{object_id.to_s(16)} @streaming=#{!!@streaming}>"
+      end
 
       # Assert that the body is actively being streamed
       def stream!
         fail StateError, 'body has already been consumed' if @streaming == false
         @streaming = true
       end
-
-      # Easier to interpret string inspect
-      def inspect
-        "#<#{self.class}:#{object_id.to_s(16)} @streaming=#{!!@streaming}>"
-      end
+      private :stream!
     end
   end
 end
