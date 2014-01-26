@@ -35,7 +35,7 @@ module HTTP
     METHODS.concat [:search]
 
     # Allowed schemes
-    SCHEMES = [:http, :https]
+    SCHEMES = [:http, :https, :ws, :wss]
 
     # Method is given as a lowercase symbol e.g. :get, :post
     attr_reader :verb
