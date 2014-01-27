@@ -9,15 +9,19 @@ SEO Note
 --------
 
 This Gem has the worst name in the history of SEO. But perhaps we can fix that if we
-all refer to it as "The HTTP Gem". Entering that phrase into Google actually pulls it
-up as #1 for me!
+all refer to it as "The HTTP Gem", or even better, the "Ruby HTTP Gem".
 
 About
 -----
 
 The HTTP Gem is an easy-to-use client library for making requests from Ruby. It uses
-a simple method chaining system for building requests, similar to libraries
-like JQuery or Python's [Requests](http://docs.python-requests.org/en/latest/).
+a simple method chaining system for building requests, similar to Python's [Requests]
+
+Under the hood, The HTTP Gem uses [http_parser.rb], a fast HTTP parsing native
+extension based on the Node.js parser and a Java port thereof.
+
+[requests]: http://docs.python-requests.org/en/latest/
+[http_parser.rb]: https://github.com/tmm1/http_parser.rb
 
 Installation
 ------------
@@ -40,12 +44,30 @@ Inside of your Ruby program do:
 
 ...to pull it in as a dependency.
 
-Making Requests
----------------
+Documentation
+-------------
+
+[Please see the HTTP Gem Wiki](https://github.com/tarcieri/http/wiki)
+for more detailed documentation and usage notes.
+
+Support
+-------
+
+For help with The HTTP Gem, either open a [Github Issue] or discuss it
+on the Celluloid mailing list:
+
+http://groups.google.com/group/celluloid-ruby
+
+You can also find us on IRC at #celluloid on freenode
+
+[Github Issue]: https://github.com/tarcieri/http/issues
+
+Basic Usage
+-----------
+
+Here's some simple examples to get you started:
 
 ### GET requests
-
-Let's start with getting the response body as a string:
 
 ```ruby
 >> HTTP.get("http://www.google.com").to_s
