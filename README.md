@@ -121,7 +121,7 @@ HTTP.post "http://example.com/resource", :body => JSON.dump(:foo => '42')
 
 It's easy!
 
-## Adding Headers
+### Adding Headers
 
 The HTTP gem uses the concept of chaining to simplify requests. Let's say
 you want to get the latest commit of this library from Github in JSON format.
@@ -157,7 +157,7 @@ HTTP[:accept => 'application/json'].
   get("https://github.com/tarcieri/http/commit/HEAD")
 ```
 
-## Content Negotiation
+### Content Negotiation
 
 As important a concept as content negotiation is to HTTP, it sure should be easy,
 right? But usually it's not, and so we end up adding ".json" onto the ends of
@@ -171,7 +171,7 @@ HTTP.accept('application/json').
 This adds the appropriate Accept header for retrieving a JSON response for the
 given resource.
 
-## Celluloid::IO Support
+### Celluloid::IO Support
 
 The HTTP Gem makes it simple to make multiple concurrent HTTP requests from a
 Celluloid::IO actor. Here's a parallel HTTP fetcher with the HTTP Gem and
@@ -195,15 +195,15 @@ There's a little more to it, but that's the core idea!
 * [Full parallel HTTP fetcher example](https://github.com/tarcieri/http/wiki/Parallel-requests-with-Celluloid%3A%3AIO)
 * See also: [Celluloid::IO](https://github.com/celluloid/celluloid-io)
 
-Contributing to the HTTP gem
---------------------
+Contributing to The HTTP Gem
+----------------------------
 
 * Fork the HTTP gem on github
 * Make your changes and send me a pull request
-* If I like them I'll merge them
-* If I've accepted a patch, feel free to ask for a commit bit!
+* If we like them we'll merge them
+* If we've accepted a patch, feel free to ask for commit access!
 
 Copyright
 ---------
 
-Copyright (c) 2014 Tony Arcieri. See LICENSE.txt for further details.
+Copyright (c) 2014 Tony Arcieri, Erik Michaels-Ober. See LICENSE.txt for further details.
