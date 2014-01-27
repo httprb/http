@@ -121,8 +121,7 @@ HTTP.post "http://example.com/resource", :body => JSON.dump(:foo => '42')
 
 It's easy!
 
-Adding Headers
---------------
+## Adding Headers
 
 The HTTP gem uses the concept of chaining to simplify requests. Let's say
 you want to get the latest commit of this library from Github in JSON format.
@@ -158,8 +157,7 @@ HTTP[:accept => 'application/json'].
   get("https://github.com/tarcieri/http/commit/HEAD")
 ```
 
-Content Negotiation
--------------------
+## Content Negotiation
 
 As important a concept as content negotiation is to HTTP, it sure should be easy,
 right? But usually it's not, and so we end up adding ".json" onto the ends of
@@ -173,8 +171,7 @@ HTTP.accept('application/json').
 This adds the appropriate Accept header for retrieving a JSON response for the
 given resource.
 
-Celluloid::IO Support
----------------------
+## Celluloid::IO Support
 
 The HTTP Gem makes it simple to make multiple concurrent HTTP requests from a
 Celluloid::IO actor. Here's a parallel HTTP fetcher with the HTTP Gem and
