@@ -1,7 +1,11 @@
+require 'forwardable'
+
 module HTTP
   # A streamable response body, also easily converted into a string
   class ResponseBody
+    extend Forwardable
     include Enumerable
+    def_delegator :to_s, :empty?
 
     def initialize(client)
       @client    = client
