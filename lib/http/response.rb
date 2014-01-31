@@ -78,9 +78,7 @@ module HTTP
       @status, @version, @body, @uri = status, version, body, uri
 
       @headers = {}
-      headers.each do |field, value|
-        @headers[canonicalize_header(field)] = value
-      end
+      headers.each { |field, value| self[field] = value }
     end
 
     # Set a header
