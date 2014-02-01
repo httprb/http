@@ -90,9 +90,8 @@ module HTTP
       key ||= canonicalize_header(name)
 
       # Check if the header has already been set and group
-      old_value = @headers[key]
-      if old_value
-        @headers[key] = [old_value].flatten << key
+      if @headers.key? key
+        @headers[key] = Array(@headers[key]) + Array(value)
       else
         @headers[key] = value
       end
