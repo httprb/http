@@ -1,5 +1,5 @@
 require 'http/header'
-require 'http/request_stream'
+require 'http/request/writer'
 require 'uri'
 require 'base64'
 
@@ -96,8 +96,7 @@ module HTTP
     # Stream the request to a socket
     def stream(socket)
       include_proxy_authorization_header if using_authenticated_proxy?
-      rs = HTTP::RequestStream.new socket, body, @headers, request_header
-      rs.stream
+      Request::Writer.new(socket, body, @headers, request_header).stream
     end
 
     # Is this request using a proxy?

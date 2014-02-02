@@ -1,10 +1,11 @@
 require 'spec_helper'
 
-describe HTTP::ResponseBody do
+describe HTTP::Response::Body do
   let(:body)     { 'Hello, world!' }
   let(:response) { double(:response) }
 
   subject { described_class.new(response) }
+
   before do
     response.should_receive(:readpartial).and_return(body)
     response.should_receive(:readpartial).and_return(nil)

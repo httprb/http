@@ -102,8 +102,8 @@ module HTTP
         raise IOError, "problem making HTTP request: #{ex}"
       end
 
-      body = HTTP::ResponseBody.new(self)
-      HTTP::Response.new(@parser.status_code, @parser.http_version, @parser.headers, body, uri)
+      body = Response::Body.new(self)
+      Response.new(@parser.status_code, @parser.http_version, @parser.headers, body, uri)
     end
 
     # Initialize TLS connection
