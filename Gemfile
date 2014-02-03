@@ -27,11 +27,5 @@ group :test do
   gem 'yardstick'
 end
 
-platforms :rbx do
-  gem 'racc'
-  gem 'rubinius-coverage', '~> 2.0'
-  gem 'rubysl', '~> 2.0'
-end
-
 # Specify your gem's dependencies in http.gemspec
 gemspec
