@@ -133,7 +133,7 @@ module HTTP
     # Charset of response (if any)
     # @return [String, nil]
     def charset
-      @mime_type ||= content_type.charset
+      @charset ||= content_type.charset
     end
 
     # Inspect a response
