@@ -1,7 +1,7 @@
 module HTTP
   class Redirector
     # Notifies that we reached max allowed redirect hops
-    class TooManyRedirectsError < RuntimeError; end
+    class TooManyRedirectsError < ResponseError; end
 
     # Notifies that following redirects got into an endless loop
     class EndlessRedirectError < TooManyRedirectsError; end

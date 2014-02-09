@@ -8,10 +8,10 @@ module HTTP
     include HTTP::Header
 
     # The method given was not understood
-    class UnsupportedMethodError < ArgumentError; end
+    class UnsupportedMethodError < RequestError; end
 
     # The scheme of given URI was not understood
-    class UnsupportedSchemeError < ArgumentError; end
+    class UnsupportedSchemeError < RequestError; end
 
     # Prefix for relative URLs
     PREFIX_RE = %r{^[^:]+://[^/]+}

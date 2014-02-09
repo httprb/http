@@ -53,7 +53,7 @@ describe HTTP do
 
   context 'without proxy port' do
     it 'should raise an argument error' do
-      expect { HTTP.via('127.0.0.1') }.to raise_error ArgumentError
+      expect { HTTP.via('127.0.0.1') }.to raise_error HTTP::RequestError
     end
   end
 
