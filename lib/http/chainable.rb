@@ -124,6 +124,5 @@ module HTTP
     def branch(options)
       HTTP::Client.new(options)
     end
-    private :branch
   end
 end
