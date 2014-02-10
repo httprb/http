@@ -61,7 +61,7 @@ module HTTP
       if [2, 4].include?(proxy_hash.keys.size)
         branch default_options.with_proxy(proxy_hash)
       else
-        fail(ArgumentError, "invalid HTTP proxy: #{proxy_hash}")
+        fail(RequestError, "invalid HTTP proxy: #{proxy_hash}")
       end
     end
     alias_method :through, :via

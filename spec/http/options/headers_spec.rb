@@ -23,7 +23,7 @@ describe HTTP::Options, 'headers' do
   it 'recognizes invalid headers' do
     expect do
       opts.with_headers(self)
-    end.to raise_error(ArgumentError)
+    end.to raise_error(HTTP::Error)
   end
 
 end

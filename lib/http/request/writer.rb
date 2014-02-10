@@ -6,7 +6,7 @@ module HTTP
 
       def initialize(socket, body, headers, headerstart) # rubocop:disable ParameterLists
         @body           = body
-        fail(ArgumentError, 'body of wrong type') unless valid_body_type
+        fail(RequestError, 'body of wrong type') unless valid_body_type
         @socket         = socket
         @headers        = headers
         @request_header = [headerstart]
@@ -41,7 +41,7 @@ module HTTP
           if encoding == 'chunked'
             @request_header << 'Transfer-Encoding: chunked'
           else
-            fail(ArgumentError, 'invalid transfer encoding')
+            fail(RequestError, 'invalid transfer encoding')
           end
         end
       end
