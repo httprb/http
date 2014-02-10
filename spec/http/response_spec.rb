@@ -19,7 +19,7 @@ describe HTTP::Response do
       let(:headers) { {'Set-Cookie' => 'a=1;', 'set-cookie' => 'b=2;'} }
 
       it 'groups values into Array' do
-        expect(response['Set-Cookie']).to eq(['a=1;', 'b=2;'])
+        expect(response['Set-Cookie']).to match_array ['a=1;', 'b=2;']
       end
     end
   end
