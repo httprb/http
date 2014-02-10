@@ -1,11 +1,11 @@
-require 'http/header'
+require 'http/headers'
 require 'http/request/writer'
 require 'uri'
 require 'base64'
 
 module HTTP
   class Request
-    include HTTP::Header
+    include HTTP::Headers::Mixin
 
     # The method given was not understood
     class UnsupportedMethodError < RequestError; end
@@ -57,7 +57,7 @@ module HTTP
     # "Request URI" as per RFC 2616
     # http://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html
     attr_reader :uri
-    attr_reader :headers, :proxy, :body, :version
+    attr_reader :proxy, :body, :version
 
     # :nodoc:
     def initialize(verb, uri, headers = {}, proxy = {}, body = nil, version = '1.1') # rubocop:disable ParameterLists
@@ -68,16 +68,10 @@ module HTTP
       fail(UnsupportedMethodError, "unknown method: #{verb}") unless METHODS.include?(verb)
       fail(UnsupportedSchemeError, "unknown scheme: #{scheme}") unless SCHEMES.include?(scheme)
 
-      @headers = {}
-      headers.each do |name, value|
-        name = name.to_s
-        key = name[CANONICAL_HEADER]
-        key ||= canonicalize_header(name)
-        @headers[key] = value
-      end
-      @headers['Host'] ||= @uri.host
-
       @proxy, @body, @version = proxy, body, version
+
+      @headers = HTTP::Headers.new(headers)
+      @headers['Host'] ||= @uri.host
     end
 
     # Returns new Request with updated uri
@@ -88,15 +82,10 @@ module HTTP
       req
     end
 
-    # Obtain the given header
-    def [](header)
-      @headers[canonicalize_header(header)]
-    end
-
     # Stream the request to a socket
     def stream(socket)
       include_proxy_authorization_header if using_authenticated_proxy?
-      Request::Writer.new(socket, body, @headers, request_header).stream
+      Request::Writer.new(socket, body, headers, request_header).stream
     end
 
     # Is this request using a proxy?
@@ -112,7 +101,7 @@ module HTTP
     # Compute and add the Proxy-Authorization header
     def include_proxy_authorization_header
       digest = Base64.encode64("#{proxy[:proxy_username]}:#{proxy[:proxy_password]}").chomp
-      @headers['Proxy-Authorization'] = "Basic #{digest}"
+      headers['Proxy-Authorization'] = "Basic #{digest}"
     end
 
     # Compute HTTP request header for direct or proxy request

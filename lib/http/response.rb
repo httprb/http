@@ -1,10 +1,10 @@
 require 'delegate'
-require 'http/header'
+require 'http/headers'
 require 'http/content_type'
 
 module HTTP
   class Response
-    include HTTP::Header
+    include HTTP::Headers::Mixin
 
     STATUS_CODES = {
       100 => 'Continue',
@@ -66,7 +66,6 @@ module HTTP
     SYMBOL_TO_STATUS_CODE.freeze
 
     attr_reader :status
-    attr_reader :headers
     attr_reader :body
     attr_reader :uri
 
@@ -76,35 +75,12 @@ module HTTP
 
     def initialize(status, version, headers, body, uri = nil) # rubocop:disable ParameterLists
       @status, @version, @body, @uri = status, version, body, uri
-
-      @headers = {}
-      headers.each { |field, value| self[field] = value }
-    end
-
-    # Set a header
-    def []=(name, value)
-      # If we have a canonical header, we're done
-      key = name[CANONICAL_HEADER]
-
-      # Convert to canonical capitalization
-      key ||= canonicalize_header(name)
-
-      # Check if the header has already been set and group
-      if @headers.key? key
-        @headers[key] = Array(@headers[key]) + Array(value)
-      else
-        @headers[key] = value
-      end
+      @headers = HTTP::Headers.new(headers)
     end
 
     # Obtain the 'Reason-Phrase' for the response
     def reason
       STATUS_CODES[@status]
-    end
-
-    # Get a header value
-    def [](name)
-      @headers[name] || @headers[canonicalize_header(name)]
     end
 
     # Returns an Array ala Rack: `[status, headers, body]`
@@ -121,7 +97,7 @@ module HTTP
     # Parsed Content-Type header
     # @return [HTTP::ContentType]
     def content_type
-      @content_type ||= ContentType.parse @headers['Content-Type']
+      @content_type ||= ContentType.parse headers['Content-Type']
     end
 
     # MIME type of response (if any)
@@ -138,7 +114,7 @@ module HTTP
 
     # Inspect a response
     def inspect
-      "#<#{self.class}/#{@version} #{status} #{reason} @headers=#{@headers.inspect}>"
+      "#<#{self.class}/#{@version} #{status} #{reason} headers=#{headers.inspect}>"
     end
 
     class BodyDelegator < ::Delegator
