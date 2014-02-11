@@ -13,7 +13,7 @@ describe HTTP do
     context 'with URI instance' do
       it 'should be easy' do
         response = HTTP.get URI(test_endpoint)
-      expect(response.to_s).to match(/<!doctype html>/)
+        expect(response.to_s).to match(/<!doctype html>/)
       end
     end
 
