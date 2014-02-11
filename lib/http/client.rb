@@ -21,7 +21,7 @@ module HTTP
     # Make an HTTP request
     def request(verb, uri, options = {})
       opts = @default_options.merge(options)
-      host = URI.parse(uri).host
+      host = URI(uri).host
       opts.headers['Host'] = host
       headers = opts.headers
       proxy = opts.proxy
