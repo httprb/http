@@ -1,5 +1,6 @@
 require 'simplecov'
 require 'coveralls'
+require 'support/example_response'
 
 SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
   SimpleCov::Formatter::HTMLFormatter,
@@ -31,4 +32,21 @@ def capture_warning
     $stderr = old_stderr
   end
   result
+end
+
+def with_socket_pair
+  host = '127.0.0.1'
+  port = 10101
+
+  server = TCPServer.new(host, port)
+  client = TCPSocket.new(host, port)
+  peer   = server.accept
+
+  begin
+    yield client, peer
+  ensure
+    server.close rescue nil
+    client.close rescue nil
+    peer.close   rescue nil
+  end
 end

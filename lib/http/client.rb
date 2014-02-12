@@ -14,7 +14,6 @@ module HTTP
 
     def initialize(default_options = {})
       @default_options = HTTP::Options.new(default_options)
-      @parser = HTTP::Response::Parser.new
       @socket = nil
     end
 
@@ -40,48 +39,13 @@ module HTTP
       if options.follow
         res = Redirector.new(options.follow).perform req, res do |request|
           # TODO: keep-alive
-          @parser.reset
           finish_response
-
           perform_without_following_redirects request, options
         end
       end
 
       @body_remaining = Integer(res['Content-Length']) if res['Content-Length']
       res
-    end
-
-    # Read a chunk of the body
-    def readpartial(size = BUFFER_SIZE) # rubocop:disable CyclomaticComplexity
-      if @parser.finished? || (@body_remaining && @body_remaining.zero?)
-        chunk = @parser.chunk
-
-        if !chunk && @body_remaining && !@body_remaining.zero?
-          fail StateError, "expected #{@body_remaining} more bytes of body"
-        end
-
-        @body_remaining -= chunk.bytesize if chunk
-        return chunk
-      end
-
-      fail StateError, 'not connected' unless @socket
-
-      chunk = @parser.chunk
-      unless chunk
-        @parser << @socket.readpartial(BUFFER_SIZE)
-        chunk = @parser.chunk
-
-        # TODO: consult @body_remaining here and raise if appropriate
-        return unless chunk
-      end
-
-      if @body_remaining
-        @body_remaining -= chunk.bytesize
-        @body_remaining = nil if @body_remaining < 1
-      end
-
-      finish_response if @parser.finished?
-      chunk
     end
 
   private
@@ -93,17 +57,18 @@ module HTTP
       # TODO: keep-alive support
       @socket = options[:socket_class].open(req.socket_host, req.socket_port)
       @socket = start_tls(@socket, options) if uri.is_a?(URI::HTTPS)
+      connection = HTTP::Connection.new(@socket)
+      parser     = HTTP::Parser.new(connection)
 
       req.stream @socket
 
       begin
-        @parser << @socket.readpartial(BUFFER_SIZE) until @parser.headers
+        parser << @socket.readpartial(BUFFER_SIZE) until parser.headers
       rescue IOError, Errno::ECONNRESET, Errno::EPIPE => ex
         raise IOError, "problem making HTTP request: #{ex}"
       end
 
-      body = Response::Body.new(self)
-      Response.new(@parser.status_code, @parser.http_version, @parser.headers, body, uri)
+      HTTP::Response.new(connection, parser.status_code, parser.http_version, parser.headers, uri)
     end
 
     # Initialize TLS connection
