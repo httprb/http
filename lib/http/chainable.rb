@@ -71,6 +71,16 @@ module HTTP
       branch default_options.with_response(response_type)
     end
 
+    def auth(type, options = {})
+      case type
+      when :basic
+        encoded = Base64.encode64("#{options[:user]}:#{options[:pass]}")
+        with_headers "Authorization" => "Basic #{encoded}"
+      when :bearer
+        with_headers "Authorization" => "Bearer #{Base64.encode64(options)}"
+      end
+    end
+
     # Alias for with_response(:object)
     def stream
       with_response(:object)
