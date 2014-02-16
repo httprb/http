@@ -75,9 +75,9 @@ module HTTP
       case type
       when :basic
         encoded = Base64.encode64("#{options[:user]}:#{options[:pass]}")
-        with_headers "Authorization" => "Basic #{encoded}"
+        with_headers 'Authorization' => "Basic #{encoded}"
       when :bearer
-        with_headers "Authorization" => "Bearer #{Base64.encode64(options)}"
+        with_headers 'Authorization' => "Bearer #{Base64.encode64(options)}"
       end
     end
 
