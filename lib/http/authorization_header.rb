@@ -19,7 +19,7 @@ module HTTP
 
         fail Error, "Unknown authorization type #{type}" unless klass
 
-        klass.new(opts).to_s
+        klass.new opts
       end
 
     private

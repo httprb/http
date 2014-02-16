@@ -98,4 +98,32 @@ describe HTTP do
       expect(response['content-type']).to match(/html/)
     end
   end
+
+  describe '.auth' do
+    context 'with no arguments' do
+      specify { expect { HTTP.auth }.to raise_error }
+    end
+
+    context 'with one argument' do
+      it 'returns branch with Authorization header as is' do
+        expect(HTTP).to receive(:with) \
+          .with :authorization => 'foobar'
+
+        HTTP.auth :foobar
+      end
+    end
+
+    context 'with two arguments' do
+      it 'builds value with AuthorizationHeader builder' do
+        expect(HTTP::AuthorizationHeader).to receive(:build) \
+          .with(:bearer, :token => 'token')
+
+        HTTP.auth :bearer, :token => 'token'
+      end
+    end
+
+    context 'with more than two arguments' do
+      specify { expect { HTTP.auth 1, 2, 3 }.to raise_error }
+    end
+  end
 end

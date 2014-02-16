@@ -94,8 +94,14 @@ module HTTP
     end
 
     # Make a request with the given Authorization header
-    def auth(type, opts)
-      with :authorization => AuthorizationHeader.build(type, opts)
+    def auth(*args)
+      value = case args.count
+              when 1 then args.first
+              when 2 then AuthorizationHeader.build(*args)
+              else fail ArgumentError, "wrong number of arguments (#{args.count} for 1..2)"
+              end
+
+      with :authorization => value.to_s
     end
 
     def default_options
