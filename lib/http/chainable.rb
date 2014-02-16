@@ -1,3 +1,5 @@
+require 'http/authorization_header'
+
 module HTTP
   module Chainable
     # Request a get sans response body
@@ -89,6 +91,11 @@ module HTTP
     # Accept the given MIME type(s)
     def accept(type)
       with :accept => type
+    end
+
+    # Make a request with the given Authorization header
+    def auth(type, opts)
+      with :authorization => AuthorizationHeader.build(type, opts)
     end
 
     def default_options
