@@ -1,18 +1,14 @@
 require 'spec_helper'
 
 describe HTTP::Response do
-  describe 'headers' do
-    let(:body) { double(:body) }
-    let(:headers) { {'Content-Type' => 'text/plain'} }
+  describe '#headers' do
+    let(:body)      { double(:body) }
+    let(:headers)   { {'Content-Type' => 'text/plain'} }
 
     subject(:response) { HTTP::Response.new(200, '1.1', headers, body) }
 
-    it 'exposes header fields for easy access' do
-      expect(response['Content-Type']).to eq('text/plain')
-    end
-
-    it 'provides a #headers accessor too' do
-      expect(response.headers).to eq('Content-Type' => 'text/plain')
+    it 'is an instance of Headers' do
+      expect(response.headers).to be_a HTTP::Headers
     end
 
     context 'with duplicate header keys (mixed case)' do
@@ -24,28 +20,23 @@ describe HTTP::Response do
     end
   end
 
+  describe '#[]' do
+    let(:body) { double(:body) }
+    let(:response) { HTTP::Response.new(200, '1.1', {}, body) }
+
+    it 'is proxied to #headers' do
+      expect(response.headers).to receive(:[]).with(:cookie)
+      response[:cookie]
+    end
+  end
+
   describe '#[]=' do
     let(:body) { double(:body) }
     let(:response) { HTTP::Response.new(200, '1.1', {}, body) }
 
-    it 'normalizes header name' do
-      response['set-cookie'] = 'foo=bar;'
-      expect(response.headers).to eq('Set-Cookie' => 'foo=bar;')
-    end
-
-    it 'groups duplicate header values into Arrays' do
-      response['set-cookie'] = 'a=b;'
-      response['set-cookie'] = 'c=d;'
-      response['set-cookie'] = 'e=f;'
-
-      expect(response.headers).to eq('Set-Cookie' => ['a=b;', 'c=d;', 'e=f;'])
-    end
-
-    it 'respects if additional value is Array' do
-      response['set-cookie'] = 'a=b;'
-      response['set-cookie'] = ['c=d;', 'e=f;']
-
-      expect(response.headers).to eq('Set-Cookie' => ['a=b;', 'c=d;', 'e=f;'])
+    it 'is proxied to #headers' do
+      expect(response.headers).to receive(:[]=).with(:cookie, 'foo=bar;')
+      response[:cookie] = 'foo=bar;'
     end
   end
 
