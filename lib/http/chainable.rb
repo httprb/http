@@ -1,3 +1,5 @@
+require 'http/authorization_header'
+
 module HTTP
   module Chainable
     # Request a get sans response body
@@ -89,6 +91,17 @@ module HTTP
     # Accept the given MIME type(s)
     def accept(type)
       with :accept => type
+    end
+
+    # Make a request with the given Authorization header
+    def auth(*args)
+      value = case args.count
+              when 1 then args.first
+              when 2 then AuthorizationHeader.build(*args)
+              else fail ArgumentError, "wrong number of arguments (#{args.count} for 1..2)"
+              end
+
+      with :authorization => value.to_s
     end
 
     def default_options
