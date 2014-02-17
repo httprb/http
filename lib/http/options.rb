@@ -147,7 +147,7 @@ module HTTP
 
     # :nodoc:
     def headers=(other)
-      @headers = Headers.new(other && other.to_hash)
+      @headers = Headers.new other
     end
 
   private
