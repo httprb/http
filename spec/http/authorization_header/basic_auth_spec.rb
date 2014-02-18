@@ -17,12 +17,13 @@ describe HTTP::AuthorizationHeader::BasicAuth do
 
   describe '#to_s' do
     let(:user)        { 'foo' }
-    let(:pass)        { 'bar' }
+    let(:pass)        { 'bar' * 100 }
     let(:user_n_pass) { user + ':' + pass }
     let(:builder)     { described_class.new :user => user, :pass => pass }
 
     subject { builder.to_s }
 
     it { should eq "Basic #{Base64.strict_encode64 user_n_pass}" }
+    it { should match(/^Basic [^\s]+$/) }
   end
 end

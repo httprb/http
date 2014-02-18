@@ -12,7 +12,7 @@ describe HTTP::AuthorizationHeader::BearerToken do
   end
 
   describe '#to_s' do
-    let(:token)   { 'foobar' }
+    let(:token)   { 'foobar' * 100 }
     let(:builder) { described_class.new options.merge :token => token }
 
     subject { builder.to_s }
@@ -20,6 +20,7 @@ describe HTTP::AuthorizationHeader::BearerToken do
     context 'when :encode => true' do
       let(:options) { {:encode => true} }
       it { should eq "Bearer #{Base64.strict_encode64 token}" }
+      it { should match(/^Bearer [^\s]+$/) }
     end
 
     context 'when :encode => false' do
