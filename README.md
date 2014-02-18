@@ -121,6 +121,25 @@ HTTP.post "http://example.com/resource", :body => JSON.dump(:foo => '42')
 
 It's easy!
 
+
+### Proxy Support
+
+Making request behind proxy is as simple as making them directly. Just specify
+hostname (or IP address) of your proxy server and it's port, and here you go:
+
+```ruby
+HTTP.via("proxy-hostname.local", 8080)
+  .get "http://example.com/resource"
+```
+
+Proxy needs authentication? No problem:
+
+```ruby
+HTTP.via("proxy-hostname.local", 8080, "username", "password")
+  .get "http://example.com/resource"
+```
+
+
 ### Adding Headers
 
 The HTTP gem uses the concept of chaining to simplify requests. Let's say
@@ -170,6 +189,7 @@ HTTP.accept('application/json').
 
 This adds the appropriate Accept header for retrieving a JSON response for the
 given resource.
+
 
 ### Celluloid::IO Support
 
