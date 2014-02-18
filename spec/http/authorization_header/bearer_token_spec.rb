@@ -19,7 +19,7 @@ describe HTTP::AuthorizationHeader::BearerToken do
 
     context 'when :encode => true' do
       let(:options) { {:encode => true} }
-      it { should eq "Bearer #{Base64.encode64 token}" }
+      it { should eq "Bearer #{Base64.strict_encode64 token}" }
     end
 
     context 'when :encode => false' do

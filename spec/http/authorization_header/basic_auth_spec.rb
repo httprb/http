@@ -16,13 +16,13 @@ describe HTTP::AuthorizationHeader::BasicAuth do
   end
 
   describe '#to_s' do
-    let(:user)        { 'foobar' }
-    let(:pass)        { 'foobar' }
-    let(:credentials) { "#{user}:#{pass}" }
+    let(:user)        { 'foo' }
+    let(:pass)        { 'bar' }
+    let(:user_n_pass) { user + ':' + pass }
     let(:builder)     { described_class.new :user => user, :pass => pass }
 
     subject { builder.to_s }
 
-    it { should eq "Basic #{Base64.encode64 credentials}" }
+    it { should eq "Basic #{Base64.strict_encode64 user_n_pass}" }
   end
 end

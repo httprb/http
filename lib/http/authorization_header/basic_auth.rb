@@ -15,7 +15,7 @@ module HTTP
 
       # :nodoc:
       def to_s
-        'Basic ' << Base64.encode64("#{@user}:#{@pass}")
+        'Basic ' << Base64.strict_encode64("#{@user}:#{@pass}")
       end
     end
 

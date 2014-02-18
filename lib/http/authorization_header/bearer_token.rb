@@ -14,7 +14,7 @@ module HTTP
       end
 
       def token
-        return Base64.encode64 @token if @encode
+        return Base64.strict_encode64 @token if @encode
         @token
       end
 
