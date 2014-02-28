@@ -17,7 +17,7 @@ class ExampleService < WEBrick::HTTPServlet::AbstractServlet
         response.body   = '<!doctype html>'
       end
     when '/params'
-      if request.query_string = 'foo=bar'
+      if request.query_string == 'foo=bar'
         response.status = 200
         response.body     = 'Params!'
       end
