@@ -24,6 +24,13 @@ describe HTTP do
       end
     end
 
+    context 'with query string parameters in the URI and opts hash' do
+      it 'includes both' do
+        response = HTTP.get "#{test_endpoint}multiple-params?foo=bar" , :params => {:baz => 'quux'}
+        expect(response.to_s).to match(/More Params!/)
+      end
+    end
+
     context 'with headers' do
       it 'should be easy' do
         response = HTTP.accept('application/json').get test_endpoint

@@ -68,4 +68,16 @@ describe HTTP::Client do
         .to raise_error(HTTP::Redirector::TooManyRedirectsError)
     end
   end
+
+  describe 'parsing params' do
+    it 'combines GET params from the URI with the passed in params' do
+      client = HTTP::Client.new
+      allow(client).to receive(:perform)
+      expect(HTTP::Request).to receive(:new) do |_, uri|
+        expect(uri).to eq('http://example.com/?foo=bar&baz=quux')
+      end
+
+      client.get('http://example.com/?foo=bar', :params => {:baz => 'quux'})
+    end
+  end
 end

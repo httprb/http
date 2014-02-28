@@ -21,6 +21,11 @@ class ExampleService < WEBrick::HTTPServlet::AbstractServlet
         response.status = 200
         response.body     = 'Params!'
       end
+    when '/multiple-params'
+      if request.query_string == 'foo=bar&baz=quux'
+        response.status = 200
+        response.body     = 'More Params!'
+      end
     when '/proxy'
       response.status = 200
       response.body     = 'Proxy!'
