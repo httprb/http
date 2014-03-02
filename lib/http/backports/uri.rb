@@ -129,3 +129,11 @@ module URI
     ary
   end
 end
+
+module Kernel
+  def URI(uri) # rubocop:disable MethodName
+    return uri if uri.is_a?(URI::Generic)
+    URI.parse(uri)
+  end
+  module_function :URI
+end
