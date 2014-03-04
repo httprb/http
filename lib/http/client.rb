@@ -32,7 +32,7 @@ module HTTP
       proxy = opts.proxy
 
       method_body = body(opts, headers)
-      if opts.params
+      if opts.params && !opts.params.empty?
         uri="#{uri}?#{URI.encode_www_form(opts.params)}"
       end
 
