@@ -135,6 +135,7 @@ module HTTP
     end
 
     # Moves uri get params into the opts.params hash
+    # @return [URI, Hash]
     def normalize_get_params(uri, opts)
       uri = URI(uri)
       if uri.query
