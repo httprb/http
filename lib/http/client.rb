@@ -137,7 +137,7 @@ module HTTP
     # Moves uri get params into the opts.params hash
     # @return [URI, Hash]
     def normalize_get_params(uri, opts)
-      uri = URI(uri)
+      uri = URI(uri) unless uri.is_a?(URI)
       if uri.query
         extracted_params_from_uri = Hash[URI.decode_www_form(uri.query)]
         opts = opts.with_params(extracted_params_from_uri.merge(opts.params))
