@@ -6,21 +6,11 @@ class ExampleService < WEBrick::HTTPServlet::AbstractServlet
   def do_GET(request, response) # rubocop:disable MethodName
     case request.path
     when '/'
-      response.status = 200
-
-      case request['Accept']
-      when 'application/json'
-        response['Content-Type'] = 'application/json'
-        response.body = '{"json": true}'
-      else
-        response['Content-Type'] = 'text/html'
-        response.body   = '<!doctype html>'
-      end
+      handle_root(request, response)
     when '/params'
-      if request.query_string == 'foo=bar'
-        response.status = 200
-        response.body     = 'Params!'
-      end
+      handle_params(request, response)
+    when '/multiple-params'
+      handle_multiple_params(request, response)
     when '/proxy'
       response.status = 200
       response.body     = 'Proxy!'
@@ -35,6 +25,33 @@ class ExampleService < WEBrick::HTTPServlet::AbstractServlet
       response['Location'] = "http://127.0.0.1:#{PORT}/"
     else
       response.status = 404
+    end
+  end
+
+  def handle_root(request, response)
+    response.status = 200
+    case request['Accept']
+    when 'application/json'
+      response['Content-Type'] = 'application/json'
+      response.body = '{"json": true}'
+    else
+      response['Content-Type'] = 'text/html'
+      response.body   = '<!doctype html>'
+    end
+  end
+
+  def handle_params(request, response)
+    if request.query_string == 'foo=bar'
+      response.status = 200
+      response.body     = 'Params!'
+    end
+  end
+
+  def handle_multiple_params(request, response)
+    params = CGI.parse(request.query_string)
+    if params == {'foo' => ['bar'], 'baz' => ['quux']}
+      response.status = 200
+      response.body     = 'More Params!'
     end
   end
 

@@ -27,6 +27,8 @@ module HTTP
       proxy = opts.proxy
 
       request_body = make_request_body(opts, headers)
+      uri, opts = normalize_get_params(uri, opts) if verb == :get
+
       uri = "#{uri}?#{URI.encode_www_form(opts.params)}" if opts.params && !opts.params.empty?
 
       request = HTTP::Request.new(verb, uri, headers, proxy, request_body)
@@ -134,6 +136,18 @@ module HTTP
     def finish_response
       # TODO: keep-alive support
       @socket = nil
+    end
+
+    # Moves uri get params into the opts.params hash
+    # @return [Array<URI, Hash>]
+    def normalize_get_params(uri, opts)
+      uri = URI(uri) unless uri.is_a?(URI)
+      if uri.query
+        extracted_params_from_uri = Hash[URI.decode_www_form(uri.query)]
+        opts = opts.with_params(extracted_params_from_uri.merge(opts.params))
+        uri.query = nil
+      end
+      [uri, opts]
     end
   end
 end
