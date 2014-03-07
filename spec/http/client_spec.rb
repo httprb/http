@@ -74,7 +74,8 @@ describe HTTP::Client do
       client = HTTP::Client.new
       allow(client).to receive(:perform)
       expect(HTTP::Request).to receive(:new) do |_, uri|
-        expect(uri).to eq('http://example.com/?foo=bar&baz=quux')
+        params = CGI.parse(URI(uri).query)
+        expect(params).to eq('foo' => ['bar'], 'baz' => ['quux'])
       end
 
       client.get('http://example.com/?foo=bar', :params => {:baz => 'quux'})

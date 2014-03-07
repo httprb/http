@@ -48,7 +48,8 @@ class ExampleService < WEBrick::HTTPServlet::AbstractServlet
   end
 
   def handle_multiple_params(request, response)
-    if request.query_string == 'foo=bar&baz=quux'
+    params = CGI.parse(request.query_string)
+    if params == {'foo' => ['bar'], 'baz' => ['quux']}
       response.status = 200
       response.body     = 'More Params!'
     end
