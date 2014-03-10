@@ -115,10 +115,12 @@ module HTTP
 
     # Parse response body with corresponding MIME type adapter.
     #
+    # @param [#to_s] as Parse as given MIME type
+    #   instead of the one determined from headers
     # @raise [Error] if adapter not found
     # @return [Object]
-    def parse
-      MimeType[mime_type].decode to_s
+    def parse(as = nil)
+      MimeType[as || mime_type].decode to_s
     end
 
     # Inspect a response

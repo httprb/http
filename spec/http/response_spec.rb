@@ -100,16 +100,27 @@ describe HTTP::Response do
   describe '#parse' do
     let(:headers)   { {'Content-Type' => content_type} }
     let(:body)      { '{"foo":"bar"}' }
-    subject { HTTP::Response.new(200, '1.1', headers, body).parse }
+    let(:response)  { HTTP::Response.new 200, '1.1', headers, body }
 
     context 'with known content type' do
       let(:content_type) { 'application/json' }
-      it { should eq 'foo' => 'bar' }
+      it 'returns parsed body' do
+        expect(response.parse).to eq 'foo' => 'bar'
+      end
     end
 
     context 'with unknown content type' do
       let(:content_type) { 'application/deadbeef' }
-      specify { expect { subject }.to raise_error HTTP::Error }
+      it 'raises HTTP::Error' do
+        expect { response.parse }.to raise_error HTTP::Error
+      end
+    end
+
+    context 'with explicitly given mime type' do
+      let(:content_type) { 'application/deadbeef' }
+      it 'ignores mime_type of response' do
+        expect(response.parse 'application/json').to eq 'foo' => 'bar'
+      end
     end
   end
 end
