@@ -18,5 +18,6 @@ module HTTP
     end
 
     register_adapter 'application/json', JSON
+    register_alias   'application/json', :json
   end
 end

@@ -4,6 +4,22 @@ module HTTP
     class << self
       # Associate MIME type with adapter
       #
+      # @example
+      #
+      #   module JsonAdapter
+      #     class << self
+      #       def encode(obj)
+      #         # encode logic here
+      #       end
+      #
+      #       def decode(str)
+      #         # decode logic here
+      #       end
+      #     end
+      #   end
+      #
+      #   HTTP::MimeType.register_adapter 'application/json', MyJsonAdapter
+      #
       # @param [#to_s] type
       # @param [#encode, #decode] adapter
       # @return [void]
@@ -13,18 +29,38 @@ module HTTP
 
       # Returns adapter associated with MIME type
       #
-      # @param [#to_s] type
+      # @param [#to_sym, #to_s] type
       # @raise [Error] if no adapter found
       # @return [void]
       def [](type)
+        # resolve type by shortcut if possible
+        type = aliases.fetch type.to_sym, type if type.respond_to? :to_sym
         adapters[type.to_s] || fail(Error, "Unknown MIME type: #{type}")
+      end
+
+      # Register a shortcut for MIME type
+      #
+      # @example
+      #
+      #   HTTP::MimeType.register_alias 'application/json', :json
+      #
+      # @param [#to_s] type
+      # @param [#to_sym] shortcut
+      # @return [void]
+      def register_alias(type, shortcut)
+        aliases[shortcut.to_sym] = type.to_s
       end
 
     private
 
-      # :noop:
+      # :nodoc:
       def adapters
         @adapters ||= {}
+      end
+
+      # :nodoc:
+      def aliases
+        @aliases ||= {}
       end
     end
   end

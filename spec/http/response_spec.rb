@@ -121,6 +121,10 @@ describe HTTP::Response do
       it 'ignores mime_type of response' do
         expect(response.parse 'application/json').to eq 'foo' => 'bar'
       end
+
+      it 'supports MIME type aliases' do
+        expect(response.parse :json).to eq 'foo' => 'bar'
+      end
     end
   end
 end
