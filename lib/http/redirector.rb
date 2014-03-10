@@ -7,7 +7,7 @@ module HTTP
     class EndlessRedirectError < TooManyRedirectsError; end
 
     # HTTP status codes which indicate redirects
-    REDIRECT_CODES = [300, 301, 302, 303, 307].freeze
+    REDIRECT_CODES = [300, 301, 302, 303, 307, 308].freeze
 
     # Last request
     attr_reader :request
