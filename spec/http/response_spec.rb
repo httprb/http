@@ -96,4 +96,20 @@ describe HTTP::Response do
       it { should eq 'utf-8' }
     end
   end
+
+  describe '#parse' do
+    let(:headers)   { {'Content-Type' => content_type} }
+    let(:body)      { '{"foo":"bar"}' }
+    subject { HTTP::Response.new(200, '1.1', headers, body).parse }
+
+    context 'with known content type' do
+      let(:content_type) { 'application/json' }
+      it { should eq 'foo' => 'bar' }
+    end
+
+    context 'with unknown content type' do
+      let(:content_type) { 'application/deadbeef' }
+      specify { expect { subject }.to raise_error HTTP::Error }
+    end
+  end
 end

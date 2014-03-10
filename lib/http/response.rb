@@ -1,6 +1,7 @@
 require 'delegate'
 require 'http/headers'
 require 'http/content_type'
+require 'http/mime_type'
 
 module HTTP
   class Response
@@ -110,6 +111,14 @@ module HTTP
     # @return [String, nil]
     def charset
       @charset ||= content_type.charset
+    end
+
+    # Parse response body with corresponding MIME type adapter.
+    #
+    # @raise [Error] if adapter not found
+    # @return [Object]
+    def parse
+      MimeType[mime_type].decode to_s
     end
 
     # Inspect a response
