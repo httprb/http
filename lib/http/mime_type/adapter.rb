@@ -11,6 +11,14 @@ module HTTP
 
         def_delegators :instance, :encode, :decode
       end
+
+      %w{ encode decode }.each do |operation|
+        class_eval <<-RUBY, __FILE__, __LINE__
+          def #{operation}(*)
+            fail Error, "\#{self.class} does not supports ##{operation}"
+          end
+        RUBY
+      end
     end
   end
 end
