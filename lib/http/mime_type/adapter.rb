@@ -3,12 +3,12 @@ require 'singleton'
 
 module HTTP
   module MimeType
+    # Base encode/decode MIME type adapter
     class Adapter
       include Singleton
 
       class << self
         extend Forwardable
-
         def_delegators :instance, :encode, :decode
       end
 

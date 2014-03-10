@@ -1,18 +1,28 @@
 module HTTP
+  # MIME type encode/decode adapters
   module MimeType
     class << self
-      def register_adapter(content_type, adapter)
-        adapters[content_type.to_s] = adapter
+      # Associate MIME type with adapter
+      #
+      # @param [#to_s] type
+      # @param [#encode, #decode] adapter
+      # @return [void]
+      def register_adapter(type, adapter)
+        adapters[type.to_s] = adapter
       end
 
-      def [](content_type)
-        adapter = adapters[content_type.to_s]
-        fail Error, "Unknown MIME type: #{content_type.inspect}" unless adapter
-        adapter
+      # Returns adapter associated with MIME type
+      #
+      # @param [#to_s] type
+      # @raise [Error] if no adapter found
+      # @return [void]
+      def [](type)
+        adapters[type.to_s] || fail(Error, "Unknown MIME type: #{type}")
       end
 
     private
 
+      # :noop:
       def adapters
         @adapters ||= {}
       end
