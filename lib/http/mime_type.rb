@@ -29,13 +29,11 @@ module HTTP
 
       # Returns adapter associated with MIME type
       #
-      # @param [#to_sym, #to_s] type
+      # @param [#to_s] type
       # @raise [Error] if no adapter found
       # @return [void]
       def [](type)
-        # resolve type by shortcut if possible
-        type = aliases.fetch type.to_sym, type if type.respond_to? :to_sym
-        adapters[type.to_s] || fail(Error, "Unknown MIME type: #{type}")
+        adapters[normalize type] || fail(Error, "Unknown MIME type: #{type}")
       end
 
       # Register a shortcut for MIME type
@@ -49,6 +47,14 @@ module HTTP
       # @return [void]
       def register_alias(type, shortcut)
         aliases[shortcut.to_sym] = type.to_s
+      end
+
+      # Resolves type by shortcut if possible
+      #
+      # @param [#to_s] type
+      # @return [String]
+      def normalize(type)
+        aliases.fetch type, type.to_s
       end
 
     private
