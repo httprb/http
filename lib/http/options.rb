@@ -1,14 +1,14 @@
 require 'http/version'
+require 'http/headers'
 require 'openssl'
 require 'socket'
 
 module HTTP
   class Options
+    include Headers::Mixin
+
     # How to format the response [:object, :body, :parse_body]
     attr_accessor :response
-
-    # HTTP headers to include in the request
-    attr_accessor :headers
 
     # Query string params to add to the url
     attr_accessor :params
@@ -31,7 +31,7 @@ module HTTP
     # Follow redirects
     attr_accessor :follow
 
-    protected :response=, :headers=, :proxy=, :params=, :form=, :follow=
+    protected :response=, :proxy=, :params=, :form=, :follow=
 
     @default_socket_class     = TCPSocket
     @default_ssl_socket_class = OpenSSL::SSL::SSLSocket
@@ -47,7 +47,6 @@ module HTTP
 
     def initialize(options = {})
       @response  = options[:response]  || :auto
-      @headers   = options[:headers]   || {}
       @proxy     = options[:proxy]     || {}
       @body      = options[:body]
       @params    = options[:params]
@@ -57,6 +56,8 @@ module HTTP
       @socket_class     = options[:socket_class]     || self.class.default_socket_class
       @ssl_socket_class = options[:ssl_socket_class] || self.class.default_ssl_socket_class
       @ssl_context      = options[:ssl_context]
+
+      self.headers = options[:headers]
 
       @headers['User-Agent'] ||= "RubyHTTPGem/#{HTTP::VERSION}"
     end
@@ -140,6 +141,13 @@ module HTTP
       dupped = super
       yield(dupped) if block_given?
       dupped
+    end
+
+  protected
+
+    # :nodoc:
+    def headers=(other)
+      @headers = Headers.new other
     end
 
   private

@@ -12,18 +12,11 @@ describe HTTP::Options, 'headers' do
   it 'may be specified with with_headers' do
     opts2 = opts.with_headers('accept' => 'json')
     expect(opts.headers).to eq('User-Agent' => user_agent)
-    expect(opts2.headers).to eq('accept' => 'json', 'User-Agent' => user_agent)
-  end
-
-  it 'accepts any object that respond to :to_hash' do
-    x = Struct.new(:to_hash).new('accept' => 'json')
-    expect(opts.with_headers(x).headers['accept']).to eq('json')
+    expect(opts2.headers).to eq('Accept' => 'json', 'User-Agent' => user_agent)
   end
 
   it 'recognizes invalid headers' do
-    expect do
-      opts.with_headers(self)
-    end.to raise_error(HTTP::Error)
+    expect { opts.with_headers(self) }.to raise_error(HTTP::Error)
   end
 
 end

@@ -40,7 +40,7 @@ describe HTTP::Options, 'merge' do
       :params => {:plop => 'plip'},
       :form      => {:bar => 'bar'},
       :body      => 'body-bar',
-      :headers   => {:accept  => 'xml', :foo => 'foo', :bar => 'bar', 'User-Agent' => user_agent},
+      :headers   => {'Accept'  => 'xml', 'Foo' => 'foo', 'Bar' => 'bar', 'User-Agent' => user_agent},
       :proxy     => {:proxy_address => '127.0.0.1', :proxy_port => 8080},
       :follow => nil,
       :socket_class     => described_class.default_socket_class,

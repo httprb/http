@@ -49,7 +49,7 @@ module HTTP
     # :nodoc:
     def __setobj__(obj)
       @headers = {}
-      obj.each { |k, v| self[k] = v } if obj.respond_to? :each
+      obj.to_hash.each { |k, v| self[k] = v } if obj.respond_to? :to_hash
     end
   end
 end
