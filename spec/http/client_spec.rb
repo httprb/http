@@ -70,6 +70,17 @@ describe HTTP::Client do
   end
 
   describe 'parsing params' do
+    it 'accepts params within the provided URL' do
+      client = HTTP::Client.new
+      allow(client).to receive(:perform)
+      expect(HTTP::Request).to receive(:new) do |_, uri|
+        params = CGI.parse(URI(uri).query)
+        expect(params).to eq('foo' => ['bar'])
+      end
+
+      client.get('http://example.com/?foo=bar')
+    end
+
     it 'combines GET params from the URI with the passed in params' do
       client = HTTP::Client.new
       allow(client).to receive(:perform)
