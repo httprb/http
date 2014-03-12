@@ -24,6 +24,7 @@ describe HTTP::Options, 'merge' do
       :params      => {:baz => 'bar'},
       :form      => {:foo => 'foo'},
       :body      => 'body-foo',
+      :json      => {:foo => 'foo'},
       :headers   => {:accept  => 'json',  :foo => 'foo'},
       :proxy     => {})
 
@@ -32,6 +33,7 @@ describe HTTP::Options, 'merge' do
       :params      => {:plop => 'plip'},
       :form      => {:bar => 'bar'},
       :body      => 'body-bar',
+      :json      => {:bar => 'bar'},
       :headers   => {:accept  => 'xml', :bar => 'bar'},
       :proxy     => {:proxy_address => '127.0.0.1', :proxy_port => 8080})
 
@@ -40,6 +42,7 @@ describe HTTP::Options, 'merge' do
       :params => {:plop => 'plip'},
       :form      => {:bar => 'bar'},
       :body      => 'body-bar',
+      :json      => {:bar => 'bar'},
       :headers   => {:accept  => 'xml', :foo => 'foo', :bar => 'bar', 'User-Agent' => user_agent},
       :proxy     => {:proxy_address => '127.0.0.1', :proxy_port => 8080},
       :follow => nil,

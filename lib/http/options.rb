@@ -16,6 +16,9 @@ module HTTP
     # Form data to embed in the request
     attr_accessor :form
 
+    # JSON data to embed in the request
+    attr_accessor :json
+
     # Explicit request body of the request
     attr_accessor :body
 
@@ -31,7 +34,7 @@ module HTTP
     # Follow redirects
     attr_accessor :follow
 
-    protected :response=, :headers=, :proxy=, :params=, :form=, :follow=
+    protected :response=, :headers=, :proxy=, :params=, :form=, :json=, :follow=
 
     @default_socket_class     = TCPSocket
     @default_ssl_socket_class = OpenSSL::SSL::SSLSocket
@@ -52,6 +55,7 @@ module HTTP
       @body      = options[:body]
       @params    = options[:params]
       @form      = options[:form]
+      @json      = options[:json]
       @follow    = options[:follow]
 
       @socket_class     = options[:socket_class]     || self.class.default_socket_class
@@ -85,6 +89,12 @@ module HTTP
     def with_form(form)
       dup do |opts|
         opts.form = form
+      end
+    end
+
+    def with_json(data)
+      dup do |opts|
+        opts.json = data
       end
     end
 
@@ -128,6 +138,7 @@ module HTTP
         :proxy            => proxy,
         :params           => params,
         :form             => form,
+        :json             => json,
         :body             => body,
         :follow           => follow,
         :socket_class     => socket_class,
