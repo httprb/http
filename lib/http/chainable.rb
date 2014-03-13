@@ -90,7 +90,7 @@ module HTTP
 
     # Accept the given MIME type(s)
     def accept(type)
-      with :accept => type
+      with :accept => MimeType.normalize(type)
     end
 
     # Make a request with the given Authorization header

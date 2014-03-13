@@ -96,4 +96,35 @@ describe HTTP::Response do
       it { should eq 'utf-8' }
     end
   end
+
+  describe '#parse' do
+    let(:headers)   { {'Content-Type' => content_type} }
+    let(:body)      { '{"foo":"bar"}' }
+    let(:response)  { HTTP::Response.new 200, '1.1', headers, body }
+
+    context 'with known content type' do
+      let(:content_type) { 'application/json' }
+      it 'returns parsed body' do
+        expect(response.parse).to eq 'foo' => 'bar'
+      end
+    end
+
+    context 'with unknown content type' do
+      let(:content_type) { 'application/deadbeef' }
+      it 'raises HTTP::Error' do
+        expect { response.parse }.to raise_error HTTP::Error
+      end
+    end
+
+    context 'with explicitly given mime type' do
+      let(:content_type) { 'application/deadbeef' }
+      it 'ignores mime_type of response' do
+        expect(response.parse 'application/json').to eq 'foo' => 'bar'
+      end
+
+      it 'supports MIME type aliases' do
+        expect(response.parse :json).to eq 'foo' => 'bar'
+      end
+    end
+  end
 end

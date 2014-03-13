@@ -129,6 +129,9 @@ module HTTP
       elsif opts.form
         headers['Content-Type'] ||= 'application/x-www-form-urlencoded'
         URI.encode_www_form(opts.form)
+      elsif opts.json
+        headers['Content-Type'] ||= 'application/json'
+        MimeType[:json].encode opts.json
       end
     end
 

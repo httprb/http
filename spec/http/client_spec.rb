@@ -92,4 +92,17 @@ describe HTTP::Client do
       client.get('http://example.com/?foo=bar', :params => {:baz => 'quux'})
     end
   end
+
+  describe 'passing json' do
+    it 'encodes given object' do
+      client = HTTP::Client.new
+      allow(client).to receive(:perform)
+
+      expect(HTTP::Request).to receive(:new) do |*args|
+        expect(args.last).to eq('{"foo":"bar"}')
+      end
+
+      client.get('http://example.com/', :json => {:foo => :bar})
+    end
+  end
 end
