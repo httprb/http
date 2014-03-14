@@ -41,4 +41,19 @@ describe HTTP::Request do
       expect(subject.__method__(:verb)).to be_a(Method)
     end
   end
+
+  describe 'redirect' do
+    subject {
+      HTTP::Request.new(:post, 'http://example.com/',
+        { :accept => 'text/html' }, {}, 'test')
+    }
+
+    it 'returns a new request to the new uri' do
+      redirected = subject.redirect('http://example.com/redirect')
+      expect(redirected.uri.to_s).to eq('http://example.com/redirect')
+      expect(redirected.verb).to eq(:post)
+      expect(redirected.body).to eq('test')
+      expect(redirected.headers['Host']).to eq('example.com')
+    end
+  end
 end
