@@ -107,7 +107,7 @@ module HTTP
     # Compute HTTP request header for direct or proxy request
     def request_header
       if using_proxy?
-        "#{verb.to_s.upcase} #{uri.to_s} HTTP/#{version}"
+        "#{verb.to_s.upcase} #{uri} HTTP/#{version}"
       else
         path = uri.query && !uri.query.empty? ? "#{uri.path}?#{uri.query}" : uri.path
         path = '/' if path.empty?
