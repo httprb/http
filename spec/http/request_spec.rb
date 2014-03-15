@@ -43,17 +43,21 @@ describe HTTP::Request do
   end
 
   describe 'redirect' do
-    subject {
-      HTTP::Request.new(:post, 'http://example.com/',
-        { :accept => 'text/html' }, {}, 'test')
-    }
+    let(:headers)   { {:accept => 'text/html'} }
+    let(:proxy)     { {:proxy_username => 'douglas', :proxy_password => 'adams'} }
+    let(:body)      { 'The Ultimate Question' }
+    let(:request)   { HTTP::Request.new(:post, 'http://example.com/', headers, proxy, body) }
 
-    it 'returns a new request to the new uri' do
-      redirected = subject.redirect('http://example.com/redirect')
-      expect(redirected.uri.to_s).to eq('http://example.com/redirect')
-      expect(redirected.verb).to eq(:post)
-      expect(redirected.body).to eq('test')
-      expect(redirected.headers['Host']).to eq('example.com')
+    subject(:redirected) { request.redirect 'http://blog.example.com/' }
+
+    its(:uri)     { should eq URI.parse 'http://blog.example.com/' }
+
+    its(:verb)    { should eq request.verb }
+    its(:body)    { should eq request.body }
+    its(:proxy)   { should eq request.proxy }
+
+    it 'presets new Host header' do
+      expect(redirected.headers['Host']).to eq 'blog.example.com'
     end
   end
 end
