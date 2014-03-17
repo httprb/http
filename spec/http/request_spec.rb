@@ -73,5 +73,19 @@ describe HTTP::Request do
         expect(redirected.headers['Host']).to eq 'example.com'
       end
     end
+
+    context 'with relative URL that misses leading slash given' do
+      subject(:redirected) { request.redirect 'blog' }
+
+      its(:uri)     { should eq URI.parse 'http://example.com/blog' }
+
+      its(:verb)    { should eq request.verb }
+      its(:body)    { should eq request.body }
+      its(:proxy)   { should eq request.proxy }
+
+      it 'keeps Host header' do
+        expect(redirected.headers['Host']).to eq 'example.com'
+      end
+    end
   end
 end
