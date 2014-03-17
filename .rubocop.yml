@@ -24,14 +24,6 @@ CyclomaticComplexity:
 BlockNesting:
   Max: 3
 
-# Align with the style guide.
-CollectionMethods:
-  PreferredMethods:
-    collect:  'map'
-    inject:   'reduce'
-    find:     'detect'
-    find_all: 'select'
-
 # Do not force public/protected/private keyword to be indented at the same
 # level as the def keyword. My personal preference is to outdent these keywords
 # because I think when scanning code it makes it easier to identify the
