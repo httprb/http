@@ -72,6 +72,11 @@ describe HTTP::Request do
       it 'keeps Host header' do
         expect(redirected.headers['Host']).to eq 'example.com'
       end
+
+      context 'with original URI having non-standard port' do
+        let(:request) { HTTP::Request.new(:post, 'http://example.com:8080/', headers, proxy, body) }
+        its(:uri)     { should eq URI.parse 'http://example.com:8080/blog' }
+      end
     end
 
     context 'with relative URL that misses leading slash given' do
@@ -85,6 +90,11 @@ describe HTTP::Request do
 
       it 'keeps Host header' do
         expect(redirected.headers['Host']).to eq 'example.com'
+      end
+
+      context 'with original URI having non-standard port' do
+        let(:request) { HTTP::Request.new(:post, 'http://example.com:8080/', headers, proxy, body) }
+        its(:uri)     { should eq URI.parse 'http://example.com:8080/blog' }
       end
     end
   end
