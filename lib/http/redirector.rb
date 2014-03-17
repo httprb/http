@@ -9,12 +9,6 @@ module HTTP
     # HTTP status codes which indicate redirects
     REDIRECT_CODES = [300, 301, 302, 303, 307, 308].freeze
 
-    # Last request
-    attr_reader :request
-
-    # Last response
-    attr_reader :response
-
     # :nodoc:
     def initialize(max_redirects)
       @max_redirects = max_redirects
@@ -36,20 +30,20 @@ module HTTP
 
     # Follow redirects
     def follow
-      while REDIRECT_CODES.include?(response.code)
-        @visited << request.uri.to_s
+      while REDIRECT_CODES.include?(@response.code)
+        @visited << @request.uri.to_s
 
         fail TooManyRedirectsError if too_many_hops?
         fail EndlessRedirectError  if endless_loop?
 
-        uri = response.headers['Location']
+        uri = @response.headers['Location']
         fail StateError, 'no Location header in redirect' unless uri
 
         @request  = @request.redirect(uri)
         @response = yield @request
       end
 
-      response
+      @response
     end
 
     # Check if we reached max amount of redirect hops
