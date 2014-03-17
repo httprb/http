@@ -34,6 +34,12 @@ class ExampleService < WEBrick::HTTPServlet::AbstractServlet
     when "/redirect-302"
       response.status = 302
       response["Location"] = "http://127.0.0.1:#{PORT}/"
+    when "/relative-redirect-302"
+      response.status = 302
+      response["Location"] = "/"
+    when "/relative-redirect-with-params-302"
+      response.status = 302
+      response["Location"] = "/foobar?format=xml"
     else
       response.status = 404
     end
