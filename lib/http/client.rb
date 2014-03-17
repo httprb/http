@@ -52,9 +52,7 @@ module HTTP
           code = response.code
 
           if response.headers["Location"] =~ /^\//
-            uri_parsed = URI.parse(uri)
-            uri_parsed.path = response.headers["Location"]
-            uri = uri_parsed.to_s
+            uri = "#{request.uri.scheme}://#{request.uri.host}:#{request.uri.port}#{response.headers["Location"]}"
           else
             uri = response.headers["Location"]
           end
