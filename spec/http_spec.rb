@@ -117,6 +117,11 @@ describe HTTP do
       expect(response).to match(/<!doctype html>/)
     end
 
+    it "should include previous host" do
+      response = HTTP.with_follow(true).get("#{test_endpoint}relative-redirect-302")
+      expect(response).to match(/<!DOCTYPE html>/)
+    end
+
   end
 
   context "head requests" do

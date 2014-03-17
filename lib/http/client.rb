@@ -50,7 +50,14 @@ module HTTP
           request = HTTP::Request.new method, uri, headers, proxy, method_body
           response = perform request, opts
           code = response.code
-          uri = response.headers["Location"]
+
+          if response.headers["Location"] =~ /^\//
+            uri_parsed = URI.parse(uri)
+            uri_parsed.path = response.headers["Location"]
+            uri = uri_parsed.to_s
+          else
+            uri = response.headers["Location"]
+          end
         end
       end
 
