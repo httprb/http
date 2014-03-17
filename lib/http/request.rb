@@ -54,6 +54,14 @@ module HTTP
       @proxy, @body, @version = proxy, body, version
     end
 
+    # Returns new Request with updated uri
+    def redirect(uri)
+      uri = @uri.merge uri.to_s
+      req = self.class.new(method, uri, headers, proxy, body, version)
+      req.headers.merge!('Host' => req.uri.host)
+      req
+    end
+
     # Obtain the given header
     def [](header)
       @headers[canonicalize_header(header)]

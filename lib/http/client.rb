@@ -1,4 +1,5 @@
 require 'http/options'
+require 'http/redirector'
 require 'uri'
 
 module HTTP
@@ -37,27 +38,17 @@ module HTTP
       end
 
       request = HTTP::Request.new method, uri, headers, proxy, method_body
+      opts.callbacks[:request].each { |c| c.call(request) }
+
+      response = perform request, opts
+
       if opts.follow
-        code = 302
-        while code == 302 or code == 301
-          # if the uri isn't fully formed complete it
-          if not uri.match(/\./)
-            uri = "#{method}://#{host}#{uri}"
-          end
-          host = URI.parse(uri).host
-          opts.headers["Host"] = host
-          method_body = body(opts, headers)
-          request = HTTP::Request.new method, uri, headers, proxy, method_body
-          response = perform request, opts
-          code = response.code
-          uri = response.headers["Location"]
+        response = Redirector.new(opts.follow).perform request, response do |req|
+          perform req, opts
         end
       end
 
-      opts.callbacks[:request].each { |c| c.call(request) }
-      response = perform request, opts
       opts.callbacks[:response].each { |c| c.call(response) }
-
       format_response method, response, opts.response
     end
 
