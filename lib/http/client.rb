@@ -51,8 +51,11 @@ module HTTP
           response = perform request, opts
           code = response.code
 
-          if response.headers["Location"] =~ /^\//
-            uri = "#{request.uri.scheme}://#{request.uri.host}:#{request.uri.port}#{response.headers["Location"]}"
+          if response.headers["Location"] !~ /^https?:\/\//i
+            new_location = response.headers["Location"]
+            new_location = "/#{new_location}" unless new_location =~ /^\//
+
+            uri = "#{request.uri.scheme}://#{request.uri.host}:#{request.uri.port}#{new_location}"
           else
             uri = response.headers["Location"]
           end
