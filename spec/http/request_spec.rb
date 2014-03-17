@@ -42,7 +42,7 @@ describe HTTP::Request do
     end
   end
 
-  describe 'redirect' do
+  describe '#redirect' do
     let(:headers)   { {:accept => 'text/html'} }
     let(:proxy)     { {:proxy_username => 'douglas', :proxy_password => 'adams'} }
     let(:body)      { 'The Ultimate Question' }
@@ -58,6 +58,20 @@ describe HTTP::Request do
 
     it 'presets new Host header' do
       expect(redirected.headers['Host']).to eq 'blog.example.com'
+    end
+
+    context 'with relative URL given' do
+      subject(:redirected) { request.redirect '/blog' }
+
+      its(:uri)     { should eq URI.parse 'http://example.com/blog' }
+
+      its(:verb)    { should eq request.verb }
+      its(:body)    { should eq request.body }
+      its(:proxy)   { should eq request.proxy }
+
+      it 'keeps Host header' do
+        expect(redirected.headers['Host']).to eq 'example.com'
+      end
     end
   end
 end
