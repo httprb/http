@@ -1,15 +1,10 @@
-require 'forwardable'
 require 'delegate'
+
+require 'http/headers/mixin'
 
 module HTTP
   # Headers Hash wraper with keys normalization
   class Headers < ::Delegator
-    module Mixin
-      extend Forwardable
-      attr_reader :headers
-      def_delegators :headers, :[], :[]=
-    end
-
     # Matches HTTP header names when in "Canonical-Http-Format"
     CANONICAL_HEADER = /^[A-Z][a-z]*(-[A-Z][a-z]*)*$/
 
