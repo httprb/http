@@ -127,22 +127,5 @@ module HTTP
     def inspect
       "#<#{self.class}/#{@version} #{status} #{reason} headers=#{headers.inspect}>"
     end
-
-    class BodyDelegator < ::Delegator
-      attr_reader :response
-
-      def initialize(response, body = response.body)
-        super(body)
-        @response, @body = response, body
-      end
-
-      def __getobj__
-        @body
-      end
-
-      def __setobj__(obj)
-        @body = obj
-      end
-    end
   end
 end
