@@ -79,7 +79,7 @@ module HTTP
 
     # :nodoc:
     def inspect
-      "#<#{self.class} #{to_h}>"
+      "#<#{self.class} #{to_h.inspect}>"
     end
 
     # List of header names
