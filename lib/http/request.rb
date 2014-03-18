@@ -4,6 +4,7 @@ require "http/request/writer"
 require "http/version"
 require "base64"
 require "uri"
+require "time"
 
 module HTTP
   class Request
@@ -65,6 +66,10 @@ module HTTP
     attr_reader :uri
     attr_reader :proxy, :body, :version
 
+    # "request_time" as per RFC 2616
+    # https://tools.ietf.org/html/rfc2616#section-13.2.3
+    attr_accessor :request_time
+
     # :nodoc:
     def initialize(verb, uri, headers = {}, proxy = {}, body = nil, version = "1.1") # rubocop:disable ParameterLists
       @verb   = verb.to_s.downcase.to_sym
@@ -80,6 +85,9 @@ module HTTP
 
       @headers["Host"]        ||= default_host
       @headers["User-Agent"]  ||= USER_AGENT
+      now = Time.now
+      @request_time = now
+      @headers['Date'] = now.httpdate
     end
 
     # Returns new Request with updated uri

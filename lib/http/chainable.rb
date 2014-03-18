@@ -107,6 +107,10 @@ module HTTP
     # @see #follow
     alias_method :with_follow, :follow
 
+    def with_cache(cache)
+      branch default_options.with_cache(cache)
+    end
+
     # Make a request with the given headers
     # @param headers
     def with_headers(headers)

@@ -11,6 +11,9 @@ module HTTP
   # Requested to do something when we're in the wrong state
   class StateError < ResponseError; end
 
+  # Generic Cache error
+  class CacheError < Error; end
+
   # Header name is invalid
   class InvalidHeaderNameError < Error; end
 end

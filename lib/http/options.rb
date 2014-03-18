@@ -1,6 +1,8 @@
 require "http/headers"
 require "openssl"
 require "socket"
+require 'http/cache'
+require 'http/cache/in_memory_cache'
 
 module HTTP
   class Options
@@ -34,13 +36,19 @@ module HTTP
     # Follow redirects
     attr_accessor :follow
 
+    # Cache, needs a hash. See @default_cache. Valid modes are: false, :public, :private
+    attr_accessor :cache
+
     protected :response=, :headers=, :proxy=, :params=, :form=, :json=, :follow=
 
     @default_socket_class     = TCPSocket
     @default_ssl_socket_class = OpenSSL::SSL::SSLSocket
 
+    @default_cache = {:mode => false, :adapter => HTTP::Cache::InMemoryCache.new}
+
     class << self
       attr_accessor :default_socket_class, :default_ssl_socket_class
+      attr_accessor :default_cache
 
       def new(options = {})
         return options if options.is_a?(self)
@@ -62,6 +70,8 @@ module HTTP
       @socket_class     = options[:socket_class]     || self.class.default_socket_class
       @ssl_socket_class = options[:ssl_socket_class] || self.class.default_ssl_socket_class
       @ssl_context      = options[:ssl_context]
+
+      @cache = options[:cache] || self.class.default_cache
     end
 
     def with_headers(headers)
@@ -76,6 +86,18 @@ module HTTP
           dup { |opts| opts.#{method_name} = value }
         end
       RUBY
+    end
+
+    def with_cache(cache)
+      my_cache = cache.dup
+
+      unless my_cache.is_a?(Hash)
+        my_cache = self.class.default_cache.merge({:mode => my_cache})
+      end
+
+      dup do |opts|
+        opts.cache = my_cache
+      end
     end
 
     def [](option)
@@ -111,7 +133,8 @@ module HTTP
         :follow           => follow,
         :socket_class     => socket_class,
         :ssl_socket_class => ssl_socket_class,
-        :ssl_context      => ssl_context
+        :ssl_context      => ssl_context,
+        :cache            => cache
       }
     end
 
