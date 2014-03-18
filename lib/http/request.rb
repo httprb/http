@@ -67,7 +67,7 @@ module HTTP
 
       @proxy, @body, @version = proxy, body, version
 
-      @headers = HTTP::Headers.new(headers)
+      @headers = HTTP::Headers.from_hash(headers || {})
       @headers['Host'] ||= @uri.host
     end
 
@@ -75,7 +75,7 @@ module HTTP
     def redirect(uri)
       uri = @uri.merge uri.to_s
       req = self.class.new(verb, uri, headers, proxy, body, version)
-      req.headers.merge!('Host' => req.uri.host)
+      req['Host'] = req.uri.host
       req
     end
 
