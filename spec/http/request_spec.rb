@@ -1,6 +1,10 @@
 require 'spec_helper'
 
 describe HTTP::Request do
+  it 'includes HTTP::Headers::Mixin' do
+    expect(described_class).to include HTTP::Headers::Mixin
+  end
+
   it 'requires URI to have scheme part' do
     expect { HTTP::Request.new(:get, 'example.com/') }.to \
       raise_error(HTTP::Request::UnsupportedSchemeError)
@@ -20,10 +24,6 @@ describe HTTP::Request do
 
     it 'sets implicit headers' do
       expect(subject['Host']).to eq('example.com')
-    end
-
-    it 'provides a #headers accessor' do
-      expect(subject.headers).to eq('Accept' => 'text/html', 'Host' => 'example.com')
     end
 
     it 'provides a #verb accessor' do
@@ -57,7 +57,7 @@ describe HTTP::Request do
     its(:proxy)   { should eq request.proxy }
 
     it 'presets new Host header' do
-      expect(redirected.headers['Host']).to eq 'blog.example.com'
+      expect(redirected['Host']).to eq 'blog.example.com'
     end
 
     context 'with relative URL given' do
@@ -70,7 +70,7 @@ describe HTTP::Request do
       its(:proxy)   { should eq request.proxy }
 
       it 'keeps Host header' do
-        expect(redirected.headers['Host']).to eq 'example.com'
+        expect(redirected['Host']).to eq 'example.com'
       end
 
       context 'with original URI having non-standard port' do
@@ -89,7 +89,7 @@ describe HTTP::Request do
       its(:proxy)   { should eq request.proxy }
 
       it 'keeps Host header' do
-        expect(redirected.headers['Host']).to eq 'example.com'
+        expect(redirected['Host']).to eq 'example.com'
       end
 
       context 'with original URI having non-standard port' do

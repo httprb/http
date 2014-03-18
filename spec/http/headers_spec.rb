@@ -369,5 +369,16 @@ describe HTTP::Headers do
     it 'fails if given object does not respond to neither to_hash nor to_h' do
       expect { described_class.from_hash double }.to raise_error HTTP::Error
     end
+
+    context 'with duplicate header keys (mixed case)' do
+      let(:headers) { {'Set-Cookie' => 'hoo=ray', 'set-cookie' => 'woo=hoo'} }
+
+      it 'adds all headers' do
+        expect(described_class.from_hash(headers).to_a).to match_array([
+          %w[Set-Cookie hoo=ray],
+          %w[Set-Cookie woo=hoo]
+        ])
+      end
+    end
   end
 end
