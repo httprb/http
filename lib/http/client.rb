@@ -3,6 +3,7 @@ require "uri"
 require "http/form_data"
 require "http/options"
 require "http/redirector"
+require "http/cache"
 
 module HTTP
   # Clients make requests and receive responses
@@ -42,6 +43,13 @@ module HTTP
 
     # Perform a single (no follow) HTTP request
     def perform(req, options)
+      if Cache::ALLOWED_CACHE_MODES.include?(options.cache[:mode])
+        cache = Cache.new(options)
+        if res = cache.perform_request(req)
+          return res
+        end
+      end
+
       # finish previous response if client was re-used
       # TODO: this is pretty wrong, as socket shoud be part of response
       #       connection, so that re-use of client will not break multiple
@@ -62,6 +70,10 @@ module HTTP
       res  = Response.new(@parser.status_code, @parser.http_version, @parser.headers, body, uri)
 
       finish_response if :head == req.verb
+
+      if Cache::ALLOWED_CACHE_MODES.include?(options.cache_mode)
+        cache.perform_response(res)
+      end
 
       res
     end

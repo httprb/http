@@ -4,6 +4,7 @@ require "http/headers"
 require "http/content_type"
 require "http/mime_type"
 require "http/response/status"
+require "time"
 
 module HTTP
   class Response
@@ -26,12 +27,14 @@ module HTTP
 
     # @return [URI, nil]
     attr_reader :uri
+    attr_reader   :response_time
+    attr_accessor :authoritative, :request_time
 
     def initialize(status, version, headers, body, uri = nil) # rubocop:disable ParameterLists
       @version, @body, @uri = version, body, uri
-
       @status  = HTTP::Response::Status.new status
       @headers = HTTP::Headers.coerce(headers || {})
+      @response_time = Time.now
     end
 
     # @!method reason
