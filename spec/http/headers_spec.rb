@@ -154,7 +154,7 @@ describe HTTP::Headers do
     end
 
     it 'returns Hash with normalized keys' do
-      expect(headers.to_h.keys).to eq %w[Content-Type Set-Cookie]
+      expect(headers.to_h.keys).to match_array %w[Content-Type Set-Cookie]
     end
 
     context 'for a header with single value' do
