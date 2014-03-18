@@ -233,6 +233,10 @@ describe HTTP::Headers do
     end
   end
 
+  it 'is Enumerable' do
+    expect(subject).to be_an Enumerable
+  end
+
   describe '#==' do
     let(:left)  { described_class.new }
     let(:right) { described_class.new }

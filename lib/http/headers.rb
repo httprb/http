@@ -5,6 +5,7 @@ require 'http/headers/mixin'
 module HTTP
   class Headers
     extend Forwardable
+    include Enumerable
 
     # Matches HTTP header names when in "Canonical-Http-Format"
     CANONICAL_HEADER = /^[A-Z][a-z]*(-[A-Z][a-z]*)*$/
