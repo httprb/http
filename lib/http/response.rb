@@ -76,7 +76,7 @@ module HTTP
 
     def initialize(status, version, headers, body, uri = nil) # rubocop:disable ParameterLists
       @status, @version, @body, @uri = status, version, body, uri
-      @headers = HTTP::Headers.new(headers)
+      @headers = HTTP::Headers.from_hash(headers || {})
     end
 
     # Obtain the 'Reason-Phrase' for the response
@@ -86,7 +86,7 @@ module HTTP
 
     # Returns an Array ala Rack: `[status, headers, body]`
     def to_a
-      [status, headers, body.to_s]
+      [status, headers.to_h, body.to_s]
     end
 
     # Return the response body as a string
