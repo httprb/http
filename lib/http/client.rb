@@ -71,7 +71,7 @@ module HTTP
 
       finish_response if :head == req.verb
 
-      if Cache::ALLOWED_CACHE_MODES.include?(options.cache_mode)
+      if Cache::ALLOWED_CACHE_MODES.include?(options.cache[:mode])
         cache.perform_response(res)
       end
 
