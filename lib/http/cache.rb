@@ -12,12 +12,11 @@ module HTTP
     attr_reader :request, :response
 
     def initialize(options)
-      @options = options
-      unless ALLOWED_CACHE_MODES.include?(@options.cache[:mode])
+      unless ALLOWED_CACHE_MODES.include?(options.cache[:mode])
         fail CacheModeError, "Invalid cache_mode #{options.cache[:mode]} supplied"
       end
-      @cache_mode    = @options.cache[:mode]
-      @cache_adapter = @options.cache[:adapter]
+      @cache_mode    = options.cache[:mode]
+      @cache_adapter = options.cache[:adapter]
     end
 
     def perform_request(request)
@@ -35,6 +34,32 @@ module HTTP
         nil
       end
     end
+
+    def perform_response(response)
+      @response = response
+      response.request_time  = request.request_time
+      response.authoritative = true
+      # RFC2618 - 14.18 : A received message that does not have a Date header
+      # field MUST be assigned one by the recipient if the message will be cached
+      # by that recipient.
+      response.headers['Date'] ||= response.response_time.httpdate
+
+      if @cached_response
+        if forces_cache_deletion?(response)
+          invalidate_cache
+        elsif response.reason == 'Not Modified'
+          revalidate_response!
+        end
+      end
+
+      if request_cacheable? && response_cacheable?
+        store_in_cache
+      elsif invalidates_cache?
+        invalidate_cache
+      end
+    end
+
+    private
 
     def cache_lookup
       @cache_adapter.lookup(request) unless skip_cache?
@@ -93,30 +118,6 @@ module HTTP
       nil
     end
 
-    def perform_response(response)
-      @response = response
-      response.request_time  = request.request_time
-      response.authoritative = true
-      # RFC2618 - 14.18 : A received message that does not have a Date header
-      # field MUST be assigned one by the recipient if the message will be cached
-      # by that recipient.
-      response.headers['Date'] ||= response.response_time.httpdate
-
-      if @cached_response
-        if forces_cache_deletion?(response)
-          invalidate_cache
-        elsif response.reason == 'Not Modified'
-          revalidate_response!
-        end
-      end
-
-      if request_cacheable? && response_cacheable?
-        store_in_cache
-      elsif invalidates_cache?
-        invalidate_cache
-      end
-    end
-
     def revalidate_response!
       @cached_response.headers.merge!(response.headers)
       @cached_response.request_time  = response.request_time
@@ -165,6 +166,7 @@ module HTTP
 
     def store_in_cache
       @cache_adapter.store(request, response)
+      nil
     end
 
     def invalidates_cache?
