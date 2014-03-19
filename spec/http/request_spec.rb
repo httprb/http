@@ -97,5 +97,10 @@ describe HTTP::Request do
         its(:uri)     { should eq URI.parse 'http://example.com:8080/blog' }
       end
     end
+
+    context 'with new verb given' do
+      subject { request.redirect 'http://blog.example.com/', :get }
+      its(:verb) { should be :get }
+    end
   end
 end

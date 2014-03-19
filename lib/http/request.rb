@@ -72,7 +72,7 @@ module HTTP
     end
 
     # Returns new Request with updated uri
-    def redirect(uri)
+    def redirect(uri, verb = @verb)
       uri = @uri.merge uri.to_s
       req = self.class.new(verb, uri, headers, proxy, body, version)
       req['Host'] = req.uri.host
