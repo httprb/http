@@ -49,13 +49,27 @@ describe HTTP::Redirector do
   end
 
   context 'following 303 redirect' do
-    let(:orig_request)  { HTTP::Request.new :post, 'http://www.example.com/' }
-    let(:orig_response) { redirect_response 'http://example.com/', 303 }
+    context 'upon POST request' do
+      let(:orig_request)  { HTTP::Request.new :post, 'http://www.example.com/' }
+      let(:orig_response) { redirect_response 'http://example.com/', 303 }
 
-    it 'follows without changing verb' do
-      redirector.perform(orig_request, orig_response) do |request|
-        expect(request.verb).to be orig_request.verb
-        simple_response 200
+      it 'follows without changing verb' do
+        redirector.perform(orig_request, orig_response) do |request|
+          expect(request.verb).to be :get
+          simple_response 200
+        end
+      end
+    end
+
+    context 'upon HEAD request' do
+      let(:orig_request)  { HTTP::Request.new :head, 'http://www.example.com/' }
+      let(:orig_response) { redirect_response 'http://example.com/', 303 }
+
+      it 'follows without changing verb' do
+        redirector.perform(orig_request, orig_response) do |request|
+          expect(request.verb).to be :get
+          simple_response 200
+        end
       end
     end
   end

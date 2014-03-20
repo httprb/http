@@ -39,7 +39,12 @@ module HTTP
         uri = @response.headers['Location']
         fail StateError, 'no Location header in redirect' unless uri
 
-        @request  = @request.redirect(uri)
+        if 303 == @response.code
+          @request = @request.redirect uri, :get
+        else
+          @request = @request.redirect uri
+        end
+
         @response = yield @request
       end
 
