@@ -105,4 +105,19 @@ describe HTTP::Client do
       client.get('http://example.com/', :json => {:foo => :bar})
     end
   end
+
+  describe '#request' do
+    context 'with explicitly given `Host` header' do
+      let(:headers) { {'Host' => 'another.example.com'} }
+      let(:client)  { described_class.new :headers => headers }
+
+      it 'keeps `Host` header as is' do
+        expect(client).to receive(:perform) do |req, options|
+          expect(req['Host']).to eq 'another.example.com'
+        end
+
+        client.request(:get, 'http://example.com/')
+      end
+    end
+  end
 end
