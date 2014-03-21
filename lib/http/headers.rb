@@ -98,7 +98,7 @@ module HTTP
       @pile == other.to_a
     end
 
-    def_delegators :@pile, :each, :hash
+    def_delegators :@pile, :each, :empty?, :hash
 
     # :nodoc:
     def initialize_copy(orig)

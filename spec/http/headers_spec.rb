@@ -3,6 +3,10 @@ require 'spec_helper'
 describe HTTP::Headers do
   subject(:headers) { described_class.new }
 
+  it 'is Enumerable' do
+    expect(headers).to be_an Enumerable
+  end
+
   describe '#set' do
     it 'sets header value' do
       headers.set 'Accept', 'application/json'
@@ -233,8 +237,38 @@ describe HTTP::Headers do
     end
   end
 
-  it 'is Enumerable' do
-    expect(subject).to be_an Enumerable
+  describe '.empty?' do
+    subject { headers.empty? }
+
+    context 'initially' do
+      it { should be_true }
+    end
+
+    context 'when header exists' do
+      before { headers.add :accept, 'text/plain' }
+      it { should be_false }
+    end
+
+    context 'when last header was removed' do
+      before do
+        headers.add :accept, 'text/plain'
+        headers.delete :accept
+      end
+
+      it { should be_true }
+    end
+  end
+
+  describe '#hash' do
+    let(:left)  { described_class.new }
+    let(:right) { described_class.new }
+
+    it 'equals if two headers equals' do
+      left.add :accept, 'text/plain'
+      right.add :accept, 'text/plain'
+
+      expect(left.hash).to eq right.hash
+    end
   end
 
   describe '#==' do
@@ -269,18 +303,6 @@ describe HTTP::Headers do
       right.add :cookie, 'hoo=ray'
 
       expect(left).to_not eq right
-    end
-  end
-
-  describe '#hash' do
-    let(:left)  { described_class.new }
-    let(:right) { described_class.new }
-
-    it 'equals if two headers equals' do
-      left.add :accept, 'text/plain'
-      right.add :accept, 'text/plain'
-
-      expect(left.hash).to eq right.hash
     end
   end
 
