@@ -1,8 +1,6 @@
 require 'spec_helper'
 
 describe HTTP::Options, 'new' do
-  let(:user_agent) { "RubyHTTPGem/#{HTTP::VERSION}" }
-
   it 'supports a Options instance' do
     opts = HTTP::Options.new
     expect(HTTP::Options.new(opts)).to eq(opts)
@@ -16,7 +14,7 @@ describe HTTP::Options, 'new' do
 
     it 'coerces :headers correctly' do
       opts = HTTP::Options.new(:headers => {:accept => 'json'})
-      expect(opts.headers).to eq(:accept => 'json', 'User-Agent' => user_agent)
+      expect(opts.headers).to eq([%w[Accept json]])
     end
 
     it 'coerces :proxy correctly' do

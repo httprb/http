@@ -1,5 +1,6 @@
 require 'http/headers'
 require 'http/request/writer'
+require 'http/version'
 require 'uri'
 require 'base64'
 
@@ -68,7 +69,9 @@ module HTTP
       @proxy, @body, @version = proxy, body, version
 
       @headers = HTTP::Headers.coerce(headers || {})
-      @headers['Host'] ||= @uri.host
+
+      @headers['Host']        ||= @uri.host
+      @headers['User-Agent']  ||= "RubyHTTPGem/#{HTTP::VERSION}"
     end
 
     # Returns new Request with updated uri
