@@ -16,7 +16,7 @@ describe HTTP::Options, 'new' do
 
     it 'coerces :headers correctly' do
       opts = HTTP::Options.new(:headers => {:accept => 'json'})
-      expect(opts.headers).to eq(:accept => 'json', 'User-Agent' => user_agent)
+      expect(opts.headers).to eq([%w[Accept json], ['User-Agent', user_agent]])
     end
 
     it 'coerces :proxy correctly' do
