@@ -382,6 +382,8 @@ describe HTTP::Headers do
   end
 
   describe '.coerce' do
+    let(:dummyClass) { Class.new { def respond_to?(*); end } }
+
     it 'accepts any object that respond to #to_hash' do
       hashie = double :to_hash => {'accept' => 'json'}
       expect(described_class.coerce(hashie)['accept']).to eq 'json'
@@ -398,7 +400,7 @@ describe HTTP::Headers do
     end
 
     it 'fails if given object cannot be coerced' do
-      expect { described_class.coerce double }.to raise_error HTTP::Error
+      expect { described_class.coerce dummyClass.new }.to raise_error HTTP::Error
     end
 
     context 'with duplicate header keys (mixed case)' do
