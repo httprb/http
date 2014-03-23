@@ -20,10 +20,4 @@ describe HTTP::Options, 'headers' do
     expect(opts.with_headers(x).headers['accept']).to eq('json')
   end
 
-  it 'recognizes invalid headers' do
-    expect do
-      opts.with_headers(self)
-    end.to raise_error(HTTP::Error)
-  end
-
 end
