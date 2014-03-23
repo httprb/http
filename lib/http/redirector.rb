@@ -13,6 +13,7 @@ module HTTP
     def initialize(options = nil)
       options   = {:max_hops => 5} unless options.respond_to?(:fetch)
       @max_hops = options.fetch(:max_hops, 5)
+      @max_hops = false if @max_hops && 1 > @max_hops.to_i
     end
 
     # Follows redirects until non-redirect response found
@@ -54,7 +55,7 @@ module HTTP
 
     # Check if we reached max amount of redirect hops
     def too_many_hops?
-      @max_hops.to_i < @visited.count if @max_hops
+      @max_hops < @visited.count if @max_hops
     end
 
     # Check if we got into an endless loop
