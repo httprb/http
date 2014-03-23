@@ -67,7 +67,7 @@ module HTTP
 
       @proxy, @body, @version = proxy, body, version
 
-      @headers = HTTP::Headers.from_hash(headers || {})
+      @headers = HTTP::Headers.coerce(headers || {})
       @headers['Host'] ||= @uri.host
     end
 

@@ -111,7 +111,7 @@ module HTTP
     # @see #merge
     # @return [void]
     def merge!(other)
-      self.class.from_hash(other).to_h.each { |name, values| set name, values }
+      self.class.coerce(other).to_h.each { |name, values| set name, values }
     end
 
     # Returns new Headers instance with `other` headers merged in.
@@ -122,20 +122,20 @@ module HTTP
       dup.tap { |dupped| dupped.merge! other }
     end
 
-    # Initiates new Headers object from given Hash
+    # Initiates new Headers object from given object.
     #
-    # @raise [Error] if given hash does not respond to `#to_hash` or `#to_h`
-    # @param [#to_hash, #to_h] hash
+    # @raise [Error] if given object can't be coerced
+    # @param [#to_hash, #to_h, nil] object
     # @return [Headers]
-    def self.from_hash(hash)
-      hash = case
-             when hash.respond_to?(:to_hash) then hash.to_hash
-             when hash.respond_to?(:to_h)    then hash.to_h
-             else fail Error, '#to_hash or #to_h object expected'
-             end
+    def self.coerce(object)
+      object = case
+        when object.respond_to?(:to_hash) then object.to_hash
+        when object.respond_to?(:to_h)    then object.to_h
+        else fail Error, "Can't coerce #{object.inspect} to Headers"
+        end
 
       headers = new
-      hash.each { |k, v| headers.add k, v }
+      object.each { |k, v| headers.add k, v }
       headers
     end
 
