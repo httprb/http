@@ -128,12 +128,14 @@ module HTTP
     # @param [#to_hash, #to_h, #to_a] object
     # @return [Headers]
     def self.coerce(object)
-      object = case
-        when object.respond_to?(:to_hash) then object.to_hash
-        when object.respond_to?(:to_h)    then object.to_h
-        when object.respond_to?(:to_a)    then object.to_a
-        else fail Error, "Can't coerce #{object.inspect} to Headers"
-        end
+      unless object.is_a? self
+        object = case
+                when object.respond_to?(:to_hash) then object.to_hash
+                when object.respond_to?(:to_h)    then object.to_h
+                when object.respond_to?(:to_a)    then object.to_a
+                else fail Error, "Can't coerce #{object.inspect} to Headers"
+                end
+      end
 
       headers = new
       object.each { |k, v| headers.add k, v }
