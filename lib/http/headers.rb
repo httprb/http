@@ -125,12 +125,13 @@ module HTTP
     # Initiates new Headers object from given object.
     #
     # @raise [Error] if given object can't be coerced
-    # @param [#to_hash, #to_h, nil] object
+    # @param [#to_hash, #to_h, #to_a] object
     # @return [Headers]
     def self.coerce(object)
       object = case
         when object.respond_to?(:to_hash) then object.to_hash
         when object.respond_to?(:to_h)    then object.to_h
+        when object.respond_to?(:to_a)    then object.to_a
         else fail Error, "Can't coerce #{object.inspect} to Headers"
         end
 

@@ -392,6 +392,11 @@ describe HTTP::Headers do
       expect(described_class.coerce(hashie)['accept']).to eq 'json'
     end
 
+    it 'accepts any object that respond to #to_a' do
+      hashie = double :to_a => [%w[accept json]]
+      expect(described_class.coerce(hashie)['accept']).to eq 'json'
+    end
+
     it 'fails if given object cannot be coerced' do
       expect { described_class.coerce double }.to raise_error HTTP::Error
     end
