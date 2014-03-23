@@ -1,9 +1,7 @@
 require 'spec_helper'
 
 describe HTTP::Options, 'merge' do
-
-  let(:opts)       { HTTP::Options.new }
-  let(:user_agent) { "RubyHTTPGem/#{HTTP::VERSION}" }
+  let(:opts) { HTTP::Options.new }
 
   it 'supports a Hash' do
     old_response = opts.response
@@ -43,7 +41,7 @@ describe HTTP::Options, 'merge' do
       :form      => {:bar => 'bar'},
       :body      => 'body-bar',
       :json      => {:bar => 'bar'},
-      :headers   => {'Accept'  => 'xml', 'Foo' => 'foo', 'Bar' => 'bar', 'User-Agent' => user_agent},
+      :headers   => {'Accept'  => 'xml', 'Foo' => 'foo', 'Bar' => 'bar'},
       :proxy     => {:proxy_address => '127.0.0.1', :proxy_port => 8080},
       :follow => nil,
       :socket_class     => described_class.default_socket_class,

@@ -1,5 +1,4 @@
 require 'http/headers'
-require 'http/version'
 require 'openssl'
 require 'socket'
 
@@ -58,12 +57,11 @@ module HTTP
       @json      = options[:json]
       @follow    = options[:follow]
 
+      @headers   = HTTP::Headers.coerce(options[:headers] || {})
+
       @socket_class     = options[:socket_class]     || self.class.default_socket_class
       @ssl_socket_class = options[:ssl_socket_class] || self.class.default_ssl_socket_class
       @ssl_context      = options[:ssl_context]
-
-      @headers = HTTP::Headers.coerce(options[:headers] || {})
-      @headers['User-Agent'] ||= "RubyHTTPGem/#{HTTP::VERSION}"
     end
 
     def with_headers(headers)
