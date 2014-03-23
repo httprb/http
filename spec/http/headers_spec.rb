@@ -381,26 +381,33 @@ describe HTTP::Headers do
     end
   end
 
-  describe '.from_hash' do
+  describe '.coerce' do
+    let(:dummyClass) { Class.new { def respond_to?(*); end } }
+
     it 'accepts any object that respond to #to_hash' do
       hashie = double :to_hash => {'accept' => 'json'}
-      expect(described_class.from_hash(hashie)['accept']).to eq 'json'
+      expect(described_class.coerce(hashie)['accept']).to eq 'json'
     end
 
     it 'accepts any object that respond to #to_h' do
       hashie = double :to_h => {'accept' => 'json'}
-      expect(described_class.from_hash(hashie)['accept']).to eq 'json'
+      expect(described_class.coerce(hashie)['accept']).to eq 'json'
     end
 
-    it 'fails if given object does not respond to neither to_hash nor to_h' do
-      expect { described_class.from_hash double }.to raise_error HTTP::Error
+    it 'accepts any object that respond to #to_a' do
+      hashie = double :to_a => [%w[accept json]]
+      expect(described_class.coerce(hashie)['accept']).to eq 'json'
+    end
+
+    it 'fails if given object cannot be coerced' do
+      expect { described_class.coerce dummyClass.new }.to raise_error HTTP::Error
     end
 
     context 'with duplicate header keys (mixed case)' do
       let(:headers) { {'Set-Cookie' => 'hoo=ray', 'set-cookie' => 'woo=hoo'} }
 
       it 'adds all headers' do
-        expect(described_class.from_hash(headers).to_a).to match_array([
+        expect(described_class.coerce(headers).to_a).to match_array([
           %w[Set-Cookie hoo=ray],
           %w[Set-Cookie woo=hoo]
         ])
