@@ -68,11 +68,6 @@ module HTTP
     end
     alias_method :through, :via
 
-    # Specify the kind of response to return (:auto, :object, :body, :parsed_body)
-    def with_response(response_type)
-      branch default_options.with_response(response_type)
-    end
-
     # Alias for with_response(:object)
     def stream
       with_response(:object)
