@@ -14,12 +14,6 @@ module HTTP
         @contents  = nil
       end
 
-      # Read exactly the given amount of data
-      def read(length)
-        stream!
-        @client.read(length)
-      end
-
       # Read up to length bytes, but return any data that's available
       def readpartial(length = nil)
         stream!
