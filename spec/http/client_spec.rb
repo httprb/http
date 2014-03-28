@@ -120,4 +120,62 @@ describe HTTP::Client do
       end
     end
   end
+
+  describe '#perform' do
+    let(:client) { described_class.new }
+
+    it 'calls finish_response before actual performance' do
+      TCPSocket.stub(:open) { throw :halt }
+      expect(client).to receive(:finish_response)
+      catch(:halt) { client.head "http://127.0.0.1:#{ExampleService::PORT}/" }
+    end
+
+    it 'calls finish_response once body was fully flushed' do
+      expect(client).to receive(:finish_response).twice.and_call_original
+      client.get("http://127.0.0.1:#{ExampleService::PORT}/").to_s
+    end
+
+    context 'with HEAD request' do
+      it 'does not iterates through body' do
+        expect(client).to_not receive(:readpartial)
+        client.head("http://127.0.0.1:#{ExampleService::PORT}/")
+      end
+
+      it 'finishes response after headers were received' do
+        expect(client).to receive(:finish_response).twice.and_call_original
+        client.head("http://127.0.0.1:#{ExampleService::PORT}/")
+      end
+    end
+
+    context 'when server fully flushes response in one chunk' do
+      before do
+        socket_spy = double
+
+        chunks = [
+          <<-RESPONSE.gsub(/^\s*\| */, '').gsub(/\n/, "\r\n")
+          | HTTP/1.1 200 OK
+          | Content-Type: text/html
+          | Server: WEBrick/1.3.1 (Ruby/1.9.3/2013-11-22)
+          | Date: Mon, 24 Mar 2014 00:32:22 GMT
+          | Content-Length: 15
+          | Connection: Keep-Alive
+          |
+          | <!doctype html>
+          RESPONSE
+        ]
+
+        socket_spy.stub(:close) { nil }
+        socket_spy.stub(:closed?) { true }
+        socket_spy.stub(:readpartial) { chunks.shift }
+        socket_spy.stub(:<<) { nil }
+
+        TCPSocket.stub(:open) { socket_spy }
+      end
+
+      it 'properly reads body' do
+        body = client.get("http://127.0.0.1:#{ExampleService::PORT}/").to_s
+        expect(body).to eq '<!doctype html>'
+      end
+    end
+  end
 end

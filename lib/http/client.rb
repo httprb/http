@@ -39,52 +39,22 @@ module HTTP
 
       if options.follow
         res = Redirector.new(options.follow).perform req, res do |request|
-          # TODO: keep-alive
-          @parser.reset
-          finish_response
-
           perform_without_following_redirects request, options
         end
       end
 
-      @body_remaining = Integer(res['Content-Length']) if res['Content-Length']
       res
     end
 
     # Read a chunk of the body
-    def readpartial(size = BUFFER_SIZE) # rubocop:disable CyclomaticComplexity
-      if @parser.finished? || (@body_remaining && @body_remaining.zero?)
-        chunk = @parser.chunk
+    def readpartial(size = BUFFER_SIZE)
+      return unless @socket
 
-        if !chunk && @body_remaining && !@body_remaining.zero?
-          fail StateError, "expected #{@body_remaining} more bytes of body"
-        end
-
-        @body_remaining -= chunk.bytesize if chunk
-        return chunk
-      end
-
-      fail StateError, 'not connected' unless @socket
-
+      read_more size
       chunk = @parser.chunk
-      unless chunk
-        begin
-          @parser << @socket.readpartial(BUFFER_SIZE)
-          chunk = @parser.chunk
-        rescue EOFError
-          chunk = nil
-        end
-
-        # TODO: consult @body_remaining here and raise if appropriate
-        return unless chunk
-      end
-
-      if @body_remaining
-        @body_remaining -= chunk.bytesize
-        @body_remaining = nil if @body_remaining < 1
-      end
 
       finish_response if @parser.finished?
+
       chunk
     end
 
@@ -92,6 +62,12 @@ module HTTP
 
     # Perform a single (no follow) HTTP request
     def perform_without_following_redirects(req, options)
+      # finish previous response if client was re-used
+      # TODO: this is pretty wrong, as socket shoud be part of response
+      #       connection, so that re-use of client will not break multiple
+      #       chunked responses
+      finish_response
+
       uri = req.uri
 
       # TODO: keep-alive support
@@ -101,13 +77,17 @@ module HTTP
       req.stream @socket
 
       begin
-        @parser << @socket.readpartial(BUFFER_SIZE) until @parser.headers
+        read_more BUFFER_SIZE until @parser.headers
       rescue IOError, Errno::ECONNRESET, Errno::EPIPE => ex
         raise IOError, "problem making HTTP request: #{ex}"
       end
 
       body = Response::Body.new(self)
-      Response.new(@parser.status_code, @parser.http_version, @parser.headers, body, uri)
+      res  = Response.new(@parser.status_code, @parser.http_version, @parser.headers, body, uri)
+
+      finish_response if :head == req.verb
+
+      res
     end
 
     # Initialize TLS connection
@@ -135,8 +115,18 @@ module HTTP
 
     # Callback for when we've reached the end of a response
     def finish_response
-      # TODO: keep-alive support
+      @socket.close if @socket && !@socket.closed?
+      @parser.reset
+
       @socket = nil
+    end
+
+    # Feeds some more data into parser
+    def read_more(size)
+      @parser << @socket.readpartial(size) unless @parser.finished?
+      return true
+    rescue EOFError
+      return false
     end
 
     # Moves uri get params into the opts.params hash
