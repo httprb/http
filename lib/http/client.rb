@@ -60,7 +60,7 @@ module HTTP
           fail StateError, "expected #{@body_remaining} more bytes of body"
         end
 
-        @body_remaining -= chunk.bytesize if chunk
+        @body_remaining -= chunk.bytesize if chunk && @body_remaining
         return chunk
       end
 
