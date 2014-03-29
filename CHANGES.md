@@ -1,3 +1,68 @@
+0.6.0
+-----
+
+* Rename `HTTP::Request#method` to `HTTP::Request#verb` (@krainboltgreene)
+* Add `HTTP::ResponseBody` class (@tarcieri)
+* Change API of response on `HTTP::Client.request` and "friends" (`#get`, `#post`, etc) (@tarcieri)
+* Add `HTTP::Response#readpartial` (@tarcieri)
+* Add `HTTP::Headers` class (@ixti)
+* Fix and improve following redirects (@ixti)
+* Add `HTTP::Request#redirect` (@ixti)
+* Add `HTTP::Response#content_type` (@ixti)
+* Add `HTTP::Response#mime_type` (@ixti)
+* Add `HTTP::Response#charset` (@ixti)
+* Improve error message upon invalid URI scheme (@ixti)
+* Consolidate errors under common `HTTP::Error` namespace (@ixti)
+* Add easy way of adding Authorization header (@ixti)
+* Fix proxy support (@hundredwatt)
+* Fix and improve query params handing (@jwinter)
+* Change API of custom MIME type parsers (@ixti)
+* Remove `HTTP::Chainable#with_response` (@ixti)
+* Remove `HTTP::Response::BodyDelegator` (@ixti)
+* Remove `HTTP::Response#parsed_body` (@ixti)
+* Bump up input buffer from 4K to 16K (@tarcieri)
+
+``` ruby
+# Main API change you will mention is that `request` method and it's
+# syntax sugar helpers like `get`, `post`, etc. now returns Response
+# object instead of BodyDelegator:
+
+response = HTTP.get "http://example.com"
+raw_body = HTTP.get("http://example.com").to_s
+parsed_body = HTTP.get("http://example.com/users.json").parse
+
+# Second major change in API is work with request/response headers
+# It is now delegated to `HTTP::Headers` class, so you can check it's
+# documentation for details, here we will only outline main difference.
+# Duckface (`[]=`) does not appends headers anymore
+
+request[:content_type] = "text/plain"
+request[:content_type] = "text/html"
+request[:content_type] # => "text/html"
+
+# In order to add multiple header values, you should pass array:
+
+request[:cookie] = ["foo=bar", "woo=hoo"]
+request[:cookie] # => ["foo=bar", "woo=hoo"]
+
+# or call `#add` on headers:
+
+request.headers.add :accept, "text/plain"
+request.headers.add :accept, "text/html"
+request[:accept] # => ["text/plain", "text/html"]
+
+# Also, you can now read body in chunks (stream):
+
+res = HTTP.get "http://example.com"
+File.open "/tmp/dummy.bin", "wb" do |io|
+  while (chunk = res.readpartial)
+    io << chunk
+  end
+end
+```
+
+[Changes discussion](https://github.com/tarcieri/http/pull/116)
+
 0.5.0
 -----
 * Add query string support
