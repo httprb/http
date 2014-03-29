@@ -61,7 +61,7 @@ File.open "/tmp/dummy.bin", "wb" do |io|
 end
 ```
 
-[Changes discussion](https://github.com/tarcieri/http/pull/116)
+[Changes discussion](https://github.com/tarcieri/http/issues/116)
 
 0.5.0
 -----
