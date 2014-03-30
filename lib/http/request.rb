@@ -1,8 +1,9 @@
+require 'http/errors'
 require 'http/headers'
 require 'http/request/writer'
 require 'http/version'
-require 'uri'
 require 'base64'
+require 'uri'
 
 module HTTP
   class Request
