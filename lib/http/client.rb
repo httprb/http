@@ -124,9 +124,9 @@ module HTTP
     # Feeds some more data into parser
     def read_more(size)
       @parser << @socket.readpartial(size) unless @parser.finished?
-      return true
+      true
     rescue EOFError
-      return false
+      false
     end
 
     # Moves uri get params into the opts.params hash
