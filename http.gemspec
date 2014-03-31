@@ -5,7 +5,13 @@ require 'http/version'
 Gem::Specification.new do |gem|
   gem.authors       = %w[Tony Arcieri]
   gem.email         = %w[tony.arcieri@gmail.com]
-  gem.description   = 'HTTP so awesome it will lure Catherine Zeta Jones into your unicorn petting zoo'
+
+  gem.description   = <<-DESCRIPTION.strip.gsub(/\s+/, ' ')
+    An easy-to-use client library for making requests from Ruby.
+    It uses a simple method chaining system for building requests,
+    similar to Python's Requests.
+  DESCRIPTION
+
   gem.summary       = 'HTTP should be easy'
   gem.homepage      = 'https://github.com/tarcieri/http'
   gem.licenses      = %w[MIT]
