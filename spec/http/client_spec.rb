@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe HTTP::Client do
   StubbedClient = Class.new(HTTP::Client) do
-    def perform_without_following_redirects(request, options)
+    def perform(request, options)
       stubs.fetch(request.uri.to_s) { super(request, options) }
     end
 

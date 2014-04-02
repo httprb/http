@@ -19,49 +19,32 @@ module HTTP
     end
 
     # Make an HTTP request
-    def request(verb, uri, options = {})
-      opts = @default_options.merge(options)
+    def request(verb, uri, opts = {})
+      opts    = @default_options.merge(opts)
       headers = opts.headers
-      proxy = opts.proxy
+      proxy   = opts.proxy
 
       request_body = make_request_body(opts, headers)
       uri, opts = normalize_get_params(uri, opts) if verb == :get
 
-      uri = "#{uri}?#{URI.encode_www_form(opts.params)}" if opts.params && !opts.params.empty?
+      if opts.params && !opts.params.empty?
+        uri = "#{uri}?#{URI.encode_www_form(opts.params)}"
+      end
 
-      request = HTTP::Request.new(verb, uri, headers, proxy, request_body)
-      perform request, opts
-    end
+      req = HTTP::Request.new(verb, uri, headers, proxy, request_body)
+      res = perform req, opts
 
-    # Perform the HTTP request (following redirects if needed)
-    def perform(req, options)
-      res = perform_without_following_redirects req, options
-
-      if options.follow
-        res = Redirector.new(options.follow).perform req, res do |request|
-          perform_without_following_redirects request, options
+      if opts.follow
+        res = Redirector.new(opts.follow).perform req, res do |request|
+          perform request, opts
         end
       end
 
       res
     end
 
-    # Read a chunk of the body
-    def readpartial(size = BUFFER_SIZE)
-      return unless @socket
-
-      read_more size
-      chunk = @parser.chunk
-
-      finish_response if @parser.finished?
-
-      chunk
-    end
-
-  private
-
     # Perform a single (no follow) HTTP request
-    def perform_without_following_redirects(req, options)
+    def perform(req, options)
       # finish previous response if client was re-used
       # TODO: this is pretty wrong, as socket shoud be part of response
       #       connection, so that re-use of client will not break multiple
@@ -89,6 +72,20 @@ module HTTP
 
       res
     end
+
+    # Read a chunk of the body
+    def readpartial(size = BUFFER_SIZE)
+      return unless @socket
+
+      read_more size
+      chunk = @parser.chunk
+
+      finish_response if @parser.finished?
+
+      chunk
+    end
+
+  private
 
     # Initialize TLS connection
     def start_tls(socket, options)
