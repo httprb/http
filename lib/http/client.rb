@@ -94,7 +94,7 @@ module HTTP
 
     # Merges query params if needed
     def make_request_uri(uri, options)
-      uri = uri.is_a?(URI) ? uri : URI(uri.to_s)
+      uri = URI uri.to_s unless uri.is_a? URI
 
       if options.params && !options.params.empty?
         params    = CGI.parse(uri.query.to_s).merge(options.params || {})
