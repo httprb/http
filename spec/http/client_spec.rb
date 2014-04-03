@@ -75,8 +75,7 @@ describe HTTP::Client do
 
     it 'accepts params within the provided URL' do
       expect(HTTP::Request).to receive(:new) do |_, uri|
-        params = CGI.parse uri.query
-        expect(params).to eq('foo' => ['bar'])
+        expect(CGI.parse uri.query).to eq('foo' => %w[bar])
       end
 
       client.get('http://example.com/?foo=bar')
@@ -84,11 +83,34 @@ describe HTTP::Client do
 
     it 'combines GET params from the URI with the passed in params' do
       expect(HTTP::Request).to receive(:new) do |_, uri|
-        params = CGI.parse uri.query
-        expect(params).to eq('foo' => ['bar'], 'baz' => ['quux'])
+        expect(CGI.parse uri.query).to eq('foo' => %w[bar], 'baz' => %w[quux])
       end
 
       client.get('http://example.com/?foo=bar', :params => {:baz => 'quux'})
+    end
+
+    it 'merges duplicate values' do
+      expect(HTTP::Request).to receive(:new) do |_, uri|
+        expect(CGI.parse uri.query).to eq('a' => %w[1 2])
+      end
+
+      client.get('http://example.com/?a=1', :params => {:a => 2})
+    end
+
+    it 'does not modifies query part if no params were given' do
+      expect(HTTP::Request).to receive(:new) do |_, uri|
+        expect(uri.query).to eq 'deadbeef'
+      end
+
+      client.get('http://example.com/?deadbeef')
+    end
+
+    it 'does not corrupts index-less arrays' do
+      expect(HTTP::Request).to receive(:new) do |_, uri|
+        expect(CGI.parse uri.query).to eq 'a[]' => %w[b c], 'd' => %w[e]
+      end
+
+      client.get('http://example.com/?a[]=b&a[]=c', :params => {:d => 'e'})
     end
   end
 
