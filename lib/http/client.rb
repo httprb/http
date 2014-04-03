@@ -19,49 +19,27 @@ module HTTP
     end
 
     # Make an HTTP request
-    def request(verb, uri, options = {})
-      opts = @default_options.merge(options)
+    def request(verb, uri, opts = {})
+      opts    = @default_options.merge(opts)
+      uri     = make_request_uri(uri, opts)
       headers = opts.headers
-      proxy = opts.proxy
+      proxy   = opts.proxy
+      body    = make_request_body(opts, headers)
 
-      request_body = make_request_body(opts, headers)
-      uri, opts = normalize_get_params(uri, opts) if verb == :get
+      req = HTTP::Request.new(verb, uri, headers, proxy, body)
+      res = perform req, opts
 
-      uri = "#{uri}?#{URI.encode_www_form(opts.params)}" if opts.params && !opts.params.empty?
-
-      request = HTTP::Request.new(verb, uri, headers, proxy, request_body)
-      perform request, opts
-    end
-
-    # Perform the HTTP request (following redirects if needed)
-    def perform(req, options)
-      res = perform_without_following_redirects req, options
-
-      if options.follow
-        res = Redirector.new(options.follow).perform req, res do |request|
-          perform_without_following_redirects request, options
+      if opts.follow
+        res = Redirector.new(opts.follow).perform req, res do |request|
+          perform request, opts
         end
       end
 
       res
     end
 
-    # Read a chunk of the body
-    def readpartial(size = BUFFER_SIZE)
-      return unless @socket
-
-      read_more size
-      chunk = @parser.chunk
-
-      finish_response if @parser.finished?
-
-      chunk
-    end
-
-  private
-
     # Perform a single (no follow) HTTP request
-    def perform_without_following_redirects(req, options)
+    def perform(req, options)
       # finish previous response if client was re-used
       # TODO: this is pretty wrong, as socket shoud be part of response
       #       connection, so that re-use of client will not break multiple
@@ -90,6 +68,20 @@ module HTTP
       res
     end
 
+    # Read a chunk of the body
+    def readpartial(size = BUFFER_SIZE)
+      return unless @socket
+
+      read_more size
+      chunk = @parser.chunk
+
+      finish_response if @parser.finished?
+
+      chunk
+    end
+
+  private
+
     # Initialize TLS connection
     def start_tls(socket, options)
       # TODO: abstract away SSLContexts so we can use other TLS libraries
@@ -98,6 +90,18 @@ module HTTP
 
       socket.connect
       socket
+    end
+
+    # Merges query params if needed
+    def make_request_uri(uri, options)
+      uri = URI uri.to_s unless uri.is_a? URI
+
+      if options.params && !options.params.empty?
+        params    = CGI.parse(uri.query.to_s).merge(options.params || {})
+        uri.query = URI.encode_www_form params
+      end
+
+      uri
     end
 
     # Create the request body object to send
@@ -127,18 +131,6 @@ module HTTP
       true
     rescue EOFError
       false
-    end
-
-    # Moves uri get params into the opts.params hash
-    # @return [Array<URI, Hash>]
-    def normalize_get_params(uri, opts)
-      uri = URI(uri) unless uri.is_a?(URI)
-      if uri.query
-        extracted_params_from_uri = Hash[URI.decode_www_form(uri.query)]
-        opts = opts.with_params(extracted_params_from_uri.merge(opts.params || {}))
-        uri.query = nil
-      end
-      [uri, opts]
     end
   end
 end

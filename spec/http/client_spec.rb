@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe HTTP::Client do
   StubbedClient = Class.new(HTTP::Client) do
-    def perform_without_following_redirects(request, options)
+    def perform(request, options)
       stubs.fetch(request.uri.to_s) { super(request, options) }
     end
 
@@ -70,26 +70,47 @@ describe HTTP::Client do
   end
 
   describe 'parsing params' do
+    let(:client) { HTTP::Client.new }
+    before { allow(client).to receive :perform }
+
     it 'accepts params within the provided URL' do
-      client = HTTP::Client.new
-      allow(client).to receive(:perform)
       expect(HTTP::Request).to receive(:new) do |_, uri|
-        params = CGI.parse(URI(uri).query)
-        expect(params).to eq('foo' => ['bar'])
+        expect(CGI.parse uri.query).to eq('foo' => %w[bar])
       end
 
       client.get('http://example.com/?foo=bar')
     end
 
     it 'combines GET params from the URI with the passed in params' do
-      client = HTTP::Client.new
-      allow(client).to receive(:perform)
       expect(HTTP::Request).to receive(:new) do |_, uri|
-        params = CGI.parse(URI(uri).query)
-        expect(params).to eq('foo' => ['bar'], 'baz' => ['quux'])
+        expect(CGI.parse uri.query).to eq('foo' => %w[bar], 'baz' => %w[quux])
       end
 
       client.get('http://example.com/?foo=bar', :params => {:baz => 'quux'})
+    end
+
+    it 'merges duplicate values' do
+      expect(HTTP::Request).to receive(:new) do |_, uri|
+        expect(CGI.parse uri.query).to eq('a' => %w[1 2])
+      end
+
+      client.get('http://example.com/?a=1', :params => {:a => 2})
+    end
+
+    it 'does not modifies query part if no params were given' do
+      expect(HTTP::Request).to receive(:new) do |_, uri|
+        expect(uri.query).to eq 'deadbeef'
+      end
+
+      client.get('http://example.com/?deadbeef')
+    end
+
+    it 'does not corrupts index-less arrays' do
+      expect(HTTP::Request).to receive(:new) do |_, uri|
+        expect(CGI.parse uri.query).to eq 'a[]' => %w[b c], 'd' => %w[e]
+      end
+
+      client.get('http://example.com/?a[]=b&a[]=c', :params => {:d => 'e'})
     end
   end
 
