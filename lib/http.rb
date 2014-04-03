@@ -9,7 +9,7 @@ require 'http/request/writer'
 require 'http/response'
 require 'http/response/body'
 require 'http/response/parser'
-require 'http/backports' if RUBY_VERSION < '1.9.0'
+require 'http/backports'
 
 # HTTP should be easy
 module HTTP
