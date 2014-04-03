@@ -21,17 +21,12 @@ module HTTP
     # Make an HTTP request
     def request(verb, uri, opts = {})
       opts    = @default_options.merge(opts)
+      uri     = make_request_uri(uri, opts)
       headers = opts.headers
       proxy   = opts.proxy
+      body    = make_request_body(opts, headers)
 
-      request_body = make_request_body(opts, headers)
-      uri, opts = normalize_get_params(uri, opts) if verb == :get
-
-      if opts.params && !opts.params.empty?
-        uri = "#{uri}?#{URI.encode_www_form(opts.params)}"
-      end
-
-      req = HTTP::Request.new(verb, uri, headers, proxy, request_body)
+      req = HTTP::Request.new(verb, uri, headers, proxy, body)
       res = perform req, opts
 
       if opts.follow
@@ -97,6 +92,18 @@ module HTTP
       socket
     end
 
+    # Merges query params if needed
+    def make_request_uri(uri, options)
+      uri = uri.is_a?(URI) ? uri : URI(uri.to_s)
+
+      if options.params && !options.params.empty?
+        params    = CGI.parse(uri.query.to_s).merge(options.params || {})
+        uri.query = URI.encode_www_form params
+      end
+
+      uri
+    end
+
     # Create the request body object to send
     def make_request_body(opts, headers)
       if opts.body
@@ -124,18 +131,6 @@ module HTTP
       true
     rescue EOFError
       false
-    end
-
-    # Moves uri get params into the opts.params hash
-    # @return [Array<URI, Hash>]
-    def normalize_get_params(uri, opts)
-      uri = URI(uri) unless uri.is_a?(URI)
-      if uri.query
-        extracted_params_from_uri = Hash[URI.decode_www_form(uri.query)]
-        opts = opts.with_params(extracted_params_from_uri.merge(opts.params || {}))
-        uri.query = nil
-      end
-      [uri, opts]
     end
   end
 end
