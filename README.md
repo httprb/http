@@ -23,6 +23,16 @@ extension based on the Node.js parser and a Java port thereof.
 [requests]: http://docs.python-requests.org/en/latest/
 [http_parser.rb]: https://github.com/tmm1/http_parser.rb
 
+Help and Discussion
+-------------------
+
+If you need help or just want to talk about the Ruby HTTP Gem, [visit our Google
+Group][googlegroup], or join by email by sending a message to:
+[ruby-http-gem+subscribe@googlegroups.com][subscribe].
+
+[googlegroup]: https://groups.google.com/forum/#!forum/ruby-http-gem
+[subscribe]:   mailto:ruby-http-gem+subscribe@googlegroups.com
+
 Installation
 ------------
 
