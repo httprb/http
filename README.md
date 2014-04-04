@@ -33,6 +33,10 @@ Group][googlegroup], or join by email by sending a message to:
 [googlegroup]: https://groups.google.com/forum/#!forum/ruby-http-gem
 [subscribe]:   mailto:ruby-http-gem+subscribe@googlegroups.com
 
+If you believe you've found a bug, please report it at:
+
+https://github.com/tarcieri/http/issues
+
 Installation
 ------------
 
@@ -59,18 +63,6 @@ Documentation
 
 [Please see the HTTP Gem Wiki](https://github.com/tarcieri/http/wiki)
 for more detailed documentation and usage notes.
-
-Support
--------
-
-For help with The HTTP Gem, either open a [Github Issue] or discuss it
-on the Celluloid mailing list:
-
-http://groups.google.com/group/celluloid-ruby
-
-You can also find us on IRC at #celluloid on freenode
-
-[Github Issue]: https://github.com/tarcieri/http/issues
 
 Basic Usage
 -----------
