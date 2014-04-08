@@ -42,15 +42,11 @@ module HTTP
     # Scheme is normalized to be a lowercase symbol e.g. :http, :https
     attr_reader :scheme
 
-    # The following alias may be removed in three minor versions (0.8.0) or one
+    # The following alias may be removed in two minor versions (0.8.0) or one
     # major version (1.0.0)
-    alias_method :__method__, :method
-
-    # The following method may be removed in two minor versions (0.7.0) or one
-    # major version (1.0.0)
-    def method(*)
-      warn "#{Kernel.caller.first}: [DEPRECATION] HTTP::Request#method is deprecated. Use #verb instead. For Object#method, use #__method__."
-      @verb
+    def __method__(*args)
+      warn "#{Kernel.caller.first}: [DEPRECATION] HTTP::Request#__method__ is deprecated. Use #method instead."
+      method(*args)
     end
 
     # "Request URI" as per RFC 2616
