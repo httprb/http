@@ -31,7 +31,7 @@ module HTTP
       #
       # @param [#to_s] type
       # @raise [Error] if no adapter found
-      # @return [void]
+      # @return [Class]
       def [](type)
         adapters[normalize type] || fail(Error, "Unknown MIME type: #{type}")
       end
