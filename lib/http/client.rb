@@ -1,6 +1,7 @@
+require 'cgi'
+require 'uri'
 require 'http/options'
 require 'http/redirector'
-require 'uri'
 
 module HTTP
   # Clients make requests and receive responses
