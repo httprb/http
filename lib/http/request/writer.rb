@@ -68,7 +68,7 @@ module HTTP
         elsif @body.is_a?(Enumerable)
           @body.each do |chunk|
             @socket << chunk.bytesize.to_s(16) << CRLF
-            @socket << chunk
+            @socket << chunk << CRLF
           end
 
           @socket << '0' << CRLF * 2
