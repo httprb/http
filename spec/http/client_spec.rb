@@ -91,7 +91,7 @@ describe HTTP::Client do
 
     it 'merges duplicate values' do
       expect(HTTP::Request).to receive(:new) do |_, uri|
-        expect(CGI.parse uri.query).to eq('a' => %w[1 2])
+        expect(uri.query).to eq 'a=1&a=2'
       end
 
       client.get('http://example.com/?a=1', :params => {:a => 2})
