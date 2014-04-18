@@ -1,4 +1,5 @@
 require 'forwardable'
+require 'http/client'
 
 module HTTP
   class Response
@@ -15,7 +16,7 @@ module HTTP
       end
 
       # Read up to length bytes, but return any data that's available
-      def readpartial(length = nil)
+      def readpartial(length = Client::BUFFER_SIZE)
         stream!
         @client.readpartial(length)
       end
