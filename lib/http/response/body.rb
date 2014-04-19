@@ -16,9 +16,10 @@ module HTTP
       end
 
       # Read up to length bytes, but return any data that's available
-      def readpartial(length = Client::BUFFER_SIZE)
+      # @see HTTP::Client#readpartial
+      def readpartial(*args)
         stream!
-        @client.readpartial(length)
+        @client.readpartial(*args)
       end
 
       # Iterate over the body, allowing it to be enumerable
