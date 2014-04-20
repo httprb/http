@@ -95,6 +95,12 @@ module HTTP
     end
     alias_method :to_str, :to_s
 
+    # Flushes body and returns self-reference
+    def flush
+      body.to_s
+      self
+    end
+
     # Parsed Content-Type header
     # @return [HTTP::ContentType]
     def content_type
