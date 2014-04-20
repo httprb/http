@@ -83,4 +83,18 @@ describe HTTP::Response do
       end
     end
   end
+
+  describe '#flush' do
+    let(:body)      { double :to_s => '' }
+    let(:response)  { HTTP::Response.new 200, '1.1', {}, body }
+
+    it 'returns response self-reference' do
+      expect(response.flush).to be response
+    end
+
+    it 'flushes body' do
+      expect(body).to receive :to_s
+      response.flush
+    end
+  end
 end
