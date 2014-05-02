@@ -1,3 +1,12 @@
+0.6.1
+-----
+
+* Add `Response#flush` (@ixti)
+* Fix `Response::Body#readpartial` default size (@hannesg, @ixti)
+* Add missing `CRLF` for chunked bodies (@hannesg)
+* Fix forgotten CGI require (@ixti)
+* Improve README (@tarcieri)
+
 0.6.0
 -----
 
