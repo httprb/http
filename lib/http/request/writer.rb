@@ -35,7 +35,7 @@ module HTTP
       # with
       def add_body_type_headers
         if @body.is_a?(String) && !@headers['Content-Length']
-          @request_header << "Content-Length: #{@body.length}"
+          @request_header << "Content-Length: #{@body.bytesize}"
         elsif @body.is_a?(Enumerable)
           encoding = @headers['Transfer-Encoding']
           if encoding == 'chunked'
