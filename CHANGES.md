@@ -1,6 +1,7 @@
 0.6.1
 -----
 
+* Fix request `Content-Length` calculation for Unicode (@challengeechallengee)
 * Add `Response#flush` (@ixti)
 * Fix `Response::Body#readpartial` default size (@hannesg, @ixti)
 * Add missing `CRLF` for chunked bodies (@hannesg)
