@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'spec_helper'
 
 describe HTTP::Request::Writer do
@@ -28,6 +30,14 @@ describe HTTP::Request::Writer do
       writer.send_request_body
       io.rewind
       expect(io.string).to eq "4\r\nbees\r\n4\r\ncows\r\n0\r\n\r\n"
+    end
+  end
+
+  describe '#add_body_type_headers' do
+    it 'properly calculates length of unicode string' do
+      writer = HTTP::Request::Writer.new(nil, 'Привет, мир!', {}, '')
+      writer.add_body_type_headers
+      expect(writer.join_headers).to match(/\r\nContent-Length: 21\r\n/)
     end
   end
 end
