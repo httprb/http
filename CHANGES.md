@@ -1,5 +1,5 @@
-0.6.1
------
+0.6.1 (2014-05-07)
+------------------
 
 * Fix request `Content-Length` calculation for Unicode (@challengeechallengee)
 * Add `Response#flush` (@ixti)
@@ -8,8 +8,8 @@
 * Fix forgotten CGI require (@ixti)
 * Improve README (@tarcieri)
 
-0.6.0
------
+0.6.0 (2014-04-04)
+------------------
 
 * Rename `HTTP::Request#method` to `HTTP::Request#verb` (@krainboltgreene)
 * Add `HTTP::ResponseBody` class (@tarcieri)
