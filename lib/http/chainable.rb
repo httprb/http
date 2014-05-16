@@ -73,9 +73,16 @@ module HTTP
       with_response(:object)
     end
 
-    def with_follow(follow)
-      branch default_options.with_follow(follow)
+    # Make client follow redirects.
+    # @param opts (see Redirector#initialize)
+    # @return [HTTP::Client]
+    def follow(opts = true)
+      branch default_options.with_follow opts
     end
+
+    # (see #follow)
+    # @deprecated
+    alias_method :with_follow, :follow
 
     # Make a request with the given headers
     def with_headers(headers)
