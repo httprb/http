@@ -15,13 +15,13 @@ class HttpFetcher
   def fetch(url)
     # Note: For SSL support specify:
     # ssl_socket_class: Celluloid::IO::SSLSocket
-    HTTP.get(url, :socket_class => Celluloid::IO::TCPSocket).response
+    HTTP.get(url, :socket_class => Celluloid::IO::TCPSocket)
   end
 end
 
 fetcher = HttpFetcher.new
 
-urls = %w[http://www.ruby-lang.org/ http://www.rubygems.org/ http://celluloid.io/]
+urls = %w[http://ruby-lang.org/ http://rubygems.org/ http://celluloid.io/]
 
 # Kick off a bunch of future calls to HttpFetcher to grab the URLs in parallel
 futures = urls.map { |u| [u, fetcher.future.fetch(u)] }
@@ -30,7 +30,7 @@ futures = urls.map { |u| [u, fetcher.future.fetch(u)] }
 futures.each do |url, future|
   # Wait for HttpFetcher#fetch to complete for this request
   response = future.value
-  puts "Got #{url}: #{response.inspect}"
+  puts "Got #{url}: #{response.body.inspect} (#{response.body.to_s.strip[0,10].inspect}...)"
 end
 
 # Suppress Celluloid's shutdown messages
