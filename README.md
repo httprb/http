@@ -118,7 +118,7 @@ HTTP.get "http://example.com/resource", :params => {:foo => "bar"}
 Want to POST with a specific body, JSON for instance?
 
 ```ruby
-HTTP.post "http://example.com/resource", :json => { :foo => '42' })
+HTTP.post "http://example.com/resource", :json => { :foo => '42' }
 ```
 
 It's easy!
@@ -206,7 +206,7 @@ class HttpFetcher
   include Celluloid::IO
 
   def fetch(url)
-    HTTP.get(url, socket_class: Celluloid::IO::TCPSocket).response
+    HTTP.get(url, socket_class: Celluloid::IO::TCPSocket)
   end
 end
 ```
