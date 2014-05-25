@@ -1,8 +1,6 @@
 require 'webrick/httpproxy'
 
-handler = proc do | req, res |
-  res['X-PROXIED'] = true
-end
+handler = proc { |_, res| res['X-PROXIED'] = true }
 
 ProxyServer = WEBrick::HTTPProxyServer.new(
   :Port => 8080,

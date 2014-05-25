@@ -133,7 +133,7 @@ describe HTTP::Client do
       let(:client)  { described_class.new :headers => headers }
 
       it 'keeps `Host` header as is' do
-        expect(client).to receive(:perform) do |req, options|
+        expect(client).to receive(:perform) do |req, _|
           expect(req['Host']).to eq 'another.example.com'
         end
 

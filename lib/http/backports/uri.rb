@@ -81,11 +81,11 @@ module URI
         encode_www_form_component(k)
       elsif v.respond_to?(:to_ary)
         v.to_ary.map do |w|
+          next unless w
+
           str = encode_www_form_component(k)
-          unless w.nil?
-            str << '='
-            str << encode_www_form_component(w)
-          end
+          str << '='
+          str << encode_www_form_component(w)
         end.join('&')
       else
         str = encode_www_form_component(k)

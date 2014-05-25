@@ -48,7 +48,7 @@ module HTTP
 
     # The following method may be removed in two minor versions (0.7.0) or one
     # major version (1.0.0)
-    def method(*args)
+    def method(*)
       warn "#{Kernel.caller.first}: [DEPRECATION] HTTP::Request#method is deprecated. Use #verb instead. For Object#method, use #__method__."
       @verb
     end
