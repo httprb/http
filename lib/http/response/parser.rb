@@ -42,10 +42,8 @@ module HTTP
       end
 
       def chunk
-        if (chunk = @chunk)
-          @chunk = nil
-          chunk
-        end
+        chunk, @chunk = @chunk, nil
+        chunk
       end
 
       def on_message_complete

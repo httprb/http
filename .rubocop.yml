@@ -1,5 +1,5 @@
 AllCops:
-  Includes:
+  Include:
     - 'Gemfile'
     - 'Rakefile'
     - 'http.gemspec'
@@ -99,3 +99,18 @@ PercentLiteralDelimiters:
 Semicolon:
   Exclude:
     - 'spec/support/'
+
+# Do not force first argument to be separated with exactly single space.
+# My (ixti) personal preference is to align code in columns when it makes
+# sense:
+#
+#   module HTTP
+#     module MimeType
+#       class JSON < Adapter
+#         register_adapter 'application/json', JSON
+#         register_alias   'application/json', :json
+#       end
+#     end
+#   end
+SingleSpaceBeforeFirstArg:
+  Enabled: false

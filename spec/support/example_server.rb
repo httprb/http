@@ -41,18 +41,19 @@ class ExampleService < WEBrick::HTTPServlet::AbstractServlet
   end
 
   def handle_params(request, response)
-    if request.query_string == 'foo=bar'
-      response.status = 200
-      response.body     = 'Params!'
-    end
+    return unless request.query_string == 'foo=bar'
+
+    response.status = 200
+    response.body   = 'Params!'
   end
 
   def handle_multiple_params(request, response)
     params = CGI.parse(request.query_string)
-    if params == {'foo' => ['bar'], 'baz' => ['quux']}
-      response.status = 200
-      response.body     = 'More Params!'
-    end
+
+    return unless params == {'foo' => ['bar'], 'baz' => ['quux']}
+
+    response.status = 200
+    response.body   = 'More Params!'
   end
 
   def do_POST(request, response) # rubocop:disable MethodName
