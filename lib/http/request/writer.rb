@@ -4,18 +4,16 @@ module HTTP
       # CRLF is the universal HTTP delimiter
       CRLF = "\r\n"
 
+      # Types valid to be used as body source
+      VALID_BODY_TYPES = [String, NilClass, Enumerable]
+
       def initialize(socket, body, headers, headerstart) # rubocop:disable ParameterLists
         @body           = body
-        fail(RequestError, 'body of wrong type') unless valid_body_type
         @socket         = socket
         @headers        = headers
         @request_header = [headerstart]
-      end
 
-      def valid_body_type
-        valid_types = [String, NilClass, Enumerable]
-        checks = valid_types.map { |type| @body.is_a?(type) }
-        checks.any?
+        validate_body_type!
       end
 
       # Adds headers to the request header from the headers array
@@ -73,6 +71,13 @@ module HTTP
 
           @socket << '0' << CRLF * 2
         end
+      end
+
+    private
+
+      def validate_body_type!
+        return if VALID_BODY_TYPES.any? { |type| @body.is_a? type }
+        fail RequestError, "body of wrong type: #{@body.class}"
       end
     end
   end
