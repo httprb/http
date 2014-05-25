@@ -15,7 +15,7 @@ MethodLength:
 
 ClassLength:
   CountComments: false
-  Max: 132 # TODO: lower to 100
+  Max: 100
 
 CyclomaticComplexity:
   Max: 13 # TODO: lower to 6
