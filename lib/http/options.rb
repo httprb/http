@@ -70,40 +70,12 @@ module HTTP
       end
     end
 
-    def with_proxy(proxy_hash)
-      dup do |opts|
-        opts.proxy = proxy_hash
-      end
-    end
-
-    def with_params(params)
-      dup do |opts|
-        opts.params = params
-      end
-    end
-
-    def with_form(form)
-      dup do |opts|
-        opts.form = form
-      end
-    end
-
-    def with_json(data)
-      dup do |opts|
-        opts.json = data
-      end
-    end
-
-    def with_body(body)
-      dup do |opts|
-        opts.body = body
-      end
-    end
-
-    def with_follow(follow)
-      dup do |opts|
-        opts.follow = follow
-      end
+    %w[proxy params form json body follow].each do |method_name|
+      class_eval <<-RUBY, __FILE__, __LINE__
+        def with_#{method_name}(value)
+          dup { |opts| opts.#{method_name} = value }
+        end
+      RUBY
     end
 
     def [](option)
