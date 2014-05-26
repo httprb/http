@@ -1,3 +1,18 @@
+master (unreleased)
+-------------------
+
+* Remove `HTTP::Request#method` and deprecate `HTTP::Request#__method__`
+  (@sferik)
+* Deprecate `HTTP::Response::STATUS_CODES`,
+  use `HTTP::Response::Status::REASONS` instead (@ixti)
+* Deprecate `HTTP::Response::SYMBOL_TO_STATUS_CODE` (@ixti)
+* Deprecate `HTTP::Response#status_code` (@ixti)
+* `HTTP::Response#status` now returns `HTTP::Response::Status`. (@ixti)
+* `HTTP::Response#reason` and `HTTP::Response#code` are proxies them
+  to corresponding methods of `HTTP::Response#status` (@ixti)
+* Rename `HTTP.with_follow` to `HTTP.follow` and mark former one as being
+  deprecated (@ixti)
+
 0.6.1 (2014-05-07)
 ------------------
 
