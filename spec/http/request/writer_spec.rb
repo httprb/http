@@ -9,7 +9,7 @@ describe HTTP::Request::Writer do
     end
 
     it "doesn't throw on a nil body" do
-      expect { construct [] }.not_to raise_error
+      expect { construct nil }.not_to raise_error
     end
 
     it "doesn't throw on a String body" do
