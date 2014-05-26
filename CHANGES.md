@@ -73,6 +73,12 @@ end
 
 [Changes discussion](https://github.com/tarcieri/http/issues/116)
 
+0.5.1 (2014-05-27)
+------------------
+
+* Backports redirector fixes from 0.6.0 (@ixti)
+* EOL of 0.5.X branch.
+
 0.5.0
 -----
 * Add query string support
