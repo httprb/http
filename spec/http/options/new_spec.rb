@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe HTTP::Options, 'new' do
+RSpec.describe HTTP::Options, 'new' do
   it 'supports a Options instance' do
     opts = HTTP::Options.new
     expect(HTTP::Options.new(opts)).to eq(opts)

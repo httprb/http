@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'json'
 
-describe HTTP do
+RSpec.describe HTTP do
   let(:test_endpoint)  { "http://127.0.0.1:#{ExampleService::PORT}/" }
 
   context 'getting resources' do

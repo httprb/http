@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe HTTP::AuthorizationHeader::BasicAuth do
+RSpec.describe HTTP::AuthorizationHeader::BasicAuth do
   describe '.new' do
     it 'fails when options is not a Hash' do
       expect { described_class.new '[FOOBAR]' }.to raise_error

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe HTTP::Options, 'merge' do
+RSpec.describe HTTP::Options, 'merge' do
   let(:opts) { HTTP::Options.new }
 
   it 'supports a Hash' do

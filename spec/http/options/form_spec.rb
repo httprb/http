@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe HTTP::Options, 'form' do
+RSpec.describe HTTP::Options, 'form' do
 
   let(:opts) { HTTP::Options.new }
 

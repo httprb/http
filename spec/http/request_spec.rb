@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe HTTP::Request do
+RSpec.describe HTTP::Request do
   subject { HTTP::Request.new(:get, 'http://example.com/', :accept => 'text/html') }
 
   it 'includes HTTP::Headers::Mixin' do

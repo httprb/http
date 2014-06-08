@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe HTTP::ContentType do
+RSpec.describe HTTP::ContentType do
   describe '.parse' do
     context 'with text/plain' do
       subject { described_class.parse 'text/plain' }

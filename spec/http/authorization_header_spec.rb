@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe HTTP::AuthorizationHeader do
+RSpec.describe HTTP::AuthorizationHeader do
   describe '.build' do
     context 'with unkown type' do
       let(:type) { :foobar }

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe HTTP::Request::Writer do
+RSpec.describe HTTP::Request::Writer do
   describe '#initalize' do
     def construct(body)
       HTTP::Request::Writer.new(nil, body, [], '')

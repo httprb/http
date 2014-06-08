@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe HTTP::Options, 'headers' do
+RSpec.describe HTTP::Options, 'headers' do
 
   let(:opts) { HTTP::Options.new }
 

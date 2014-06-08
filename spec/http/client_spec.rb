@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe HTTP::Client do
+RSpec.describe HTTP::Client do
   StubbedClient = Class.new(HTTP::Client) do
     def perform(request, options)
       stubs.fetch(request.uri.to_s) { super(request, options) }
