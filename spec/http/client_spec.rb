@@ -146,7 +146,7 @@ describe HTTP::Client do
     let(:client) { described_class.new }
 
     it 'calls finish_response before actual performance' do
-      TCPSocket.stub(:open) { throw :halt }
+      allow(TCPSocket).to receive(:open) { throw :halt }
       expect(client).to receive(:finish_response)
       catch(:halt) { client.head "http://127.0.0.1:#{ExampleService::PORT}/" }
     end
@@ -185,12 +185,12 @@ describe HTTP::Client do
           RESPONSE
         ]
 
-        socket_spy.stub(:close) { nil }
-        socket_spy.stub(:closed?) { true }
-        socket_spy.stub(:readpartial) { chunks.shift }
-        socket_spy.stub(:<<) { nil }
+        allow(socket_spy).to receive(:close) { nil }
+        allow(socket_spy).to receive(:closed?) { true }
+        allow(socket_spy).to receive(:readpartial) { chunks.shift }
+        allow(socket_spy).to receive(:<<) { nil }
 
-        TCPSocket.stub(:open) { socket_spy }
+        allow(TCPSocket).to receive(:open) { socket_spy }
       end
 
       it 'properly reads body' do

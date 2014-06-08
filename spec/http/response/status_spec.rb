@@ -51,17 +51,17 @@ describe HTTP::Response::Status do
 
         context 'when code is #{code}' do
           let(:status) { described_class.new #{code} }
-          it { should be_true }
+          it { should be true }
         end
 
         context 'when code is higher than #{code}' do
           let(:status) { described_class.new #{code + 1} }
-          it { should be_false }
+          it { should be false }
         end
 
         context 'when code is lower than #{code}' do
           let(:status) { described_class.new #{code - 1} }
-          it { should be_false }
+          it { should be false }
         end
       end
     RUBY

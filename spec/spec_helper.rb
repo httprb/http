@@ -1,3 +1,5 @@
+require 'rspec/its'
+
 require 'simplecov'
 require 'coveralls'
 

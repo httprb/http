@@ -209,7 +209,7 @@ describe HTTP::Headers do
     end
 
     it 'returns uniq keys only' do
-      expect(headers.keys).to have_exactly(2).items
+      expect(headers.keys.size).to eq 2
     end
 
     it 'normalizes keys' do
@@ -241,12 +241,12 @@ describe HTTP::Headers do
     subject { headers.empty? }
 
     context 'initially' do
-      it { should be_true }
+      it { should be true }
     end
 
     context 'when header exists' do
       before { headers.add :accept, 'text/plain' }
-      it { should be_false }
+      it { should be false }
     end
 
     context 'when last header was removed' do
@@ -255,7 +255,7 @@ describe HTTP::Headers do
         headers.delete :accept
       end
 
-      it { should be_true }
+      it { should be true }
     end
   end
 
