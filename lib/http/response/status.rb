@@ -3,6 +3,58 @@ require 'delegate'
 module HTTP
   class Response
     class Status < ::Delegator
+      class << self
+        # Coerces given value to Status.
+        #
+        # @example
+        #
+        #   Status.coerce(:bad_request) # => Status.new(400)
+        #   Status.coerce("400")        # => Status.new(400)
+        #   Status.coerce(true)         # => raises HTTP::Error
+        #
+        # @raise [Error] if coercion is impossible
+        # @param [Symbol, #to_i] object
+        # @return [Status]
+        def coerce(object)
+          code = case
+                 when object.is_a?(String)  then SYMBOL_CODES[symbolize object]
+                 when object.is_a?(Symbol)  then SYMBOL_CODES[object]
+                 when object.is_a?(Numeric) then object.to_i
+                 else                            nil
+                 end
+
+          return new code if code
+
+          fail Error, "Can't coerce #{object.class}(#{object}) to #{self}"
+        end
+        alias_method :[], :coerce
+
+      protected
+
+        # Symbolizes given string
+        #
+        # @example
+        #
+        #   symbolize "Bad Request"           # => :bad_request
+        #   symbolize "Request-URI Too Long"  # => :request_uri_too_long
+        #   symbolize "I'm a Teapot"          # => :im_a_teapot
+        #
+        # @param [#to_s] str
+        # @return [Symbol]
+        def symbolize(str)
+          str.to_s.downcase.gsub(/-/, ' ').gsub(/[^a-z ]/, '').gsub(/\s+/, '_').to_sym
+        end
+      end
+
+      # Code to Reason map
+      #
+      # @example Usage
+      #
+      #   REASONS[400] # => "Bad Request"
+      #   REASONS[414] # => "Request-URI Too Long"
+      #   REASONS[418] # => "I'm a Teapot"
+      #
+      # @return [Hash<Fixnum => String>]
       REASONS = {
         100 => 'Continue',
         101 => 'Switching Protocols',
@@ -56,7 +108,29 @@ module HTTP
         506 => 'Variant Also Negotiates',
         507 => 'Insufficient Storage',
         510 => 'Not Extended'
-      }.freeze
+      }.each { |_, v| v.freeze }.freeze
+
+      # Code to Symbol map
+      #
+      # @example Usage
+      #
+      #   SYMBOLS[400] # => :bad_request
+      #   SYMBOLS[414] # => :request_uri_too_long
+      #   SYMBOLS[418] # => :im_a_teapot
+      #
+      # @return [Hash<Fixnum => Symbol>]
+      SYMBOLS = Hash[REASONS.map { |k, v| [k, symbolize(v)] }].freeze
+
+      # Reversed {SYMBOLS} map.
+      #
+      # @example Usage
+      #
+      #   SYMBOL_CODES[:bad_request]           # => 400
+      #   SYMBOL_CODES[:request_uri_too_long]  # => 414
+      #   SYMBOL_CODES[:im_a_teapot]           # => 418
+      #
+      # @return [Hash<Symbol => Fixnum>]
+      SYMBOL_CODES = Hash[SYMBOLS.map { |k, v| [v, k] }].freeze
 
       # Status code
       #
@@ -72,9 +146,18 @@ module HTTP
 
       # Status message
       #
+      # @return [nil] unless code is well-known (see REASONS)
       # @return [String]
       def reason
         REASONS[code]
+      end
+
+      # Symbolized {#reason}
+      #
+      # @return [nil] unless code is well-known (see REASONS)
+      # @return [Symbol]
+      def symbolize
+        SYMBOLS[code]
       end
 
       # Printable version of HTTP Status, surrounded by quote marks,
@@ -85,13 +168,9 @@ module HTTP
         "#{code} #{reason}".inspect
       end
 
-      REASONS.each do |code, reason|
-        # "Bad Request"   => "bad_request"
-        # "I'm a Teapot"  => "im_a_teapot"
-        helper_name = reason.downcase.gsub(/[^a-z ]+/, ' ').gsub(/ +/, '_')
-
+      SYMBOLS.each do |code, symbol|
         class_eval <<-RUBY, __FILE__, __LINE__
-          def #{helper_name}? # def bad_request?
+          def #{symbol}?      # def bad_request?
             #{code} == code   #   400 == code
           end                 # end
         RUBY
