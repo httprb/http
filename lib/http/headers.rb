@@ -122,24 +122,27 @@ module HTTP
       dup.tap { |dupped| dupped.merge! other }
     end
 
-    # Initiates new Headers object from given object.
-    #
-    # @raise [Error] if given object can't be coerced
-    # @param [#to_hash, #to_h, #to_a] object
-    # @return [Headers]
-    def self.coerce(object)
-      unless object.is_a? self
-        object = case
-                when object.respond_to?(:to_hash) then object.to_hash
-                when object.respond_to?(:to_h)    then object.to_h
-                when object.respond_to?(:to_a)    then object.to_a
-                else fail Error, "Can't coerce #{object.inspect} to Headers"
-                end
-      end
+    class << self
+      # Initiates new Headers object from given object.
+      #
+      # @raise [Error] if given object can't be coerced
+      # @param [#to_hash, #to_h, #to_a] object
+      # @return [Headers]
+      def coerce(object)
+        unless object.is_a? self
+          object = case
+                  when object.respond_to?(:to_hash) then object.to_hash
+                  when object.respond_to?(:to_h)    then object.to_h
+                  when object.respond_to?(:to_a)    then object.to_a
+                  else fail Error, "Can't coerce #{object.inspect} to Headers"
+                  end
+        end
 
-      headers = new
-      object.each { |k, v| headers.add k, v }
-      headers
+        headers = new
+        object.each { |k, v| headers.add k, v }
+        headers
+      end
+      alias_method :[], :coerce
     end
 
   private

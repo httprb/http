@@ -413,5 +413,9 @@ describe HTTP::Headers do
         ])
       end
     end
+
+    it 'is aliased as .[]' do
+      expect(described_class.method :coerce).to eq described_class.method(:[])
+    end
   end
 end
