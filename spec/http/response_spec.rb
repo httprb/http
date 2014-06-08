@@ -20,17 +20,17 @@ describe HTTP::Response do
 
     context 'without Content-Type header' do
       let(:headers) { {} }
-      it { should be_nil }
+      it { is_expected.to be_nil }
     end
 
     context 'with Content-Type: text/html' do
       let(:headers) { {'Content-Type' => 'text/html'} }
-      it { should eq 'text/html' }
+      it { is_expected.to eq 'text/html' }
     end
 
     context 'with Content-Type: text/html; charset=utf-8' do
       let(:headers) { {'Content-Type' => 'text/html; charset=utf-8'} }
-      it { should eq 'text/html' }
+      it { is_expected.to eq 'text/html' }
     end
   end
 
@@ -39,17 +39,17 @@ describe HTTP::Response do
 
     context 'without Content-Type header' do
       let(:headers) { {} }
-      it { should be_nil }
+      it { is_expected.to be_nil }
     end
 
     context 'with Content-Type: text/html' do
       let(:headers) { {'Content-Type' => 'text/html'} }
-      it { should be_nil }
+      it { is_expected.to be_nil }
     end
 
     context 'with Content-Type: text/html; charset=utf-8' do
       let(:headers) { {'Content-Type' => 'text/html; charset=utf-8'} }
-      it { should eq 'utf-8' }
+      it { is_expected.to eq 'utf-8' }
     end
   end
 

@@ -19,18 +19,18 @@ describe HTTP::AuthorizationHeader::BearerToken do
 
     context 'when :encode => true' do
       let(:options) { {:encode => true} }
-      it { should eq "Bearer #{Base64.strict_encode64 token}" }
-      it { should match(/^Bearer [^\s]+$/) }
+      it { is_expected.to eq "Bearer #{Base64.strict_encode64 token}" }
+      it { is_expected.to match(/^Bearer [^\s]+$/) }
     end
 
     context 'when :encode => false' do
       let(:options) { {:encode => false} }
-      it { should eq "Bearer #{token}" }
+      it { is_expected.to eq "Bearer #{token}" }
     end
 
     context 'when :encode not specified' do
       let(:options) { {} }
-      it { should eq "Bearer #{token}" }
+      it { is_expected.to eq "Bearer #{token}" }
     end
   end
 end
