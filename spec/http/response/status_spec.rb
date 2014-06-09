@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe HTTP::Response::Status do
+RSpec.describe HTTP::Response::Status do
   describe '.new' do
     it 'fails if given value does not respond to #to_i' do
       expect { described_class.new double }.to raise_error

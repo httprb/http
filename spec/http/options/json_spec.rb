@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe HTTP::Options, 'json' do
+RSpec.describe HTTP::Options, 'json' do
 
   let(:opts) { HTTP::Options.new }
 

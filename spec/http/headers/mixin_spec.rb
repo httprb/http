@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe HTTP::Headers::Mixin do
+RSpec.describe HTTP::Headers::Mixin do
   let :dummy_class do
     Class.new do
       include HTTP::Headers::Mixin

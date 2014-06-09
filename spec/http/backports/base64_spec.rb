@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Base64 do
+RSpec.describe Base64 do
   specify { expect(Base64).to respond_to :strict_encode64 }
 
   describe '.strict_encode64' do

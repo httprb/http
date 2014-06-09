@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe HTTP::Options, 'proxy' do
+RSpec.describe HTTP::Options, 'proxy' do
 
   let(:opts) { HTTP::Options.new }
 

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe HTTP::Options do
+RSpec.describe HTTP::Options do
   subject { described_class.new(:response => :body) }
 
   it 'behaves like a Hash for reading' do

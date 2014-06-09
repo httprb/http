@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe HTTP::Headers do
+RSpec.describe HTTP::Headers do
   subject(:headers) { described_class.new }
 
   it 'is Enumerable' do

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe HTTP::AuthorizationHeader::BearerToken do
+RSpec.describe HTTP::AuthorizationHeader::BearerToken do
   describe '.new' do
     it 'fails when options is not a Hash' do
       expect { described_class.new '[TOKEN]' }.to raise_error

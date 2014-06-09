@@ -18,9 +18,7 @@ require 'support/example_server'
 require 'support/proxy_server'
 
 RSpec.configure do |config|
-  config.expect_with :rspec do |c|
-    c.syntax = :expect
-  end
+  config.disable_monkey_patching!
 end
 
 def capture_warning
