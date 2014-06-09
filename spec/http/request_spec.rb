@@ -46,11 +46,11 @@ describe HTTP::Request do
 
     subject(:redirected) { request.redirect 'http://blog.example.com/' }
 
-    its(:uri)     { should eq URI.parse 'http://blog.example.com/' }
+    its(:uri)     { is_expected.to eq URI.parse 'http://blog.example.com/' }
 
-    its(:verb)    { should eq request.verb }
-    its(:body)    { should eq request.body }
-    its(:proxy)   { should eq request.proxy }
+    its(:verb)    { is_expected.to eq request.verb }
+    its(:body)    { is_expected.to eq request.body }
+    its(:proxy)   { is_expected.to eq request.proxy }
 
     it 'presets new Host header' do
       expect(redirected['Host']).to eq 'blog.example.com'
@@ -59,11 +59,11 @@ describe HTTP::Request do
     context 'with relative URL given' do
       subject(:redirected) { request.redirect '/blog' }
 
-      its(:uri)     { should eq URI.parse 'http://example.com/blog' }
+      its(:uri)     { is_expected.to eq URI.parse 'http://example.com/blog' }
 
-      its(:verb)    { should eq request.verb }
-      its(:body)    { should eq request.body }
-      its(:proxy)   { should eq request.proxy }
+      its(:verb)    { is_expected.to eq request.verb }
+      its(:body)    { is_expected.to eq request.body }
+      its(:proxy)   { is_expected.to eq request.proxy }
 
       it 'keeps Host header' do
         expect(redirected['Host']).to eq 'example.com'
@@ -71,18 +71,18 @@ describe HTTP::Request do
 
       context 'with original URI having non-standard port' do
         let(:request) { HTTP::Request.new(:post, 'http://example.com:8080/', headers, proxy, body) }
-        its(:uri)     { should eq URI.parse 'http://example.com:8080/blog' }
+        its(:uri)     { is_expected.to eq URI.parse 'http://example.com:8080/blog' }
       end
     end
 
     context 'with relative URL that misses leading slash given' do
       subject(:redirected) { request.redirect 'blog' }
 
-      its(:uri)     { should eq URI.parse 'http://example.com/blog' }
+      its(:uri)     { is_expected.to eq URI.parse 'http://example.com/blog' }
 
-      its(:verb)    { should eq request.verb }
-      its(:body)    { should eq request.body }
-      its(:proxy)   { should eq request.proxy }
+      its(:verb)    { is_expected.to eq request.verb }
+      its(:body)    { is_expected.to eq request.body }
+      its(:proxy)   { is_expected.to eq request.proxy }
 
       it 'keeps Host header' do
         expect(redirected['Host']).to eq 'example.com'
@@ -90,13 +90,13 @@ describe HTTP::Request do
 
       context 'with original URI having non-standard port' do
         let(:request) { HTTP::Request.new(:post, 'http://example.com:8080/', headers, proxy, body) }
-        its(:uri)     { should eq URI.parse 'http://example.com:8080/blog' }
+        its(:uri)     { is_expected.to eq URI.parse 'http://example.com:8080/blog' }
       end
     end
 
     context 'with new verb given' do
       subject { request.redirect 'http://blog.example.com/', :get }
-      its(:verb) { should be :get }
+      its(:verb) { is_expected.to be :get }
     end
   end
 end
