@@ -56,6 +56,20 @@ RSpec.describe HTTP::Request do
       expect(redirected['Host']).to eq 'blog.example.com'
     end
 
+    context 'with schema-less absolute URL given' do
+      subject(:redirected) { request.redirect '//another.example.com/blog' }
+
+      its(:uri)     { is_expected.to eq URI.parse 'http://another.example.com/blog' }
+
+      its(:verb)    { is_expected.to eq request.verb }
+      its(:body)    { is_expected.to eq request.body }
+      its(:proxy)   { is_expected.to eq request.proxy }
+
+      it 'presets new Host header' do
+        expect(redirected['Host']).to eq 'another.example.com'
+      end
+    end
+
     context 'with relative URL given' do
       subject(:redirected) { request.redirect '/blog' }
 
