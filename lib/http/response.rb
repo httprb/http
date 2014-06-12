@@ -35,7 +35,7 @@ module HTTP
     # (see Status#code)
     def_delegator :status, :code
 
-    # @deprected Will be removed in 1.0.0
+    # @deprecated Will be removed in 1.0.0
     alias_method :status_code, :code
 
     # Returns an Array ala Rack: `[status, headers, body]`
