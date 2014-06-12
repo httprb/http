@@ -159,19 +159,6 @@ module HTTP
       end
     end
 
-    # Get callbacks of HTTP options
-    def default_callbacks
-      default_options.callbacks
-    end
-
-    # Set callbacks of HTTP options
-    # @param callbacks
-    def default_callbacks=(callbacks)
-      @default_options = default_options.dup do |opts|
-        opts.callbacks = callbacks
-      end
-    end
-
   private
 
     # :nodoc:
