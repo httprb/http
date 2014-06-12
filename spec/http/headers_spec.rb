@@ -154,7 +154,7 @@ RSpec.describe HTTP::Headers do
     end
 
     it 'returns a Hash' do
-      expect(headers.to_h).to be_a Hash
+      expect(headers.to_h).to be_a ::Hash
     end
 
     it 'returns Hash with normalized keys' do
