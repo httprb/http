@@ -31,7 +31,7 @@ module HTTP
         end
         alias_method :[], :coerce
 
-      protected
+      private
 
         # Symbolizes given string
         #
