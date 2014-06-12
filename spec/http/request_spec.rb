@@ -63,11 +63,11 @@ describe HTTP::Request do
     context 'with schema-less absolute URL given' do
       subject(:redirected) { request.redirect '//another.example.com/blog' }
 
-      its(:uri)     { is_expected.to eq URI.parse 'http://another.example.com/blog' }
+      its(:uri)     { should eq URI.parse 'http://another.example.com/blog' }
 
-      its(:verb)    { is_expected.to eq request.verb }
-      its(:body)    { is_expected.to eq request.body }
-      its(:proxy)   { is_expected.to eq request.proxy }
+      its(:verb)    { should eq request.verb }
+      its(:body)    { should eq request.body }
+      its(:proxy)   { should eq request.proxy }
 
       it 'presets new Host header' do
         expect(redirected['Host']).to eq 'another.example.com'
