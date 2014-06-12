@@ -112,7 +112,7 @@ module HTTP
         :socket_class     => socket_class,
         :ssl_socket_class => ssl_socket_class,
         :ssl_context      => ssl_context
-     }
+      }
     end
 
     def dup
