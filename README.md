@@ -123,7 +123,6 @@ HTTP.post "http://example.com/resource", :json => { :foo => '42' }
 
 It's easy!
 
-
 ### Proxy Support
 
 Making request behind proxy is as simple as making them directly. Just specify
@@ -141,18 +140,17 @@ HTTP.via("proxy-hostname.local", 8080, "username", "password")
   .get "http://example.com/resource"
 ```
 
-
 ### Adding Headers
 
 The HTTP gem uses the concept of chaining to simplify requests. Let's say
-you want to get the latest commit of this library from Github in JSON format.
+you want to get the latest commit of this library from GitHub in JSON format.
 One way we could do this is by tacking a filename on the end of the URL:
 
 ```ruby
 HTTP.get "https://github.com/tarcieri/http/commit/HEAD.json"
 ```
 
-The Github API happens to support this approach, but really this is a bit of a
+The GitHub API happens to support this approach, but really this is a bit of a
 hack that makes it easy for people typing URLs into the address bars of
 browsers to perform the act of content negotiation. Since we have access to
 the full, raw power of HTTP, we can perform content negotiation the way HTTP
@@ -163,7 +161,7 @@ HTTP.with_headers(:accept => 'application/json').
   get("https://github.com/tarcieri/http/commit/HEAD")
 ```
 
-This requests JSON from Github. Github is smart enough to understand our
+This requests JSON from GitHub. GitHub is smart enough to understand our
 request and returns a response with Content-Type: application/json. If you
 happen to have a library loaded which defines the JSON constant and implements
 JSON.parse, the HTTP gem will attempt to parse the JSON response.
@@ -178,6 +176,38 @@ HTTP[:accept => 'application/json'].
   get("https://github.com/tarcieri/http/commit/HEAD")
 ```
 
+### [HTTP Basic Authentication](http://tools.ietf.org/html/rfc2617)
+
+```ruby
+HTTP.auth("true-lah-lah")
+# <HTTP::Headers {"Authorization"=>"Basic true-lah-lah"}>
+```
+
+With a username and password:
+
+```ruby
+HTTP.auth(:basic, :user => 'user', :pass => 'pass')
+# <HTTP::Headers {"Authorization"=>"Basic dXNlcjpwYXNz"}>
+```
+
+Passing in a token (OAuth Bearer Token):
+
+```ruby
+HTTP.auth(:bearer, :token => 'foobar')
+# <HTTP::Headers {"Authorization"=>"Bearer foobar"}>
+```
+
+Encode the token:
+
+```ruby
+HTTP.auth(:bearer, :token => 'foobar', :encode => true)
+# <HTTP::Headers {"Authorization"=>"Bearer Zm9vYmFy"}>
+```
+
+Chain all together!
+
+HTTP.auth("true-lah-lah").with_headers('Cookie' => '9wq3w').get('https://example.com')
+
 ### Content Negotiation
 
 As important a concept as content negotiation is to HTTP, it sure should be easy,
@@ -190,7 +220,6 @@ HTTP.accept(:json).get("https://github.com/tarcieri/http/commit/HEAD")
 
 This adds the appropriate Accept header for retrieving a JSON response for the
 given resource.
-
 
 ### Celluloid::IO Support
 
@@ -215,7 +244,6 @@ There's a little more to it, but that's the core idea!
 
 * [Full parallel HTTP fetcher example](https://github.com/tarcieri/http/wiki/Parallel-requests-with-Celluloid%3A%3AIO)
 * See also: [Celluloid::IO](https://github.com/celluloid/celluloid-io)
-
 
 Supported Ruby Versions
 -----------------------
@@ -243,7 +271,6 @@ exist at the time of a major release, support for that Ruby version may be
 dropped.
 
 [travis]: http://travis-ci.org/tarcieri/http
-
 
 Contributing to The HTTP Gem
 ----------------------------
