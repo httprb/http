@@ -206,7 +206,9 @@ HTTP.auth(:bearer, :token => 'foobar', :encode => true)
 
 Chain all together!
 
+```ruby
 HTTP.auth("true-lah-lah").with_headers('Cookie' => '9wq3w').get('https://example.com')
+```
 
 ### Content Negotiation
 
