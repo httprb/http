@@ -121,6 +121,12 @@ Want to POST with a specific body, JSON for instance?
 HTTP.post "http://example.com/resource", :json => { :foo => '42' }
 ```
 
+Or just a plain body?
+
+```ruby
+HTTP.post "http://example.com/resource", :body => "foo=42&bar=baz"
+```
+
 It's easy!
 
 ### Proxy Support
