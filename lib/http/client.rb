@@ -78,7 +78,7 @@ module HTTP
 
       finish_response if @parser.finished?
 
-      chunk
+      chunk.to_s
     end
 
   private
