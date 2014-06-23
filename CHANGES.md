@@ -1,6 +1,8 @@
 master (unreleased)
 -------------------
 
+* Deprecate `:encode` option BearerToken authorization header. (@ixti)
+* Fix handling of chunked responses without Content-Length header. (@ixti)
 * Remove `HTTP::Request#method` and deprecate `HTTP::Request#__method__`
   (@sferik)
 * Deprecate `HTTP::Response::STATUS_CODES`,
