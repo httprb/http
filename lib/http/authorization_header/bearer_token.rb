@@ -13,6 +13,8 @@ module HTTP
         @token  = opts.fetch :token
       end
 
+      # Base64-encode the token if +@encode+ option is not false.
+      # @return [String] Base64-encoded version of +@token+.
       def token
         return Base64.strict_encode64 @token if @encode
         @token
