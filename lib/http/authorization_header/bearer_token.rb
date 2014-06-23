@@ -7,20 +7,20 @@ module HTTP
     class BearerToken
       # @param [#fetch] opts
       # @option opts [#to_s] :token
-      # @option opts [#to_s] :encode (false)
+      # @option opts [Boolean] :encode (false) deprecated
       def initialize(opts)
-        @encode = opts.fetch :encode, false
-        @token  = opts.fetch :token
-      end
+        @token = opts.fetch :token
 
-      def token
-        return Base64.strict_encode64 @token if @encode
-        @token
+        return unless opts.fetch(:encode, false)
+
+        warn "#{Kernel.caller.first}: [DEPRECATION] BearerToken :encode option is deprecated. " \
+          "You should pass encoded token on your own: { :token => Base64.strict_encode64('token') }"
+        @token = Base64.strict_encode64 @token
       end
 
       # :nodoc:
       def to_s
-        "Bearer #{token}"
+        "Bearer #{@token}"
       end
     end
 
