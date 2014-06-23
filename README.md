@@ -182,38 +182,29 @@ HTTP[:accept => 'application/json'].
   get("https://github.com/tarcieri/http/commit/HEAD")
 ```
 
-### [HTTP Basic Authentication](http://tools.ietf.org/html/rfc2617)
+### Authorization Header
 
-```ruby
-HTTP.auth("true-lah-lah")
-# <HTTP::Headers {"Authorization"=>"Basic true-lah-lah"}>
-```
-
-With a username and password:
+With  [HTTP Basic Authentication](http://tools.ietf.org/html/rfc2617) username
+and password:
 
 ```ruby
 HTTP.auth(:basic, :user => 'user', :pass => 'pass')
 # <HTTP::Headers {"Authorization"=>"Basic dXNlcjpwYXNz"}>
 ```
 
-Passing in a token (OAuth Bearer Token):
+Or with plain as-is value:
 
 ```ruby
-HTTP.auth(:bearer, :token => 'foobar')
-# <HTTP::Headers {"Authorization"=>"Bearer foobar"}>
+HTTP.auth("Bearer VGhlIEhUVFAgR2VtLCBST0NLUw")
+# <HTTP::Headers {"Authorization"=>"Bearer VGhlIEhUVFAgR2VtLCBST0NLUw"}>
 ```
 
-Encode the token:
+And Chain all together!
 
 ```ruby
-HTTP.auth(:bearer, :token => 'foobar', :encode => true)
-# <HTTP::Headers {"Authorization"=>"Bearer Zm9vYmFy"}>
-```
-
-Chain all together!
-
-```ruby
-HTTP.auth("true-lah-lah").with_headers('Cookie' => '9wq3w').get('https://example.com')
+HTTP.auth(:basic, :user => 'user', :pass => 'pass')
+  .with('Cookie' => '9wq3w')
+  .get('https://example.com')
 ```
 
 ### Content Negotiation
