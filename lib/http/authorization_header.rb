@@ -34,4 +34,3 @@ end
 
 # built-in builders
 require 'http/authorization_header/basic_auth'
-require 'http/authorization_header/bearer_token'

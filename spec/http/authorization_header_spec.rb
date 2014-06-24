@@ -20,16 +20,6 @@ RSpec.describe HTTP::AuthorizationHeader do
         described_class.build type, opts
       end
     end
-
-    context 'with :bearer type' do
-      let(:type) { :bearer }
-      let(:opts) { {:token => 'token', :encode => true} }
-
-      it 'passes options to BearerToken' do
-        expect(described_class::BearerToken).to receive(:new).with(opts)
-        described_class.build type, opts
-      end
-    end
   end
 
   describe '.register' do

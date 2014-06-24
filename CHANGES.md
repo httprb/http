@@ -1,7 +1,7 @@
 master (unreleased)
 -------------------
 
-* Deprecate BearerToken authorization header. (@ixti)
+* Remove BearerToken authorization header. (@ixti)
 * Fix handling of chunked responses without Content-Length header. (@ixti)
 * Remove `HTTP::Request#method` and deprecate `HTTP::Request#__method__`
   (@sferik)
