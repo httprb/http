@@ -5,7 +5,7 @@ module HTTP
     # OAuth2 Bearer token authorization header builder
     # @see http://tools.ietf.org/html/rfc6750
     #
-    # @deprecated Will be remove in v0.8.0
+    # @deprecated Will be remove in v0.7.0
     class BearerToken
       # @param [#fetch] opts
       # @option opts [#to_s] :token
