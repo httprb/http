@@ -19,14 +19,14 @@ RSpec.describe HTTP do
 
     context 'with query string parameters' do
       it 'is easy' do
-        response = HTTP.get "#{test_endpoint}params" , :params => {:foo => 'bar'}
+        response = HTTP.get "#{test_endpoint}params", :params => {:foo => 'bar'}
         expect(response.to_s).to match(/Params!/)
       end
     end
 
     context 'with query string parameters in the URI and opts hash' do
       it 'includes both' do
-        response = HTTP.get "#{test_endpoint}multiple-params?foo=bar" , :params => {:baz => 'quux'}
+        response = HTTP.get "#{test_endpoint}multiple-params?foo=bar", :params => {:baz => 'quux'}
         expect(response.to_s).to match(/More Params!/)
       end
     end
