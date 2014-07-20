@@ -1,11 +1,13 @@
-require 'simplecov'
-require 'coveralls'
+if RUBY_VERSION >= '1.9'
+  require 'simplecov'
+  require 'coveralls'
 
-SimpleCov.formatters = [SimpleCov::Formatter::HTMLFormatter, Coveralls::SimpleCov::Formatter]
+  SimpleCov.formatters = [SimpleCov::Formatter::HTMLFormatter, Coveralls::SimpleCov::Formatter]
 
-SimpleCov.start do
-  add_filter '/spec/'
-  minimum_coverage(80)
+  SimpleCov.start do
+    add_filter '/spec/'
+    minimum_coverage(80)
+  end
 end
 
 require 'http'
