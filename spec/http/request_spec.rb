@@ -1,7 +1,8 @@
 require 'spec_helper'
 
 RSpec.describe HTTP::Request do
-  subject { HTTP::Request.new(:get, 'http://example.com/', :accept => 'text/html') }
+  let(:headers) { {:accept => 'text/html'} }
+  subject(:request) { HTTP::Request.new(:get, 'http://example.com/', headers) }
 
   it 'includes HTTP::Headers::Mixin' do
     expect(described_class).to include HTTP::Headers::Mixin
@@ -28,13 +29,33 @@ RSpec.describe HTTP::Request do
     expect(warning).to match(/\[DEPRECATION\] HTTP::Request#__method__ is deprecated\. Use #method instead\.$/)
   end
 
-  describe 'headers' do
-    it 'sets explicit headers' do
-      expect(subject['Accept']).to eq('text/html')
+  it 'sets given headers' do
+    expect(subject['Accept']).to eq('text/html')
+  end
+
+  describe 'Host header' do
+    subject { request['Host'] }
+
+    context 'was not given' do
+      it { is_expected.to eq 'example.com' }
     end
 
-    it 'sets implicit headers' do
-      expect(subject['Host']).to eq('example.com')
+    context 'was explicitly given' do
+      before { headers[:host] = 'github.com' }
+      it { is_expected.to eq 'github.com' }
+    end
+  end
+
+  describe 'User-Agent header' do
+    subject { request['User-Agent'] }
+
+    context 'was not given' do
+      it { is_expected.to eq HTTP::Request::USER_AGENT }
+    end
+
+    context 'was explicitly given' do
+      before { headers[:user_agent] = 'MrCrawly/123' }
+      it { is_expected.to eq 'MrCrawly/123' }
     end
   end
 

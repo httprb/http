@@ -15,6 +15,9 @@ module HTTP
     # The scheme of given URI was not understood
     class UnsupportedSchemeError < RequestError; end
 
+    # Default User-Agent header value
+    USER_AGENT = "RubyHTTPGem/#{HTTP::VERSION}".freeze
+
     # RFC 2616: Hypertext Transfer Protocol -- HTTP/1.1
     METHODS = [:options, :get, :head, :post, :put, :delete, :trace, :connect]
 
@@ -68,7 +71,7 @@ module HTTP
       @headers = HTTP::Headers.coerce(headers || {})
 
       @headers['Host']        ||= @uri.host
-      @headers['User-Agent']  ||= "RubyHTTPGem/#{HTTP::VERSION}"
+      @headers['User-Agent']  ||= USER_AGENT
     end
 
     # Returns new Request with updated uri
