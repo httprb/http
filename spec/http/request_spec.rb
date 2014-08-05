@@ -1,8 +1,10 @@
 require 'spec_helper'
 
 RSpec.describe HTTP::Request do
-  let(:headers) { {:accept => 'text/html'} }
-  subject(:request) { HTTP::Request.new(:get, 'http://example.com/', headers) }
+  let(:headers)     { {:accept => 'text/html'} }
+  let(:request_uri) { 'http://example.com/' }
+
+  subject(:request) { HTTP::Request.new(:get, request_uri, headers) }
 
   it 'includes HTTP::Headers::Mixin' do
     expect(described_class).to include HTTP::Headers::Mixin
@@ -38,6 +40,11 @@ RSpec.describe HTTP::Request do
 
     context 'was not given' do
       it { is_expected.to eq 'example.com' }
+
+      context 'and request URI has non-standard port' do
+        let(:request_uri) { 'http://example.com:3000/' }
+        it { is_expected.to eq 'example.com:3000' }
+      end
     end
 
     context 'was explicitly given' do

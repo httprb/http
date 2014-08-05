@@ -39,6 +39,14 @@ module HTTP
     # Allowed schemes
     SCHEMES = [:http, :https, :ws, :wss]
 
+    # Default ports of supported schemes
+    PORTS = {
+      :http   => 80,
+      :https  => 443,
+      :ws     => 80,
+      :wss    => 443
+    }
+
     # Method is given as a lowercase symbol e.g. :get, :post
     attr_reader :verb
 
@@ -70,7 +78,7 @@ module HTTP
 
       @headers = HTTP::Headers.coerce(headers || {})
 
-      @headers['Host']        ||= @uri.host
+      @headers['Host']        ||= default_host
       @headers['User-Agent']  ||= USER_AGENT
     end
 
@@ -123,6 +131,19 @@ module HTTP
     # Port for tcp socket
     def socket_port
       using_proxy? ? proxy[:proxy_port] : uri.port
+    end
+
+  private
+
+    # Default host (with port if needed) header value.
+    #
+    # @return [String]
+    def default_host
+      if PORTS[@scheme] == @uri.port
+        @uri.host
+      else
+        "#{@uri.host}:#{@uri.port}"
+      end
     end
   end
 end
