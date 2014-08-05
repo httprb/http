@@ -1,6 +1,11 @@
 require 'spec_helper'
 
 describe HTTP::Request do
+  let(:headers)     { {:accept => 'text/html'} }
+  let(:request_uri) { 'http://example.com/' }
+
+  subject(:request) { HTTP::Request.new(:get, request_uri, headers) }
+
   it 'includes HTTP::Headers::Mixin' do
     expect(described_class).to include HTTP::Headers::Mixin
   end
@@ -11,35 +16,57 @@ describe HTTP::Request do
   end
 
   it 'provides a #scheme accessor' do
-    request = HTTP::Request.new(:get, 'http://example.com/')
     expect(request.scheme).to eq(:http)
   end
 
-  describe 'headers' do
-    subject { HTTP::Request.new(:get, 'http://example.com/', :accept => 'text/html') }
+  it 'sets given headers' do
+    expect(subject['Accept']).to eq('text/html')
+  end
 
-    it 'sets explicit headers' do
-      expect(subject['Accept']).to eq('text/html')
-    end
+  describe 'Host header' do
+    subject { request['Host'] }
 
-    it 'sets implicit headers' do
-      expect(subject['Host']).to eq('example.com')
-    end
+    context 'was not given' do
+      it { is_expected.to eq 'example.com' }
 
-    it 'provides a #verb accessor' do
-      expect(subject.verb).to eq(:get)
-    end
-
-    it 'provides a #method accessor that outputs a deprecation warning and returns the verb' do
-      warning = capture_warning do
-        expect(subject.method).to eq(subject.verb)
+      context 'and request URI has non-standard port' do
+        let(:request_uri) { 'http://example.com:3000/' }
+        it { is_expected.to eq 'example.com:3000' }
       end
-      expect(warning).to match(/\[DEPRECATION\] HTTP::Request#method is deprecated\. Use #verb instead\. For Object#method, use #__method__\.$/)
     end
 
-    it 'provides a #__method__ method that delegates to Object#method' do
-      expect(subject.__method__(:verb)).to be_a(Method)
+    context 'was explicitly given' do
+      before { headers[:host] = 'github.com' }
+      it { is_expected.to eq 'github.com' }
     end
+  end
+
+  describe 'User-Agent header' do
+    subject { request['User-Agent'] }
+
+    context 'was not given' do
+      it { is_expected.to eq HTTP::Request::USER_AGENT }
+    end
+
+    context 'was explicitly given' do
+      before { headers[:user_agent] = 'MrCrawly/123' }
+      it { is_expected.to eq 'MrCrawly/123' }
+    end
+  end
+
+  it 'provides a #verb accessor' do
+    expect(subject.verb).to eq(:get)
+  end
+
+  it 'provides a #method accessor that outputs a deprecation warning and returns the verb' do
+    warning = capture_warning do
+      expect(subject.method).to eq(subject.verb)
+    end
+    expect(warning).to match(/\[DEPRECATION\] HTTP::Request#method is deprecated\. Use #verb instead\. For Object#method, use #__method__\.$/)
+  end
+
+  it 'provides a #__method__ method that delegates to Object#method' do
+    expect(subject.__method__(:verb)).to be_a(Method)
   end
 
   describe '#redirect' do

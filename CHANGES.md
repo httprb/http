@@ -1,6 +1,7 @@
 0-6-stable (unreleased)
 -----------------------
 
+* Fix default Host header value. See #150. (@ixti)
 * Deprecate BearerToken authorization header. (@ixti)
 * Fix handling of chunked responses without Content-Length header. (@ixti)
 * Rename `HTTP.with_follow` to `HTTP.follow` and mark former one as being
