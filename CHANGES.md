@@ -1,5 +1,5 @@
-0-6-stable (unreleased)
------------------------
+0.6.2 (2014-08-06)
+------------------
 
 * Fix default Host header value. See #150. (@ixti)
 * Deprecate BearerToken authorization header. (@ixti)
