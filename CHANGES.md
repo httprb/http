@@ -16,6 +16,15 @@ master (unreleased)
 * Rename `HTTP.with_follow` to `HTTP.follow` and mark former one as being
   deprecated (@ixti)
 
+0.6.2 (2014-08-06)
+------------------
+
+* Fix default Host header value. See #150. (@ixti)
+* Deprecate BearerToken authorization header. (@ixti)
+* Fix handling of chunked responses without Content-Length header. (@ixti)
+* Rename `HTTP.with_follow` to `HTTP.follow` and mark former one as being
+  deprecated (@ixti)
+
 0.6.1 (2014-05-07)
 ------------------
 
