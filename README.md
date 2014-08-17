@@ -15,7 +15,7 @@ About
 -----
 
 The HTTP Gem is an easy-to-use client library for making requests from Ruby. It uses
-a simple method chaining system for building requests, similar to Python's [Requests]
+a simple method chaining system for building requests, similar to Python's [Requests].
 
 Under the hood, The HTTP Gem uses [http_parser.rb], a fast HTTP parsing native
 extension based on the Node.js parser and a Java port thereof.
