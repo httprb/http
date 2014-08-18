@@ -131,11 +131,11 @@ module HTTP
       def coerce(object)
         unless object.is_a? self
           object = case
-                  when object.respond_to?(:to_hash) then object.to_hash
-                  when object.respond_to?(:to_h)    then object.to_h
-                  when object.respond_to?(:to_a)    then object.to_a
-                  else fail Error, "Can't coerce #{object.inspect} to Headers"
-                  end
+                   when object.respond_to?(:to_hash) then object.to_hash
+                   when object.respond_to?(:to_h)    then object.to_h
+                   when object.respond_to?(:to_a)    then object.to_a
+                   else fail Error, "Can't coerce #{object.inspect} to Headers"
+                   end
         end
 
         headers = new

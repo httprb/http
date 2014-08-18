@@ -14,7 +14,7 @@ RSpec.describe HTTP::Options, 'new' do
 
     it 'coerces :headers correctly' do
       opts = HTTP::Options.new(:headers => {:accept => 'json'})
-      expect(opts.headers).to eq([%w[Accept json]])
+      expect(opts.headers).to eq([%w(Accept json)])
     end
 
     it 'coerces :proxy correctly' do

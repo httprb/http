@@ -49,8 +49,8 @@ RSpec.describe HTTP::Client do
         'http://example.com/' => redirect_response('/')
       )
 
-      expect { client.get('http://example.com/') } \
-        .to raise_error(HTTP::Redirector::EndlessRedirectError)
+      expect { client.get('http://example.com/') }.
+        to raise_error(HTTP::Redirector::EndlessRedirectError)
     end
 
     it 'fails if max amount of hops reached' do
@@ -64,8 +64,8 @@ RSpec.describe HTTP::Client do
         'http://example.com/6' => simple_response('OK')
       )
 
-      expect { client.get('http://example.com/') } \
-        .to raise_error(HTTP::Redirector::TooManyRedirectsError)
+      expect { client.get('http://example.com/') }.
+        to raise_error(HTTP::Redirector::TooManyRedirectsError)
     end
   end
 
@@ -75,7 +75,7 @@ RSpec.describe HTTP::Client do
 
     it 'accepts params within the provided URL' do
       expect(HTTP::Request).to receive(:new) do |_, uri|
-        expect(CGI.parse uri.query).to eq('foo' => %w[bar])
+        expect(CGI.parse uri.query).to eq('foo' => %w(bar))
       end
 
       client.get('http://example.com/?foo=bar')
@@ -83,7 +83,7 @@ RSpec.describe HTTP::Client do
 
     it 'combines GET params from the URI with the passed in params' do
       expect(HTTP::Request).to receive(:new) do |_, uri|
-        expect(CGI.parse uri.query).to eq('foo' => %w[bar], 'baz' => %w[quux])
+        expect(CGI.parse uri.query).to eq('foo' => %w(bar), 'baz' => %w(quux))
       end
 
       client.get('http://example.com/?foo=bar', :params => {:baz => 'quux'})
@@ -107,7 +107,7 @@ RSpec.describe HTTP::Client do
 
     it 'does not corrupts index-less arrays' do
       expect(HTTP::Request).to receive(:new) do |_, uri|
-        expect(CGI.parse uri.query).to eq 'a[]' => %w[b c], 'd' => %w[e]
+        expect(CGI.parse uri.query).to eq 'a[]' => %w(b c), 'd' => %w(e)
       end
 
       client.get('http://example.com/?a[]=b&a[]=c', :params => {:d => 'e'})

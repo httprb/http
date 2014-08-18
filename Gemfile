@@ -23,7 +23,7 @@ group :test do
   gem 'rest-client', '~> 1.6.0', :platforms => [:jruby, :ruby_18]
   gem 'rspec', '~> 3.0'
   gem 'rspec-its'
-  gem 'rubocop', '~> 0.24.0', :platforms => [:ruby_19, :ruby_20, :ruby_21]
+  gem 'rubocop', '~> 0.25.0', :platforms => [:ruby_19, :ruby_20, :ruby_21]
   gem 'simplecov', '>= 0.9'
   gem 'yardstick'
 end

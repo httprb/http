@@ -21,7 +21,7 @@ end
 
 fetcher = HttpFetcher.new
 
-urls = %w[http://ruby-lang.org/ http://rubygems.org/ http://celluloid.io/]
+urls = %w(http://ruby-lang.org/ http://rubygems.org/ http://celluloid.io/)
 
 # Kick off a bunch of future calls to HttpFetcher to grab the URLs in parallel
 futures = urls.map { |u| [u, fetcher.future.fetch(u)] }

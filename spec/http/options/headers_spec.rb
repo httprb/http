@@ -11,7 +11,7 @@ RSpec.describe HTTP::Options, 'headers' do
   it 'may be specified with with_headers' do
     opts2 = opts.with_headers('accept' => 'json')
     expect(opts.headers).to be_empty
-    expect(opts2.headers).to eq([%w[Accept json]])
+    expect(opts2.headers).to eq([%w(Accept json)])
   end
 
   it 'accepts any object that respond to :to_hash' do

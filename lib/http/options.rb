@@ -70,7 +70,7 @@ module HTTP
       end
     end
 
-    %w[proxy params form json body follow].each do |method_name|
+    %w(proxy params form json body follow).each do |method_name|
       class_eval <<-RUBY, __FILE__, __LINE__
         def with_#{method_name}(value)
           dup { |opts| opts.#{method_name} = value }

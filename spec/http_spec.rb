@@ -113,8 +113,8 @@ RSpec.describe HTTP do
 
     context 'with one argument' do
       it 'returns branch with Authorization header as is' do
-        expect(HTTP).to receive(:with) \
-          .with :authorization => 'foobar'
+        expect(HTTP).to receive(:with).
+          with :authorization => 'foobar'
 
         HTTP.auth :foobar
       end
@@ -122,8 +122,8 @@ RSpec.describe HTTP do
 
     context 'with two arguments' do
       it 'builds value with AuthorizationHeader builder' do
-        expect(HTTP::AuthorizationHeader).to receive(:build) \
-          .with(:bearer, :token => 'token')
+        expect(HTTP::AuthorizationHeader).to receive(:build).
+          with(:bearer, :token => 'token')
 
         HTTP.auth :bearer, :token => 'token'
       end

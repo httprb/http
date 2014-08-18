@@ -1,116 +1,61 @@
-AllCops:
-  Include:
-    - 'Gemfile'
-    - 'Rakefile'
-    - 'http.gemspec'
+Metrics/BlockNesting:
+  Max: 2
 
-# Avoid long parameter lists
-ParameterLists:
-  Max: 3
-  CountKeywordArgs: true
-
-MethodLength:
-  CountComments: false
-  Max: 31 # TODO: lower to 15
-
-ClassLength:
+Metrics/ClassLength:
   CountComments: false
   Max: 100
 
-CyclomaticComplexity:
-  Max: 13 # TODO: lower to 6
+Metrics/CyclomaticComplexity:
+  Max: 8 # TODO: Lower to 6
 
-# Avoid more than `Max` levels of nesting.
-BlockNesting:
+Metrics/LineLength:
+  AllowURI: true
+  Max: 143 # TODO: Lower to 80
+
+Metrics/MethodLength:
+  CountComments: false
+  Max: 22 # TODO: Lower to 15
+
+Metrics/ParameterLists:
   Max: 3
+  CountKeywordArgs: true
 
-# Do not force public/protected/private keyword to be indented at the same
-# level as the def keyword. My personal preference is to outdent these keywords
-# because I think when scanning code it makes it easier to identify the
-# sections of code and visually separate them. When the keyword is at the same
-# level I think it sort of blends in with the def keywords and makes it harder
-# to scan the code and see where the sections are.
-AccessModifierIndentation:
-  Enabled: false
-
-# Limit line length
-LineLength:
-  Enabled: false
-
-# Disable documentation checking until a class needs to be documented once
-Documentation:
-  Enabled: false
-
-# Not all trivial readers/writers can be defined with attr_* methods
-TrivialAccessors:
-  Enabled: false
-
-# Enforce Ruby 1.8-compatible hash syntax
-HashSyntax:
-  EnforcedStyle: hash_rockets
-
-# No spaces inside hash literals
-SpaceInsideHashLiteralBraces:
-  EnforcedStyle: no_space
-
-# Allow dots at the end of lines
-DotPosition:
-  Enabled: false
-
-# Don't require magic comment at the top of every file
-Encoding:
-  Enabled: false
-
-# Enforce outdenting of access modifiers (i.e. public, private, protected)
-AccessModifierIndentation:
+Style/AccessModifierIndentation:
   EnforcedStyle: outdent
 
-EmptyLinesAroundAccessModifier:
-  Enabled: true
+Style/CollectionMethods:
+  PreferredMethods:
+    collect:  'map'
+    reduce:   'inject'
+    find:     'detect'
+    find_all: 'select'
 
-# Align ends correctly
-EndAlignment:
-  AlignWith: variable
-
-# Indentation of when/else
-CaseIndentation:
-  IndentWhenRelativeTo: end
-  IndentOneStep: false
-
-# Use the old lambda literal syntax
-Lambda:
+Style/Documentation:
   Enabled: false
 
-DoubleNegation:
+Style/DotPosition:
+  EnforcedStyle: trailing
+
+Style/DoubleNegation:
   Enabled: false
 
-PercentLiteralDelimiters:
-  PreferredDelimiters:
-    '%':  ()
-    '%i': ()
-    '%q': ()
-    '%Q': ()
-    '%r': '{}'
-    '%s': ()
-    '%w': '[]'
-    '%W': '[]'
-    '%x': ()
+Style/EachWithObject:
+  Enabled: false
 
-Semicolon:
-  Exclude:
-    - 'spec/support/'
+Style/Encoding:
+  Enabled: false
 
-# Do not force first argument to be separated with exactly single space.
-# My (ixti) personal preference is to align code in columns when it makes
-# sense:
-#
-#   module HTTP
-#     module MimeType
-#       class JSON < Adapter
-#         register_adapter 'application/json', JSON
-#         register_alias   'application/json', :json
-#       end
-#     end
-#   end
-SingleSpaceBeforeFirstArg:
+Style/HashSyntax:
+  EnforcedStyle: hash_rockets
+
+Style/Lambda:
+  Enabled: false
+
+Style/SingleSpaceBeforeFirstArg:
+  Enabled: false
+
+Style/SpaceInsideHashLiteralBraces:
+  EnforcedStyle: no_space
+
+Style/TrivialAccessors:
   Enabled: false
