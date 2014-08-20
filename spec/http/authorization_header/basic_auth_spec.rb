@@ -23,7 +23,7 @@ describe HTTP::AuthorizationHeader::BasicAuth do
 
     subject { builder.to_s }
 
-    it { should eq "Basic #{Base64.strict_encode64 user_n_pass}" }
-    it { should match(/^Basic [^\s]+$/) }
+    it { is_expected.to eq "Basic #{Base64.strict_encode64 user_n_pass}" }
+    it { is_expected.to match(/^Basic [^\s]+$/) }
   end
 end

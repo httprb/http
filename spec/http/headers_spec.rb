@@ -198,7 +198,7 @@ describe HTTP::Headers do
     before  { headers.set :set_cookie, %w[hoo=ray woo=hoo] }
     subject { headers.inspect }
 
-    it { should eq '#<HTTP::Headers {"Set-Cookie"=>["hoo=ray", "woo=hoo"]}>' }
+    it { is_expected.to eq '#<HTTP::Headers {"Set-Cookie"=>["hoo=ray", "woo=hoo"]}>' }
   end
 
   describe '#keys' do
@@ -209,7 +209,7 @@ describe HTTP::Headers do
     end
 
     it 'returns uniq keys only' do
-      expect(headers.keys).to have_exactly(2).items
+      expect(headers.keys.size).to eq(2)
     end
 
     it 'normalizes keys' do
@@ -241,12 +241,12 @@ describe HTTP::Headers do
     subject { headers.empty? }
 
     context 'initially' do
-      it { should be_true }
+      it { is_expected.to be_truthy }
     end
 
     context 'when header exists' do
       before { headers.add :accept, 'text/plain' }
-      it { should be_false }
+      it { is_expected.to be_falsey }
     end
 
     context 'when last header was removed' do
@@ -255,7 +255,7 @@ describe HTTP::Headers do
         headers.delete :accept
       end
 
-      it { should be_true }
+      it { is_expected.to be_truthy }
     end
   end
 
@@ -311,8 +311,8 @@ describe HTTP::Headers do
 
     subject(:dupped) { headers.dup }
 
-    it { should be_a described_class }
-    it { should_not be headers }
+    it { is_expected.to be_a described_class }
+    it { is_expected.not_to be headers }
 
     it 'has headers copied' do
       expect(dupped[:content_type]).to eq 'application/json'
@@ -361,8 +361,8 @@ describe HTTP::Headers do
       headers.merge :accept => 'plain/text', :cookie => %w[hoo=ray woo=hoo]
     end
 
-    it { should be_a described_class }
-    it { should_not be headers }
+    it { is_expected.to be_a described_class }
+    it { is_expected.not_to be headers }
 
     it 'does not affects original headers' do
       expect(merged.to_h).to_not eq headers.to_h
