@@ -273,8 +273,10 @@ dropped.
 Contributing to The HTTP Gem
 ----------------------------
 
-* Fork the HTTP gem on github
-* Make your changes and send me a pull request
+* Fork the HTTP gem on GitHub
+* Make your changes
+* Ensure all tests pass (`bundle exec rake`)
+* Send a pull request
 * If we like them we'll merge them
 * If we've accepted a patch, feel free to ask for commit access!
 
