@@ -1,7 +1,7 @@
 source 'http://rubygems.org'
 
 gem 'jruby-openssl' if defined? JRUBY_VERSION
-gem 'rake', '~> 10.1.1'
+gem 'rake'
 
 group :development do
   gem 'pry'
