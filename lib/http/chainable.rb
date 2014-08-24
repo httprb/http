@@ -122,7 +122,10 @@ module HTTP
 
     # Make a request with the given Authorization header
     # @param [#to_s] value Authorization header value
-    def auth(value)
+    def auth(value, opts = nil)
+      # shim for deprecated auth(:basic, opts).
+      # will be removed in 0.8.0
+      return basic_auth(opts) if :basic == value
       with :authorization => value.to_s
     end
 
