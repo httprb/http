@@ -188,7 +188,7 @@ With  [HTTP Basic Authentication](http://tools.ietf.org/html/rfc2617) username
 and password:
 
 ```ruby
-HTTP.auth(:basic, :user => 'user', :pass => 'pass')
+HTTP.basic_auth(:user => 'user', :pass => 'pass')
 # <HTTP::Headers {"Authorization"=>"Basic dXNlcjpwYXNz"}>
 ```
 
