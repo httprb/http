@@ -3,6 +3,8 @@ master (unreleased)
 
 * Fix default Host header value. See #150. (@ixti)
 * Remove BearerToken authorization header. (@ixti)
+* `#auth` sugar now accepts only string value of Authorization header.
+  For Basic Authorization header, use `#basic_auth(opts)`.
 * Fix handling of chunked responses without Content-Length header. (@ixti)
 * Remove `HTTP::Request#method` and deprecate `HTTP::Request#__method__`
   (@sferik)
