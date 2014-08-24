@@ -1,4 +1,4 @@
-require 'http/authorization_header'
+require 'base64'
 
 module HTTP
   module Chainable
@@ -121,16 +121,21 @@ module HTTP
     end
 
     # Make a request with the given Authorization header
-    # @param [*String] args
-    # @raise ArgumentError if the size of arguments is not 1 or 2
-    def auth(*args)
-      value = case args.count
-              when 1 then args.first
-              when 2 then AuthorizationHeader.build(*args)
-              else fail ArgumentError, "wrong number of arguments (#{args.count} for 1..2)"
-              end
-
+    # @param [#to_s] value Authorization header value
+    def auth(value)
       with :authorization => value.to_s
+    end
+
+    # Make a request with the given Basic authorization header
+    # @see http://tools.ietf.org/html/rfc2617
+    # @param [#fetch] opts
+    # @option opts [#to_s] :user
+    # @option opts [#to_s] :pass
+    def basic_auth(opts)
+      user = opts.fetch :user
+      pass = opts.fetch :pass
+
+      auth('Basic ' << Base64.strict_encode64("#{user}:#{pass}"))
     end
 
     # Get options for HTTP
