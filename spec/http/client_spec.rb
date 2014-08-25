@@ -49,8 +49,8 @@ RSpec.describe HTTP::Client do
         'http://example.com/' => redirect_response('/')
       )
 
-      expect { client.get('http://example.com/') }.
-        to raise_error(HTTP::Redirector::EndlessRedirectError)
+      expect { client.get('http://example.com/') }
+        .to raise_error(HTTP::Redirector::EndlessRedirectError)
     end
 
     it 'fails if max amount of hops reached' do
@@ -64,8 +64,8 @@ RSpec.describe HTTP::Client do
         'http://example.com/6' => simple_response('OK')
       )
 
-      expect { client.get('http://example.com/') }.
-        to raise_error(HTTP::Redirector::TooManyRedirectsError)
+      expect { client.get('http://example.com/') }
+        .to raise_error(HTTP::Redirector::TooManyRedirectsError)
     end
   end
 

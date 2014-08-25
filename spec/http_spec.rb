@@ -133,7 +133,8 @@ RSpec.describe HTTP do
 
     it 'sets Authorization header with proper BasicAuth value' do
       client = HTTP.basic_auth :user => 'foo', :pass => 'bar'
-      expect(client.default_headers[:authorization]).to match(/^Basic [A-Za-z0-9+\/]+=*$/)
+      expect(client.default_headers[:authorization])
+        .to match(/^Basic [A-Za-z0-9+\/]+=*$/)
     end
   end
 end
