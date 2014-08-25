@@ -1,6 +1,7 @@
 master (unreleased)
 -------------------
 
+* Drop Ruby 1.8.7 support
 * Fix default Host header value. See #150. (@ixti)
 * Remove BearerToken authorization header. (@ixti)
 * `#auth` sugar now accepts only string value of Authorization header.
