@@ -9,7 +9,6 @@ require 'http/request/writer'
 require 'http/response'
 require 'http/response/body'
 require 'http/response/parser'
-require 'http/backports'
 
 # HTTP should be easy
 module HTTP
