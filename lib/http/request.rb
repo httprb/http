@@ -114,13 +114,7 @@ module HTTP
 
     # Compute HTTP request header for direct or proxy request
     def request_header
-      if using_proxy?
-        "#{verb.to_s.upcase} #{uri} HTTP/#{version}"
-      else
-        path = uri.query && !uri.query.empty? ? "#{uri.path}?#{uri.query}" : uri.path
-        path = '/' if path.empty?
-        "#{verb.to_s.upcase} #{path} HTTP/#{version}"
-      end
+      "#{verb.to_s.upcase} #{path_for_request_header} HTTP/#{version}"
     end
 
     # Host for tcp socket
@@ -134,6 +128,23 @@ module HTTP
     end
 
   private
+
+    def path_for_request_header
+      if using_proxy?
+        uri
+      else
+        uri_path_with_query
+      end
+    end
+
+    def uri_path_with_query
+      path = uri_has_query? ? "#{uri.path}?#{uri.query}" : uri.path
+      path.empty? ? '/' : path
+    end
+
+    def uri_has_query?
+      uri.query && !uri.query.empty?
+    end
 
     # Default host (with port if needed) header value.
     #
