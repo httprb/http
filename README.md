@@ -132,7 +132,7 @@ It's easy!
 ### Proxy Support
 
 Making request behind proxy is as simple as making them directly. Just specify
-hostname (or IP address) of your proxy server and it's port, and here you go:
+hostname (or IP address) of your proxy server and its port, and here you go:
 
 ```ruby
 HTTP.via("proxy-hostname.local", 8080)
