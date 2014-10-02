@@ -51,7 +51,7 @@ module HTTP
 
       # TODO: keep-alive support
       @socket = options[:socket_class].open(req.socket_host, req.socket_port)
-      @socket = start_tls(@socket, options) if uri.is_a?(URI::HTTPS)
+      @socket = start_tls(@socket, options) if uri.is_a?(URI::HTTPS) && !req.using_proxy?
 
       req.stream @socket
 
