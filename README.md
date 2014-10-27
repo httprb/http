@@ -202,7 +202,7 @@ HTTP.auth("Bearer VGhlIEhUVFAgR2VtLCBST0NLUw")
 And Chain all together!
 
 ```ruby
-HTTP.auth(:basic, :user => 'user', :pass => 'pass')
+HTTP.basic_auth(:user => 'user', :pass => 'pass')
   .with('Cookie' => '9wq3w')
   .get('https://example.com')
 ```
