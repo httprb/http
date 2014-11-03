@@ -156,6 +156,11 @@ RSpec.describe HTTP::Client do
       client.get("http://127.0.0.1:#{ExampleService::PORT}/").to_s
     end
 
+    it 'fails on unexpected eof' do
+      expect { client.get("http://127.0.0.1:#{ExampleService::PORT}/eof").to_s }
+        .to raise_error(IOError)
+    end
+
     context 'with HEAD request' do
       it 'does not iterates through body' do
         expect(client).to_not receive(:readpartial)
