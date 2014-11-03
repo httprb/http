@@ -129,9 +129,6 @@ module HTTP
     # Feeds some more data into parser
     def read_more(size)
       @parser << @socket.readpartial(size) unless @parser.finished?
-      true
-    rescue EOFError
-      false
     end
   end
 end
