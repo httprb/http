@@ -55,11 +55,7 @@ module HTTP
 
       req.stream @socket
 
-      begin
-        read_more BUFFER_SIZE until @parser.headers
-      rescue IOError, Errno::ECONNRESET, Errno::EPIPE => ex
-        raise IOError, "problem making HTTP request: #{ex}"
-      end
+      read_headers!
 
       body = Response::Body.new(self)
       res  = Response.new(@parser.status_code, @parser.http_version, @parser.headers, body, uri)
@@ -70,13 +66,22 @@ module HTTP
     end
 
     # Read a chunk of the body
+    #
+    # @return [String] data chunk
+    # @return [Nil] when no more data left
     def readpartial(size = BUFFER_SIZE)
       return unless @socket
 
-      read_more size
+      begin
+        read_more size
+        finished = @parser.finished?
+      rescue EOFError
+        finished = true
+      end
+
       chunk = @parser.chunk
 
-      finish_response if @parser.finished?
+      finish_response if finished
 
       chunk.to_s
     end
@@ -131,6 +136,14 @@ module HTTP
         headers['Content-Type'] ||= 'application/json'
         MimeType[:json].encode opts.json
       end
+    end
+
+    # Reads data from socket up until headers
+    def read_headers!
+      read_more BUFFER_SIZE until @parser.headers
+    rescue IOError, Errno::ECONNRESET, Errno::EPIPE => ex
+      return if ex.is_a?(EOFError) && @parser.headers
+      raise IOError, "problem making HTTP request: #{ex}"
     end
 
     # Callback for when we've reached the end of a response

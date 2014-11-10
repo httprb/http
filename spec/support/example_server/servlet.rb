@@ -74,10 +74,6 @@ class ExampleServer
       res['Location'] = "http://#{ExampleServer::ADDR}/"
     end
 
-    get '/eof' do |req, _res|
-      req.instance_variable_get('@socket').close
-    end
-
     post '/form' do |req, res|
       if 'testing-form' == req.query['example']
         res.status = 200
