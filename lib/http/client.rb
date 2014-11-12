@@ -95,12 +95,27 @@ module HTTP
 
     # Merges query params if needed
     def make_request_uri(uri, options)
-      uri = URI uri.to_s unless uri.is_a? URI
+      uri = normalize_uri uri
 
       if options.params && !options.params.empty?
         params    = CGI.parse(uri.query.to_s).merge(options.params || {})
         uri.query = URI.encode_www_form params
       end
+
+      uri
+    end
+
+    # Normalize URI
+    #
+    # @param [#to_s] uri
+    # @return [URI]
+    def normalize_uri(uri)
+      uri = URI uri.to_s
+
+      # Some proxies (seen on WEBRick) fail if URL has
+      # empty path (e.g. `http://example.com`) while it's RFC-complaint:
+      # http://tools.ietf.org/html/rfc1738#section-3.1
+      uri.path = '/' if uri.path.empty?
 
       uri
     end
