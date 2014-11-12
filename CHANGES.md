@@ -1,11 +1,13 @@
 master (unreleased)
 -------------------
 
-* Drop Ruby 1.8.7 support
+* Fix handling of EOF which caused infinite loop. See #163, #166. (@mickm, @ixti)
+* Drop Ruby 1.8.7 support. (@ixti)
 * Fix default Host header value. See #150. (@ixti)
 * Remove BearerToken authorization header. (@ixti)
 * `#auth` sugar now accepts only string value of Authorization header.
   Calling `#auth(:basic, opts)` is deprecated, use `#basic_auth(opts)` instead.
+  (@ixti)
 * Fix handling of chunked responses without Content-Length header. (@ixti)
 * Remove `HTTP::Request#method` and deprecate `HTTP::Request#__method__`
   (@sferik)
