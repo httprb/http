@@ -1,6 +1,8 @@
 require 'spec_helper'
 
 RSpec.describe HTTP::Client do
+  let(:test_endpoint)  { "http://#{ExampleServer::ADDR}" }
+
   StubbedClient = Class.new(HTTP::Client) do
     def perform(request, options)
       stubs.fetch(request.uri.to_s) { super(request, options) }
@@ -148,28 +150,28 @@ RSpec.describe HTTP::Client do
     it 'calls finish_response before actual performance' do
       allow(TCPSocket).to receive(:open) { throw :halt }
       expect(client).to receive(:finish_response)
-      catch(:halt) { client.head "http://127.0.0.1:#{ExampleService::PORT}/" }
+      catch(:halt) { client.head test_endpoint }
     end
 
     it 'calls finish_response once body was fully flushed' do
       expect(client).to receive(:finish_response).twice.and_call_original
-      client.get("http://127.0.0.1:#{ExampleService::PORT}/").to_s
+      client.get(test_endpoint).to_s
     end
 
     it 'fails on unexpected eof' do
-      expect { client.get("http://127.0.0.1:#{ExampleService::PORT}/eof").to_s }
+      expect { client.get("#{test_endpoint}/eof").to_s }
         .to raise_error(IOError)
     end
 
     context 'with HEAD request' do
       it 'does not iterates through body' do
         expect(client).to_not receive(:readpartial)
-        client.head("http://127.0.0.1:#{ExampleService::PORT}/")
+        client.head(test_endpoint)
       end
 
       it 'finishes response after headers were received' do
         expect(client).to receive(:finish_response).twice.and_call_original
-        client.head("http://127.0.0.1:#{ExampleService::PORT}/")
+        client.head(test_endpoint)
       end
     end
 
@@ -199,7 +201,7 @@ RSpec.describe HTTP::Client do
       end
 
       it 'properly reads body' do
-        body = client.get("http://127.0.0.1:#{ExampleService::PORT}/").to_s
+        body = client.get(test_endpoint).to_s
         expect(body).to eq '<!doctype html>'
       end
     end
