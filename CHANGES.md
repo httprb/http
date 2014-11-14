@@ -1,4 +1,4 @@
-0.6.3 (2014-11-12)
+0.6.3 (2014-11-14)
 ------------------
 
 * Backported EOF fix from master branch. See #166. (@ixti)
