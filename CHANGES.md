@@ -21,6 +21,11 @@ master (unreleased)
 * Rename `HTTP.with_follow` to `HTTP.follow` and mark former one as being
   deprecated (@ixti)
 
+0.6.3 (2014-11-14)
+------------------
+
+* Backported EOF fix from master branch. See #166. (@ixti)
+
 0.6.2 (2014-08-06)
 ------------------
 
