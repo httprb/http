@@ -1,7 +1,7 @@
 master (unreleased)
 -------------------
 
-* Fix handling of EOF which caused infinite loop. See #163, #166. (@mickm, @ixti)
+* Fix handling of EOF which caused infinite loop. See #163, #166 and #152. (@mickm, @ixti)
 * Drop Ruby 1.8.7 support. (@ixti)
 * Fix default Host header value. See #150. (@ixti)
 * Remove BearerToken authorization header. (@ixti)
