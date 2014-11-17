@@ -34,13 +34,8 @@ module HTTP
       def add_body_type_headers
         if @body.is_a?(String) && !@headers['Content-Length']
           @request_header << "Content-Length: #{@body.bytesize}"
-        elsif @body.is_a?(Enumerable)
-          encoding = @headers['Transfer-Encoding']
-          if encoding == 'chunked'
-            @request_header << 'Transfer-Encoding: chunked'
-          else
-            fail(RequestError, 'invalid transfer encoding')
-          end
+        elsif @body.is_a?(Enumerable) && 'chunked' != @headers['Transfer-Encoding']
+          fail(RequestError, 'invalid transfer encoding')
         end
       end
 
