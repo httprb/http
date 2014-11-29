@@ -1,23 +1,17 @@
-![The HTTP Gem](https://raw.github.com/tarcieri/http/master/logo.png)
+![http.rb](https://raw.github.com/tarcieri/http/master/logo.png)
 ==============
 [![Gem Version](https://badge.fury.io/rb/http.png)](http://rubygems.org/gems/http)
-[![Build Status](https://secure.travis-ci.org/tarcieri/http.png?branch=master)](http://travis-ci.org/tarcieri/http)
-[![Code Climate](https://codeclimate.com/github/tarcieri/http.png)](https://codeclimate.com/github/tarcieri/http)
-[![Coverage Status](https://coveralls.io/repos/tarcieri/http/badge.png?branch=master)](https://coveralls.io/r/tarcieri/http)
-
-SEO Note
---------
-
-This Gem has the worst name in the history of SEO. But perhaps we can fix that if we
-all refer to it as "The HTTP Gem", or even better, the "Ruby HTTP Gem".
+[![Build Status](https://secure.travis-ci.org/tarcieri/http.rb.png?branch=master)](http://travis-ci.org/tarcieri/http.rb)
+[![Code Climate](https://codeclimate.com/github/tarcieri/http.rb.png)](https://codeclimate.com/github/tarcieri/http.rb)
+[![Coverage Status](https://coveralls.io/repos/tarcieri/http.rb/badge.png?branch=master)](https://coveralls.io/r/tarcieri/http.rb)
 
 About
 -----
 
-The HTTP Gem is an easy-to-use client library for making requests from Ruby. It uses
+http.rb is an easy-to-use client library for making requests from Ruby. It uses
 a simple method chaining system for building requests, similar to Python's [Requests].
 
-Under the hood, The HTTP Gem uses [http_parser.rb], a fast HTTP parsing native
+Under the hood, http.rb uses [http_parser.rb], a fast HTTP parsing native
 extension based on the Node.js parser and a Java port thereof.
 
 [requests]: http://docs.python-requests.org/en/latest/
@@ -26,16 +20,16 @@ extension based on the Node.js parser and a Java port thereof.
 Help and Discussion
 -------------------
 
-If you need help or just want to talk about the Ruby HTTP Gem, [visit our Google
-Group][googlegroup], or join by email by sending a message to:
-[ruby-http-gem+subscribe@googlegroups.com][subscribe].
+If you need help or just want to talk about the Ruby HTTP Gem, [visit the
+http.rb Google Group][googlegroup], or join by email by sending a message to:
+[httprb+subscribe@googlegroups.com][subscribe].
 
-[googlegroup]: https://groups.google.com/forum/#!forum/ruby-http-gem
-[subscribe]:   mailto:ruby-http-gem+subscribe@googlegroups.com
+[googlegroup]: https://groups.google.com/forum/#!forum/httprb
+[subscribe]:   mailto:httprb+subscribe@googlegroups.com
 
 If you believe you've found a bug, please report it at:
 
-https://github.com/tarcieri/http/issues
+https://github.com/tarcieri/http.rb/issues
 
 Installation
 ------------
@@ -222,7 +216,7 @@ given resource.
 
 ### Celluloid::IO Support
 
-The HTTP Gem makes it simple to make multiple concurrent HTTP requests from a
+http.rb makes it simple to make multiple concurrent HTTP requests from a
 Celluloid::IO actor. Here's a parallel HTTP fetcher with the HTTP Gem and
 Celluloid::IO:
 
@@ -267,10 +261,10 @@ patches in a timely fashion. If critical issues for a particular implementation
 exist at the time of a major release, support for that Ruby version may be
 dropped.
 
-[travis]: http://travis-ci.org/tarcieri/http
+[travis]: http://travis-ci.org/tarcieri/http.rb
 
-Contributing to The HTTP Gem
-----------------------------
+Contributing to http.rb
+-----------------------
 
 * Fork the HTTP gem on GitHub
 * Make your changes
@@ -282,4 +276,5 @@ Contributing to The HTTP Gem
 Copyright
 ---------
 
-Copyright (c) 2014 Tony Arcieri, Erik Michaels-Ober. See LICENSE.txt for further details.
+Copyright (c) 2014 Tony Arcieri, Erik Michaels-Ober, Aleksey V. Zapparov.
+See LICENSE.txt for further details.
