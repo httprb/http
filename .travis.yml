@@ -9,11 +9,12 @@ rvm:
   - 2.1
   - jruby-19mode
   - jruby-head
-  - rbx-2
   - ruby-head
+  - rbx-2
 matrix:
   allow_failures:
     - rvm: jruby-head
     - rvm: ruby-head
+    - rvm: rbx-2
   fast_finish: true
 sudo: false
