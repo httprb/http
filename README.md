@@ -102,24 +102,24 @@ In practice you'll want to bind the HTTP::ResponseBody to a local variable (e.g.
 Making POST requests is simple too. Want to POST a form?
 
 ```ruby
-HTTP.post "http://example.com/resource", :form => {:foo => "42"}
+HTTP.post("http://example.com/resource", :form => {:foo => "42"})
 ```
 Making GET requests with query string parameters is as simple.
 
 ```ruby
-HTTP.get "http://example.com/resource", :params => {:foo => "bar"}
+HTTP.get("http://example.com/resource", :params => {:foo => "bar"})
 ```
 
 Want to POST with a specific body, JSON for instance?
 
 ```ruby
-HTTP.post "http://example.com/resource", :json => { :foo => '42' }
+HTTP.post("http://example.com/resource", :json => { :foo => '42' })
 ```
 
 Or just a plain body?
 
 ```ruby
-HTTP.post "http://example.com/resource", :body => "foo=42&bar=baz"
+HTTP.post("http://example.com/resource", :body => "foo=42&bar=baz")
 ```
 
 It's easy!
@@ -148,7 +148,7 @@ you want to get the latest commit of this library from GitHub in JSON format.
 One way we could do this is by tacking a filename on the end of the URL:
 
 ```ruby
-HTTP.get "https://github.com/tarcieri/http/commit/HEAD.json"
+HTTP.get("https://github.com/tarcieri/http/commit/HEAD.json")
 ```
 
 The GitHub API happens to support this approach, but really this is a bit of a
