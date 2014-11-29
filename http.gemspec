@@ -13,7 +13,7 @@ Gem::Specification.new do |gem|
   DESCRIPTION
 
   gem.summary       = 'HTTP should be easy'
-  gem.homepage      = 'https://github.com/tarcieri/http'
+  gem.homepage      = 'https://github.com/tarcieri/http.rb'
   gem.licenses      = %w(MIT)
 
   gem.executables   = `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) }
