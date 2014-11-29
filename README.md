@@ -20,8 +20,9 @@ extension based on the Node.js parser and a Java port thereof.
 Help and Discussion
 -------------------
 
-If you need help or just want to talk about the Ruby HTTP Gem, [visit the
-http.rb Google Group][googlegroup], or join by email by sending a message to:
+If you need help or just want to talk about the http.rb,
+[visit the http.rb Google Group][googlegroup],
+or join by email by sending a message to:
 [httprb+subscribe@googlegroups.com][subscribe].
 
 [googlegroup]: https://groups.google.com/forum/#!forum/httprb
