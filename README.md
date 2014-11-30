@@ -267,7 +267,7 @@ dropped.
 Contributing to http.rb
 -----------------------
 
-* Fork the HTTP gem on GitHub
+* Fork http.rb on GitHub
 * Make your changes
 * Ensure all tests pass (`bundle exec rake`)
 * Send a pull request
