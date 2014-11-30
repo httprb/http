@@ -12,7 +12,9 @@ http.rb is an easy-to-use client library for making requests from Ruby. It uses
 a simple method chaining system for building requests, similar to Python's [Requests].
 
 Under the hood, http.rb uses [http_parser.rb], a fast HTTP parsing native
-extension based on the Node.js parser and a Java port thereof.
+extension based on the Node.js parser and a Java port thereof. This library
+isn't just yet another wrapper around Net::HTTP. It implements the HTTP protocol
+natively and outsources the parsing to native extensions.
 
 [requests]: http://docs.python-requests.org/en/latest/
 [http_parser.rb]: https://github.com/tmm1/http_parser.rb
