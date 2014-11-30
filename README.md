@@ -58,7 +58,7 @@ Inside of your Ruby program do:
 Documentation
 -------------
 
-[Please see the HTTP Gem Wiki](https://github.com/tarcieri/http/wiki)
+[Please see the http.rb wiki](https://github.com/tarcieri/http/wiki)
 for more detailed documentation and usage notes.
 
 Basic Usage
@@ -220,7 +220,7 @@ given resource.
 ### Celluloid::IO Support
 
 http.rb makes it simple to make multiple concurrent HTTP requests from a
-Celluloid::IO actor. Here's a parallel HTTP fetcher with the HTTP Gem and
+Celluloid::IO actor. Here's a parallel HTTP fetcher combining http.rb with
 Celluloid::IO:
 
 ```ruby
