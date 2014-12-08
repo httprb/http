@@ -165,9 +165,7 @@ HTTP.with_headers(:accept => 'application/json').
 ```
 
 This requests JSON from GitHub. GitHub is smart enough to understand our
-request and returns a response with Content-Type: application/json. If you
-happen to have a library loaded which defines the JSON constant and implements
-JSON.parse, the HTTP gem will attempt to parse the JSON response.
+request and returns a response with Content-Type: application/json.
 
 Shorter aliases exists for HTTP.with_headers:
 
