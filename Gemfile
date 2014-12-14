@@ -28,5 +28,10 @@ group :test do
   gem 'yardstick'
 end
 
+group :doc do
+  gem 'yard'
+  gem 'redcarpet'
+end
+
 # Specify your gem's dependencies in http.gemspec
 gemspec
