@@ -1,5 +1,6 @@
 require 'cgi'
 require 'uri'
+require 'form_data'
 require 'http/options'
 require 'http/redirector'
 
@@ -127,12 +128,15 @@ module HTTP
 
     # Create the request body object to send
     def make_request_body(opts, headers)
-      if opts.body
+      case
+      when opts.body
         opts.body
-      elsif opts.form
-        headers['Content-Type'] ||= 'application/x-www-form-urlencoded'
-        URI.encode_www_form(opts.form)
-      elsif opts.json
+      when opts.form
+        form = FormData.create opts.form
+        headers['Content-Type']   ||= form.content_type
+        headers['Content-Length'] ||= form.content_length
+        form.to_s
+      when opts.json
         headers['Content-Type'] ||= 'application/json'
         MimeType[:json].encode opts.json
       end
