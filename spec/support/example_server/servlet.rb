@@ -7,12 +7,12 @@ class ExampleServer
       res.body   = 'Not Found'
     end
 
+    def self.handlers
+      @handlers ||= {}
+    end
+
     %w(get post head).each do |method|
       class_eval <<-RUBY, __FILE__, __LINE__
-        def self.handlers
-          @handlers ||= {}
-        end
-
         def self.#{method}(path, &block)
           handlers["#{method}:\#{path}"] = block
         end
