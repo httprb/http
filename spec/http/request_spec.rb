@@ -16,7 +16,6 @@ RSpec.describe HTTP::Request do
   end
 
   it 'provides a #scheme accessor' do
-    request = HTTP::Request.new(:get, 'http://example.com/')
     expect(request.scheme).to eq(:http)
   end
 
