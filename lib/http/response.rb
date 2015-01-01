@@ -18,8 +18,13 @@ module HTTP
     # @deprecated Will be removed in 1.0.0
     SYMBOL_TO_STATUS_CODE = Hash[STATUS_CODES.map { |k, v| [v.downcase.gsub(/\s|-/, '_').to_sym, k] }].freeze
 
+    # @return [Status]
     attr_reader :status
+
+    # @return [Body]
     attr_reader :body
+
+    # @return [URI, nil]
     attr_reader :uri
 
     def initialize(status, version, headers, body, uri = nil) # rubocop:disable ParameterLists
@@ -29,14 +34,25 @@ module HTTP
       @headers = HTTP::Headers.coerce(headers || {})
     end
 
-    # (see Status#reason)
+    # @!attribute reason
+    #   (see Status#reason)
     def_delegator :status, :reason
 
-    # (see Status#code)
+    # @!attribute code
+    #   (see Status#code)
     def_delegator :status, :code
 
     # @deprecated Will be removed in 1.0.0
     alias_method :status_code, :code
+
+    # @!method to_s
+    #   (see Body#to_s)
+    def_delegator :body, :to_s
+    alias_method :to_str, :to_s
+
+    # @!method readpartial
+    #   (see Body#readpartial)
+    def_delegator :body, :readpartial
 
     # Returns an Array ala Rack: `[status, headers, body]`
     #
@@ -44,14 +60,6 @@ module HTTP
     def to_a
       [status.to_i, headers.to_h, body.to_s]
     end
-
-    # Return the response body as a string
-    #
-    # @return [String]
-    def to_s
-      body.to_s
-    end
-    alias_method :to_str, :to_s
 
     # Flushes body and returns self-reference
     #
