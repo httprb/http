@@ -38,20 +38,19 @@ module HTTP
     # @deprecated Will be removed in 1.0.0
     alias_method :status_code, :code
 
+    # (see Body#to_s)
+    def_delegator :body, :to_s
+    alias_method :to_str, :to_s
+
+    # (see Body#readpartial)
+    def_delegator :body, :readpartial
+
     # Returns an Array ala Rack: `[status, headers, body]`
     #
     # @return [Array(Fixnum, Hash, String)]
     def to_a
       [status.to_i, headers.to_h, body.to_s]
     end
-
-    # Return the response body as a string
-    #
-    # @return [String]
-    def to_s
-      body.to_s
-    end
-    alias_method :to_str, :to_s
 
     # Flushes body and returns self-reference
     #
