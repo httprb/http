@@ -29,8 +29,7 @@ https://groups.google.com/forum/#!forum/httprb
 
 You can join by email by sending a message to:
 
-[httprb+subscribe@googlegroups.com][subscribe].
-[subscribe]:   mailto:httprb+subscribe@googlegroups.com
+[httprb+subscribe@googlegroups.com](mailto:httprb+subscribe@googlegroups.com)
 
 If you believe you've found a bug, please report it at:
 
