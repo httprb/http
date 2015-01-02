@@ -1,5 +1,4 @@
-0.7.0 (2015-01-02)
-------------------
+## 0.7.0 (2015-01-02)
 
 * Fix handling of EOF which caused infinite loop. See #163, #166 and #152. (@mickm, @ixti)
 * Drop Ruby 1.8.7 support. (@ixti)
@@ -22,13 +21,13 @@
   deprecated (@ixti)
 * Delegate `HTTP::Response#readpartial` to `HTTP::Response::Body` (@ixti)
 
-0.6.3 (2014-11-14)
-------------------
+
+## 0.6.3 (2014-11-14)
 
 * Backported EOF fix from master branch. See #166. (@ixti)
 
-0.6.2 (2014-08-06)
-------------------
+
+## 0.6.2 (2014-08-06)
 
 * Fix default Host header value. See #150. (@ixti)
 * Deprecate BearerToken authorization header. (@ixti)
@@ -36,8 +35,8 @@
 * Rename `HTTP.with_follow` to `HTTP.follow` and mark former one as being
   deprecated (@ixti)
 
-0.6.1 (2014-05-07)
-------------------
+
+## 0.6.1 (2014-05-07)
 
 * Fix request `Content-Length` calculation for Unicode (@challengeechallengee)
 * Add `Response#flush` (@ixti)
@@ -46,8 +45,8 @@
 * Fix forgotten CGI require (@ixti)
 * Improve README (@tarcieri)
 
-0.6.0 (2014-04-04)
-------------------
+
+## 0.6.0 (2014-04-04)
 
 * Rename `HTTP::Request#method` to `HTTP::Request#verb` (@krainboltgreene)
 * Add `HTTP::ResponseBody` class (@tarcieri)
@@ -109,16 +108,17 @@ File.open "/tmp/dummy.bin", "wb" do |io|
 end
 ```
 
-[Changes discussion](https://github.com/tarcieri/http/issues/116)
+[Changes discussion](https://github.com/httprb/http.rb/issues/116)
 
-0.5.1 (2014-05-27)
-------------------
+
+## 0.5.1 (2014-05-27)
 
 * Backports redirector fixes from 0.6.0 (@ixti)
 * EOL of 0.5.X branch.
 
-0.5.0
------
+
+## 0.5.0 (2013-09-14)
+
 * Add query string support
 * New response delegator allows HTTP.get(uri).response
 * HTTP::Chainable#stream provides a shorter alias for
@@ -126,36 +126,42 @@ end
 * Better string inspect for HTTP::Response
 * Curb compatibility layer removed
 
-0.4.0
------
+
+## 0.4.0 (2012-10-12)
+
 * Fix bug accessing https URLs
 * Fix several instances of broken redirect handling
 * Add default user agent
 * Many additional minor bugfixes
 
-0.3.0
------
+
+## 0.3.0 (2012-09-01)
+
 * New implementation based on tmm1's http_parser.rb instead of Net::HTTP
 * Support for following redirects
 * Support for request body through {:body => ...} option
 * HTTP#with_response (through Chainable)
 
-0.2.0
------
+
+## 0.2.0 (2012-03-05)
+
 * Request and response objects
 * Callback system
 * Internal refactoring ensuring true chainability
 * Use the certified gem to ensure SSL certificate verification
 
-0.1.0
------
+
+## 0.1.0 (2012-01-26)
+
 * Testing against WEBrick
 * Curb compatibility (require 'http/compat/curb')
 
-0.0.1
------
+
+## 0.0.1 (2011-10-11)
+
 * Initial half-baked release
 
-0.0.0
------
+
+## 0.0.0 (2011-10-06)
+
 * Vapoware release to claim the "http" gem name >:D
