@@ -59,7 +59,7 @@ Inside of your Ruby program do:
 Documentation
 -------------
 
-[Please see the http.rb wiki](https://github.com/httprb/http/wiki)
+[Please see the http.rb wiki](https://github.com/httprb/http.rb/wiki)
 for more detailed documentation and usage notes.
 
 Basic Usage
@@ -151,7 +151,7 @@ you want to get the latest commit of this library from GitHub in JSON format.
 One way we could do this is by tacking a filename on the end of the URL:
 
 ```ruby
-HTTP.get("https://github.com/httprb/http/commit/HEAD.json")
+HTTP.get("https://github.com/httprb/http.rb/commit/HEAD.json")
 ```
 
 The GitHub API happens to support this approach, but really this is a bit of a
@@ -162,7 +162,7 @@ intends us to, by using the Accept header:
 
 ```ruby
 HTTP.with_headers(:accept => 'application/json').
-  get("https://github.com/httprb/http/commit/HEAD")
+  get("https://github.com/httprb/http.rb/commit/HEAD")
 ```
 
 This requests JSON from GitHub. GitHub is smart enough to understand our
@@ -172,16 +172,16 @@ Shorter aliases exists for HTTP.with_headers:
 
 ```ruby
 HTTP.with(:accept => 'application/json').
-  get("https://github.com/httprb/http/commit/HEAD")
+  get("https://github.com/httprb/http.rb/commit/HEAD")
 
 HTTP[:accept => 'application/json'].
-  get("https://github.com/httprb/http/commit/HEAD")
+  get("https://github.com/httprb/http.rb/commit/HEAD")
 ```
 
 ### Authorization Header
 
-With  [HTTP Basic Authentication](http://tools.ietf.org/html/rfc2617) username
-and password:
+With [HTTP Basic Authentication](http://tools.ietf.org/html/rfc2617) using
+a username and password:
 
 ```ruby
 HTTP.basic_auth(:user => 'user', :pass => 'pass')
@@ -210,7 +210,7 @@ right? But usually it's not, and so we end up adding ".json" onto the ends of
 our URLs because the existing mechanisms make it too hard. It should be easy:
 
 ```ruby
-HTTP.accept(:json).get("https://github.com/httprb/http/commit/HEAD")
+HTTP.accept(:json).get("https://github.com/httprb/http.rb/commit/HEAD")
 ```
 
 This adds the appropriate Accept header for retrieving a JSON response for the
@@ -237,7 +237,7 @@ end
 
 There's a little more to it, but that's the core idea!
 
-* [Full parallel HTTP fetcher example](https://github.com/httprb/http/wiki/Parallel-requests-with-Celluloid%3A%3AIO)
+* [Full parallel HTTP fetcher example](https://github.com/httprb/http.rb/wiki/Parallel-requests-with-Celluloid%3A%3AIO)
 * See also: [Celluloid::IO](https://github.com/celluloid/celluloid-io)
 
 Supported Ruby Versions
