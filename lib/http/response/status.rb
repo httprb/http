@@ -70,9 +70,7 @@ module HTTP
       # @return [Hash<Symbol => Fixnum>]
       SYMBOL_CODES = Hash[SYMBOLS.map { |k, v| [v, k] }].freeze
 
-      # Status code
-      #
-      # @return [Fixnum]
+      # @return [Fixnum] status code
       attr_reader :code
 
       if RUBY_VERSION < '1.9.0'
@@ -82,10 +80,8 @@ module HTTP
         end
       end
 
-      # Status message
-      #
-      # @return [nil] unless code is well-known (see REASONS)
-      # @return [String]
+      # @see REASONS
+      # @return [String, nil] status message
       def reason
         REASONS[code]
       end

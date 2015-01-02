@@ -34,24 +34,24 @@ module HTTP
       @headers = HTTP::Headers.coerce(headers || {})
     end
 
-    # @!attribute reason
-    #   (see Status#reason)
+    # @!method reason
+    #   @return (see HTTP::Response::Status#reason)
     def_delegator :status, :reason
 
-    # @!attribute code
-    #   (see Status#code)
+    # @!method code
+    #   @return (see HTTP::Response::Status#code)
     def_delegator :status, :code
 
     # @deprecated Will be removed in 1.0.0
     alias_method :status_code, :code
 
     # @!method to_s
-    #   (see Body#to_s)
+    #   (see HTTP::Response::Body#to_s)
     def_delegator :body, :to_s
     alias_method :to_str, :to_s
 
     # @!method readpartial
-    #   (see Body#readpartial)
+    #   (see HTTP::Response::Body#readpartial)
     def_delegator :body, :readpartial
 
     # Returns an Array ala Rack: `[status, headers, body]`

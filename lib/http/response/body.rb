@@ -15,8 +15,7 @@ module HTTP
         @contents  = nil
       end
 
-      # Read up to length bytes, but return any data that's available
-      # @see HTTP::Client#readpartial
+      # (see HTTP::Client#readpartial)
       def readpartial(*args)
         stream!
         @client.readpartial(*args)
@@ -29,7 +28,7 @@ module HTTP
         end
       end
 
-      # Eagerly consume the entire body as a string
+      # @return [String] eagerly consume the entire body as a string
       def to_s
         return @contents if @contents
         fail StateError, 'body is being streamed' unless @streaming.nil?
