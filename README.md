@@ -1,4 +1,4 @@
-![http.rb](https://raw.github.com/httprb/http/master/logo.png)
+![http.rb](https://raw.github.com/httprb/http.rb/master/logo.png)
 ==============
 [![Gem Version](https://badge.fury.io/rb/http.png)](http://rubygems.org/gems/http)
 [![Build Status](https://secure.travis-ci.org/httprb/http.rb.png?branch=master)](http://travis-ci.org/httprb/http.rb)
