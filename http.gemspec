@@ -3,8 +3,8 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'http/version'
 
 Gem::Specification.new do |gem|
-  gem.authors       = ['Tony Arcieri']
-  gem.email         = ['tony.arcieri@gmail.com']
+  gem.authors       = ['Tony Arcieri', 'Erik Michaels-Ober', 'Aleksey V. Zapparov']
+  gem.email         = ['bascule@gmail.com']
 
   gem.description   = <<-DESCRIPTION.strip.gsub(/\s+/, ' ')
     An easy-to-use client library for making requests from Ruby.
@@ -13,7 +13,7 @@ Gem::Specification.new do |gem|
   DESCRIPTION
 
   gem.summary       = 'HTTP should be easy'
-  gem.homepage      = 'https://github.com/tarcieri/http.rb'
+  gem.homepage      = 'https://github.com/httprb/http.rb'
   gem.licenses      = ['MIT']
 
   gem.executables   = `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) }
