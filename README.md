@@ -278,5 +278,5 @@ Contributing to http.rb
 Copyright
 ---------
 
-Copyright (c) 2014 Tony Arcieri, Erik Michaels-Ober, Aleksey V. Zapparov.
+Copyright (c) 2011-15 Tony Arcieri, Erik Michaels-Ober, Aleksey V. Zapparov.
 See LICENSE.txt for further details.
