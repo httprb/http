@@ -235,6 +235,14 @@ RSpec.describe HTTP::Headers do
         %w(Set-Cookie woo=hoo)
       )
     end
+
+    it 'returns self instance if block given' do
+      expect(headers.each { |*| }).to be headers
+    end
+
+    it 'returns Enumerator if no block given' do
+      expect(headers.each).to be_a Enumerator
+    end
   end
 
   describe '.empty?' do

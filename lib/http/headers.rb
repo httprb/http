@@ -3,6 +3,7 @@ require 'forwardable'
 require 'http/headers/mixin'
 
 module HTTP
+  # HTTP Headers container.
   class Headers
     extend Forwardable
     include Enumerable
@@ -10,13 +11,14 @@ module HTTP
     # Matches HTTP header names when in "Canonical-Http-Format"
     CANONICAL_HEADER = /^[A-Z][a-z]*(-[A-Z][a-z]*)*$/
 
-    # :nodoc:
+    # Class constructor.
     def initialize
       @pile = []
     end
 
-    # Sets header
+    # Sets header.
     #
+    # @param (see #add)
     # @return [void]
     def set(name, value)
       delete(name)
@@ -24,36 +26,41 @@ module HTTP
     end
     alias_method :[]=, :set
 
-    # Removes header
+    # Removes header.
     #
+    # @param [#to_s] name header name
     # @return [void]
     def delete(name)
       name = canonicalize_header name.to_s
       @pile.delete_if { |k, _| k == name }
     end
 
-    # Append header
+    # Appends header.
     #
+    # @param [#to_s] name header name
+    # @param [Array<#to_s>, #to_s] value header value(s) to be appended
     # @return [void]
     def add(name, value)
-      name = canonicalize_header name.to_s
-      Array(value).each { |v| @pile << [name, v] }
+      name  = canonicalize_header name.to_s
+      Array(value).each { |v| @pile << [name, v.to_s] }
     end
+
+    # @deprecated Will be removed in 1.0.0
     alias_method :append, :add
 
-    # Return array of header values if any.
+    # Returns list of header values if any.
     #
-    # @return [Array]
+    # @return [Array<String>]
     def get(name)
       name = canonicalize_header name.to_s
       @pile.select { |k, _| k == name }.map { |_, v| v }
     end
 
-    # Smart version of {#get}
+    # Smart version of {#get}.
     #
-    # @return [NilClass] if header was not set
-    # @return [Object] if header has exactly one value
-    # @return [Array<Object>] if header has more than one value
+    # @return [nil] if header was not set
+    # @return [String] if header has exactly one value
+    # @return [Array<String>] if header has more than one value
     def [](name)
       values = get(name)
 
@@ -64,26 +71,28 @@ module HTTP
       end
     end
 
-    # Converts headers into a Rack-compatible Hash
+    # Returns Rack-compatible headers Hash
     #
     # @return [Hash]
     def to_h
       Hash[keys.map { |k| [k, self[k]] }]
     end
 
-    # Array of key/value pairs
+    # Returns headers key/value pairs.
     #
     # @return [Array<[String, String]>]
     def to_a
       @pile.map { |pair| pair.map(&:dup) }
     end
 
-    # :nodoc:
+    # Returns human-readable representation of `self` instance.
+    #
+    # @return [String]
     def inspect
       "#<#{self.class} #{to_h.inspect}>"
     end
 
-    # List of header names
+    # Returns list of header names.
     #
     # @return [Array<String>]
     def keys
@@ -98,15 +107,40 @@ module HTTP
       @pile == other.to_a
     end
 
-    def_delegators :@pile, :each, :empty?, :hash
+    # Calls the given block once for each key/value pair in headers container.
+    #
+    # @return [Enumerator] if no block given
+    # @return [Headers] self-reference
+    def each(&blk)
+      return @pile.each unless blk
 
-    # :nodoc:
+      @pile.each(&blk)
+      self
+    end
+
+    # @!method empty?
+    #   Returns `true` if `self` has no key/value pairs
+    #
+    #   @return [Boolean]
+    def_delegator :@pile, :empty?
+
+    # @!method hash
+    #   Compute a hash-code for this headers container.
+    #   Two conatiners with the same content will have the same hash code.
+    #
+    #   @see http://www.ruby-doc.org/core/Object.html#method-i-hash
+    #   @return [Fixnum]
+    def_delegator :@pile, :hash
+
+    # Properly clones internal key/value storage.
+    #
+    # @api private
     def initialize_copy(orig)
       super
       @pile = to_a
     end
 
-    # Merge in `other` headers
+    # Merges `other` headers into `self`.
     #
     # @see #merge
     # @return [void]
@@ -114,7 +148,7 @@ module HTTP
       self.class.coerce(other).to_h.each { |name, values| set name, values }
     end
 
-    # Returns new Headers instance with `other` headers merged in.
+    # Returns new instance with `other` headers merged in.
     #
     # @see #merge!
     # @return [Headers]
@@ -123,9 +157,9 @@ module HTTP
     end
 
     class << self
-      # Initiates new Headers object from given object.
+      # Coerces given `object` into Headers.
       #
-      # @raise [Error] if given object can't be coerced
+      # @raise [Error] if object can't be coerced
       # @param [#to_hash, #to_h, #to_a] object
       # @return [Headers]
       def coerce(object)
@@ -147,9 +181,10 @@ module HTTP
 
   private
 
-    # Transform to canonical HTTP header capitalization
+    # Transforms `name` to canonical HTTP header capitalization
+    #
     # @param [String] name
-    # @return [String]
+    # @return [String] canonical HTTP header name
     def canonicalize_header(name)
       name[CANONICAL_HEADER] || name.split(/[\-_]/).map(&:capitalize).join('-')
     end
