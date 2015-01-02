@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe HTTP::Options do
   subject { described_class.new(:response => :body) }
 

@@ -1,7 +1,4 @@
-require 'spec_helper'
-
 RSpec.describe HTTP::Options, 'headers' do
-
   let(:opts) { HTTP::Options.new }
 
   it 'defaults to be empty' do
@@ -18,5 +15,4 @@ RSpec.describe HTTP::Options, 'headers' do
     x = Struct.new(:to_hash).new('accept' => 'json')
     expect(opts.with_headers(x).headers['accept']).to eq('json')
   end
-
 end

@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe HTTP::Request do
   let(:headers)     { {:accept => 'text/html'} }
   let(:request_uri) { 'http://example.com/' }

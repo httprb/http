@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe HTTP::Client do
   let(:test_endpoint)  { "http://#{ExampleServer::ADDR}" }
 

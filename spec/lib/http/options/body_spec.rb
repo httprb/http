@@ -1,7 +1,4 @@
-require 'spec_helper'
-
 RSpec.describe HTTP::Options, 'body' do
-
   let(:opts) { HTTP::Options.new }
 
   it 'defaults to nil' do
@@ -13,5 +10,4 @@ RSpec.describe HTTP::Options, 'body' do
     expect(opts.body).to be nil
     expect(opts2.body).to eq('foo')
   end
-
 end

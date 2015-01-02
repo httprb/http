@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe HTTP::Response::Body do
   let(:client)   { double }
   let(:chunks)   { ['Hello, ', 'World!'] }

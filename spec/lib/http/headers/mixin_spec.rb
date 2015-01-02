@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe HTTP::Headers::Mixin do
   let :dummy_class do
     Class.new do

@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe HTTP::ContentType do
   describe '.parse' do
     context 'with text/plain' do

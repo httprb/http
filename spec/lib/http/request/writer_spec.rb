@@ -1,7 +1,5 @@
 # coding: utf-8
 
-require 'spec_helper'
-
 RSpec.describe HTTP::Request::Writer do
   let(:io)          { StringIO.new }
   let(:body)        { '' }

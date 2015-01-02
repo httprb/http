@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe HTTP::Options, 'merge' do
   let(:opts) { HTTP::Options.new }
 

@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe HTTP::Headers do
   subject(:headers) { described_class.new }
 

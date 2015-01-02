@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe HTTP::Response do
   it 'includes HTTP::Headers::Mixin' do
     expect(described_class).to include HTTP::Headers::Mixin

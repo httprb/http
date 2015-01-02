@@ -1,7 +1,4 @@
-require 'spec_helper'
-
 RSpec.describe HTTP::Options, 'json' do
-
   let(:opts) { HTTP::Options.new }
 
   it 'defaults to nil' do
@@ -13,5 +10,4 @@ RSpec.describe HTTP::Options, 'json' do
     expect(opts.json).to be nil
     expect(opts2.json).to eq(:foo => 42)
   end
-
 end

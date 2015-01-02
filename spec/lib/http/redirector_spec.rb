@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe HTTP::Redirector do
   def simple_response(status, body = '', headers = {})
     HTTP::Response.new(status, '1.1', headers, body)
