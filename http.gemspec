@@ -24,7 +24,7 @@ Gem::Specification.new do |gem|
   gem.version       = HTTP::VERSION
 
   gem.add_runtime_dependency 'http_parser.rb', '~> 0.6.0'
-  gem.add_runtime_dependency 'form_data',      '~> 0.0.1'
+  gem.add_runtime_dependency 'form_data',      '~> 0.1.0'
 
   gem.add_development_dependency 'bundler', '~> 1.0'
 end
