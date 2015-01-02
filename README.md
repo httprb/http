@@ -23,11 +23,13 @@ Help and Discussion
 -------------------
 
 If you need help or just want to talk about the http.rb,
-[visit the http.rb Google Group][googlegroup],
-or join by email by sending a message to:
-[httprb+subscribe@googlegroups.com][subscribe].
+visit the http.rb Google Group:
 
-[googlegroup]: https://groups.google.com/forum/#!forum/httprb
+https://groups.google.com/forum/#!forum/httprb
+
+You can join by email by sending a message to:
+
+[httprb+subscribe@googlegroups.com][subscribe].
 [subscribe]:   mailto:httprb+subscribe@googlegroups.com
 
 If you believe you've found a bug, please report it at:
