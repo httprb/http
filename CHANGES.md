@@ -1,5 +1,5 @@
-master (unreleased)
--------------------
+0.7.0 (2015-01-02)
+------------------
 
 * Fix handling of EOF which caused infinite loop. See #163, #166 and #152. (@mickm, @ixti)
 * Drop Ruby 1.8.7 support. (@ixti)
@@ -20,6 +20,7 @@ master (unreleased)
   to corresponding methods of `HTTP::Response#status` (@ixti)
 * Rename `HTTP.with_follow` to `HTTP.follow` and mark former one as being
   deprecated (@ixti)
+* Delegate `HTTP::Response#readpartial` to `HTTP::Response::Body` (@ixti)
 
 0.6.3 (2014-11-14)
 ------------------
