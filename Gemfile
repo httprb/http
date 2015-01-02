@@ -1,4 +1,4 @@
-source 'http://rubygems.org'
+source 'https://rubygems.org'
 
 gem 'jruby-openssl' if defined? JRUBY_VERSION
 gem 'rake'
