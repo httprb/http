@@ -27,6 +27,16 @@ RSpec.describe HTTP::Headers do
       headers.set :set_cookie, %w(hoo=ray woo=hoo)
       expect(headers['Set-Cookie']).to eq %w(hoo=ray woo=hoo)
     end
+
+    it 'fails with empty header name' do
+      expect { headers.set '', 'foo bar' }
+        .to raise_error HTTP::InvalidHeaderNameError
+    end
+
+    it 'fails with invalid header name' do
+      expect { headers.set 'foo bar', 'baz' }
+        .to raise_error HTTP::InvalidHeaderNameError
+    end
   end
 
   describe '#[]=' do
@@ -65,6 +75,16 @@ RSpec.describe HTTP::Headers do
       headers.delete :content_type
       expect(headers['Content-Type']).to be_nil
     end
+
+    it 'fails with empty header name' do
+      expect { headers.delete '' }
+        .to raise_error HTTP::InvalidHeaderNameError
+    end
+
+    it 'fails with invalid header name' do
+      expect { headers.delete 'foo bar' }
+        .to raise_error HTTP::InvalidHeaderNameError
+    end
   end
 
   describe '#add' do
@@ -89,6 +109,16 @@ RSpec.describe HTTP::Headers do
       headers.add :set_cookie, %w(woo=hoo yup=pie)
       expect(headers['Set-Cookie']).to eq %w(hoo=ray woo=hoo yup=pie)
     end
+
+    it 'fails with empty header name' do
+      expect { headers.add '', 'foobar' }
+        .to raise_error HTTP::InvalidHeaderNameError
+    end
+
+    it 'fails with invalid header name' do
+      expect { headers.add 'foo bar', 'baz' }
+        .to raise_error HTTP::InvalidHeaderNameError
+    end
   end
 
   describe '#get' do
@@ -106,6 +136,16 @@ RSpec.describe HTTP::Headers do
       it 'returns empty array' do
         expect(headers.get :accept).to eq []
       end
+    end
+
+    it 'fails with empty header name' do
+      expect { headers.get '' }
+        .to raise_error HTTP::InvalidHeaderNameError
+    end
+
+    it 'fails with invalid header name' do
+      expect { headers.get 'foo bar' }
+        .to raise_error HTTP::InvalidHeaderNameError
     end
   end
 

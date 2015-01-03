@@ -8,6 +8,9 @@ module HTTP
   # Generic Response error
   class ResponseError < Error; end
 
-  # Request to do something when we're in the wrong state
+  # Requested to do something when we're in the wrong state
   class StateError < ResponseError; end
+
+  # Header name is invalid
+  class InvalidHeaderNameError < Error; end
 end

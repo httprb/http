@@ -1,5 +1,6 @@
 require 'forwardable'
 
+require 'http/errors'
 require 'http/headers/mixin'
 
 module HTTP
@@ -10,6 +11,10 @@ module HTTP
 
     # Matches HTTP header names when in "Canonical-Http-Format"
     CANONICAL_HEADER = /^[A-Z][a-z]*(-[A-Z][a-z]*)*$/
+
+    # Matches valid header field name according to RFC.
+    # @see http://tools.ietf.org/html/rfc7230#section-3.2
+    HEADER_NAME_RE = /^[A-Za-z0-9!#$%&'*+\-.^_`|~]+$/
 
     # Class constructor.
     def initialize
@@ -31,7 +36,7 @@ module HTTP
     # @param [#to_s] name header name
     # @return [void]
     def delete(name)
-      name = canonicalize_header name.to_s
+      name = normalize_header name.to_s
       @pile.delete_if { |k, _| k == name }
     end
 
@@ -41,7 +46,7 @@ module HTTP
     # @param [Array<#to_s>, #to_s] value header value(s) to be appended
     # @return [void]
     def add(name, value)
-      name  = canonicalize_header name.to_s
+      name  = normalize_header name.to_s
       Array(value).each { |v| @pile << [name, v.to_s] }
     end
 
@@ -52,7 +57,7 @@ module HTTP
     #
     # @return [Array<String>]
     def get(name)
-      name = canonicalize_header name.to_s
+      name = normalize_header name.to_s
       @pile.select { |k, _| k == name }.map { |_, v| v }
     end
 
@@ -184,9 +189,16 @@ module HTTP
     # Transforms `name` to canonical HTTP header capitalization
     #
     # @param [String] name
+    # @raise [InvalidHeaderNameError] if normalized name does not
+    #   match {HEADER_NAME_RE}
     # @return [String] canonical HTTP header name
-    def canonicalize_header(name)
-      name[CANONICAL_HEADER] || name.split(/[\-_]/).map(&:capitalize).join('-')
+    def normalize_header(name)
+      normalized   = name[CANONICAL_HEADER]
+      normalized ||= name.split(/[\-_]/).map(&:capitalize).join('-')
+
+      return normalized if normalized =~ HEADER_NAME_RE
+
+      fail InvalidHeaderNameError, "Invalid HTTP header field name: #{name.inspect}"
     end
   end
 end
