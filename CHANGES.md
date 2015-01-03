@@ -1,3 +1,10 @@
+## unreleased
+
+* `HTTP::Headers` now raises `HTTP::InvalidHeaderNameError` in case of
+  (surprise) invalid HTTP header field name (e.g.`"Foo:Bar"`). See #173.
+  (@ixti)
+
+
 ## 0.7.1 (2015-01-03)
 
 * Gemspec fixups
