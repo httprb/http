@@ -97,7 +97,7 @@ The response body can be streamed with `HTTP::Response::Body#readpartial`:
  => "<!doctype html><html "
 ```
 
-In practice you'll want to bind the HTTP::ResponseBody to a local variable (e.g.
+In practice you'll want to bind the HTTP::Response::Body to a local variable (e.g.
 "body") and call readpartial on it repeatedly until it returns nil.
 
 ### POST requests
