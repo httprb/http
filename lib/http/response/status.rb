@@ -72,13 +72,6 @@ module HTTP
       # @return [Fixnum] status code
       attr_reader :code
 
-      if RUBY_VERSION < '1.9.0'
-        # @param [#to_i] code
-        def initialize(code)
-          super __setobj__ code
-        end
-      end
-
       # @see REASONS
       # @return [String, nil] status message
       def reason
