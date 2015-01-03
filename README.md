@@ -125,6 +125,15 @@ Or just a plain body?
 HTTP.post('http://example.com/resource', :body => 'foo=42&bar=baz')
 ```
 
+Posting a file?
+
+``` ruby
+HTTP.post('http://examplc.com/resource', :form => {
+  :username => 'ixti',
+  :avatar   => FormData::File.new('/home/ixit/avatar.png')
+})
+```
+
 It's easy!
 
 ### Proxy Support
