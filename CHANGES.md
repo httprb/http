@@ -6,6 +6,9 @@
 
 ## 0.7.0 (2015-01-02)
 
+* Add support of multipart form data. See #73, #167. (@ixti)
+* Fix URI path normalization: `https://github.com` -> `https://github.com/`.
+  (@ixti)
 * Fix handling of EOF which caused infinite loop. See #163, #166 and #152. (@mickm, @ixti)
 * Drop Ruby 1.8.7 support. (@ixti)
 * Fix default Host header value. See #150. (@ixti)
