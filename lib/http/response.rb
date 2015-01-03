@@ -102,7 +102,7 @@ module HTTP
 
     # Inspect a response
     def inspect
-      "#<#{self.class}/#{@version} #{code}  #{reason} #{headers.inspect}>"
+      "#<#{self.class}/#{@version} #{code} #{reason} #{headers.inspect}>"
     end
   end
 end
