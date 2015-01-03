@@ -22,7 +22,6 @@ module HTTP
                  when object.is_a?(String)  then SYMBOL_CODES[symbolize object]
                  when object.is_a?(Symbol)  then SYMBOL_CODES[object]
                  when object.is_a?(Numeric) then object.to_i
-                 else                            nil
                  end
 
           return new code if code
