@@ -1,3 +1,9 @@
+## 0.7.1 (2015-01-03)
+
+* Gemspec fixups
+* Remove superfluous space in HTTP::Response inspection
+
+
 ## 0.7.0 (2015-01-02)
 
 * Fix handling of EOF which caused infinite loop. See #163, #166 and #152. (@mickm, @ixti)
