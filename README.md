@@ -70,7 +70,7 @@ Here's some simple examples to get you started:
 ### GET requests
 
 ```ruby
->> HTTP.get("http://www.google.com").to_s
+>> HTTP.get("https://github.com").to_s
 => "<html><head><meta http-equiv=\"content-type\" content=..."
 ```
 
@@ -78,7 +78,7 @@ That's all it takes! To obtain an `HTTP::Response` object instead of the respons
 body, all we have to do is omit the #to_s on the end:
 
 ```ruby
->> HTTP.get("http://www.google.com")
+>> HTTP.get("https://github.com")
 => #<HTTP/1.0 200 OK @headers={"Content-Type"=>"text/html; charset=UTF-8", "Date"=>"Fri, ...>
  => #<HTTP::Response/1.1 200 OK @headers={"Content-Type"=>"text/html; ...>
 ```
@@ -86,14 +86,14 @@ body, all we have to do is omit the #to_s on the end:
 We can also obtain an `HTTP::ResponseBody` object for this response:
 
 ```ruby
->> HTTP.get("http://www.google.com").body
+>> HTTP.get("https://github.com").body
  => #<HTTP::ResponseBody:814d7aac @streaming=false>
 ```
 
 The response body can be streamed with `HTTP::ResponseBody#readpartial`:
 
 ```ruby
->> HTTP.get("http://www.google.com").body.readpartial
+>> HTTP.get("https://github.com").body.readpartial
  => "<!doctype html><html "
 ```
 
