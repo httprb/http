@@ -70,7 +70,7 @@ Here's some simple examples to get you started:
 ### GET requests
 
 ```ruby
->> HTTP.get("https://github.com").to_s
+>> HTTP.get('https://github.com').to_s
 => "<html><head><meta http-equiv=\"content-type\" content=..."
 ```
 
@@ -78,22 +78,22 @@ That's all it takes! To obtain an `HTTP::Response` object instead of the respons
 body, all we have to do is omit the #to_s on the end:
 
 ```ruby
->> HTTP.get("https://github.com")
+>> HTTP.get('https://github.com')
 => #<HTTP/1.0 200 OK @headers={"Content-Type"=>"text/html; charset=UTF-8", "Date"=>"Fri, ...>
  => #<HTTP::Response/1.1 200 OK @headers={"Content-Type"=>"text/html; ...>
 ```
 
-We can also obtain an `HTTP::ResponseBody` object for this response:
+We can also obtain an `HTTP::Response::Body` object for this response:
 
 ```ruby
->> HTTP.get("https://github.com").body
- => #<HTTP::ResponseBody:814d7aac @streaming=false>
+>> HTTP.get('https://github.com').body
+ => #<HTTP::Response::Body:814d7aac @streaming=false>
 ```
 
-The response body can be streamed with `HTTP::ResponseBody#readpartial`:
+The response body can be streamed with `HTTP::Response::Body#readpartial`:
 
 ```ruby
->> HTTP.get("https://github.com").body.readpartial
+>> HTTP.get('https://github.com').body.readpartial
  => "<!doctype html><html "
 ```
 
@@ -105,24 +105,24 @@ In practice you'll want to bind the HTTP::ResponseBody to a local variable (e.g.
 Making POST requests is simple too. Want to POST a form?
 
 ```ruby
-HTTP.post("http://example.com/resource", :form => {:foo => "42"})
+HTTP.post('http://example.com/resource', :form => {:foo => '42'})
 ```
 Making GET requests with query string parameters is as simple.
 
 ```ruby
-HTTP.get("http://example.com/resource", :params => {:foo => "bar"})
+HTTP.get('http://example.com/resource', :params => {:foo => 'bar'})
 ```
 
 Want to POST with a specific body, JSON for instance?
 
 ```ruby
-HTTP.post("http://example.com/resource", :json => { :foo => '42' })
+HTTP.post('http://example.com/resource', :json => { :foo => '42' })
 ```
 
 Or just a plain body?
 
 ```ruby
-HTTP.post("http://example.com/resource", :body => "foo=42&bar=baz")
+HTTP.post('http://example.com/resource', :body => 'foo=42&bar=baz')
 ```
 
 It's easy!
@@ -133,15 +133,15 @@ Making request behind proxy is as simple as making them directly. Just specify
 hostname (or IP address) of your proxy server and its port, and here you go:
 
 ```ruby
-HTTP.via("proxy-hostname.local", 8080)
-  .get "http://example.com/resource"
+HTTP.via('proxy-hostname.local', 8080)
+  .get('http://example.com/resource')
 ```
 
 Proxy needs authentication? No problem:
 
 ```ruby
-HTTP.via("proxy-hostname.local", 8080, "username", "password")
-  .get "http://example.com/resource"
+HTTP.via('proxy-hostname.local', 8080, 'username', 'password')
+  .get('http://example.com/resource')
 ```
 
 ### Adding Headers
@@ -151,7 +151,7 @@ you want to get the latest commit of this library from GitHub in JSON format.
 One way we could do this is by tacking a filename on the end of the URL:
 
 ```ruby
-HTTP.get("https://github.com/httprb/http.rb/commit/HEAD.json")
+HTTP.get('https://github.com/httprb/http.rb/commit/HEAD.json')
 ```
 
 The GitHub API happens to support this approach, but really this is a bit of a
@@ -162,7 +162,7 @@ intends us to, by using the Accept header:
 
 ```ruby
 HTTP.with_headers(:accept => 'application/json').
-  get("https://github.com/httprb/http.rb/commit/HEAD")
+  get('https://github.com/httprb/http.rb/commit/HEAD')
 ```
 
 This requests JSON from GitHub. GitHub is smart enough to understand our
@@ -172,10 +172,10 @@ Shorter aliases exists for HTTP.with_headers:
 
 ```ruby
 HTTP.with(:accept => 'application/json').
-  get("https://github.com/httprb/http.rb/commit/HEAD")
+  get('https://github.com/httprb/http.rb/commit/HEAD')
 
 HTTP[:accept => 'application/json'].
-  get("https://github.com/httprb/http.rb/commit/HEAD")
+  get('https://github.com/httprb/http.rb/commit/HEAD')
 ```
 
 ### Authorization Header
@@ -191,7 +191,7 @@ HTTP.basic_auth(:user => 'user', :pass => 'pass')
 Or with plain as-is value:
 
 ```ruby
-HTTP.auth("Bearer VGhlIEhUVFAgR2VtLCBST0NLUw")
+HTTP.auth('Bearer VGhlIEhUVFAgR2VtLCBST0NLUw')
 # <HTTP::Headers {"Authorization"=>"Bearer VGhlIEhUVFAgR2VtLCBST0NLUw"}>
 ```
 
@@ -210,7 +210,7 @@ right? But usually it's not, and so we end up adding ".json" onto the ends of
 our URLs because the existing mechanisms make it too hard. It should be easy:
 
 ```ruby
-HTTP.accept(:json).get("https://github.com/httprb/http.rb/commit/HEAD")
+HTTP.accept(:json).get('https://github.com/httprb/http.rb/commit/HEAD')
 ```
 
 This adds the appropriate Accept header for retrieving a JSON response for the
