@@ -1,6 +1,6 @@
 require "cgi"
 require "uri"
-require "form_data"
+require "http/form_data"
 require "http/options"
 require "http/redirector"
 
@@ -132,7 +132,7 @@ module HTTP
       when opts.body
         opts.body
       when opts.form
-        form = FormData.create opts.form
+        form = HTTP::FormData.create opts.form
         headers["Content-Type"]   ||= form.content_type
         headers["Content-Length"] ||= form.content_length
         form.to_s

@@ -1,5 +1,6 @@
 ## unreleased
 
+* Reflect FormData rename changes (FormData -> HTTP::FormData). (@ixti)
 * `HTTP::Headers` now raises `HTTP::InvalidHeaderNameError` in case of
   (surprise) invalid HTTP header field name (e.g.`"Foo:Bar"`). See #173.
   (@ixti)
