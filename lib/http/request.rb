@@ -127,7 +127,7 @@ module HTTP
       using_proxy? ? proxy[:proxy_port] : uri.port
     end
 
-  private
+    private
 
     def path_for_request_header
       if using_proxy?

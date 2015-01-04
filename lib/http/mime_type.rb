@@ -57,7 +57,7 @@ module HTTP
         aliases.fetch type, type.to_s
       end
 
-    private
+      private
 
       # :nodoc:
       def adapters

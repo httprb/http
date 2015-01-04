@@ -22,7 +22,7 @@ module HTTP
       follow(&block)
     end
 
-  private
+    private
 
     # Reset redirector state
     def reset(request, response)

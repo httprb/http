@@ -20,9 +20,6 @@ Metrics/ParameterLists:
   Max: 3
   CountKeywordArgs: true
 
-Style/AccessModifierIndentation:
-  EnforcedStyle: outdent
-
 Style/CollectionMethods:
   PreferredMethods:
     collect:  'map'

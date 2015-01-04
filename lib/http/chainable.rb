@@ -167,7 +167,7 @@ module HTTP
       end
     end
 
-  private
+    private
 
     # :nodoc:
     def branch(options)

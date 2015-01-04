@@ -184,7 +184,7 @@ module HTTP
       alias_method :[], :coerce
     end
 
-  private
+    private
 
     # Transforms `name` to canonical HTTP header capitalization
     #

@@ -121,7 +121,7 @@ module HTTP
       dupped
     end
 
-  private
+    private
 
     def argument_error!(message)
       fail(Error, message, caller[1..-1])

@@ -87,7 +87,7 @@ module HTTP
       chunk.to_s
     end
 
-  private
+    private
 
     # Initialize TLS connection
     def start_tls(socket, options)

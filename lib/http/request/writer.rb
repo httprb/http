@@ -68,7 +68,7 @@ module HTTP
         end
       end
 
-    private
+      private
 
       def validate_body_type!
         return if VALID_BODY_TYPES.any? { |type| @body.is_a? type }

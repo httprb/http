@@ -9,7 +9,7 @@ module HTTP
         new mime_type(str), charset(str)
       end
 
-    private
+      private
 
       # :nodoc:
       def mime_type(str)

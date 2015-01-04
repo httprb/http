@@ -30,7 +30,7 @@ module HTTP
         end
         alias_method :[], :coerce
 
-      private
+        private
 
         # Symbolizes given string
         #
