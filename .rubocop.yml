@@ -54,5 +54,8 @@ Style/SingleSpaceBeforeFirstArg:
 Style/SpaceInsideHashLiteralBraces:
   EnforcedStyle: no_space
 
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
 Style/TrivialAccessors:
   Enabled: false

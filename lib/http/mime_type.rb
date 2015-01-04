@@ -73,4 +73,4 @@ module HTTP
 end
 
 # built-in mime types
-require 'http/mime_type/json'
+require "http/mime_type/json"

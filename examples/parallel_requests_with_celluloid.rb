@@ -6,8 +6,8 @@
 # Run as: bundle exec examples/parallel_requests_with_celluloid.rb
 #
 
-require 'celluloid/io'
-require 'http'
+require "celluloid/io"
+require "http"
 
 class HttpFetcher
   include Celluloid::IO

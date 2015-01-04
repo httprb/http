@@ -1,9 +1,9 @@
-require 'http/errors'
-require 'http/headers'
-require 'http/request/writer'
-require 'http/version'
-require 'base64'
-require 'uri'
+require "http/errors"
+require "http/headers"
+require "http/request/writer"
+require "http/version"
+require "base64"
+require "uri"
 
 module HTTP
   class Request
@@ -66,7 +66,7 @@ module HTTP
     attr_reader :proxy, :body, :version
 
     # :nodoc:
-    def initialize(verb, uri, headers = {}, proxy = {}, body = nil, version = '1.1') # rubocop:disable ParameterLists
+    def initialize(verb, uri, headers = {}, proxy = {}, body = nil, version = "1.1") # rubocop:disable ParameterLists
       @verb   = verb.to_s.downcase.to_sym
       @uri    = uri.is_a?(URI) ? uri : URI(uri.to_s)
       @scheme = @uri.scheme && @uri.scheme.to_s.downcase.to_sym
@@ -78,15 +78,15 @@ module HTTP
 
       @headers = HTTP::Headers.coerce(headers || {})
 
-      @headers['Host']        ||= default_host
-      @headers['User-Agent']  ||= USER_AGENT
+      @headers["Host"]        ||= default_host
+      @headers["User-Agent"]  ||= USER_AGENT
     end
 
     # Returns new Request with updated uri
     def redirect(uri, verb = @verb)
       uri = @uri.merge uri.to_s
       req = self.class.new(verb, uri, headers, proxy, body, version)
-      req['Host'] = req.uri.host
+      req["Host"] = req.uri.host
       req
     end
 
@@ -109,7 +109,7 @@ module HTTP
     # Compute and add the Proxy-Authorization header
     def include_proxy_authorization_header
       digest = Base64.encode64("#{proxy[:proxy_username]}:#{proxy[:proxy_password]}").chomp
-      headers['Proxy-Authorization'] = "Basic #{digest}"
+      headers["Proxy-Authorization"] = "Basic #{digest}"
     end
 
     # Compute HTTP request header for direct or proxy request
@@ -139,7 +139,7 @@ module HTTP
 
     def uri_path_with_query
       path = uri_has_query? ? "#{uri.path}?#{uri.query}" : uri.path
-      path.empty? ? '/' : path
+      path.empty? ? "/" : path
     end
 
     def uri_has_query?

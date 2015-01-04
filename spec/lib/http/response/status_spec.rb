@@ -1,24 +1,24 @@
 RSpec.describe HTTP::Response::Status do
-  describe '.new' do
-    it 'fails if given value does not respond to #to_i' do
+  describe ".new" do
+    it "fails if given value does not respond to #to_i" do
       expect { described_class.new double }.to raise_error
     end
 
-    it 'accepts any object that responds to #to_i' do
+    it "accepts any object that responds to #to_i" do
       expect { described_class.new double :to_i => 200 }.to_not raise_error
     end
   end
 
-  describe '#code' do
-    subject { described_class.new('200.0').code }
+  describe "#code" do
+    subject { described_class.new("200.0").code }
     it { is_expected.to eq 200 }
     it { is_expected.to be_a Fixnum }
   end
 
-  describe '#reason' do
+  describe "#reason" do
     subject { described_class.new(code).reason }
 
-    context 'with unknown code' do
+    context "with unknown code" do
       let(:code) { 1024 }
       it { is_expected.to be_nil }
     end
@@ -34,10 +34,10 @@ RSpec.describe HTTP::Response::Status do
     end
   end
 
-  describe '#symbolize' do
+  describe "#symbolize" do
     subject { described_class.new(code).symbolize }
 
-    context 'with unknown code' do
+    context "with unknown code" do
       let(:code) { 1024 }
       it { is_expected.to be_nil }
     end
@@ -52,15 +52,15 @@ RSpec.describe HTTP::Response::Status do
     end
   end
 
-  describe '#inspect' do
-    it 'returns quoted code and reason phrase' do
+  describe "#inspect" do
+    it "returns quoted code and reason phrase" do
       status = described_class.new 200
       expect(status.inspect).to eq '"200 OK"'
     end
   end
 
   # testing edge cases only
-  describe '::SYMBOLS' do
+  describe "::SYMBOLS" do
     subject { described_class::SYMBOLS }
 
     # "OK"
@@ -99,38 +99,38 @@ RSpec.describe HTTP::Response::Status do
     RUBY
   end
 
-  describe '.coerce' do
-    context 'with String' do
-      it 'coerces reasons' do
-        expect(described_class.coerce 'Bad request').to eq described_class.new 400
+  describe ".coerce" do
+    context "with String" do
+      it "coerces reasons" do
+        expect(described_class.coerce "Bad request").to eq described_class.new 400
       end
 
-      it 'fails when reason is unknown' do
-        expect { described_class.coerce 'foobar' }.to raise_error HTTP::Error
+      it "fails when reason is unknown" do
+        expect { described_class.coerce "foobar" }.to raise_error HTTP::Error
       end
     end
 
-    context 'with Symbol' do
-      it 'coerces symbolized reasons' do
+    context "with Symbol" do
+      it "coerces symbolized reasons" do
         expect(described_class.coerce :bad_request).to eq described_class.new 400
       end
 
-      it 'fails when symbolized reason is unknown' do
+      it "fails when symbolized reason is unknown" do
         expect { described_class.coerce :foobar }.to raise_error HTTP::Error
       end
     end
 
-    context 'with Numeric' do
-      it 'coerces as Fixnum code' do
+    context "with Numeric" do
+      it "coerces as Fixnum code" do
         expect(described_class.coerce 200.1).to eq described_class.new 200
       end
     end
 
-    it 'fails if coercion failed' do
+    it "fails if coercion failed" do
       expect { described_class.coerce true }.to raise_error HTTP::Error
     end
 
-    it 'is aliased as `.[]`' do
+    it "is aliased as `.[]`" do
       expect(described_class.method :coerce).to eq described_class.method :[]
     end
   end

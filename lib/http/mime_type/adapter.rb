@@ -1,5 +1,5 @@
-require 'forwardable'
-require 'singleton'
+require "forwardable"
+require "singleton"
 
 module HTTP
   module MimeType

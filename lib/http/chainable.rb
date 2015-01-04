@@ -1,4 +1,4 @@
-require 'base64'
+require "base64"
 
 module HTTP
   module Chainable
@@ -138,7 +138,7 @@ module HTTP
       user = opts.fetch :user
       pass = opts.fetch :pass
 
-      auth('Basic ' << Base64.strict_encode64("#{user}:#{pass}"))
+      auth("Basic " << Base64.strict_encode64("#{user}:#{pass}"))
     end
 
     # Get options for HTTP

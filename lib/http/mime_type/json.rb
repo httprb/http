@@ -1,5 +1,5 @@
-require 'json'
-require 'http/mime_type/adapter'
+require "json"
+require "http/mime_type/adapter"
 
 module HTTP
   module MimeType
@@ -17,7 +17,7 @@ module HTTP
       end
     end
 
-    register_adapter 'application/json', JSON
-    register_alias   'application/json', :json
+    register_adapter "application/json", JSON
+    register_alias   "application/json", :json
   end
 end

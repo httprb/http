@@ -38,8 +38,8 @@ module HTTP
         fail TooManyRedirectsError if too_many_hops?
         fail EndlessRedirectError  if endless_loop?
 
-        uri = @response.headers['Location']
-        fail StateError, 'no Location header in redirect' unless uri
+        uri = @response.headers["Location"]
+        fail StateError, "no Location header in redirect" unless uri
 
         if 303 == @response.code
           @request = @request.redirect uri, :get

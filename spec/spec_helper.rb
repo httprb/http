@@ -1,7 +1,7 @@
 # coding: utf-8
 
-require 'simplecov'
-require 'coveralls'
+require "simplecov"
+require "coveralls"
 
 SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
   SimpleCov::Formatter::HTMLFormatter,
@@ -9,15 +9,15 @@ SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
 ]
 
 SimpleCov.start do
-  add_filter '/spec/'
+  add_filter "/spec/"
   minimum_coverage 80
 end
 
-require 'http'
-require 'rspec/its'
-require 'support/example_server'
-require 'support/proxy_server'
-require 'support/capture_warning'
+require "http"
+require "rspec/its"
+require "support/example_server"
+require "support/proxy_server"
+require "support/capture_warning"
 
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 RSpec.configure do |config|
@@ -64,7 +64,7 @@ RSpec.configure do |config|
     # Use the documentation formatter for detailed output,
     # unless a formatter has already been configured
     # (e.g. via a command-line flag).
-    config.default_formatter = 'doc'
+    config.default_formatter = "doc"
   end
 
   # Print the 10 slowest examples and example groups at the

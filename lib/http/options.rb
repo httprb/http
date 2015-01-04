@@ -1,6 +1,6 @@
-require 'http/headers'
-require 'openssl'
-require 'socket'
+require "http/headers"
+require "openssl"
+require "socket"
 
 module HTTP
   class Options

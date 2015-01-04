@@ -1,7 +1,7 @@
-require 'forwardable'
+require "forwardable"
 
-require 'http/errors'
-require 'http/headers/mixin'
+require "http/errors"
+require "http/headers/mixin"
 
 module HTTP
   # HTTP Headers container.
@@ -194,7 +194,7 @@ module HTTP
     # @return [String] canonical HTTP header name
     def normalize_header(name)
       normalized   = name[CANONICAL_HEADER]
-      normalized ||= name.split(/[\-_]/).map(&:capitalize).join('-')
+      normalized ||= name.split(/[\-_]/).map(&:capitalize).join("-")
 
       return normalized if normalized =~ HEADER_NAME_RE
 

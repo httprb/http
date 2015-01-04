@@ -1,6 +1,6 @@
-require 'delegate'
+require "delegate"
 
-require 'http/response/status/reasons'
+require "http/response/status/reasons"
 
 module HTTP
   class Response
@@ -43,7 +43,7 @@ module HTTP
         # @param [#to_s] str
         # @return [Symbol]
         def symbolize(str)
-          str.to_s.downcase.gsub(/-/, ' ').gsub(/[^a-z ]/, '').gsub(/\s+/, '_').to_sym
+          str.to_s.downcase.gsub(/-/, " ").gsub(/[^a-z ]/, "").gsub(/\s+/, "_").to_sym
         end
       end
 

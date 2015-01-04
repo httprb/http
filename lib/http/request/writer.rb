@@ -32,10 +32,10 @@ module HTTP
       # Adds the headers to the header array for the given request body we are working
       # with
       def add_body_type_headers
-        if @body.is_a?(String) && !@headers['Content-Length']
+        if @body.is_a?(String) && !@headers["Content-Length"]
           @request_header << "Content-Length: #{@body.bytesize}"
-        elsif @body.is_a?(Enumerable) && 'chunked' != @headers['Transfer-Encoding']
-          fail(RequestError, 'invalid transfer encoding')
+        elsif @body.is_a?(Enumerable) && "chunked" != @headers["Transfer-Encoding"]
+          fail(RequestError, "invalid transfer encoding")
         end
       end
 
@@ -64,7 +64,7 @@ module HTTP
             @socket << chunk << CRLF
           end
 
-          @socket << '0' << CRLF * 2
+          @socket << "0" << CRLF * 2
         end
       end
 

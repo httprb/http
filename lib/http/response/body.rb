@@ -1,5 +1,5 @@
-require 'forwardable'
-require 'http/client'
+require "forwardable"
+require "http/client"
 
 module HTTP
   class Response
@@ -31,11 +31,11 @@ module HTTP
       # @return [String] eagerly consume the entire body as a string
       def to_s
         return @contents if @contents
-        fail StateError, 'body is being streamed' unless @streaming.nil?
+        fail StateError, "body is being streamed" unless @streaming.nil?
 
         begin
           @streaming = false
-          @contents = ''
+          @contents = ""
           while (chunk = @client.readpartial)
             @contents << chunk
           end
@@ -50,7 +50,7 @@ module HTTP
 
       # Assert that the body is actively being streamed
       def stream!
-        fail StateError, 'body has already been consumed' if @streaming == false
+        fail StateError, "body has already been consumed" if @streaming == false
         @streaming = true
       end
 

@@ -18,7 +18,7 @@ module HTTP
       end
 
       def http_version
-        @parser.http_version.join('.')
+        @parser.http_version.join(".")
       end
 
       def status_code

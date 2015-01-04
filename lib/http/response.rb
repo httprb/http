@@ -1,9 +1,9 @@
-require 'forwardable'
+require "forwardable"
 
-require 'http/headers'
-require 'http/content_type'
-require 'http/mime_type'
-require 'http/response/status'
+require "http/headers"
+require "http/content_type"
+require "http/mime_type"
+require "http/response/status"
 
 module HTTP
   class Response
@@ -16,7 +16,7 @@ module HTTP
     STATUS_CODES = Status::REASONS
 
     # @deprecated Will be removed in 1.0.0
-    SYMBOL_TO_STATUS_CODE = Hash[STATUS_CODES.map { |k, v| [v.downcase.gsub(/\s|-/, '_').to_sym, k] }].freeze
+    SYMBOL_TO_STATUS_CODE = Hash[STATUS_CODES.map { |k, v| [v.downcase.gsub(/\s|-/, "_").to_sym, k] }].freeze
 
     # @return [Status]
     attr_reader :status
@@ -73,7 +73,7 @@ module HTTP
     #
     # @return [HTTP::ContentType]
     def content_type
-      @content_type ||= ContentType.parse headers['Content-Type']
+      @content_type ||= ContentType.parse headers["Content-Type"]
     end
 
     # MIME type of response (if any)

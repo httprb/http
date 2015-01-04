@@ -1,8 +1,8 @@
-require 'cgi'
-require 'uri'
-require 'form_data'
-require 'http/options'
-require 'http/redirector'
+require "cgi"
+require "uri"
+require "form_data"
+require "http/options"
+require "http/redirector"
 
 module HTTP
   # Clients make requests and receive responses
@@ -121,7 +121,7 @@ module HTTP
       # Some proxies (seen on WEBRick) fail if URL has
       # empty path (e.g. `http://example.com`) while it's RFC-complaint:
       # http://tools.ietf.org/html/rfc1738#section-3.1
-      uri.path = '/' if uri.path.empty?
+      uri.path = "/" if uri.path.empty?
 
       uri
     end
@@ -133,11 +133,11 @@ module HTTP
         opts.body
       when opts.form
         form = FormData.create opts.form
-        headers['Content-Type']   ||= form.content_type
-        headers['Content-Length'] ||= form.content_length
+        headers["Content-Type"]   ||= form.content_type
+        headers["Content-Length"] ||= form.content_length
         form.to_s
       when opts.json
-        headers['Content-Type'] ||= 'application/json'
+        headers["Content-Type"] ||= "application/json"
         MimeType[:json].encode opts.json
       end
     end

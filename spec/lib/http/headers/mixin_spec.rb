@@ -12,23 +12,23 @@ RSpec.describe HTTP::Headers::Mixin do
   let(:headers) { HTTP::Headers.new }
   let(:dummy)   { dummy_class.new headers }
 
-  describe '#headers' do
-    it 'returns @headers instance variable' do
+  describe "#headers" do
+    it "returns @headers instance variable" do
       expect(dummy.headers).to be headers
     end
   end
 
-  describe '#[]' do
-    it 'proxies to headers#[]' do
+  describe "#[]" do
+    it "proxies to headers#[]" do
       expect(headers).to receive(:[]).with(:accept)
       dummy[:accept]
     end
   end
 
-  describe '#[]=' do
-    it 'proxies to headers#[]' do
-      expect(headers).to receive(:[]=).with(:accept, 'text/plain')
-      dummy[:accept] = 'text/plain'
+  describe "#[]=" do
+    it "proxies to headers#[]" do
+      expect(headers).to receive(:[]=).with(:accept, "text/plain")
+      dummy[:accept] = "text/plain"
     end
   end
 end
