@@ -18,14 +18,8 @@ AuthenticatedProxyServer = WEBrick::HTTPProxyServer.new(
   :RequestCallback => handler
 )
 
-Thread.new  { ProxyServer.start }
-trap("INT") do
-  ProxyServer.shutdown
-  exit
-end
+Thread.new { ProxyServer.start }
+at_exit { ProxyServer.shutdown }
 
-Thread.new  { AuthenticatedProxyServer.start }
-trap("INT") do
-  AuthenticatedProxyServer.shutdown
-  exit
-end
+Thread.new { AuthenticatedProxyServer.start }
+at_exit { AuthenticatedProxyServer.shutdown }
