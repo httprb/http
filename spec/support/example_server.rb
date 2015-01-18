@@ -19,12 +19,3 @@ class ExampleServer
 
   delegate [:start, :shutdown] => :@server
 end
-
-t = Thread.new { ExampleServer.instance.start }
-
-trap("INT") do
-  ExampleServer.instance.shutdown
-  exit
-end
-
-Thread.pass while t.status && t.status != "sleep"
