@@ -1,5 +1,7 @@
+require "support/dummy_server"
+
 RSpec.describe HTTP::Client do
-  let(:test_endpoint)  { "http://#{ExampleServer::ADDR}" }
+  run_server(:dummy) { DummyServer.new }
 
   StubbedClient = Class.new(HTTP::Client) do
     def perform(request, options)
@@ -148,23 +150,23 @@ RSpec.describe HTTP::Client do
     it "calls finish_response before actual performance" do
       allow(TCPSocket).to receive(:open) { throw :halt }
       expect(client).to receive(:finish_response)
-      catch(:halt) { client.head test_endpoint }
+      catch(:halt) { client.head dummy.endpoint }
     end
 
     it "calls finish_response once body was fully flushed" do
       expect(client).to receive(:finish_response).twice.and_call_original
-      client.get(test_endpoint).to_s
+      client.get(dummy.endpoint).to_s
     end
 
     context "with HEAD request" do
       it "does not iterates through body" do
         expect(client).to_not receive(:readpartial)
-        client.head(test_endpoint)
+        client.head(dummy.endpoint)
       end
 
       it "finishes response after headers were received" do
         expect(client).to receive(:finish_response).twice.and_call_original
-        client.head(test_endpoint)
+        client.head(dummy.endpoint)
       end
     end
 
@@ -190,7 +192,7 @@ RSpec.describe HTTP::Client do
         end
 
         it "raises IOError" do
-          expect { client.get test_endpoint }.to raise_error IOError
+          expect { client.get dummy.endpoint }.to raise_error IOError
         end
       end
 
@@ -205,7 +207,7 @@ RSpec.describe HTTP::Client do
         end
 
         it "reads partially arrived body" do
-          res = client.get(test_endpoint).to_s
+          res = client.get(dummy.endpoint).to_s
           expect(res).to eq "unexpected end of f"
         end
       end
@@ -219,7 +221,7 @@ RSpec.describe HTTP::Client do
         end
 
         it "reads partially arrived body" do
-          res = client.get(test_endpoint).to_s
+          res = client.get(dummy.endpoint).to_s
           expect(res).to eq "unexpected end of f"
         end
       end
@@ -251,7 +253,7 @@ RSpec.describe HTTP::Client do
       end
 
       it "properly reads body" do
-        body = client.get(test_endpoint).to_s
+        body = client.get(dummy.endpoint).to_s
         expect(body).to eq "<!doctype html>"
       end
     end

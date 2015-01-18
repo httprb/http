@@ -15,7 +15,6 @@ end
 
 require "http"
 require "rspec/its"
-require "support/example_server"
 require "support/proxy_server"
 require "support/capture_warning"
 

@@ -1,6 +1,4 @@
-require "webrick"
-
-class ExampleServer
+class DummyServer
   class Servlet < WEBrick::HTTPServlet::AbstractServlet
     def not_found(_req, res)
       res.status = 404
@@ -66,12 +64,12 @@ class ExampleServer
 
     get "/redirect-301" do |_req, res|
       res.status      = 301
-      res["Location"] = "http://#{ExampleServer::ADDR}/"
+      res["Location"] = "http://#{@server.config[:BindAddress]}:#{@server.config[:Port]}/"
     end
 
     get "/redirect-302" do |_req, res|
       res.status      = 302
-      res["Location"] = "http://#{ExampleServer::ADDR}/"
+      res["Location"] = "http://#{@server.config[:BindAddress]}:#{@server.config[:Port]}/"
     end
 
     post "/form" do |req, res|
