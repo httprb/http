@@ -1,6 +1,7 @@
 require "json"
 
 require "support/dummy_server"
+require "support/proxy_server"
 
 RSpec.describe HTTP do
   run_server(:dummy) { DummyServer.new }
