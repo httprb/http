@@ -17,3 +17,22 @@ AuthenticatedProxyServer = WEBrick::HTTPProxyServer.new(
   end,
   :RequestCallback => handler
 )
+
+RSpec.configure do |config|
+  servers = [
+    ProxyServer,
+    AuthenticatedProxyServer
+  ]
+  threads = []
+
+  config.before :suite do
+    threads.push(*servers.map { |server| Thread.new { server.start } })
+    # wait until servers fully boot up
+    Thread.pass while threads.any? { |t| t.status && t.status != "sleep" }
+  end
+
+  config.after :suite do
+    servers.each { |server| server.shutdown }
+    threads.each(&:join).clear
+  end
+end

@@ -19,23 +19,6 @@ require "support/capture_warning"
 
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 RSpec.configure do |config|
-  servers = [
-    ProxyServer,
-    AuthenticatedProxyServer,
-    ExampleServer.instance
-  ]
-  threads = []
-
-  config.before :suite do
-    threads.push(*servers.map { |server| Thread.new { server.start } })
-    # wait until servers fully boot up
-    Thread.pass while threads.any? { |t| t.status && t.status != "sleep" }
-  end
-
-  config.after :suite do
-    servers.each { |server| server.shutdown }
-    threads.each(&:join).clear
-  end
 
   config.expect_with :rspec do |expectations|
     # This option will default to `true` in RSpec 4. It makes the `description`
