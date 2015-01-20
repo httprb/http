@@ -41,35 +41,49 @@ RSpec.describe HTTP do
     end
   end
 
-  context "with http proxy address and port" do
-    it "proxies the request" do
-      response = HTTP.via("127.0.0.1", 8080).get dummy.endpoint
-      expect(response.headers["X-Proxied"]).to eq "true"
-    end
-  end
+  context "with http proxy" do
+    let(:handler) { proc { |_, res| res["X-PROXIED"] = true } }
 
-  context "with http proxy address, port username and password" do
-    it "proxies the request" do
-      response = HTTP.via("127.0.0.1", 8081, "username", "password").get dummy.endpoint
-      expect(response.headers["X-Proxied"]).to eq "true"
+    context "address and port" do
+      it "proxies the request" do
+        with_proxy(8080, handler) do
+          response = HTTP.via("127.0.0.1", 8080).get dummy.endpoint
+          expect(response.headers["X-Proxied"]).to eq "true"
+        end
+      end
     end
 
-    it 'responds with the endpoint\'s body' do
-      response = HTTP.via("127.0.0.1", 8081, "username", "password").get dummy.endpoint
-      expect(response.to_s).to match(/<!doctype html>/)
-    end
-  end
+    context "address, port username and password" do
+      it "proxies the request" do
+        with_auth_proxy(8081, handler, :user => "username", :password => "password") do
+          response = HTTP.via("127.0.0.1", 8081, "username", "password").get dummy.endpoint
+          expect(response.headers["X-Proxied"]).to eq "true"
+        end
+      end
 
-  context "with http proxy address, port, with wrong username and password" do
-    it "responds with 407" do
-      response = HTTP.via("127.0.0.1", 8081, "user", "pass").get dummy.endpoint
-      expect(response.status).to eq(407)
+      it "responds with the endpoint\'s body" do
+        with_auth_proxy(8081, handler, :user => "username", :password => "password") do
+          response = HTTP.via("127.0.0.1", 8081, "username", "password").get dummy.endpoint
+          expect(response.to_s).to match(/<!doctype html>/)
+        end
+      end
     end
-  end
 
-  context "without proxy port" do
-    it "raises an argument error" do
-      expect { HTTP.via("127.0.0.1") }.to raise_error HTTP::RequestError
+    context "address, port, with wrong username and password" do
+      it "responds with 407" do
+        with_auth_proxy(8081, handler, :user => "username", :password => "password") do
+          response = HTTP.via("127.0.0.1", 8081, "user", "pass").get dummy.endpoint
+          expect(response.status).to eq(407)
+        end
+      end
+    end
+
+    context "without proxy port" do
+      it "raises an argument error" do
+        with_proxy(8080, handler) do
+          expect { HTTP.via("127.0.0.1") }.to raise_error HTTP::RequestError
+        end
+      end
     end
   end
 
