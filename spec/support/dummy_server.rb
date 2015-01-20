@@ -1,12 +1,12 @@
 require "webrick"
-require "forwardable"
 
 require "support/black_hole"
 require "support/dummy_server/servlet"
-require "support/helpers/server_runner"
+require "support/servers/config"
+require "support/servers/runner"
 
-class DummyServer
-  extend  Forwardable
+class DummyServer < WEBrick::HTTPServer
+  include ServerConfig
 
   CONFIG = {
     :BindAddress  => "127.0.0.1",
@@ -16,13 +16,11 @@ class DummyServer
   }.freeze
 
   def initialize
-    @server = WEBrick::HTTPServer.new CONFIG
-    @server.mount("/", Servlet)
+    super CONFIG
+    mount("/", Servlet)
   end
 
   def endpoint
-    "http://#{@server.config[:BindAddress]}:#{@server.config[:Port]}"
+    "http://#{addr}:#{port}"
   end
-
-  def_delegators :@server, :start, :shutdown
 end

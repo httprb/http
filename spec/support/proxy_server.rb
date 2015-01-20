@@ -1,31 +1,37 @@
 require "webrick/httpproxy"
 
-handler = proc { |_, res| res["X-PROXIED"] = true }
+require "support/black_hole"
+require "support/servers/config"
+require "support/servers/runner"
 
-ProxyServer = WEBrick::HTTPProxyServer.new(
-  :Port => 8080,
-  :AccessLog => [],
-  :RequestCallback => handler
-)
+class ProxyServer < WEBrick::HTTPProxyServer
+  include ServerConfig
 
-AuthenticatedProxyServer = WEBrick::HTTPProxyServer.new(
-  :Port => 8081,
-  :ProxyAuthProc => proc do | req, res |
-    WEBrick::HTTPAuth.proxy_basic_auth(req, res, "proxy") do | user, pass |
-      user == "username" && pass == "password"
-    end
-  end,
-  :RequestCallback => handler
-)
+  CONFIG = {
+    :BindAddress     => "127.0.0.1",
+    :Port            => 0,
+    :AccessLog       => BlackHole,
+    :Logger          => BlackHole,
+    :RequestCallback => proc { |_, res| res["X-PROXIED"] = true }
+  }.freeze
 
-Thread.new  { ProxyServer.start }
-trap("INT") do
-  ProxyServer.shutdown
-  exit
+  def initialize
+    super CONFIG
+  end
 end
 
-Thread.new  { AuthenticatedProxyServer.start }
-trap("INT") do
-  AuthenticatedProxyServer.shutdown
-  exit
+class AuthProxyServer < WEBrick::HTTPProxyServer
+  include ServerConfig
+
+  AUTHENTICATOR = proc do |req, res|
+    WEBrick::HTTPAuth.proxy_basic_auth(req, res, "proxy") do |user, pass|
+      user == "username" && pass == "password"
+    end
+  end
+
+  CONFIG = ProxyServer::CONFIG.merge :ProxyAuthProc => AUTHENTICATOR
+
+  def initialize
+    super CONFIG
+  end
 end

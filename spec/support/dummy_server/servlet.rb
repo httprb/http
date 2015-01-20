@@ -1,4 +1,4 @@
-class DummyServer
+class DummyServer < WEBrick::HTTPServer
   class Servlet < WEBrick::HTTPServlet::AbstractServlet
     def not_found(_req, res)
       res.status = 404
