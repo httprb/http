@@ -8,7 +8,12 @@ require "support/helpers/server_runner"
 class DummyServer
   extend  Forwardable
 
-  CONFIG = {:BindAddress => "127.0.0.1", :Port => 0, :Logger => BlackHole}.freeze
+  CONFIG = {
+    :BindAddress  => "127.0.0.1",
+    :Port         => 0,
+    :AccessLog    => BlackHole,
+    :Logger       => BlackHole
+  }.freeze
 
   def initialize
     @server = WEBrick::HTTPServer.new CONFIG
