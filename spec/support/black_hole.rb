@@ -1,4 +1,5 @@
 module BlackHole
-  def method_missing(*); end
-  module_function :method_missing
+  def self.method_missing(*)
+    self
+  end
 end
