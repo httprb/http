@@ -42,35 +42,49 @@ RSpec.describe HTTP do
   end
 
   describe ".via" do
-    run_server(:proxy)      { ProxyServer.new }
-    run_server(:auth_proxy) { AuthProxyServer.new }
+    context "anonymous proxy" do
+      run_server(:proxy) { ProxyServer.new }
 
-    context "with http proxy address and port" do
       it "proxies the request" do
         response = HTTP.via(proxy.addr, proxy.port).get dummy.endpoint
         expect(response.headers["X-Proxied"]).to eq "true"
       end
-    end
 
-    context "without proxy port" do
-      it "raises an argument error" do
+      it "responds with the endpoint's body" do
+        response = HTTP.via(proxy.addr, proxy.port).get dummy.endpoint
+        expect(response.to_s).to match(/<!doctype html>/)
+      end
+
+      it "raises an argument error if no port given" do
         expect { HTTP.via(proxy.addr) }.to raise_error HTTP::RequestError
+      end
+
+      it "ignores credentials" do
+        response = HTTP.via(proxy.addr, proxy.port, "username", "password").get dummy.endpoint
+        expect(response.to_s).to match(/<!doctype html>/)
       end
     end
 
-    context "with http proxy address, port username and password" do
+    context "proxy with authentication" do
+      run_server(:proxy) { AuthProxyServer.new }
+
       it "proxies the request" do
-        response = HTTP.via(auth_proxy.addr, auth_proxy.port, "username", "password").get dummy.endpoint
+        response = HTTP.via(proxy.addr, proxy.port, "username", "password").get dummy.endpoint
         expect(response.headers["X-Proxied"]).to eq "true"
       end
 
       it "responds with the endpoint's body" do
-        response = HTTP.via(auth_proxy.addr, auth_proxy.port, "username", "password").get dummy.endpoint
+        response = HTTP.via(proxy.addr, proxy.port, "username", "password").get dummy.endpoint
         expect(response.to_s).to match(/<!doctype html>/)
       end
 
-      it "responds with 407 when wrong proxy credentials given" do
-        response = HTTP.via(auth_proxy.addr, auth_proxy.port, "user", "pass").get dummy.endpoint
+      it "responds with 407 when wrong credentials given" do
+        response = HTTP.via(proxy.addr, proxy.port, "user", "pass").get dummy.endpoint
+        expect(response.status).to eq(407)
+      end
+
+      it "responds with 407 if no credentials given" do
+        response = HTTP.via(proxy.addr, proxy.port).get dummy.endpoint
         expect(response.status).to eq(407)
       end
     end
