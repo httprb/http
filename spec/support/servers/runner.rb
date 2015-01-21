@@ -1,12 +1,17 @@
 module ServerRunner
-  def run_server(name)
+  def run_server(name, &block)
     let! name do
-      server = yield
-      Thread.new { server.start }
+      server = block.call
+      thread = Thread.new { server.start }
+
+      Thread.pass while thread.status != "sleep"
+
       server
     end
 
-    after { send(name).shutdown }
+    after do
+      send(name).shutdown
+    end
   end
 end
 
