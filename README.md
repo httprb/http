@@ -1,9 +1,9 @@
 ![http.rb](https://raw.github.com/httprb/http.rb/master/logo.png)
 ==============
-[![Gem Version](https://badge.fury.io/rb/http.png)](http://rubygems.org/gems/http)
-[![Build Status](https://secure.travis-ci.org/httprb/http.rb.png?branch=master)](http://travis-ci.org/httprb/http.rb)
-[![Code Climate](https://codeclimate.com/github/httprb/http.rb.png)](https://codeclimate.com/github/httprb/http.rb)
-[![Coverage Status](https://coveralls.io/repos/httprb/http.rb/badge.png?branch=master)](https://coveralls.io/r/httprb/http.rb)
+[![Gem Version](https://badge.fury.io/rb/http.svg)](http://rubygems.org/gems/http)
+[![Build Status](https://secure.travis-ci.org/httprb/http.rb.svg?branch=master)](http://travis-ci.org/httprb/http.rb)
+[![Code Climate](https://codeclimate.com/github/httprb/http.rb.svg?branch=master)](https://codeclimate.com/github/httprb/http.rb)
+[![Coverage Status](https://coveralls.io/repos/httprb/http.rb/badge.svg?branch=master)](https://coveralls.io/r/httprb/http.rb)
 
 About
 -----
