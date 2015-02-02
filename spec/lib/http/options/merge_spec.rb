@@ -1,3 +1,4 @@
+
 RSpec.describe HTTP::Options, "merge" do
   let(:opts) { HTTP::Options.new }
 
@@ -44,6 +45,7 @@ RSpec.describe HTTP::Options, "merge" do
       :follow => nil,
       :socket_class     => described_class.default_socket_class,
       :ssl_socket_class => described_class.default_ssl_socket_class,
-      :ssl_context      => nil)
+      :ssl_context      => nil,
+      :cache      => described_class.default_cache)
   end
 end

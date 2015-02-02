@@ -1,4 +1,4 @@
-require 'time'
+require "time"
 
 module HTTP
   class Cache
@@ -42,12 +42,12 @@ module HTTP
       # RFC2618 - 14.18 : A received message that does not have a Date header
       # field MUST be assigned one by the recipient if the message will be cached
       # by that recipient.
-      response.headers['Date'] ||= response.response_time.httpdate
+      response.headers["Date"] ||= response.response_time.httpdate
 
       if @cached_response
         if forces_cache_deletion?(response)
           invalidate_cache
-        elsif response.reason == 'Not Modified'
+        elsif response.reason == "Not Modified"
           revalidate_response!
         end
       end
@@ -66,7 +66,7 @@ module HTTP
     end
 
     def forces_cache_deletion?(re)
-      re.headers['Cache-Control'] && re.headers['Cache-Control'].include?('no-store')
+      re.headers["Cache-Control"] && re.headers["Cache-Control"].include?("no-store")
     end
 
     def needs_revalidation?
@@ -82,22 +82,22 @@ module HTTP
     end
 
     def max_age
-      if request.headers['Cache-Control'] && request.headers['Cache-Control'].include?('max-age')
-        request.headers['Cache-Control'].split(',').grep(/max-age/).first.split('=').last.to_i
+      if request.headers["Cache-Control"] && request.headers["Cache-Control"].include?("max-age")
+        request.headers["Cache-Control"].split(",").grep(/max-age/).first.split("=").last.to_i
       end
     end
 
     def skip_cache?
       return true unless CACHEABLE_METHODS.include?(request.verb)
-      return false unless request.headers['Cache-Control']
-      request.headers['Cache-Control'].include?('no-cache')
+      return false unless request.headers["Cache-Control"]
+      request.headers["Cache-Control"].include?("no-cache")
     end
 
     # Algo from https://tools.ietf.org/html/rfc2616#section-13.2.3
     def current_age
       now = Time.now
-      age_value  = response.headers['Age'].to_i
-      date_value = Time.httpdate(response.headers['Date'])
+      age_value  = response.headers["Age"].to_i
+      date_value = Time.httpdate(response.headers["Date"])
 
       apparent_age = [0, response.response_time - date_value].max
       corrected_received_age = [apparent_age, age_value].max
@@ -108,13 +108,13 @@ module HTTP
     end
 
     def set_validation_headers!
-      if response.headers['Etag']
-        request.headers['If-None-Match'] = response.headers['Etag']
+      if response.headers["Etag"]
+        request.headers["If-None-Match"] = response.headers["Etag"]
       end
-      if response.headers['Last-Modified']
-        request.headers['If-Modified-Since'] = response.headers['Last-Modified']
+      if response.headers["Last-Modified"]
+        request.headers["If-Modified-Since"] = response.headers["Last-Modified"]
       end
-      request.headers['Cache-Control'] = 'max-age=0' if must_be_revalidated?
+      request.headers["Cache-Control"] = "max-age=0" if must_be_revalidated?
       nil
     end
 
@@ -129,7 +129,7 @@ module HTTP
     def request_cacheable?
       return false unless response.status.between?(200, 299)
       return false unless CACHEABLE_METHODS.include?(request.verb)
-      return false if request.headers['Cache-Control'] && request.headers['Cache-Control'].include?('no-store')
+      return false if request.headers["Cache-Control"] && request.headers["Cache-Control"].include?("no-store")
       true
     end
 
@@ -139,16 +139,16 @@ module HTTP
       if CACHEABLE_RESPONSE_CODES.include?(response.code)
         @cacheable = true
 
-        if response.headers['Cache-Control']
-          @cacheable = :public  if response.headers['Cache-Control'].include?('public')
-          @cacheable = :private if response.headers['Cache-Control'].include?('private')
-          @cacheable = false    if response.headers['Cache-Control'].include?('no-cache')
-          @cacheable = false    if response.headers['Cache-Control'].include?('no-store')
+        if response.headers["Cache-Control"]
+          @cacheable = :public  if response.headers["Cache-Control"].include?("public")
+          @cacheable = :private if response.headers["Cache-Control"].include?("private")
+          @cacheable = false    if response.headers["Cache-Control"].include?("no-cache")
+          @cacheable = false    if response.headers["Cache-Control"].include?("no-store")
         end
 
         # A Vary header field-value of "*" always fails to match
         # and subsequent requests on that resource can only be properly interpreted by the origin server.
-        @cacheable = false if response.headers['Vary'] && response.headers['Vary'].include?('*')
+        @cacheable = false if response.headers["Vary"] && response.headers["Vary"].include?("*")
       else
         @cacheable = false
       end
@@ -179,11 +179,11 @@ module HTTP
     end
 
     def expired?
-      if response.headers['Cache-Control'] && m_age_str = response.headers['Cache-Control'].match(/max-age=(\d+)/)
+      if response.headers["Cache-Control"] && m_age_str = response.headers["Cache-Control"].match(/max-age=(\d+)/)
         current_age > m_age_str[1].to_i
-      elsif response.headers['Expires']
+      elsif response.headers["Expires"]
         begin
-          Time.httpdate(response.headers['Expires']) < Time.now
+          Time.httpdate(response.headers["Expires"]) < Time.now
         rescue ArgumentError
           # Some servers only send a "Expire: -1" header which must be treated as expired
           true
@@ -195,14 +195,14 @@ module HTTP
 
     def stale?
       return true if expired?
-      return false unless response.headers['Cache-Control']
-      return true if response.headers['Cache-Control'].match(/must-revalidate|no-cache/)
+      return false unless response.headers["Cache-Control"]
+      return true if response.headers["Cache-Control"].match(/must-revalidate|no-cache/)
 
       false
     end
 
     def must_be_revalidated?
-      response.headers['Cache-Control'] && response.headers['Cache-Control'].include?('must-revalidate')
+      response.headers["Cache-Control"] && response.headers["Cache-Control"].include?("must-revalidate")
     end
   end
 end

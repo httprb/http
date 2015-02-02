@@ -1,5 +1,5 @@
-require 'thread'
-require 'http/cache/collection'
+require "thread"
+require "http/cache/collection"
 
 module HTTP
   class Cache
