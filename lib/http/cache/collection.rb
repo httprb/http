@@ -1,4 +1,4 @@
-require 'http/headers'
+require "http/headers"
 
 module HTTP
   class Cache
@@ -42,10 +42,10 @@ module HTTP
       def select_request_headers
         headers = HTTP::Headers.new
 
-        @response.headers['Vary'].split(',').each do |name|
+        @response.headers["Vary"].split(",").each do |name|
           name.strip!
           headers[name] = @request.headers[name] if @request.headers[name]
-        end if @response.headers['Vary']
+        end if @response.headers["Vary"]
 
         headers.to_h
       end

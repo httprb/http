@@ -1,8 +1,8 @@
 # Currently broken
-# require 'connection_pool'
-# require 'redis'
-# require 'http/cache/collection'
-# require 'digest/sha2'
+# require "connection_pool"
+# require "redis"
+# require "http/cache/collection"
+# require "digest/sha2"
 
 # module HTTP
 #   class Cache
