@@ -42,10 +42,10 @@ module HTTP
       def select_request_headers
         headers = HTTP::Headers.new
 
-        @response.headers["Vary"].split(",").each do |name|
+        @response.headers.get("Vary").flat_map{|v| v.split(",")}.uniq.each do |name|
           name.strip!
           headers[name] = @request.headers[name] if @request.headers[name]
-        end if @response.headers["Vary"]
+        end
 
         headers.to_h
       end

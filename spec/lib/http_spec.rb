@@ -157,16 +157,17 @@ RSpec.describe HTTP do
   end
 
   describe ".with_cache" do
-    it "sets cache options for valid mode" do
-      client = HTTP.with_cache "private"
-      expect(client.default_options[:cache]).to include mode: "private", adapter: HTTP::Cache::InMemoryCache
+    it "sets cache option" do
+      cache = double(:cache, :perform => nil)
+      client = HTTP.with_cache cache
+      expect(client.default_options[:cache]).to eq cache
     end
 
-    it "sets cache options for valid mode and adapter" do
-      adapter = double("an_adapter")
-      client = HTTP.with_cache mode: :private, adapter: adapter
-      expect(client.default_options[:cache]).to include mode: :private, adapter: adapter
+    it "sets cache option" do
+      persistence_adapter = double(:cache, :lookup => nil)
+      client = HTTP.with_cache persistence_adapter
+      expect(client.default_options[:cache]).not_to eq persistence_adapter
     end
+
   end
-
 end

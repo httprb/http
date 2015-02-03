@@ -43,13 +43,8 @@ module HTTP
 
     # Perform a single (no follow) HTTP request
     def perform(req, options)
-      if Cache::ALLOWED_CACHE_MODES.include?(options.cache[:mode])
-        cache = Cache.new(options)
-        cache.perform(req, options) do |r, opts|
-          make_request(r, opts)
-        end
-      else
-        make_request(req, options)
+      options.cache.perform(req, options) do |r, opts|
+        make_request(r, opts)
       end
     end
 
@@ -74,10 +69,6 @@ module HTTP
       res  = Response.new(@parser.status_code, @parser.http_version, @parser.headers, body, uri)
 
       finish_response if :head == req.verb
-
-      if Cache::ALLOWED_CACHE_MODES.include?(options.cache[:mode])
-        cache.perform_response(res)
-      end
 
       res
     end
