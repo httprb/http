@@ -19,17 +19,23 @@ RSpec.describe HTTP::Cache do
   subject { described_class.new(opts) }
 
   describe "#perform" do
-    it "calls request_performer block when cache miss" do
+    it "calls request_performer blocck when cache miss" do
       expect { |b| subject.perform(request, opts) {|*args|
                  b.to_proc.call(*args)
                  origin_response }
       }.to yield_with_args(request, opts)
     end
 
-    it "does not call request_performer block when cache it" do
-      allow(cache_adapter).to receive(:lookup).and_return(origin_response)
+    context "cache hit" do
+      let(:cached_response) { HTTP::Cache::ResponseWithCacheBehavior.coerce(
+        HTTP::Response.new(200, "http/1.1",
+                           {"Cache-Control" => "private", "test"=> "foo"},
+                           "")
+      ).tap{|r| r.requested_at = r.received_at = Time.now } }
 
-      expect { |b| subject.perform(request, opts, &b) }.not_to yield_control
+      it "does not call request_performer block" do
+        expect { |b| subject.perform(request, opts, &b) }.not_to yield_control
+      end
     end
   end
 
@@ -67,7 +73,7 @@ RSpec.describe HTTP::Cache do
     end
   end
 
-  context "empty cache, cacheable request, 'no-store' response" do
+  context "empty cache, cacheable request, 'nreceiver' response" do
     let(:origin_response) { HTTP::Response.new(200, "http/1.1",
                                                  {"Cache-Control" => "no-cache"},
                                                  "") }
@@ -126,9 +132,9 @@ RSpec.describe HTTP::Cache do
   end
 
   context "warm cache, cacheable request, cacheable response" do
-    let(:cached_response) { HTTP::Response.new(200, "http/1.1",
-                                               {"Cache-Control" => "private"},
-                                               "") }
+    let(:cached_response) { build_cached_response(200, "http/1.1",
+                                                  {"Cache-Control" => "private"},
+                                                  "") }
     let!(:response) { subject.perform(request, opts) { origin_response } }
 
     it "lookups request" do
@@ -141,11 +147,13 @@ RSpec.describe HTTP::Cache do
   end
 
   context "stale cache, cacheable request, cacheable response" do
-    let(:cached_response) { HTTP::Response.new(200, "http/1.1",
-                                               {"Cache-Control" => "private, max-age=1",
-                                                "Date" => (Time.now - 2).httpdate},
-                                               "")
-                            .tap{|x| x.request_time = (Time.now - 2)} }
+    let(:cached_response) {
+      build_cached_response(200, "http/1.1",
+                            {"Cache-Control" => "private, max-age=1",
+                             "Date" => (Time.now - 2).httpdate},
+                            "") do |t|
+        t.request_time = (Time.now - 2)
+      end }
     let!(:response) { subject.perform(request, opts) { origin_response } }
 
     it "lookups request" do
@@ -162,12 +170,14 @@ RSpec.describe HTTP::Cache do
   end
 
   context "stale cache, cacheable request, not modified response" do
-    let(:cached_response) { HTTP::Response.new(200, "http/1.1",
-                                               {"Cache-Control" => "private, max-age=1",
-                                                "Etag" => "foo",
-                                                "Date" => (Time.now - 2).httpdate},
-                                               "")
-                            .tap{|x| x.request_time = (Time.now - 2)} }
+    let(:cached_response) {
+      build_cached_response(200, "http/1.1",
+                            {"Cache-Control" => "private, max-age=1",
+                             "Etag" => "foo",
+                             "Date" => (Time.now - 2).httpdate},
+                            "") do |x|
+        x.request_time = (Time.now - 2)
+      end }
     let(:origin_response) { HTTP::Response.new(304, "http/1.1", {}, "") }
     let!(:response) { subject.perform(request, opts) { origin_response } }
 
@@ -176,7 +186,6 @@ RSpec.describe HTTP::Cache do
     end
 
     it "modifies request with conditional request headers" do
-      subject.perform(request, opts) { response }
       expect(request.headers["If-None-Match"]).to eq cached_response.headers["Etag"]
       expect(request.headers["If-Modified-Since"])
         .to eq cached_response.headers["Last-Modified"]
@@ -203,6 +212,15 @@ RSpec.describe HTTP::Cache do
                                              "") }
 
   let(:cached_response) { nil } # cold cache by default
+
+  def build_cached_response(*args)
+    r = HTTP::Cache::ResponseWithCacheBehavior.coerce(HTTP::Response.new(*args))
+    r.requested_at = r.received_at = Time.now
+
+    yield r if block_given?
+
+    r
+  end
 
   def options(cache_opts)
     HTTP::Options.new(cache: cache_opts)
