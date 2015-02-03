@@ -5,23 +5,23 @@ require "http/cache/request_with_cache_behavior"
 
 module HTTP
   class Cache
-    ALLOWED_CACHE_MODES      = [:public, :private].freeze
-
-    class CacheModeError < CacheError; end
-
     attr_reader :request, :response
 
-    def initialize(options)
-      unless ALLOWED_CACHE_MODES.include?(options.cache[:mode])
-        fail CacheModeError, "Invalid cache_mode #{options.cache[:mode]} supplied"
+    # NoOp cache. Always makes the request.
+    class NullCache
+      def perform(request, options,  &request_performer)
+        yield(request, options)
       end
-      @cache_mode    = options.cache[:mode]
-      @cache_adapter = options.cache[:adapter]
+    end
+
+    def initialize(adapter=HTTP::Cache::InMemoryCache.new)
+      @cache_adapter = adapter
     end
 
     # @return [Response] a cached response that is valid for the request or
     #   the result of executing the provided block.
     def perform(request, options, &request_performer)
+      puts "cache is handling request"
       req = RequestWithCacheBehavior.coerce(request)
 
       if req.invalidates_cache?

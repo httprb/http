@@ -41,10 +41,9 @@ module HTTP
         @cacheable ||=
           begin
             CACHEABLE_RESPONSE_CODES.include?(code) &&
-              (cache_control.public? || cache_control.private?) &&
-              !cache_control.vary_star? &&
-              !cache_control.no_store? &&
-              !cache_control.no_cache?
+              !(cache_control.vary_star? ||
+                cache_control.no_store? ||
+                cache_control.no_cache? )
           end
       end
 

@@ -44,7 +44,7 @@ module HTTP
     @default_socket_class     = TCPSocket
     @default_ssl_socket_class = OpenSSL::SSL::SSLSocket
 
-    @default_cache = {:mode => false, :adapter => HTTP::Cache::InMemoryCache.new}
+    @default_cache = Http::Cache::NullCache.new
 
     class << self
       attr_accessor :default_socket_class, :default_ssl_socket_class
@@ -88,15 +88,15 @@ module HTTP
       RUBY
     end
 
-    def with_cache(cache)
-      my_cache = cache.dup
-
-      unless my_cache.is_a?(Hash)
-        my_cache = self.class.default_cache.merge({:mode => my_cache})
-      end
+    def with_cache(persistence_adapter_or_cache)
+      cache = if persistence_adapter_or_cache.respond_to? :perform
+                persistence_adapter_or_cache
+              else
+                HTTP::Cache.new(persistence_adapter_or_cache)
+              end
 
       dup do |opts|
-        opts.cache = my_cache
+        opts.cache = cache
       end
     end
 

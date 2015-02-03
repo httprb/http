@@ -106,6 +106,26 @@ RSpec.describe HTTP::Cache::ResponseWithCacheBehavior do
     end
   end
 
+  describe "basic 200 response w/ max age" do
+    let(:cache_control) { "max-age=100" }
+
+    it "is not cacheable" do
+      expect(subject.cacheable?).to be_truthy
+    end
+
+    it "is not stale" do
+      expect(subject.stale?).to be_falsy
+    end
+
+    it "is not expired" do
+      expect(subject.expired?).to be_falsy
+    end
+
+    it "is expected to be 0 seconds old" do
+      expect(subject.current_age).to be_within(1).of(0)
+    end
+  end
+  
   describe "basic 200 response w/ public & max age" do
     let(:cache_control) { "public, max-age=100" }
 

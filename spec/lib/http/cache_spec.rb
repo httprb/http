@@ -5,18 +5,18 @@ RSpec.describe HTTP::Cache do
     subject { described_class }
 
     it "allows private mode" do
-      expect(subject.new(options(mode: :private, adapter: cache_adapter)))
+      expect(subject.new(cache_adapter))
         .to be_kind_of HTTP::Cache
     end
 
     it "allows public mode" do
-      expect(subject.new(options(mode: :public, adapter: cache_adapter)))
+      expect(subject.new(cache_adapter))
         .to be_kind_of HTTP::Cache
     end
   end
 
-  let(:opts) { options(mode: :private, adapter: cache_adapter) }
-  subject { described_class.new(opts) }
+  let(:opts) { options }
+  subject { described_class.new(cache_adapter) }
 
   describe "#perform" do
     it "calls request_performer blocck when cache miss" do
@@ -222,7 +222,7 @@ RSpec.describe HTTP::Cache do
     r
   end
 
-  def options(cache_opts)
-    HTTP::Options.new(cache: cache_opts)
+  def options()
+    HTTP::Options.new()
   end
 end
