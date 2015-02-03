@@ -45,8 +45,8 @@ module HTTP
     def perform(req, options)
       if Cache::ALLOWED_CACHE_MODES.include?(options.cache[:mode])
         cache = Cache.new(options)
-        cache.perform(req, options) do |req, options|
-          make_request(req, options)
+        cache.perform(req, options) do |r, opts|
+          make_request(r, opts)
         end
       else
         make_request(req, options)

@@ -1,10 +1,10 @@
 require "time"
+require "http/cache/cache_control"
+require "http/cache/response_with_cache_behavior"
+require "http/cache/request_with_cache_behavior"
 
 module HTTP
   class Cache
-    CACHEABLE_METHODS        = [:get, :head].freeze
-    INVALIDATING_METHODS     = [:post, :put, :delete].freeze
-    CACHEABLE_RESPONSE_CODES = [200, 203, 300, 301, 410].freeze
     ALLOWED_CACHE_MODES      = [:public, :private].freeze
 
     class CacheModeError < CacheError; end
@@ -17,205 +17,64 @@ module HTTP
       end
       @cache_mode    = options.cache[:mode]
       @cache_adapter = options.cache[:adapter]
-      @cacheable     = nil
     end
 
     # @return [Response] a cached response that is valid for the request or
     #   the result of executing the provided block.
     def perform(request, options, &request_performer)
-      @request = request
+      req = RequestWithCacheBehavior.coerce(request)
 
-      if forces_cache_deletion?(request)
-        invalidate_cache
+      if req.invalidates_cache?
+        invalidate_cache(req)
 
-      elsif @response = @cached_response = cache_lookup
-        if needs_revalidation?
-          set_validation_headers!
-        else
-          return @cached_response
-        end
+      elsif cached_resp = cache_lookup(req)
+        return cached_resp unless cached_resp.stale?
+
+        req.set_validation_headers!(cached_resp)
       end
-      # cache miss!
 
-      response = yield request, options
+      # cache miss! Do this the hard way...
+      req.sent_at = Time.now
+      act_resp = ResponseWithCacheBehavior.coerce(yield(req, options))
 
-      register(response)
+      act_resp.received_at  = Time.now
+      act_resp.requested_at = req.sent_at
 
-      if response.status == 304
-        @cached_response
+      if act_resp.status.not_modified? && cached_resp
+        cached_resp.validated!(act_resp)
+        store_in_cache(req, cached_resp)
+        return cached_resp
+
+      elsif req.cacheable? && act_resp.cacheable?
+        store_in_cache(req, act_resp)
+        return act_resp
+
       else
-        response
+        return act_resp
       end
     end
 
     protected
 
-    def register(response)
-      @response = response
-      response.request_time  = request.request_time
-      response.authoritative = true
-      # RFC2618 - 14.18 : A received message that does not have a Date header
-      # field MUST be assigned one by the recipient if the message will be cached
-      # by that recipient.
-      response.headers["Date"] ||= response.response_time.httpdate
 
-      if @cached_response
-        if forces_cache_deletion?(response)
-          invalidate_cache
-        elsif response.reason == "Not Modified"
-          revalidate_response!
-        end
-      end
-
-      if request_cacheable? && response_cacheable?
-        store_in_cache
-      elsif invalidates_cache?
-        invalidate_cache
-      end
-    end
-
-    def cache_lookup
-      @cache_adapter.lookup(request) unless skip_cache?
-    end
-
-    def forces_cache_deletion?(re)
-      re.headers["Cache-Control"] && re.headers["Cache-Control"].include?("no-store")
-    end
-
-    def needs_revalidation?
-      return true if forces_revalidation?
-      return true if stale?
-      return true if max_age && current_age > max_age
-      return true if must_be_revalidated?
-      false
-    end
-
-    def forces_revalidation?
-      max_age == 0 || skip_cache?
-    end
-
-    def max_age
-      if request.headers["Cache-Control"] && request.headers["Cache-Control"].include?("max-age")
-        request.headers["Cache-Control"].split(",").grep(/max-age/).first.split("=").last.to_i
-      end
-    end
-
-    def skip_cache?
-      return true unless CACHEABLE_METHODS.include?(request.verb)
-      return false unless request.headers["Cache-Control"]
-      request.headers["Cache-Control"].include?("no-cache")
-    end
-
-    # Algo from https://tools.ietf.org/html/rfc2616#section-13.2.3
-    def current_age
-      now = Time.now
-      age_value  = response.headers["Age"].to_i
-      date_value = Time.httpdate(response.headers["Date"])
-
-      apparent_age = [0, response.response_time - date_value].max
-      corrected_received_age = [apparent_age, age_value].max
-      response_delay = response.response_time - response.request_time
-      corrected_initial_age = corrected_received_age + response_delay
-      resident_time = now - response.response_time
-      corrected_initial_age + resident_time
-    end
-
-    def set_validation_headers!
-      if response.headers["Etag"]
-        request.headers["If-None-Match"] = response.headers["Etag"]
-      end
-      if response.headers["Last-Modified"]
-        request.headers["If-Modified-Since"] = response.headers["Last-Modified"]
-      end
-      request.headers["Cache-Control"] = "max-age=0" if must_be_revalidated?
-      nil
-    end
-
-    def revalidate_response!
-      @cached_response.headers.merge!(response.headers)
-      @cached_response.request_time  = response.request_time
-      @cached_response.response_time = response.response_time
-      @cached_response.authoritative = true
-      @response = @cached_response
-    end
-
-    def request_cacheable?
-      return false unless response.status.between?(200, 299)
-      return false unless CACHEABLE_METHODS.include?(request.verb)
-      return false if request.headers["Cache-Control"] && request.headers["Cache-Control"].include?("no-store")
-      true
-    end
-
-    def response_cacheable?
-      return @cacheable if @cacheable
-
-      if CACHEABLE_RESPONSE_CODES.include?(response.code)
-        @cacheable = true
-
-        if response.headers["Cache-Control"]
-          @cacheable = :public  if response.headers["Cache-Control"].include?("public")
-          @cacheable = :private if response.headers["Cache-Control"].include?("private")
-          @cacheable = false    if response.headers["Cache-Control"].include?("no-cache")
-          @cacheable = false    if response.headers["Cache-Control"].include?("no-store")
-        end
-
-        # A Vary header field-value of "*" always fails to match
-        # and subsequent requests on that resource can only be properly interpreted by the origin server.
-        @cacheable = false if response.headers["Vary"] && response.headers["Vary"].include?("*")
+    def cache_lookup(request)
+      return nil if request.skips_cache?
+      c = @cache_adapter.lookup(request)
+      if c
+        ResponseWithCacheBehavior.coerce(c)
       else
-        @cacheable = false
+        nil
       end
-
-      unless @cacheable == true
-        if @cacheable == @cache_mode
-          @cacheable = true
-        else
-          @cacheable = false
-        end
-      end
-
-      @cacheable
     end
 
-    def store_in_cache
+    def store_in_cache(request, response)
       @cache_adapter.store(request, response)
       nil
     end
 
-    def invalidates_cache?
-      INVALIDATING_METHODS.include?(request.verb)
-    end
-
-    def invalidate_cache
+    def invalidate_cache(request)
       @cache_adapter.invalidate(request.uri)
-      nil
     end
 
-    def expired?
-      if response.headers["Cache-Control"] && m_age_str = response.headers["Cache-Control"].match(/max-age=(\d+)/)
-        current_age > m_age_str[1].to_i
-      elsif response.headers["Expires"]
-        begin
-          Time.httpdate(response.headers["Expires"]) < Time.now
-        rescue ArgumentError
-          # Some servers only send a "Expire: -1" header which must be treated as expired
-          true
-        end
-      else
-        false
-      end
-    end
-
-    def stale?
-      return true if expired?
-      return false unless response.headers["Cache-Control"]
-      return true if response.headers["Cache-Control"].match(/must-revalidate|no-cache/)
-
-      false
-    end
-
-    def must_be_revalidated?
-      response.headers["Cache-Control"] && response.headers["Cache-Control"].include?("must-revalidate")
-    end
   end
 end
