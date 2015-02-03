@@ -45,11 +45,15 @@ module HTTP
     def perform(req, options)
       if Cache::ALLOWED_CACHE_MODES.include?(options.cache[:mode])
         cache = Cache.new(options)
-        if res = cache.perform_request(req)
-          return res
+        cache.perform(req, options) do |req, options|
+          make_request(req, options)
         end
+      else
+        make_request(req, options)
       end
+    end
 
+    def make_request(req, options)
       # finish previous response if client was re-used
       # TODO: this is pretty wrong, as socket shoud be part of response
       #       connection, so that re-use of client will not break multiple

@@ -27,8 +27,7 @@ module HTTP
 
     # @return [URI, nil]
     attr_reader :uri
-    attr_reader   :response_time
-    attr_accessor :authoritative, :request_time
+    attr_accessor :authoritative, :request_time, :response_time
 
     def initialize(status, version, headers, body, uri = nil) # rubocop:disable ParameterLists
       @version, @body, @uri = version, body, uri

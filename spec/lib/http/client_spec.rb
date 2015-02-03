@@ -4,7 +4,7 @@ RSpec.describe HTTP::Client do
   run_server(:dummy) { DummyServer.new }
 
   StubbedClient = Class.new(HTTP::Client) do
-    def perform(request, options)
+    def make_request(request, options)
       stubs.fetch(request.uri.to_s) { super(request, options) }
     end
 
@@ -68,6 +68,18 @@ RSpec.describe HTTP::Client do
 
       expect { client.get("http://example.com/") }
         .to raise_error(HTTP::Redirector::TooManyRedirectsError)
+    end
+  end
+
+  describe "caching" do
+    it "returns cached responses if they exist" do
+      cached_response = simple_response("OK")
+      cache = double("cache", lookup: cached_response)
+      client = StubbedClient.new(:cache => {mode: :private, adapter: cache}).stub(
+        "http://example.com/" => simple_response("OK")
+      )
+
+      expect(client.get("http://example.com/")).to eq cached_response
     end
   end
 

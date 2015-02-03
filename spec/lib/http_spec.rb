@@ -155,4 +155,18 @@ RSpec.describe HTTP do
         .to match(/^Basic [A-Za-z0-9+\/]+=*$/)
     end
   end
+
+  describe ".with_cache" do
+    it "sets cache options for valid mode" do
+      client = HTTP.with_cache "private"
+      expect(client.default_options[:cache]).to include mode: "private", adapter: HTTP::Cache::InMemoryCache
+    end
+
+    it "sets cache options for valid mode and adapter" do
+      adapter = double("an_adapter")
+      client = HTTP.with_cache mode: :private, adapter: adapter
+      expect(client.default_options[:cache]).to include mode: :private, adapter: adapter
+    end
+  end
+
 end

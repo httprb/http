@@ -17,25 +17,40 @@ module HTTP
       end
       @cache_mode    = options.cache[:mode]
       @cache_adapter = options.cache[:adapter]
+      @cacheable     = nil
     end
 
-    def perform_request(request)
+    # @return [Response] a cached response that is valid for the request or
+    #   the result of executing the provided block.
+    def perform(request, options, &request_performer)
       @request = request
 
-      if @response = @cached_response = cache_lookup
-        if forces_cache_deletion?(request)
-          invalidate_cache
-        elsif needs_revalidation?
+      if forces_cache_deletion?(request)
+        invalidate_cache
+
+      elsif @response = @cached_response = cache_lookup
+        if needs_revalidation?
           set_validation_headers!
         else
-          @cached_response
+          return @cached_response
         end
+      end
+      # cache miss!
+
+      response = yield request, options
+
+      register(response)
+
+      if response.status == 304
+        @cached_response
       else
-        nil
+        response
       end
     end
 
-    def perform_response(response)
+    protected
+
+    def register(response)
       @response = response
       response.request_time  = request.request_time
       response.authoritative = true
@@ -58,8 +73,6 @@ module HTTP
         invalidate_cache
       end
     end
-
-    private
 
     def cache_lookup
       @cache_adapter.lookup(request) unless skip_cache?
