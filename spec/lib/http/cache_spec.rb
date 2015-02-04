@@ -30,12 +30,10 @@ RSpec.describe HTTP::Cache do
 
     context "cache hit" do
       let(:cached_response) do
-        HTTP::Cache::ResponseWithCacheBehavior.coerce(
-          HTTP::Response.new(200,
-                             "http/1.1",
-                             {"Cache-Control" => "private", "test" => "foo"},
-                             "")
-        ).tap { |r| r.requested_at = r.received_at = Time.now }
+        headers = {"Cache-Control" => "private", "test" => "foo"}
+        HTTP::Response.new(200, "http/1.1", headers, "").cached.tap do |r|
+          r.requested_at = r.received_at = Time.now
+        end
       end
 
       it "does not call request_performer block" do
@@ -62,9 +60,8 @@ RSpec.describe HTTP::Cache do
 
   context "cache by-passing request, cacheable response" do
     let(:request) do
-      HTTP::Request.new(:get,
-                        "http://example.com/",
-                        "Cache-Control" => "no-cache")
+      headers = {"Cache-Control" => "no-cache"}
+      HTTP::Request.new(:get, "http://example.com/", headers)
     end
     let!(:response) { subject.perform(request, opts) { origin_response } }
 
@@ -244,7 +241,7 @@ RSpec.describe HTTP::Cache do
   let(:cached_response) { nil } # cold cache by default
 
   def build_cached_response(*args)
-    r = HTTP::Cache::ResponseWithCacheBehavior.coerce(HTTP::Response.new(*args))
+    r = HTTP::Response.new(*args).cached
     r.requested_at = r.received_at = Time.now
 
     yield r if block_given?

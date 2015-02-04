@@ -1,4 +1,7 @@
 RSpec.describe HTTP::Response do
+  let(:body)          { "Hello world!" }
+  subject(:response)  { HTTP::Response.new 200, "1.1", {}, body }
+
   it "includes HTTP::Headers::Mixin" do
     expect(described_class).to include HTTP::Headers::Mixin
   end
@@ -105,5 +108,10 @@ RSpec.describe HTTP::Response do
       expect(response.inspect)
         .to eq '#<HTTP::Response/1.1 200 OK {"Content-Type"=>"text/plain"}>'
     end
+  end
+
+  describe "#cached" do
+    subject { response.cached }
+    it { is_expected.to be_a HTTP::Response::Cached }
   end
 end

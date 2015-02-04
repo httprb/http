@@ -138,4 +138,9 @@ RSpec.describe HTTP::Request do
       its(:verb) { is_expected.to be :get }
     end
   end
+
+  describe "#cached" do
+    subject { request.cached }
+    it { is_expected.to be_a HTTP::Request::Cached }
+  end
 end

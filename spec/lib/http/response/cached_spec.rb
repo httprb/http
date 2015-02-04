@@ -1,19 +1,9 @@
-RSpec.describe HTTP::Cache::ResponseWithCacheBehavior do
-  describe ".coerce" do
-    it "should accept a base response" do
-      expect(described_class.coerce(response)).to be_kind_of described_class
-    end
+RSpec.describe HTTP::Response::Cached do
+  subject(:cached_response) { described_class.new response }
 
-    it "should accept an already decorated response" do
-      decorated_req = described_class.coerce(response)
-      expect(decorated_req).to be_kind_of described_class
-    end
-  end
-
-  subject { described_class.coerce(response) }
-
-  it "provides access to it's cache control object" do
-    expect(subject.cache_control).to be_kind_of HTTP::Cache::CacheControl
+  describe "#cache_headers" do
+    subject { cached_response.cache_headers }
+    it { is_expected.to be_a HTTP::Cache::Headers }
   end
 
   it "allows requested_at to be set" do
@@ -204,4 +194,9 @@ RSpec.describe HTTP::Cache::ResponseWithCacheBehavior do
   let(:cache_control) { "" }
   let(:headers) { {"cache-control" => cache_control} }
   let(:response) { HTTP::Response.new(200, "http/1.1", headers, "") }
+
+  describe "#cached" do
+    subject(:cached_response) { response.cached }
+    it { is_expected.to be cached_response }
+  end
 end
