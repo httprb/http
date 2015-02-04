@@ -33,7 +33,7 @@ module HTTP
       end
 
       def valid_for?(request)
-        request.uri == @request.uri and
+        request.uri == @request.uri &&
           select_request_headers.all? do |key, value|
             request.headers[key] == value
           end
@@ -42,7 +42,7 @@ module HTTP
       def select_request_headers
         headers = HTTP::Headers.new
 
-        @response.headers.get("Vary").flat_map{|v| v.split(",")}.uniq.each do |name|
+        @response.headers.get("Vary").flat_map { |v| v.split(",") }.uniq.each do |name|
           name.strip!
           headers[name] = @request.headers[name] if @request.headers[name]
         end

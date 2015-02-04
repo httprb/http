@@ -56,7 +56,7 @@ RSpec.describe HTTP::Cache::CacheControl do
   end
 
   context "expires: {100 seconds from now}" do
-    let(:headers) { {"Expires" => (Time.now+100).httpdate } }
+    let(:headers) { {"Expires" => (Time.now + 100).httpdate} }
 
     it "knows max age" do
       expect(subject.max_age).to be_within(1).of(100)
@@ -64,7 +64,7 @@ RSpec.describe HTTP::Cache::CacheControl do
   end
 
   context "expires: {100 seconds before now}" do
-    let(:headers) { {"Expires" => (Time.now-100).httpdate } }
+    let(:headers) { {"Expires" => (Time.now - 100).httpdate} }
 
     it "knows max age" do
       expect(subject.max_age).to eq 0
@@ -72,7 +72,7 @@ RSpec.describe HTTP::Cache::CacheControl do
   end
 
   context "expires: -1" do
-    let(:headers) { {"Expires" => "-1" } }
+    let(:headers) { {"Expires" => "-1"} }
 
     it "knows max age" do
       expect(subject.max_age).to eq 0
@@ -80,7 +80,7 @@ RSpec.describe HTTP::Cache::CacheControl do
   end
 
   context "vary: *" do
-    let(:headers) { {"Vary" => "*" } }
+    let(:headers) { {"Vary" => "*"} }
 
     it "knows it is vary *" do
       expect(subject.vary_star?).to be_truthy
@@ -113,7 +113,6 @@ RSpec.describe HTTP::Cache::CacheControl do
     it "knows it is not vary *" do
       expect(subject.vary_star?).to be_falsy
     end
-
   end
 
   # Background
@@ -122,5 +121,4 @@ RSpec.describe HTTP::Cache::CacheControl do
   let(:request) { HTTP::Request.new(:get, "http://example.com/") }
 
   let(:response) { HTTP::Response.new(200, "http/1.1", headers, "") }
-
 end

@@ -16,7 +16,7 @@ module HTTP
       end
     end
 
-    def initialize(adapter=HTTP::Cache::InMemoryCache.new)
+    def initialize(adapter = HTTP::Cache::InMemoryCache.new)
       @cache_adapter = adapter
     end
 
@@ -25,19 +25,24 @@ module HTTP
     #
     # Yields request and options to block if when there is a cache
     # miss so that the request can be make for real.
-    def perform(request, options)
+    def perform(request, options, &request_performer)
       req = RequestWithCacheBehavior.coerce(request)
 
       if req.invalidates_cache?
         invalidate_cache(req)
 
-      elsif cached_resp = cache_lookup(req)
+      elsif cached_resp = cache_lookup(req) # rubocop:disable all
         return cached_resp unless cached_resp.stale?
 
         req.set_validation_headers!(cached_resp)
       end
 
-      # cache miss! Do this the hard way...
+      handle_miss(req, cached_resp, options, &request_performer)
+    end
+
+    protected
+
+    def handle_miss(req, cached_resp, options)
       req.sent_at = Time.now
       act_resp = ResponseWithCacheBehavior.coerce(yield(req, options))
 
@@ -58,9 +63,6 @@ module HTTP
       end
     end
 
-    protected
-
-
     def cache_lookup(request)
       return nil if request.skips_cache?
       c = @cache_adapter.lookup(request)
@@ -79,6 +81,5 @@ module HTTP
     def invalidate_cache(request)
       @cache_adapter.invalidate(request.uri)
     end
-
   end
 end

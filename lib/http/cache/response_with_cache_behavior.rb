@@ -16,7 +16,7 @@ module HTTP
           if another.respond_to? :cacheable?
             another
           else
-            self.new(another)
+            new(another)
           end
         end
       end
@@ -42,8 +42,8 @@ module HTTP
           begin
             CACHEABLE_RESPONSE_CODES.include?(code) &&
               !(cache_control.vary_star? ||
-                cache_control.no_store? ||
-                cache_control.no_cache? )
+                cache_control.no_store?  ||
+                cache_control.no_cache?)
           end
       end
 
@@ -93,11 +93,19 @@ module HTTP
 
       # Returns the time at which the server generated this response.
       def server_response_time
-        headers.get("Date").map{|s| Time.httpdate(s) rescue Time.at(0) }.max ||
-          begin
-            headers["Date"] = received_at.httpdate
-            received_at
-          end
+        headers.get("Date")
+          .map(&method(:to_time_or_epoch))
+          .max || begin
+                    # set it if it is not already set
+                    headers["Date"] = received_at.httpdate
+                    received_at
+                  end
+      end
+
+      def to_time_or_epoch(t_str)
+        Time.httpdate(t_str)
+      rescue ArgumentError
+        Time.at(0)
       end
 
       def initialize(obj)
@@ -105,7 +113,6 @@ module HTTP
         @requested_at = nil
         @received_at  = nil
       end
-
     end
   end
 end

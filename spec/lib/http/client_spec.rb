@@ -74,7 +74,7 @@ RSpec.describe HTTP::Client do
   describe "caching" do
     it "returns cached responses if they exist" do
       cached_response = HTTP::Cache::ResponseWithCacheBehavior.coerce(simple_response("OK"))
-      adapter = double("persistance_adapter", lookup: cached_response)
+      adapter = double("persistance_adapter", :lookup => cached_response)
       client = StubbedClient.new(:cache => HTTP::Cache.new(adapter)).stub(
         "http://example.com/" => simple_response("OK")
       )

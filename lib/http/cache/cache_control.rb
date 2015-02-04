@@ -35,7 +35,7 @@ module HTTP
       end
 
       def vary_star?
-        headers.get("Vary").any?{|v| "*" == v.strip }
+        headers.get("Vary").any? { |v| "*" == v.strip }
       end
 
       protected
@@ -43,25 +43,31 @@ module HTTP
       attr_reader :headers
 
       def matches?(pattern)
-        headers.get("Cache-Control").any?{|v| v =~ pattern }
+        headers.get("Cache-Control").any? { |v| v =~ pattern }
       end
 
       # ---
       # Some servers send a "Expire: -1" header which must be treated as expired
       def seconds_til_expires
         headers.get("Expires")
-          .map{|e| Time.httpdate(e) rescue Time.at(0) }
+          .map(&method(:to_time_or_epoch))
           .compact
-          .map{|e| e - Time.now}
-          .map{|a| a < 0 ? 0 : a} # age is 0 if it is expired
+          .map { |e| e - Time.now }
+          .map { |a| a < 0 ? 0 : a } # age is 0 if it is expired
           .max
+      end
+
+      def to_time_or_epoch(t_str)
+        Time.httpdate(t_str)
+      rescue ArgumentError
+        Time.at(0)
       end
 
       def explicit_max_age
         headers.get("Cache-Control")
-          .map{|v| (/max-age=(\d+)/i).match(v) }
+          .map { |v| (/max-age=(\d+)/i).match(v) }
           .compact
-          .map{|m| m[1].to_i }
+          .map { |m| m[1].to_i }
           .max
       end
     end

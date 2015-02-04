@@ -42,8 +42,11 @@ RSpec.describe HTTP::Cache::RequestWithCacheBehavior do
   end
 
   context "GET request w/ must-revalidate" do
-    let(:request) { HTTP::Request.new(:get, "http://example.com/",
-                                      {"cache-control" => "must-revalidate"}) }
+    let(:request) do
+      HTTP::Request.new(:get,
+                        "http://example.com/",
+                        "cache-control" => "must-revalidate")
+    end
 
     it "is cacheable" do
       expect(subject.cacheable?).to be_truthy
@@ -134,8 +137,6 @@ RSpec.describe HTTP::Cache::RequestWithCacheBehavior do
     end
   end
 
-
   # Background
   let(:request) { HTTP::Request.new(:get, "http://example.com/") }
-
 end
