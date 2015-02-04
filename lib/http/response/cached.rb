@@ -1,24 +1,21 @@
-require "http/response"
+require "http/cache/cache_control"
 
 module HTTP
-  class Cache
+  class Response
     # Decorator class for responses to provide convenience methods
-    # related to caching. Instantiate using the `.coerce` method.
-    class ResponseWithCacheBehavior < DelegateClass(HTTP::Response)
+    # related to caching.
+    class Cached < DelegateClass(HTTP::Response)
       CACHEABLE_RESPONSE_CODES = [200, 203, 300, 301, 410].freeze
 
-      class << self
-        protected :new
+      def initialize(obj)
+        super
+        @requested_at = nil
+        @received_at  = nil
+      end
 
-        # @return [Boolean] a instance of self by wrapping `another` a new
-        #  instance of self or by just returning it
-        def coerce(another)
-          if another.respond_to? :cacheable?
-            another
-          else
-            new(another)
-          end
-        end
+      # @return [HTTP::Response::Cached]
+      def cached
+        self
       end
 
       # @return [Boolean] true iff this response is stale
@@ -40,10 +37,10 @@ module HTTP
       def cacheable?
         @cacheable ||=
           begin
-            CACHEABLE_RESPONSE_CODES.include?(code) &&
-              !(cache_control.vary_star? ||
-                cache_control.no_store?  ||
-                cache_control.no_cache?)
+            CACHEABLE_RESPONSE_CODES.include?(code) \
+              && !(cache_control.vary_star? ||
+                   cache_control.no_store?  ||
+                   cache_control.no_cache?)
           end
       end
 
@@ -84,9 +81,9 @@ module HTTP
         self.authoritative = true
       end
 
-      # @return [CacheControl] cache control helper object.
+      # @return [HTTP::Cache::CacheControl] cache control helper object.
       def cache_control
-        @cache_control ||= CacheControl.new(self)
+        @cache_control ||= HTTP::Cache::CacheControl.new(self)
       end
 
       protected
@@ -106,12 +103,6 @@ module HTTP
         Time.httpdate(t_str)
       rescue ArgumentError
         Time.at(0)
-      end
-
-      def initialize(obj)
-        super
-        @requested_at = nil
-        @received_at  = nil
       end
     end
   end

@@ -1,7 +1,5 @@
 require "time"
 require "http/cache/cache_control"
-require "http/cache/response_with_cache_behavior"
-require "http/cache/request_with_cache_behavior"
 
 module HTTP
   class Cache
@@ -20,7 +18,7 @@ module HTTP
     # @yield [request, options] on cache miss so that an actual
     # request can be made
     def perform(request, options, &request_performer)
-      req = RequestWithCacheBehavior.coerce(request)
+      req = request.cached
 
       invalidate_cache(req) if req.invalidates_cache?
 
@@ -64,26 +62,22 @@ module HTTP
       end
     end
 
-    # @return [ResponseWithCacheBehavior] the actual response returned
+    # @return [HTTP::Response::Cached] the actual response returned
     # by request_performer
     def make_request(req, options, request_performer)
       req.sent_at = Time.now
-      ResponseWithCacheBehavior.coerce(request_performer.call(req, options)).tap do |resp|
-        resp.received_at  = Time.now
-        resp.requested_at = req.sent_at
+
+      request_performer.call(req, options).cached.tap do |res|
+        res.received_at  = Time.now
+        res.requested_at = req.sent_at
       end
     end
 
-    # @return [ResponseWithCacheBehavior] the cached response for the
-    # request or nil if there isn't one
+    # @return [HTTP::Response::Cached, nil] the cached response for the request
     def cache_lookup(request)
       return nil if request.skips_cache?
       c = @cache_adapter.lookup(request)
-      if c
-        ResponseWithCacheBehavior.coerce(c)
-      else
-        nil
-      end
+      c && c.cached
     end
 
     # Store response in cache
