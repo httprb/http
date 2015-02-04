@@ -26,7 +26,6 @@ module HTTP
     # Yields request and options to block if when there is a cache
     # miss so that the request can be make for real.
     def perform(request, options)
-      puts "cache is handling request"
       req = RequestWithCacheBehavior.coerce(request)
 
       if req.invalidates_cache?
