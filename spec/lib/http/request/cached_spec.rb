@@ -1,16 +1,5 @@
-RSpec.describe HTTP::Cache::RequestWithCacheBehavior do
-  describe ".coerce" do
-    it "should accept a base request" do
-      expect(described_class.coerce(request)).to be_kind_of described_class
-    end
-
-    it "should accept an already decorated request" do
-      decorated_req = described_class.coerce(request)
-      expect(decorated_req).to be_kind_of described_class
-    end
-  end
-
-  subject { described_class.coerce(request) }
+RSpec.describe HTTP::Request::Cached do
+  subject { described_class.new request }
 
   it "provides access to it's cache control object" do
     expect(subject.cache_control).to be_kind_of HTTP::Cache::CacheControl
@@ -30,11 +19,11 @@ RSpec.describe HTTP::Cache::RequestWithCacheBehavior do
     end
 
     it "can construct a new conditional version of itself based on a cached response" do
-      mod_date = Time.now.httpdate
+      mod_date    = Time.now.httpdate
       cached_resp = HTTP::Response.new(200, "http/1.1",
                                        {"Etag" => "foo",
                                         "Last-Modified" => mod_date},
-                                       "")
+                                        "")
       cond_req = subject.conditional_on_changes_to(cached_resp)
 
       expect(cond_req.headers["If-None-Match"]).to eq "foo"
@@ -66,7 +55,7 @@ RSpec.describe HTTP::Cache::RequestWithCacheBehavior do
       cached_resp = HTTP::Response.new(200, "http/1.1",
                                        {"Etag" => "foo",
                                         "Last-Modified" => mod_date},
-                                       "")
+                                        "")
       cond_req = subject.conditional_on_changes_to(cached_resp)
       expect(cond_req.headers["If-None-Match"]).to eq "foo"
       expect(cond_req.headers["If-Modified-Since"]).to eq mod_date
@@ -140,4 +129,9 @@ RSpec.describe HTTP::Cache::RequestWithCacheBehavior do
 
   # Background
   let(:request) { HTTP::Request.new(:get, "http://example.com/") }
+
+  describe "#cached" do
+    subject(:cached_request) { request.cached }
+    it { is_expected.to be cached_request }
+  end
 end
