@@ -1,7 +1,20 @@
+require "delegate"
+
+require "http/errors"
+require "http/headers"
+
 module HTTP
   class Cache
     # Convenience methods around cache control headers.
-    class CacheControl
+    class Headers < ::SimpleDelegator
+      def initialize(headers)
+        if headers.is_a? HTTP::Headers
+          super headers
+        else
+          super HTTP::Headers.coerce headers
+        end
+      end
+
       # @return [Boolean] does this message force revalidation
       def forces_revalidation?
         must_revalidate? || max_age == 0
@@ -40,16 +53,14 @@ module HTTP
 
       # @return [Boolean] is the vary header set to '*'
       def vary_star?
-        headers.get("Vary").any? { |v| "*" == v.strip }
+        get("Vary").any? { |v| "*" == v.strip }
       end
 
-      protected
-
-      attr_reader :headers
+      private
 
       # @return [Boolean] true when cache-control header matches the pattern
       def matches?(pattern)
-        headers.get("Cache-Control").any? { |v| v =~ pattern }
+        get("Cache-Control").any? { |v| v =~ pattern }
       end
 
       # @return [Numeric] number of seconds until the time in the
@@ -58,7 +69,7 @@ module HTTP
       # ---
       # Some servers send a "Expire: -1" header which must be treated as expired
       def seconds_til_expires
-        headers.get("Expires")
+        get("Expires")
           .map(&method(:to_time_or_epoch))
           .compact
           .map { |e| e - Time.now }
@@ -75,16 +86,11 @@ module HTTP
 
       # @return [Numeric] the value of the max-age component of cache control
       def explicit_max_age
-        headers.get("Cache-Control")
+        get("Cache-Control")
           .map { |v| (/max-age=(\d+)/i).match(v) }
           .compact
           .map { |m| m[1].to_i }
           .max
-      end
-
-      # Inits a new instance
-      def initialize(message)
-        @headers = message.headers
       end
     end
   end

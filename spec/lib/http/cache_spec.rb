@@ -60,9 +60,8 @@ RSpec.describe HTTP::Cache do
 
   context "cache by-passing request, cacheable response" do
     let(:request) do
-      HTTP::Request.new(:get,
-                        "http://example.com/",
-                        "Cache-Control" => "no-cache")
+      headers = {"Cache-Control" => "no-cache"}
+      HTTP::Request.new(:get, "http://example.com/", headers)
     end
     let!(:response) { subject.perform(request, opts) { origin_response } }
 
