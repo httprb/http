@@ -168,7 +168,7 @@ RSpec.describe HTTP::Cache do
                             {"Cache-Control" => "private, max-age=1",
                              "Date" => (Time.now - 2).httpdate},
                             "") do |t|
-        t.request_time = (Time.now - 2)
+        t.requested_at = (Time.now - 2)
       end
     end
     let!(:response) { subject.perform(request, opts) { origin_response } }
@@ -194,7 +194,7 @@ RSpec.describe HTTP::Cache do
                              "Etag" => "foo",
                              "Date" => (Time.now - 2).httpdate},
                             "") do |x|
-        x.request_time = (Time.now - 2)
+        x.requested_at = (Time.now - 2)
       end
     end
     let(:origin_response) { HTTP::Response.new(304, "http/1.1", {}, "") }

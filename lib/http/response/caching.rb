@@ -76,9 +76,8 @@ module HTTP
       # server.
       def validated!(validating_response)
         headers.merge!(validating_response.headers)
-        self.request_time  = validating_response.request_time
-        self.response_time = validating_response.response_time
-        self.authoritative = true
+        self.requested_at  = validating_response.requested_at
+        self.received_at   = validating_response.received_at
       end
 
       # @return [HTTP::Cache::Headers] cache control headers helper object.

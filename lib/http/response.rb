@@ -28,13 +28,11 @@ module HTTP
 
     # @return [URI, nil]
     attr_reader :uri
-    attr_accessor :authoritative, :request_time, :response_time
 
     def initialize(status, version, headers, body, uri = nil) # rubocop:disable ParameterLists
       @version, @body, @uri = version, body, uri
       @status  = HTTP::Response::Status.new status
       @headers = HTTP::Headers.coerce(headers || {})
-      @response_time = Time.now
     end
 
     # @!method reason
