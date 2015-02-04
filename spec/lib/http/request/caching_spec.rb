@@ -1,8 +1,8 @@
-RSpec.describe HTTP::Request::Cached do
-  subject(:cached_request) { described_class.new request }
+RSpec.describe HTTP::Request::Caching do
+  subject(:caching_request) { described_class.new request }
 
   describe "#cache_headers" do
-    subject { cached_request.cache_headers }
+    subject { caching_request.cache_headers }
     it { is_expected.to be_a HTTP::Cache::Headers }
   end
 
@@ -19,7 +19,7 @@ RSpec.describe HTTP::Request::Cached do
       expect(subject.skips_cache?).to be_falsy
     end
 
-    it "can construct a new conditional version of itself based on a cached response" do
+    it "can construct a new conditional version of itself based on a caching response" do
       mod_date    = Time.now.httpdate
       headers     = {"Etag" => "foo", "Last-Modified" => mod_date}
       cached_resp = HTTP::Response.new(200, "http/1.1", headers, "")
@@ -48,7 +48,7 @@ RSpec.describe HTTP::Request::Cached do
       expect(subject.skips_cache?).to be_truthy
     end
 
-    it "can construct a condition version of itself based on a cached response" do
+    it "can construct a condition version of itself based on a caching response" do
       mod_date    = Time.now.httpdate
       headers     = {"Etag" => "foo", "Last-Modified" => mod_date}
       cached_resp = HTTP::Response.new(200, "http/1.1", headers, "")
@@ -127,8 +127,8 @@ RSpec.describe HTTP::Request::Cached do
   # Background
   let(:request) { HTTP::Request.new(:get, "http://example.com/") }
 
-  describe "#cached" do
-    subject(:cached_request) { request.cached }
-    it { is_expected.to be cached_request }
+  describe "#caching" do
+    subject(:caching_request) { request.caching }
+    it { is_expected.to be caching_request }
   end
 end

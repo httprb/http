@@ -1,6 +1,6 @@
 require "http/errors"
 require "http/headers"
-require "http/request/cached"
+require "http/request/caching"
 require "http/request/writer"
 require "http/version"
 require "base64"
@@ -131,9 +131,9 @@ module HTTP
       using_proxy? ? proxy[:proxy_port] : uri.port
     end
 
-    # @return [HTTP::Request::Cached]
-    def cached
-      Cached.new self
+    # @return [HTTP::Request::Caching]
+    def caching
+      Caching.new self
     end
 
     private

@@ -2,9 +2,8 @@ require "http/cache/headers"
 
 module HTTP
   class Request
-    # Decorator class for requests to provide convenience methods
-    # related to caching.
-    class Cached < DelegateClass(HTTP::Request)
+    # Decorator for requests to provide convenience methods related to caching.
+    class Caching < DelegateClass(HTTP::Request)
       INVALIDATING_METHODS = [:post, :put, :delete, :patch].freeze
       CACHEABLE_METHODS    = [:get, :head].freeze
 
@@ -21,8 +20,8 @@ module HTTP
         @received_at  = nil
       end
 
-      # @return [HTTP::Request::Cached]
-      def cached
+      # @return [HTTP::Request::Caching]
+      def caching
         self
       end
 
@@ -53,7 +52,7 @@ module HTTP
           cache_headers.no_cache?
       end
 
-      # @return [HTTP::Request::Cached] new request based on this
+      # @return [HTTP::Request::Caching] new request based on this
       # one but conditional on the resource having changed since
       # `cached_response`
       #
@@ -61,7 +60,7 @@ module HTTP
       def conditional_on_changes_to(cached_response)
         self.class.new HTTP::Request.new(
           verb, uri, headers.merge(conditional_headers_for(cached_response)),
-          proxy, body, version)
+          proxy, body, version).caching
       end
 
       # @return [HTTP::Cache::Headers] cache control helper for this request
