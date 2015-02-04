@@ -9,7 +9,9 @@ module HTTP
 
     # NoOp cache. Always makes the request.
     class NullCache
-      def perform(request, options,  &request_performer)
+      # Yields request and options to block so that it can make
+      # request.
+      def perform(request, options)
         yield(request, options)
       end
     end
@@ -20,7 +22,10 @@ module HTTP
 
     # @return [Response] a cached response that is valid for the request or
     #   the result of executing the provided block.
-    def perform(request, options, &request_performer)
+    #
+    # Yields request and options to block if when there is a cache
+    # miss so that the request can be make for real.
+    def perform(request, options)
       puts "cache is handling request"
       req = RequestWithCacheBehavior.coerce(request)
 
