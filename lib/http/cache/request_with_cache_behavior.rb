@@ -45,16 +45,14 @@ module HTTP
           cache_control.no_cache?
       end
 
-      # Update headers such that this request becomes a condition
-      # request revalidating `response`
-      def set_validation_headers!(response)
-        response.headers.get("Etag")
-          .each { |etag| headers.add("If-None-Match", etag) }
+      # Returns new request based on this one but conditional on the
+      # resource having changed since `cached_response`
+      def conditional_on_changes_to(cached_response)
+        raw_cond_req = HTTP::Request.new(verb, uri,
+                                        headers.merge(conditional_headers_for(cached_response)),
+                                        proxy, body, version)
 
-        response.headers.get("Last-Modified")
-          .each { |last_mod| headers.add("If-Modified-Since", last_mod) }
-
-        headers.add("Cache-Control", "max-age=0") if cache_control.forces_revalidation?
+        self.class.coerce(raw_cond_req)
       end
 
       # Returns cache control helper for this request.
@@ -63,6 +61,20 @@ module HTTP
       end
 
       protected
+
+      def conditional_headers_for(cached_response)
+        headers = HTTP::Headers.new
+
+        cached_response.headers.get("Etag")
+          .each { |etag| headers.add("If-None-Match", etag) }
+
+        cached_response.headers.get("Last-Modified")
+          .each { |last_mod| headers.add("If-Modified-Since", last_mod) }
+
+        headers.add("Cache-Control", "max-age=0") if cache_control.forces_revalidation?
+
+        headers
+      end
 
       def initialize(obj)
         super
