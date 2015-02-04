@@ -28,26 +28,25 @@ module HTTP
     def perform(request, options, &request_performer)
       req = RequestWithCacheBehavior.coerce(request)
 
-      if req.invalidates_cache?
-        invalidate_cache(req)
+      invalidate_cache(req) if req.invalidates_cache?
 
-      elsif cached_resp = cache_lookup(req) # rubocop:disable all
-        return cached_resp unless cached_resp.stale?
-
-        req.set_validation_headers!(cached_resp)
-      end
-
-      handle_miss(req, cached_resp, options, &request_performer)
+      get_response(req, options, request_performer)
     end
 
     protected
 
-    def handle_miss(req, cached_resp, options)
-      req.sent_at = Time.now
-      act_resp = ResponseWithCacheBehavior.coerce(yield(req, options))
+    def get_response(req, options, request_performer)
+      cached_resp = cache_lookup(req)
+      return cached_resp if cached_resp && !cached_resp.stale?
 
-      act_resp.received_at  = Time.now
-      act_resp.requested_at = req.sent_at
+      # cache miss
+
+      act_req = if cached_resp
+                  req.conditional_on_changes_to(cached_resp)
+                else
+                  req
+                end
+      act_resp = make_request(act_req, options, request_performer)
 
       if act_resp.status.not_modified? && cached_resp
         cached_resp.validated!(act_resp)
@@ -60,6 +59,14 @@ module HTTP
 
       else
         return act_resp
+      end
+    end
+
+    def make_request(req, options, request_performer)
+      req.sent_at = Time.now
+      ResponseWithCacheBehavior.coerce(request_performer.call(req, options)).tap do |resp|
+        resp.received_at  = Time.now
+        resp.requested_at = req.sent_at
       end
     end
 

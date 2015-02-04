@@ -207,9 +207,12 @@ RSpec.describe HTTP::Cache do
       expect(cache_adapter).to have_received(:lookup).with(request)
     end
 
-    it "modifies request with conditional request headers" do
-      expect(request.headers["If-None-Match"]).to eq cached_response.headers["Etag"]
-      expect(request.headers["If-Modified-Since"])
+    it "makes request with conditional request headers" do
+      actual_request = nil
+      subject.perform(request, opts) { |r, _| actual_request = r;  origin_response }
+
+      expect(actual_request.headers["If-None-Match"]).to eq cached_response.headers["Etag"]
+      expect(actual_request.headers["If-Modified-Since"])
         .to eq cached_response.headers["Last-Modified"]
     end
 

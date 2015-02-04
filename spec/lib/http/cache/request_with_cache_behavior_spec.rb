@@ -29,15 +29,16 @@ RSpec.describe HTTP::Cache::RequestWithCacheBehavior do
       expect(subject.skips_cache?).to be_falsy
     end
 
-    it "can turn itself into a condition request based on a cached response" do
+    it "can construct a new conditional version of itself based on a cached response" do
       mod_date = Time.now.httpdate
       cached_resp = HTTP::Response.new(200, "http/1.1",
                                        {"Etag" => "foo",
                                         "Last-Modified" => mod_date},
                                        "")
-      subject.set_validation_headers!(cached_resp)
-      expect(subject.headers["If-None-Match"]).to eq "foo"
-      expect(subject.headers["If-Modified-Since"]).to eq mod_date
+      cond_req = subject.conditional_on_changes_to(cached_resp)
+
+      expect(cond_req.headers["If-None-Match"]).to eq "foo"
+      expect(cond_req.headers["If-Modified-Since"]).to eq mod_date
     end
   end
 
@@ -60,16 +61,16 @@ RSpec.describe HTTP::Cache::RequestWithCacheBehavior do
       expect(subject.skips_cache?).to be_truthy
     end
 
-    it "can turn itself into a condition request based on a cached response" do
+    it "can construct a condition version of itself based on a cached response" do
       mod_date = Time.now.httpdate
       cached_resp = HTTP::Response.new(200, "http/1.1",
                                        {"Etag" => "foo",
                                         "Last-Modified" => mod_date},
                                        "")
-      subject.set_validation_headers!(cached_resp)
-      expect(subject.headers["If-None-Match"]).to eq "foo"
-      expect(subject.headers["If-Modified-Since"]).to eq mod_date
-      expect(subject.cache_control.max_age).to eq 0
+      cond_req = subject.conditional_on_changes_to(cached_resp)
+      expect(cond_req.headers["If-None-Match"]).to eq "foo"
+      expect(cond_req.headers["If-Modified-Since"]).to eq mod_date
+      expect(cond_req.cache_control.max_age).to eq 0
     end
   end
 
