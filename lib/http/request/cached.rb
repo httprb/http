@@ -1,4 +1,4 @@
-require "http/cache/cache_control"
+require "http/cache/headers"
 
 module HTTP
   class Request
@@ -31,7 +31,7 @@ module HTTP
       # @api public
       def invalidates_cache?
         INVALIDATING_METHODS.include?(verb) ||
-          cache_control.no_store?
+          cache_headers.no_store?
       end
 
       # @return [Boolean] true if request is cacheable
@@ -39,7 +39,7 @@ module HTTP
       # @api public
       def cacheable?
         CACHEABLE_METHODS.include?(verb) &&
-          !cache_control.no_store?
+          !cache_headers.no_store?
       end
 
       # @return [Boolean] true iff the cache control info of this
@@ -48,9 +48,9 @@ module HTTP
       #
       # @api public
       def skips_cache?
-        0 == cache_control.max_age       ||
-          cache_control.must_revalidate? ||
-          cache_control.no_cache?
+        0 == cache_headers.max_age       ||
+          cache_headers.must_revalidate? ||
+          cache_headers.no_cache?
       end
 
       # @return [HTTP::Request::Cached] new request based on this
@@ -64,10 +64,10 @@ module HTTP
           proxy, body, version)
       end
 
-      # @return [HTTP::Cache::CacheControl] cache control helper for this request
+      # @return [HTTP::Cache::Headers] cache control helper for this request
       # @api public
-      def cache_control
-        @cache_control ||= HTTP::Cache::CacheControl.new(self)
+      def cache_headers
+        @cache_headers ||= HTTP::Cache::Headers.new headers
       end
 
       private
@@ -83,7 +83,7 @@ module HTTP
         cached_response.headers.get("Last-Modified")
           .each { |last_mod| headers.add("If-Modified-Since", last_mod) }
 
-        headers.add("Cache-Control", "max-age=0") if cache_control.forces_revalidation?
+        headers.add("Cache-Control", "max-age=0") if cache_headers.forces_revalidation?
 
         headers
       end

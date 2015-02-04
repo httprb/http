@@ -1,8 +1,9 @@
 RSpec.describe HTTP::Response::Cached do
-  subject { described_class.new response }
+  subject(:cached_response) { described_class.new response }
 
-  it "provides access to it's cache control object" do
-    expect(subject.cache_control).to be_kind_of HTTP::Cache::CacheControl
+  describe "#cache_headers" do
+    subject { cached_response.cache_headers }
+    it { is_expected.to be_a HTTP::Cache::Headers }
   end
 
   it "allows requested_at to be set" do

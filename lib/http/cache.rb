@@ -1,5 +1,5 @@
 require "time"
-require "http/cache/cache_control"
+require "http/cache/in_memory_cache"
 
 module HTTP
   class Cache

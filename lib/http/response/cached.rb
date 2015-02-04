@@ -1,4 +1,4 @@
-require "http/cache/cache_control"
+require "http/cache/headers"
 
 module HTTP
   class Response
@@ -20,12 +20,12 @@ module HTTP
 
       # @return [Boolean] true iff this response is stale
       def stale?
-        expired? || cache_control.must_revalidate?
+        expired? || cache_headers.must_revalidate?
       end
 
       # @returns [Boolean] true iff this response has expired
       def expired?
-        current_age > cache_control.max_age
+        current_age > cache_headers.max_age
       end
 
       # @return [Boolean] true iff this response is cacheable
@@ -38,9 +38,9 @@ module HTTP
         @cacheable ||=
           begin
             CACHEABLE_RESPONSE_CODES.include?(code) \
-              && !(cache_control.vary_star? ||
-                   cache_control.no_store?  ||
-                   cache_control.no_cache?)
+              && !(cache_headers.vary_star? ||
+                   cache_headers.no_store?  ||
+                   cache_headers.no_cache?)
           end
       end
 
@@ -81,9 +81,9 @@ module HTTP
         self.authoritative = true
       end
 
-      # @return [HTTP::Cache::CacheControl] cache control helper object.
-      def cache_control
-        @cache_control ||= HTTP::Cache::CacheControl.new(self)
+      # @return [HTTP::Cache::Headers] cache control headers helper object.
+      def cache_headers
+        @cache_headers ||= HTTP::Cache::Headers.new headers
       end
 
       protected
