@@ -62,6 +62,3 @@ Style/StringLiterals:
 
 Style/TrivialAccessors:
   Enabled: false
-
-Style/AlignParameters:
-  Enabled: false
