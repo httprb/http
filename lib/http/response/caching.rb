@@ -4,7 +4,7 @@ module HTTP
   class Response
     # Decorator class for responses to provide convenience methods
     # related to caching.
-    class Cached < DelegateClass(HTTP::Response)
+    class Caching < DelegateClass(HTTP::Response)
       CACHEABLE_RESPONSE_CODES = [200, 203, 300, 301, 410].freeze
 
       def initialize(obj)
@@ -13,8 +13,8 @@ module HTTP
         @received_at  = nil
       end
 
-      # @return [HTTP::Response::Cached]
-      def cached
+      # @return [HTTP::Response::Caching]
+      def caching
         self
       end
 

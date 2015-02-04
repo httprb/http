@@ -110,8 +110,8 @@ RSpec.describe HTTP::Response do
     end
   end
 
-  describe "#cached" do
-    subject { response.cached }
-    it { is_expected.to be_a HTTP::Response::Cached }
+  describe "#caching" do
+    subject { response.caching }
+    it { is_expected.to be_a HTTP::Response::Caching }
   end
 end

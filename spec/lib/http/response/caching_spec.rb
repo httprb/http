@@ -1,8 +1,8 @@
-RSpec.describe HTTP::Response::Cached do
-  subject(:cached_response) { described_class.new response }
+RSpec.describe HTTP::Response::Caching do
+  subject(:caching_response) { described_class.new response }
 
   describe "#cache_headers" do
-    subject { cached_response.cache_headers }
+    subject { caching_response.cache_headers }
     it { is_expected.to be_a HTTP::Cache::Headers }
   end
 
@@ -195,8 +195,8 @@ RSpec.describe HTTP::Response::Cached do
   let(:headers) { {"cache-control" => cache_control} }
   let(:response) { HTTP::Response.new(200, "http/1.1", headers, "") }
 
-  describe "#cached" do
-    subject(:cached_response) { response.cached }
-    it { is_expected.to be cached_response }
+  describe "#caching" do
+    subject(:caching_response) { response.caching }
+    it { is_expected.to be caching_response }
   end
 end

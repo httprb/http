@@ -31,7 +31,7 @@ RSpec.describe HTTP::Cache do
     context "cache hit" do
       let(:cached_response) do
         headers = {"Cache-Control" => "private", "test" => "foo"}
-        HTTP::Response.new(200, "http/1.1", headers, "").cached.tap do |r|
+        HTTP::Response.new(200, "http/1.1", headers, "").caching.tap do |r|
           r.requested_at = r.received_at = Time.now
         end
       end
@@ -241,7 +241,7 @@ RSpec.describe HTTP::Cache do
   let(:cached_response) { nil } # cold cache by default
 
   def build_cached_response(*args)
-    r = HTTP::Response.new(*args).cached
+    r = HTTP::Response.new(*args).caching
     r.requested_at = r.received_at = Time.now
 
     yield r if block_given?

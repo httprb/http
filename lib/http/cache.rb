@@ -18,7 +18,7 @@ module HTTP
     # @yield [request, options] on cache miss so that an actual
     # request can be made
     def perform(request, options, &request_performer)
-      req = request.cached
+      req = request.caching
 
       invalidate_cache(req) if req.invalidates_cache?
 
@@ -62,22 +62,22 @@ module HTTP
       end
     end
 
-    # @return [HTTP::Response::Cached] the actual response returned
+    # @return [HTTP::Response::Caching] the actual response returned
     # by request_performer
     def make_request(req, options, request_performer)
       req.sent_at = Time.now
 
-      request_performer.call(req, options).cached.tap do |res|
+      request_performer.call(req, options).caching.tap do |res|
         res.received_at  = Time.now
         res.requested_at = req.sent_at
       end
     end
 
-    # @return [HTTP::Response::Cached, nil] the cached response for the request
+    # @return [HTTP::Response::Caching, nil] the cached response for the request
     def cache_lookup(request)
       return nil if request.skips_cache?
       c = @cache_adapter.lookup(request)
-      c && c.cached
+      c && c.caching
     end
 
     # Store response in cache

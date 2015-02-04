@@ -3,7 +3,7 @@ require "forwardable"
 require "http/headers"
 require "http/content_type"
 require "http/mime_type"
-require "http/response/cached"
+require "http/response/caching"
 require "http/response/status"
 require "time"
 
@@ -108,9 +108,9 @@ module HTTP
       "#<#{self.class}/#{@version} #{code} #{reason} #{headers.to_h.inspect}>"
     end
 
-    # @return [HTTP::Response::Cached]
-    def cached
-      Cached.new self
+    # @return [HTTP::Response::Caching]
+    def caching
+      Caching.new self
     end
   end
 end
