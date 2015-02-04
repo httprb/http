@@ -209,7 +209,10 @@ RSpec.describe HTTP::Cache do
 
     it "makes request with conditional request headers" do
       actual_request = nil
-      subject.perform(request, opts) { |r, _| actual_request = r;  origin_response }
+      subject.perform(request, opts) do |r, _|
+        actual_request = r
+        origin_response
+      end
 
       expect(actual_request.headers["If-None-Match"]).to eq cached_response.headers["Etag"]
       expect(actual_request.headers["If-Modified-Since"])

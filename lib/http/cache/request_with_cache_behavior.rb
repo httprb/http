@@ -49,8 +49,8 @@ module HTTP
       # resource having changed since `cached_response`
       def conditional_on_changes_to(cached_response)
         raw_cond_req = HTTP::Request.new(verb, uri,
-                                        headers.merge(conditional_headers_for(cached_response)),
-                                        proxy, body, version)
+                                         headers.merge(conditional_headers_for(cached_response)),
+                                         proxy, body, version)
 
         self.class.coerce(raw_cond_req)
       end
