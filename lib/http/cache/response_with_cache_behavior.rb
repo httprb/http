@@ -10,7 +10,7 @@ module HTTP
       class << self
         protected :new
 
-        # Returns a instance of self by wrapping `another` a new
+        # @return [Boolean] a instance of self by wrapping `another` a new
         #  instance of self or by just returning it
         def coerce(another)
           if another.respond_to? :cacheable?
@@ -21,17 +21,17 @@ module HTTP
         end
       end
 
-      # Returns true iff this response is stale; otherwise false
+      # @return [Boolean] true iff this response is stale
       def stale?
         expired? || cache_control.must_revalidate?
       end
 
-      # Returns true iff this response has expired; otherwise false
+      # @returns [Boolean] true iff this response has expired
       def expired?
         current_age > cache_control.max_age
       end
 
-      # Return true iff this response is cacheable; otherwise false
+      # @return [Boolean] true iff this response is cacheable
       #
       # ---
       # A Vary header field-value of "*" always fails to match and
@@ -47,7 +47,7 @@ module HTTP
           end
       end
 
-      # Returns the current age (in seconds) of this response
+      # @return [Numeric] the current age (in seconds) of this response
       #
       # ---
       # Algo from https://tools.ietf.org/html/rfc2616#section-13.2.3
@@ -63,13 +63,13 @@ module HTTP
         corrected_initial_age + resident_time
       end
 
-      # Returns the time at which this response was requested
+      # @return [Time] the time at which this response was requested
       def requested_at
         @requested_at ||= Time.now
       end
       attr_writer :requested_at
 
-      # Returns the time at which this response was received
+      # @return [Time] the time at which this response was received
       def received_at
         @received_at || Time.now
       end
@@ -84,14 +84,14 @@ module HTTP
         self.authoritative = true
       end
 
-      # Returns cache control helper object.
+      # @return [CacheControl] cache control helper object.
       def cache_control
         @cache_control ||= CacheControl.new(self)
       end
 
       protected
 
-      # Returns the time at which the server generated this response.
+      # @return [Time] the time at which the server generated this response.
       def server_response_time
         headers.get("Date")
           .map(&method(:to_time_or_epoch))
