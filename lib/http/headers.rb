@@ -82,6 +82,7 @@ module HTTP
     def to_h
       Hash[keys.map { |k| [k, self[k]] }]
     end
+    alias_method :to_hash, :to_h
 
     # Returns headers key/value pairs.
     #

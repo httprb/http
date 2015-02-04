@@ -25,7 +25,7 @@ module HTTP
 
       # @returns [Boolean] true iff this response has expired
       def expired?
-        current_age > cache_headers.max_age
+        current_age >= cache_headers.max_age
       end
 
       # @return [Boolean] true iff this response is cacheable
@@ -54,21 +54,22 @@ module HTTP
 
         apparent_age = [0, received_at - server_response_time].max
         corrected_received_age = [apparent_age, age_value].max
-        response_delay = received_at - requested_at
+        response_delay = [0, received_at - requested_at].max
         corrected_initial_age = corrected_received_age + response_delay
-        resident_time = now - received_at
+        resident_time = [0, now - received_at].max
+
         corrected_initial_age + resident_time
       end
 
       # @return [Time] the time at which this response was requested
       def requested_at
-        @requested_at ||= Time.now
+        @requested_at ||= received_at
       end
       attr_writer :requested_at
 
       # @return [Time] the time at which this response was received
       def received_at
-        @received_at || Time.now
+        @received_at ||= Time.now
       end
       attr_writer :received_at
 
@@ -83,6 +84,34 @@ module HTTP
       # @return [HTTP::Cache::Headers] cache control headers helper object.
       def cache_headers
         @cache_headers ||= HTTP::Cache::Headers.new headers
+      end
+
+      def body
+        @body ||= if __getobj__.body.respond_to? :each
+                    __getobj__.body
+                  else
+                    StringBody.new(__getobj__.body.to_s)
+                  end
+      end
+
+      def body=(new_body)
+        @body = if new_body.respond_to? :readpartial
+                  # Normal body, just use it
+                  new_body
+
+                elsif new_body.respond_to? :join
+                  # probably a rack enumerable body, join the parts
+                  # into a single string.
+                  StringBody.new(new_body.join(""))
+
+                else
+                  # backstop, just to_s it
+                  StringBody.new(new_body.to_s)
+                end
+      end
+
+      def vary
+        headers.get("Vary").first
       end
 
       protected
