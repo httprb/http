@@ -2,7 +2,6 @@ require "http/headers"
 require "openssl"
 require "socket"
 require "http/cache"
-require "http/cache/in_memory_cache"
 
 module HTTP
   class Options

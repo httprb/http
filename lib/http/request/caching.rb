@@ -69,6 +69,10 @@ module HTTP
         @cache_headers ||= HTTP::Cache::Headers.new headers
       end
 
+      def env
+        {"rack-cache.cache_key" => ->(r) { r.uri.to_s }}
+      end
+
       private
 
       # @return [Headers] conditional request headers

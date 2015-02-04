@@ -1,5 +1,5 @@
 require "time"
-require "http/cache/in_memory_cache"
+require "http/cache/rack_cache_stores_adapter"
 
 module HTTP
   class Cache
@@ -92,11 +92,11 @@ module HTTP
     #
     # @return [nil]
     def invalidate_cache(request)
-      @cache_adapter.invalidate(request.uri)
+      @cache_adapter.invalidate(request)
     end
 
     # Inits a new instance
-    def initialize(adapter = HTTP::Cache::InMemoryCache.new)
+    def initialize(adapter = HTTP::Cache::RackCacheStoresAdapter.new(:metastore => "heap:/", :entitystore => "heap:/"))
       @cache_adapter = adapter
     end
   end
