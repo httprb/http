@@ -41,24 +41,28 @@ module HTTP
 
       # cache miss
 
-      act_req = if cached_resp
-                  req.conditional_on_changes_to(cached_resp)
-                else
-                  req
-                end
-      act_resp = make_request(act_req, options, request_performer)
+      actual_req = if cached_resp
+                     req.conditional_on_changes_to(cached_resp)
+                   else
+                     req
+                   end
+      actual_resp = make_request(actual_req, options, request_performer)
 
-      if act_resp.status.not_modified? && cached_resp
-        cached_resp.validated!(act_resp)
+      handle_response(cached_resp, actual_resp, req)
+    end
+
+    def handle_response(cached_resp, actual_resp, req)
+      if actual_resp.status.not_modified? && cached_resp
+        cached_resp.validated!(actual_resp)
         store_in_cache(req, cached_resp)
         return cached_resp
 
-      elsif req.cacheable? && act_resp.cacheable?
-        store_in_cache(req, act_resp)
-        return act_resp
+      elsif req.cacheable? && actual_resp.cacheable?
+        store_in_cache(req, actual_resp)
+        return actual_resp
 
       else
-        return act_resp
+        return actual_resp
       end
     end
 
