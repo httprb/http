@@ -5,26 +5,20 @@ require "http/cache/request_with_cache_behavior"
 
 module HTTP
   class Cache
-    attr_reader :request, :response
-
     # NoOp cache. Always makes the request.
     class NullCache
-      # Yields request and options to block so that it can make
-      # request.
+      # @return [Response] the result of the provided block
+      # @yield [request, options] so that the request can actually be made
       def perform(request, options)
         yield(request, options)
       end
     end
 
-    def initialize(adapter = HTTP::Cache::InMemoryCache.new)
-      @cache_adapter = adapter
-    end
-
     # @return [Response] a cached response that is valid for the request or
-    #   the result of executing the provided block.
+    #   the result of executing the provided block
     #
-    # Yields request and options to block if when there is a cache
-    # miss so that the request can be make for real.
+    # @yield [request, options] on cache miss so that an actual
+    # request can be made
     def perform(request, options, &request_performer)
       req = RequestWithCacheBehavior.coerce(request)
 
@@ -35,6 +29,8 @@ module HTTP
 
     protected
 
+    # @return [Response] the response to the request, either from the
+    # cache or by actually making the request
     def get_response(req, options, request_performer)
       cached_resp = cache_lookup(req)
       return cached_resp if cached_resp && !cached_resp.stale?
@@ -51,6 +47,8 @@ module HTTP
       handle_response(cached_resp, actual_resp, req)
     end
 
+    # @returns [Response] the most useful of the responses after
+    # updating the cache as appropriate
     def handle_response(cached_resp, actual_resp, req)
       if actual_resp.status.not_modified? && cached_resp
         cached_resp.validated!(actual_resp)
@@ -66,6 +64,8 @@ module HTTP
       end
     end
 
+    # @return [ResponseWithCacheBehavior] the actual response returned
+    # by request_performer
     def make_request(req, options, request_performer)
       req.sent_at = Time.now
       ResponseWithCacheBehavior.coerce(request_performer.call(req, options)).tap do |resp|
@@ -74,6 +74,8 @@ module HTTP
       end
     end
 
+    # @return [ResponseWithCacheBehavior] the cached response for the
+    # request or nil if there isn't one
     def cache_lookup(request)
       return nil if request.skips_cache?
       c = @cache_adapter.lookup(request)
@@ -84,13 +86,24 @@ module HTTP
       end
     end
 
+    # Store response in cache
+    #
+    # @return [nil]
     def store_in_cache(request, response)
       @cache_adapter.store(request, response)
       nil
     end
 
+    # Invalidate all response from the requested resource
+    #
+    # @return [nil]
     def invalidate_cache(request)
       @cache_adapter.invalidate(request.uri)
+    end
+
+    # Inits a new instance
+    def initialize(adapter = HTTP::Cache::InMemoryCache.new)
+      @cache_adapter = adapter
     end
   end
 end
