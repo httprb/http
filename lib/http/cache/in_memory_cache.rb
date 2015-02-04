@@ -4,7 +4,6 @@ require "http/cache/collection"
 module HTTP
   class Cache
     class InMemoryCache
-
       # @return [Response] the response for the request or nil if one
       # isn't found
       def lookup(request)
@@ -35,7 +34,6 @@ module HTTP
         @mutex = Mutex.new
         @collection = Hash.new { |h, k| h[k] = CacheEntryCollection.new }
       end
-
     end
   end
 end
