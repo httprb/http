@@ -20,18 +20,23 @@ RSpec.describe HTTP::Cache do
 
   describe "#perform" do
     it "calls request_performer blocck when cache miss" do
-      expect { |b| subject.perform(request, opts) {|*args|
-                 b.to_proc.call(*args)
-                 origin_response }
-      }.to yield_with_args(request, opts)
+      expect do |b|
+        subject.perform(request, opts) do |*args|
+          b.to_proc.call(*args)
+          origin_response
+        end
+      end.to yield_with_args(request, opts)
     end
 
     context "cache hit" do
-      let(:cached_response) { HTTP::Cache::ResponseWithCacheBehavior.coerce(
-        HTTP::Response.new(200, "http/1.1",
-                           {"Cache-Control" => "private", "test"=> "foo"},
-                           "")
-      ).tap{|r| r.requested_at = r.received_at = Time.now } }
+      let(:cached_response) do
+        HTTP::Cache::ResponseWithCacheBehavior.coerce(
+          HTTP::Response.new(200,
+                             "http/1.1",
+                             {"Cache-Control" => "private", "test" => "foo"},
+                             "")
+        ).tap { |r| r.requested_at = r.received_at = Time.now }
+      end
 
       it "does not call request_performer block" do
         expect { |b| subject.perform(request, opts, &b) }.not_to yield_control
@@ -56,8 +61,11 @@ RSpec.describe HTTP::Cache do
   end
 
   context "cache by-passing request, cacheable response" do
-    let(:request) { HTTP::Request.new(:get, "http://example.com/",
-                                      {"Cache-Control" => "no-cache"}) }
+    let(:request) do
+      HTTP::Request.new(:get,
+                        "http://example.com/",
+                        "Cache-Control" => "no-cache")
+    end
     let!(:response) { subject.perform(request, opts) { origin_response } }
 
     it "doesn't lookup request" do
@@ -74,9 +82,11 @@ RSpec.describe HTTP::Cache do
   end
 
   context "empty cache, cacheable request, 'nreceiver' response" do
-    let(:origin_response) { HTTP::Response.new(200, "http/1.1",
-                                                 {"Cache-Control" => "no-cache"},
-                                                 "") }
+    let(:origin_response) do
+      HTTP::Response.new(200, "http/1.1",
+                         {"Cache-Control" => "no-cache"},
+                         "")
+    end
     let!(:response) { subject.perform(request, opts) { origin_response } }
 
     it "tries to lookup request" do
@@ -90,13 +100,15 @@ RSpec.describe HTTP::Cache do
     it "doesn't store response in cache" do
       expect(cache_adapter).not_to have_received(:store)
     end
-
   end
 
   context "empty cache, cacheable request, 'no-cache' response" do
-    let(:origin_response) { HTTP::Response.new(200, "http/1.1",
-                                                 {"Cache-Control" => "no-store"},
-                                                 "") }
+    let(:origin_response) do
+      HTTP::Response.new(200,
+                         "http/1.1",
+                         {"Cache-Control" => "no-store"},
+                         "")
+    end
     let!(:response) { subject.perform(request, opts) { origin_response } }
 
     it "tries to lookup request" do
@@ -113,9 +125,12 @@ RSpec.describe HTTP::Cache do
   end
 
   context "empty cache, cacheable request, 'no-store' response" do
-    let(:origin_response) { HTTP::Response.new(200, "http/1.1",
-                                                 {"Cache-Control" => "no-store"},
-                                                 "") }
+    let(:origin_response) do
+      HTTP::Response.new(200,
+                         "http/1.1",
+                         {"Cache-Control" => "no-store"},
+                         "")
+    end
     let!(:response) { subject.perform(request, opts) { origin_response } }
 
     it "tries to lookup request" do
@@ -132,9 +147,12 @@ RSpec.describe HTTP::Cache do
   end
 
   context "warm cache, cacheable request, cacheable response" do
-    let(:cached_response) { build_cached_response(200, "http/1.1",
-                                                  {"Cache-Control" => "private"},
-                                                  "") }
+    let(:cached_response) do
+      build_cached_response(200,
+                            "http/1.1",
+                            {"Cache-Control" => "private"},
+                            "")
+    end
     let!(:response) { subject.perform(request, opts) { origin_response } }
 
     it "lookups request" do
@@ -147,13 +165,15 @@ RSpec.describe HTTP::Cache do
   end
 
   context "stale cache, cacheable request, cacheable response" do
-    let(:cached_response) {
-      build_cached_response(200, "http/1.1",
+    let(:cached_response) do
+      build_cached_response(200,
+                            "http/1.1",
                             {"Cache-Control" => "private, max-age=1",
                              "Date" => (Time.now - 2).httpdate},
                             "") do |t|
         t.request_time = (Time.now - 2)
-      end }
+      end
+    end
     let!(:response) { subject.perform(request, opts) { origin_response } }
 
     it "lookups request" do
@@ -170,14 +190,16 @@ RSpec.describe HTTP::Cache do
   end
 
   context "stale cache, cacheable request, not modified response" do
-    let(:cached_response) {
-      build_cached_response(200, "http/1.1",
+    let(:cached_response) do
+      build_cached_response(200,
+                            "http/1.1",
                             {"Cache-Control" => "private, max-age=1",
                              "Etag" => "foo",
                              "Date" => (Time.now - 2).httpdate},
                             "") do |x|
         x.request_time = (Time.now - 2)
-      end }
+      end
+    end
     let(:origin_response) { HTTP::Response.new(304, "http/1.1", {}, "") }
     let!(:response) { subject.perform(request, opts) { origin_response } }
 
@@ -200,16 +222,18 @@ RSpec.describe HTTP::Cache do
     end
   end
 
-
   # Background
 
-  let(:cache_adapter) { double("cache_adapter", lookup: cached_response, store: nil) }
+  let(:cache_adapter) { double("cache_adapter", :lookup => cached_response, :store => nil) }
 
   let(:request) { HTTP::Request.new(:get, "http://example.com/") }
 
-  let(:origin_response) { HTTP::Response.new(200, "http/1.1",
-                                             {"Cache-Control" => "private"},
-                                             "") }
+  let(:origin_response) do
+    HTTP::Response.new(200,
+                       "http/1.1",
+                       {"Cache-Control" => "private"},
+                       "")
+  end
 
   let(:cached_response) { nil } # cold cache by default
 
@@ -222,7 +246,7 @@ RSpec.describe HTTP::Cache do
     r
   end
 
-  def options()
-    HTTP::Options.new()
+  def options
+    HTTP::Options.new
   end
 end

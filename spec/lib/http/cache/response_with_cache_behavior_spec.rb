@@ -125,7 +125,7 @@ RSpec.describe HTTP::Cache::ResponseWithCacheBehavior do
       expect(subject.current_age).to be_within(1).of(0)
     end
   end
-  
+
   describe "basic 200 response w/ public & max age" do
     let(:cache_control) { "public, max-age=100" }
 
@@ -146,8 +146,7 @@ RSpec.describe HTTP::Cache::ResponseWithCacheBehavior do
     end
 
     context "with age of max-age + 1 seconds" do
-      let(:headers) { {"cache-control" => cache_control,
-                       "age" => "101"} }
+      let(:headers) { {"cache-control" => cache_control, "age" => "101"} }
 
       it "is stale" do
         expect(subject.stale?).to be_truthy
@@ -163,7 +162,9 @@ RSpec.describe HTTP::Cache::ResponseWithCacheBehavior do
     end
 
     context "after max-age + 1 seconds" do
-      before do subject.received_at = subject.requested_at = (Time.now - 101) end
+      before do
+        subject.received_at = subject.requested_at = (Time.now - 101)
+      end
 
       it "is stale" do
         expect(subject.stale?).to be_truthy
@@ -177,7 +178,6 @@ RSpec.describe HTTP::Cache::ResponseWithCacheBehavior do
         expect(subject.current_age).to be_within(1).of(101)
       end
     end
-
   end
 
   describe "basic 400 response " do
@@ -204,5 +204,4 @@ RSpec.describe HTTP::Cache::ResponseWithCacheBehavior do
   let(:cache_control) { "" }
   let(:headers) { {"cache-control" => cache_control} }
   let(:response) { HTTP::Response.new(200, "http/1.1", headers, "") }
-
 end

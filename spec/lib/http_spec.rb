@@ -168,6 +168,5 @@ RSpec.describe HTTP do
       client = HTTP.with_cache persistence_adapter
       expect(client.default_options[:cache]).not_to eq persistence_adapter
     end
-
   end
 end

@@ -17,7 +17,7 @@ module HTTP
           if another.respond_to? :cacheable?
             another
           else
-            self.new(another)
+            new(another)
           end
         end
       end
@@ -40,7 +40,7 @@ module HTTP
       # Returns true iff the cache control info of this request
       # demands that the response be revalidated by the origin server.
       def skips_cache?
-        0 == cache_control.max_age ||
+        0 == cache_control.max_age       ||
           cache_control.must_revalidate? ||
           cache_control.no_cache?
       end
@@ -49,10 +49,10 @@ module HTTP
       # request revalidating `response`
       def set_validation_headers!(response)
         response.headers.get("Etag")
-          .each{|etag| headers.add("If-None-Match", etag) }
+          .each { |etag| headers.add("If-None-Match", etag) }
 
         response.headers.get("Last-Modified")
-          .each{|last_mod| headers.add("If-Modified-Since", last_mod) }
+          .each { |last_mod| headers.add("If-Modified-Since", last_mod) }
 
         headers.add("Cache-Control", "max-age=0") if cache_control.forces_revalidation?
       end

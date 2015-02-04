@@ -6,7 +6,7 @@ module HTTP
     class InMemoryCache
       def initialize
         @mutex = Mutex.new
-        @collection = Hash.new{ |h,k| h[k] = CacheEntryCollection.new }
+        @collection = Hash.new { |h, k| h[k] = CacheEntryCollection.new }
       end
 
       def lookup(request)
