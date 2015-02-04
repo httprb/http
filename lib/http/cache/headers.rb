@@ -70,11 +70,14 @@ module HTTP
       # Some servers send a "Expire: -1" header which must be treated as expired
       def seconds_til_expires
         get("Expires")
-          .map(&method(:to_time_or_epoch))
-          .compact
-          .map { |e| e - Time.now }
-          .map { |a| a < 0 ? 0 : a } # age is 0 if it is expired
+          .map { |e| http_date_to_ttl(e) }
           .max
+      end
+
+      def http_date_to_ttl(t_str)
+        ttl = to_time_or_epoch(t_str) - Time.now
+
+        ttl < 0 ? 0 : ttl
       end
 
       # @return [Time] parses t_str at a time; if that fails returns epoch time
