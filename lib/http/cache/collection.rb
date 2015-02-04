@@ -14,7 +14,7 @@ module HTTP
       end
 
       def [](request)
-        entry = find { |e| e.valid_for?(request) }
+        entry = detect { |e| e.valid_for?(request) }
         entry.response if entry
       end
 
