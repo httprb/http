@@ -9,7 +9,6 @@ module HTTP
       def lookup(request)
         @mutex.synchronize do
           response = @collection[request.uri.to_s][request]
-          response.authoritative = false if response
           response
         end
       end
