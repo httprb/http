@@ -26,6 +26,7 @@ group :test do
   gem "rspec-its"
   gem "rubocop"
   gem "yardstick"
+  gem "fakefs", :require => "fakefs/safe"
 end
 
 group :doc do
