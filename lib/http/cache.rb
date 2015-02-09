@@ -83,7 +83,14 @@ module HTTP
     # Store response in cache
     #
     # @return [nil]
+    #
+    # ---
+    #
+    # We have to convert the response body in to a string body so
+    # that the cache store reading the body will not prevent the
+    # original requester from doing so.
     def store_in_cache(request, response)
+      response.body = response.body.to_s
       @cache_adapter.store(request, response)
       nil
     end

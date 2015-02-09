@@ -17,7 +17,7 @@ module HTTP
 
       # Iterate over the body, allowing it to be enumerable
       def each
-        while part = readpartial # rubocop:disable Lint/AssignmentInCondition
+        while (part = readpartial)
           yield part
         end
       end
