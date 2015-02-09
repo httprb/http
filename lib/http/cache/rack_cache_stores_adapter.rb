@@ -20,7 +20,7 @@ module HTTP
         return if rack_resp.nil?
 
         HTTP::Response.new(
-          rack_resp.status, "1.1", rack_resp.headers, rack_resp.body.join("")
+          rack_resp.status, "1.1", rack_resp.headers, rack_resp.body.reduce(""){|b, part| b << part }
         ).caching
       end
 

@@ -26,6 +26,7 @@ group :test do
   gem "rubocop",      "~> 0.25.0"
   gem "simplecov",    ">= 0.9"
   gem "yardstick"
+  gem "fakefs", :require => "fakefs/safe"
 end
 
 group :doc do
