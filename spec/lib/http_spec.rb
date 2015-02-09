@@ -162,11 +162,5 @@ RSpec.describe HTTP do
       client = HTTP.with_cache cache
       expect(client.default_options[:cache]).to eq cache
     end
-
-    it "sets cache option" do
-      persistence_adapter = double(:cache, :lookup => nil)
-      client = HTTP.with_cache persistence_adapter
-      expect(client.default_options[:cache]).not_to eq persistence_adapter
-    end
   end
 end

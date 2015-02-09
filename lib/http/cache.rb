@@ -1,5 +1,5 @@
 require "time"
-require "http/cache/rack_cache_stores_adapter"
+require "rack-cache"
 
 module HTTP
   class Cache
@@ -9,6 +9,21 @@ module HTTP
       # @yield [request, options] so that the request can actually be made
       def perform(request, options)
         yield(request, options)
+      end
+    end
+
+    # NoOp logger.
+    class NullLogger
+      def error(_msg = nil)
+      end
+
+      def debug(_msg = nil)
+      end
+
+      def info(_msg = nil)
+      end
+
+      def warn(_msg = nil)
       end
     end
 
@@ -34,7 +49,7 @@ module HTTP
       return cached_resp if cached_resp && !cached_resp.stale?
 
       # cache miss
-
+      logger.debug { "Cache miss for <#{req.uri}>, making request" }
       actual_req = if cached_resp
                      req.conditional_on_changes_to(cached_resp)
                    else
@@ -49,6 +64,7 @@ module HTTP
     # updating the cache as appropriate
     def handle_response(cached_resp, actual_resp, req)
       if actual_resp.status.not_modified? && cached_resp
+        logger.debug { "<#{req.uri}> not modified, using cached version." }
         cached_resp.validated!(actual_resp)
         store_in_cache(req, cached_resp)
         return cached_resp
@@ -76,8 +92,13 @@ module HTTP
     # @return [HTTP::Response::Caching, nil] the cached response for the request
     def cache_lookup(request)
       return nil if request.skips_cache?
-      c = @cache_adapter.lookup(request)
-      c && c.caching
+
+      rack_resp = metastore.lookup(request, entitystore)
+      return if rack_resp.nil?
+
+      HTTP::Response.new(
+        rack_resp.status, "1.1", rack_resp.headers, stringify(rack_resp.body)
+      ).caching
     end
 
     # Store response in cache
@@ -91,7 +112,7 @@ module HTTP
     # original requester from doing so.
     def store_in_cache(request, response)
       response.body = response.body.to_s
-      @cache_adapter.store(request, response)
+      metastore.store(request, response, entitystore)
       nil
     end
 
@@ -99,12 +120,36 @@ module HTTP
     #
     # @return [nil]
     def invalidate_cache(request)
-      @cache_adapter.invalidate(request)
+      metastore.invalidate(request, entitystore)
     end
 
     # Inits a new instance
-    def initialize(adapter = HTTP::Cache::RackCacheStoresAdapter.new(:metastore => "heap:/", :entitystore => "heap:/"))
-      @cache_adapter = adapter
+    #
+    # @option opts [String] :metastore   URL to the metastore location
+    # @option opts [String] :entitystore URL to the entitystore location
+    # @option opts [Logger] :logger      logger to use
+    def initialize(opts)
+      @metastore   = storage.resolve_metastore_uri(opts.fetch(:metastore))
+      @entitystore = storage.resolve_entitystore_uri(opts.fetch(:entitystore))
+      @logger = opts.fetch(:logger) { NullLogger.new }
+    end
+
+    attr_reader :metastore, :entitystore, :logger
+
+    def storage
+      @@storage ||= Rack::Cache::Storage.new # rubocop:disable Style/ClassVars
+    end
+
+    def stringify(body)
+      if body.respond_to?(:each)
+        String.new.tap do |buf|
+          body.each do |part|
+            buf << part
+          end
+        end
+      else
+        body.to_s
+      end
     end
   end
 end
