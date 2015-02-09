@@ -4,19 +4,14 @@ RSpec.describe HTTP::Cache do
   describe "creation" do
     subject { described_class }
 
-    it "allows private mode" do
-      expect(subject.new(cache_adapter))
-        .to be_kind_of HTTP::Cache
-    end
-
-    it "allows public mode" do
-      expect(subject.new(cache_adapter))
+    it "allows metastore and entitystore" do
+      expect(subject.new(:metastore => "heap:/", :entitystore => "heap:/"))
         .to be_kind_of HTTP::Cache
     end
   end
 
   let(:opts) { options }
-  subject { described_class.new(cache_adapter) }
+  subject { described_class.new(:metastore => "heap:/", :entitystore => "heap:/") }
 
   describe "#perform" do
     it "calls request_performer blocck when cache miss" do
@@ -29,14 +24,11 @@ RSpec.describe HTTP::Cache do
     end
 
     context "cache hit" do
-      let(:cached_response) do
-        headers = {"Cache-Control" => "private", "test" => "foo"}
-        HTTP::Response.new(200, "http/1.1", headers, "").caching.tap do |r|
-          r.requested_at = r.received_at = Time.now
-        end
-      end
-
       it "does not call request_performer block" do
+        subject.perform(request, opts) do |*_t|
+          origin_response
+        end
+
         expect { |b| subject.perform(request, opts, &b) }.not_to yield_control
       end
     end
@@ -45,16 +37,8 @@ RSpec.describe HTTP::Cache do
   context "empty cache, cacheable request, cacheable response" do
     let!(:response) { subject.perform(request, opts) { origin_response } }
 
-    it "tries to lookup request" do
-      expect(cache_adapter).to have_received(:lookup).with(request)
-    end
-
     it "returns origin servers response" do
       expect(response).to eq origin_response
-    end
-
-    it "stores response in cache" do
-      expect(cache_adapter).to have_received(:store).with(request, origin_response)
     end
   end
 
@@ -65,37 +49,8 @@ RSpec.describe HTTP::Cache do
     end
     let!(:response) { subject.perform(request, opts) { origin_response } }
 
-    it "doesn't lookup request" do
-      expect(cache_adapter).not_to have_received(:lookup)
-    end
-
     it "returns origin servers response" do
       expect(response).to eq origin_response
-    end
-
-    it "stores response in cache" do
-      expect(cache_adapter).to have_received(:store).with(request, origin_response)
-    end
-  end
-
-  context "empty cache, cacheable request, 'nreceiver' response" do
-    let(:origin_response) do
-      HTTP::Response.new(200, "http/1.1",
-                         {"Cache-Control" => "no-cache"},
-                         "")
-    end
-    let!(:response) { subject.perform(request, opts) { origin_response } }
-
-    it "tries to lookup request" do
-      expect(cache_adapter).to have_received(:lookup).with(request)
-    end
-
-    it "returns origin servers response" do
-      expect(response).to eq origin_response
-    end
-
-    it "doesn't store response in cache" do
-      expect(cache_adapter).not_to have_received(:store)
     end
   end
 
@@ -108,16 +63,8 @@ RSpec.describe HTTP::Cache do
     end
     let!(:response) { subject.perform(request, opts) { origin_response } }
 
-    it "tries to lookup request" do
-      expect(cache_adapter).to have_received(:lookup).with(request)
-    end
-
     it "returns origin servers response" do
       expect(response).to eq origin_response
-    end
-
-    it "doesn't store response in cache" do
-      expect(cache_adapter).not_to have_received(:store)
     end
   end
 
@@ -130,59 +77,46 @@ RSpec.describe HTTP::Cache do
     end
     let!(:response) { subject.perform(request, opts) { origin_response } }
 
-    it "tries to lookup request" do
-      expect(cache_adapter).to have_received(:lookup).with(request)
-    end
-
     it "returns origin servers response" do
       expect(response).to eq origin_response
-    end
-
-    it "doesn't store response in cache" do
-      expect(cache_adapter).not_to have_received(:store)
     end
   end
 
   context "warm cache, cacheable request, cacheable response" do
     let(:cached_response) do
       build_cached_response(200,
-                            "http/1.1",
-                            {"Cache-Control" => "private"},
-                            "")
+                            "1.1",
+                            {"Cache-Control" => "max-age=100"},
+                            "cached")
     end
-    let!(:response) { subject.perform(request, opts) { origin_response } }
+    before do
+      subject.perform(request, opts) { cached_response }
+    end
 
-    it "lookups request" do
-      expect(cache_adapter).to have_received(:lookup).with(request)
-    end
+    let(:response) { subject.perform(request, opts) { origin_response } }
 
     it "returns cached response" do
-      expect(response).to eq cached_response
+      expect(response.body.to_s).to eq cached_response.body.to_s
     end
   end
 
   context "stale cache, cacheable request, cacheable response" do
     let(:cached_response) do
       build_cached_response(200,
-                            "http/1.1",
+                            "1.1",
                             {"Cache-Control" => "private, max-age=1",
                              "Date" => (Time.now - 2).httpdate},
-                            "") do |t|
+                            "cached") do |t|
         t.requested_at = (Time.now - 2)
       end
     end
-    let!(:response) { subject.perform(request, opts) { origin_response } }
-
-    it "lookups request" do
-      expect(cache_adapter).to have_received(:lookup).with(request)
+    before do
+      subject.perform(request, opts) { cached_response }
     end
+    let(:response) { subject.perform(request, opts) { origin_response } }
 
     it "returns origin servers response" do
-      expect(response).to eq origin_response
-    end
-
-    it "stores fresh response in cache" do
-      expect(cache_adapter).to have_received(:store).with(request, origin_response)
+      expect(response.body.to_s).to eq origin_response.body.to_s
     end
   end
 
@@ -197,45 +131,39 @@ RSpec.describe HTTP::Cache do
         x.requested_at = (Time.now - 2)
       end
     end
-    let(:origin_response) { HTTP::Response.new(304, "http/1.1", {}, "") }
-    let!(:response) { subject.perform(request, opts) { origin_response } }
-
-    it "lookups request" do
-      expect(cache_adapter).to have_received(:lookup).with(request)
+    before do
+      subject.perform(request, opts) { cached_response }
     end
 
+    let(:origin_response) { HTTP::Response.new(304, "http/1.1", {}, "") }
+    let(:response) { subject.perform(request, opts) { origin_response } }
+
     it "makes request with conditional request headers" do
-      actual_request = nil
-      subject.perform(request, opts) do |r, _|
-        actual_request = r
+      subject.perform(request, opts) do |actual_request, _|
+        expect(actual_request.headers["If-None-Match"])
+          .to eq cached_response.headers["Etag"]
+        expect(actual_request.headers["If-Modified-Since"])
+          .to eq cached_response.headers["Last-Modified"]
+
         origin_response
       end
-
-      expect(actual_request.headers["If-None-Match"]).to eq cached_response.headers["Etag"]
-      expect(actual_request.headers["If-Modified-Since"])
-        .to eq cached_response.headers["Last-Modified"]
     end
 
     it "returns cached servers response" do
-      expect(response).to eq cached_response
-    end
-
-    it "updates the stored response in cache" do
-      expect(cache_adapter).to have_received(:store).with(request, cached_response)
+      expect(response.body.to_s).to eq cached_response.body.to_s
     end
   end
 
   # Background
 
-  let(:cache_adapter) { double("cache_adapter", :lookup => cached_response, :store => nil) }
-
-  let(:request) { HTTP::Request.new(:get, "http://example.com/") }
+  let(:sn) { SecureRandom.urlsafe_base64(3) }
+  let(:request) { HTTP::Request.new(:get, "http://example.com/#{sn}") }
 
   let(:origin_response) do
     HTTP::Response.new(200,
                        "http/1.1",
                        {"Cache-Control" => "private"},
-                       "")
+                       "origin")
   end
 
   let(:cached_response) { nil } # cold cache by default

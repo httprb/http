@@ -87,11 +87,11 @@ module HTTP
       RUBY
     end
 
-    def with_cache(persistence_adapter_or_cache)
-      cache = if persistence_adapter_or_cache.respond_to? :perform
-                persistence_adapter_or_cache
+    def with_cache(cache_or_cache_options)
+      cache = if cache_or_cache_options.respond_to? :perform
+                cache_or_cache_options
               else
-                HTTP::Cache.new(persistence_adapter_or_cache)
+                HTTP::Cache.new(cache_or_cache_options)
               end
 
       dup do |opts|

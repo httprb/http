@@ -72,14 +72,21 @@ RSpec.describe HTTP::Client do
   end
 
   describe "caching" do
-    it "returns cached responses if they exist" do
-      cached_response = simple_response("OK").caching
-      adapter = double("persistance_adapter", :lookup => cached_response)
-      client = StubbedClient.new(:cache => HTTP::Cache.new(adapter)).stub(
-        "http://example.com/" => simple_response("OK")
-      )
+    let(:sn) { SecureRandom.urlsafe_base64(3) }
 
-      expect(client.get("http://example.com/")).to eq cached_response
+    it "returns cached responses if they exist" do
+      cached_response = simple_response("cached").caching
+      StubbedClient.new(:cache => HTTP::Cache.new(:metastore => "heap:/", :entitystore => "heap:/"))
+        .stub("http://example.com/#{sn}" => cached_response)
+        .get("http://example.com/#{sn}")
+
+      # cache is now warm
+
+      client = StubbedClient.new(:cache => HTTP::Cache.new(:metastore => "heap:/", :entitystore => "heap:/"))
+               .stub("http://example.com/#{sn}" => simple_response("OK"))
+
+      expect(client.get("http://example.com/#{sn}").body.to_s)
+        .to eq cached_response.body.to_s
     end
   end
 
