@@ -54,7 +54,7 @@ module HTTP
         fail StateError, "body is being streamed" unless @streaming.nil?
 
         @streaming = false
-        String.new.tap do |buf|
+        "".tap do |buf|
           buf << stream.read until stream.eof?
         end
       end

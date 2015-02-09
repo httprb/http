@@ -142,7 +142,7 @@ module HTTP
 
     def stringify(body)
       if body.respond_to?(:each)
-        String.new.tap do |buf|
+        "".tap do |buf|
           body.each do |part|
             buf << part
           end
