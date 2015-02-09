@@ -1,4 +1,6 @@
 require "http/cache/headers"
+require "http/response/string_body"
+require "http/response/io_body"
 
 module HTTP
   class Response
@@ -97,7 +99,7 @@ module HTTP
       def body=(new_body)
         @body = if new_body.respond_to? :readpartial
                   # Normal body, just use it
-                  new_body
+                  IoBody.new(new_body)
 
                 elsif new_body.respond_to? :join
                   # probably a rack enumerable body, join the parts

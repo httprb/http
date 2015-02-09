@@ -20,7 +20,7 @@ module HTTP
         return if rack_resp.nil?
 
         HTTP::Response.new(
-          rack_resp.status, "1.1", rack_resp.headers, rack_resp.body.reduce(""){|b, part| b << part }
+          rack_resp.status, "1.1", rack_resp.headers, stringify(rack_resp.body)
         ).caching
       end
 
@@ -36,7 +36,7 @@ module HTTP
       # @option opts [String] :metastore The location of the metastore
       # @option opts [String] :entitystore The location of the entity store
       def initialize(opts)
-        @metastore = storage.resolve_metastore_uri(opts[:metastore])
+        @metastore   = storage.resolve_metastore_uri(opts[:metastore])
         @entitystore = storage.resolve_entitystore_uri(opts[:entitystore])
       end
 
@@ -44,6 +44,18 @@ module HTTP
 
       def storage
         @@storage ||= Rack::Cache::Storage.new # rubocop:disable Style/ClassVars
+      end
+
+      def stringify(body)
+        if body.respond_to?(:each)
+          String.new.tap do |buf|
+            body.each do |part|
+              buf << part
+            end
+          end
+        else
+          body.to_s
+        end
       end
     end
   end
