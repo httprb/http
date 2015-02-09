@@ -32,5 +32,4 @@ RSpec.describe HTTP::Response::StringBody do
       expect { |b| body.each(&b) }.to yield_with_args "Hello, World!"
     end
   end
-
 end

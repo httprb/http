@@ -97,14 +97,17 @@ module HTTP
       end
 
       def body=(new_body)
-        @body = if new_body.respond_to? :readpartial
-                  # Normal body, just use it
+        @body = if new_body.respond_to?(:readpartial) && new_body.respond_to?(:read)
+                  # IO-ish, probably a rack cache response body
                   IoBody.new(new_body)
 
                 elsif new_body.respond_to? :join
-                  # probably a rack enumerable body, join the parts
-                  # into a single string.
+                  # probably an array of body parts (rack cache does this sometimes)
                   StringBody.new(new_body.join(""))
+
+                elsif new_body.respond_to? :readpartial
+                  # normal body, just use it.
+                  new_body
 
                 else
                   # backstop, just to_s it
