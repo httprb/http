@@ -11,7 +11,8 @@ module HTTP
 
     # :nodoc:
     def initialize(options = nil)
-      options   = {:max_hops => 5} unless options.respond_to?(:fetch)
+      options   = {:max_hops => 5, :strict => false} unless options.respond_to?(:fetch)
+      @strict   = options.fetch(:strict)
       @max_hops = options.fetch(:max_hops, 5)
       @max_hops = false if @max_hops && 1 > @max_hops.to_i
     end
@@ -41,6 +42,10 @@ module HTTP
         uri = @response.headers["Location"]
         fail StateError, "no Location header in redirect" unless uri
 
+        fail StateError, "no redirect in strict mode" if no_redirect? && @strict
+
+        @request = @request.redirect uri, :get if no_redirect?
+
         if 303 == @response.code
           @request = @request.redirect uri, :get
         else
@@ -61,6 +66,18 @@ module HTTP
     # Check if we got into an endless loop
     def endless_loop?
       2 < @visited.count(@visited.last)
+    end
+
+    def no_redirect?
+      nor_get_or_head? && strict_no_redirect_codes?
+    end
+
+    def strict_no_redirect_codes?
+      [301, 302, 303].include? @response.code
+    end
+
+    def nor_get_or_head?
+      @request.verb != :get && @request.verb != :head
     end
   end
 end
