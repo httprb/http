@@ -1,3 +1,8 @@
+## 0.7.2 (2015-03-02)
+
+* Swap from `form_data` to `http-form_data` (changed gem name).
+
+
 ## 0.7.1 (2015-01-03)
 
 * Gemspec fixups
