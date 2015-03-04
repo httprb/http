@@ -5,43 +5,9 @@ require "http/cache/null_cache"
 
 module HTTP
   class Options
-    # How to format the response [:object, :body, :parse_body]
-    attr_accessor :response
-
-    # HTTP headers to include in the request
-    attr_accessor :headers
-
-    # Query string params to add to the url
-    attr_accessor :params
-
-    # Form data to embed in the request
-    attr_accessor :form
-
-    # JSON data to embed in the request
-    attr_accessor :json
-
-    # Explicit request body of the request
-    attr_accessor :body
-
-    # HTTP proxy to route request
-    attr_accessor :proxy
-
-    # Socket classes
-    attr_accessor :socket_class, :ssl_socket_class
-
-    # SSL context
-    attr_accessor :ssl_context
-
-    # Follow redirects
-    attr_accessor :follow
-
-    # Cache to use when making requests
-    attr_accessor :cache
-
-    protected :response=, :headers=, :proxy=, :params=, :form=, :json=, :follow=
-
     @default_socket_class     = TCPSocket
     @default_ssl_socket_class = OpenSSL::SSL::SSLSocket
+
     @default_cache = Http::Cache::NullCache.new
 
     class << self
@@ -52,50 +18,56 @@ module HTTP
         return options if options.is_a?(self)
         super
       end
-    end
 
-    def initialize(options = {})
-      @response  = options[:response]  || :auto
-      @proxy     = options[:proxy]     || {}
-      @body      = options[:body]
-      @params    = options[:params]
-      @form      = options[:form]
-      @json      = options[:json]
-      @follow    = options[:follow]
+      def defined_options
+        @defined_options ||= []
+      end
 
-      @headers   = HTTP::Headers.coerce(options[:headers] || {})
+      protected
 
-      @socket_class     = options[:socket_class]     || self.class.default_socket_class
-      @ssl_socket_class = options[:ssl_socket_class] || self.class.default_ssl_socket_class
-      @ssl_context      = options[:ssl_context]
+      def def_option(name, &interpreter)
+        defined_options << name.to_sym
+        interpreter ||= ->(v) { v }
 
-      @cache = options[:cache] || self.class.default_cache
-    end
+        attr_accessor name
+        protected :"#{name}="
 
-    def with_headers(headers)
-      dup do |opts|
-        opts.headers = self.headers.merge(headers)
+        define_method(:"with_#{name}") do |value|
+          dup { |opts| opts.send(:"#{name}=", instance_exec(value, &interpreter)) }
+        end
       end
     end
 
-    %w(proxy params form json body follow).each do |method_name|
-      class_eval <<-RUBY, __FILE__, __LINE__
-        def with_#{method_name}(value)
-          dup { |opts| opts.#{method_name} = value }
-        end
-      RUBY
+    def initialize(options = {})
+      defaults = {:response =>         :auto,
+                  :proxy =>            {},
+                  :socket_class =>     self.class.default_socket_class,
+                  :ssl_socket_class => self.class.default_ssl_socket_class,
+                  :cache =>            self.class.default_cache,
+                  :headers =>          {}}
+
+      opts_w_defaults = defaults.merge(options)
+      opts_w_defaults[:headers] = HTTP::Headers.coerce(opts_w_defaults[:headers])
+
+      opts_w_defaults.each do |(opt_name, opt_val)|
+        self[opt_name] = opt_val
+      end
     end
 
-    def with_cache(cache_or_cache_options)
-      cache = if cache_or_cache_options.respond_to? :perform
-                cache_or_cache_options
-              else
-                require "http/cache"
-                HTTP::Cache.new(cache_or_cache_options)
-              end
+    def_option :headers do |headers|
+      self.headers.merge(headers)
+    end
 
-      dup do |opts|
-        opts.cache = cache
+    %w(proxy params form json body follow response socket_class ssl_socket_class ssl_context).each do |method_name|
+      def_option method_name
+    end
+
+    def_option :cache do |cache_or_cache_options|
+      if cache_or_cache_options.respond_to? :perform
+        cache_or_cache_options
+      else
+        require "http/cache"
+        HTTP::Cache.new(cache_or_cache_options)
       end
     end
 
@@ -118,29 +90,22 @@ module HTTP
     end
 
     def to_hash
-      # FIXME: hardcoding these fields blows! We should have a declarative
-      # way of specifying all the options fields, and ensure they *all*
-      # get serialized here, rather than manually having to add them each time
-      {
-        :response         => response,
-        :headers          => headers.to_h,
-        :proxy            => proxy,
-        :params           => params,
-        :form             => form,
-        :json             => json,
-        :body             => body,
-        :follow           => follow,
-        :socket_class     => socket_class,
-        :ssl_socket_class => ssl_socket_class,
-        :ssl_context      => ssl_context,
-        :cache            => cache
-      }
+      hash_pairs = self.class
+                   .defined_options
+                   .flat_map { |opt_name| [opt_name, self[opt_name]] }
+      Hash[*hash_pairs]
     end
 
     def dup
       dupped = super
       yield(dupped) if block_given?
       dupped
+    end
+
+    protected
+
+    def []=(option, val)
+      send(:"#{option}=", val)
     end
 
     private
