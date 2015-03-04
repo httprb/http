@@ -9,7 +9,6 @@ require "http/request/writer"
 require "http/response"
 require "http/response/body"
 require "http/response/parser"
-require "http/response/string_body"
 
 # HTTP should be easy
 module HTTP

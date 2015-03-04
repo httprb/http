@@ -3,7 +3,6 @@ require "uri"
 require "http/form_data"
 require "http/options"
 require "http/redirector"
-require "http/cache"
 
 module HTTP
   # Clients make requests and receive responses

@@ -1,4 +1,5 @@
 require "support/dummy_server"
+require "http/cache"
 
 RSpec.describe HTTP::Cache do
   describe "creation" do

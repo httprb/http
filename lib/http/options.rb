@@ -1,7 +1,7 @@
 require "http/headers"
 require "openssl"
 require "socket"
-require "http/cache"
+require "http/cache/null_cache"
 
 module HTTP
   class Options
@@ -35,14 +35,13 @@ module HTTP
     # Follow redirects
     attr_accessor :follow
 
-    # Cache, needs a hash. See @default_cache. Valid modes are: false, :public, :private
+    # Cache to use when making requests
     attr_accessor :cache
 
     protected :response=, :headers=, :proxy=, :params=, :form=, :json=, :follow=
 
     @default_socket_class     = TCPSocket
     @default_ssl_socket_class = OpenSSL::SSL::SSLSocket
-
     @default_cache = Http::Cache::NullCache.new
 
     class << self
@@ -91,6 +90,7 @@ module HTTP
       cache = if cache_or_cache_options.respond_to? :perform
                 cache_or_cache_options
               else
+                require "http/cache"
                 HTTP::Cache.new(cache_or_cache_options)
               end
 

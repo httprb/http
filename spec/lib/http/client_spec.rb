@@ -72,11 +72,14 @@ RSpec.describe HTTP::Client do
   end
 
   describe "caching" do
+    before { require "http/cache" }
+
     let(:sn) { SecureRandom.urlsafe_base64(3) }
 
     it "returns cached responses if they exist" do
       cached_response = simple_response("cached").caching
-      StubbedClient.new(:cache => HTTP::Cache.new(:metastore => "heap:/", :entitystore => "heap:/"))
+      StubbedClient.new(:cache =>
+                        HTTP::Cache.new(:metastore => "heap:/", :entitystore => "heap:/"))
         .stub("http://example.com/#{sn}" => cached_response)
         .get("http://example.com/#{sn}")
 
