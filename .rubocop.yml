@@ -20,6 +20,9 @@ Metrics/ParameterLists:
   Max: 3
   CountKeywordArgs: true
 
+Metrics/AbcSize:
+  Enabled: false
+
 Style/CollectionMethods:
   PreferredMethods:
     collect:  'map'

@@ -18,13 +18,13 @@ end
 group :test do
   gem "backports"
   gem "coveralls"
+  gem "simplecov",    ">= 0.9"
   gem "json",         ">= 1.8.1"
   gem "mime-types",   "~> 1.25",  :platforms => [:jruby]
   gem "rest-client",  "~> 1.6.0", :platforms => [:jruby]
   gem "rspec",        "~> 3.0"
   gem "rspec-its"
-  gem "rubocop",      "~> 0.25.0"
-  gem "simplecov",    ">= 0.9"
+  gem "rubocop"
   gem "yardstick"
   gem "fakefs", :require => "fakefs/safe"
 end

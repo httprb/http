@@ -14,7 +14,7 @@ module HTTP
 
     # Matches valid header field name according to RFC.
     # @see http://tools.ietf.org/html/rfc7230#section-3.2
-    HEADER_NAME_RE = /^[A-Za-z0-9!#$%&'*+\-.^_`|~]+$/
+    HEADER_NAME_RE = /^[A-Za-z0-9!#\$%&'*+\-.^_`|~]+$/
 
     # Class constructor.
     def initialize
