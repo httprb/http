@@ -40,7 +40,7 @@ RSpec.describe HTTP::Options, "merge" do
       :form      => {:bar => "bar"},
       :body      => "body-bar",
       :json      => {:bar => "bar"},
-      :headers   => HTTP::Headers.coerce("Foo" => "foo", "Accept"  => "xml", "Bar" => "bar"),
+      :headers   => {"Foo" => "foo", "Accept"  => "xml", "Bar" => "bar"},
       :proxy     => {:proxy_address => "127.0.0.1", :proxy_port => 8080},
       :follow => nil,
       :socket_class     => described_class.default_socket_class,
