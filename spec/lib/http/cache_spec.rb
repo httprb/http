@@ -12,6 +12,16 @@ RSpec.describe HTTP::Cache do
   end
 
   let(:opts) { options }
+  let(:sn) { SecureRandom.urlsafe_base64(3) }
+  let(:request) { HTTP::Request.new(:get, "http://example.com/#{sn}") }
+
+  let(:origin_response) do
+    HTTP::Response.new(200,
+                       "http/1.1",
+                       {"Cache-Control" => "private"},
+                       "origin")
+  end
+
   subject { described_class.new(:metastore => "heap:/", :entitystore => "heap:/") }
 
   describe "#perform" do
@@ -153,18 +163,6 @@ RSpec.describe HTTP::Cache do
     it "returns cached servers response" do
       expect(response.body.to_s).to eq cached_response.body.to_s
     end
-  end
-
-  # Background
-
-  let(:sn) { SecureRandom.urlsafe_base64(3) }
-  let(:request) { HTTP::Request.new(:get, "http://example.com/#{sn}") }
-
-  let(:origin_response) do
-    HTTP::Response.new(200,
-                       "http/1.1",
-                       {"Cache-Control" => "private"},
-                       "origin")
   end
 
   let(:cached_response) { nil } # cold cache by default

@@ -1,4 +1,6 @@
 RSpec.describe HTTP::Request::Caching do
+  let(:request) { HTTP::Request.new(:get, "http://example.com/") }
+
   subject(:caching_request) { described_class.new request }
 
   describe "#cache_headers" do
@@ -123,9 +125,6 @@ RSpec.describe HTTP::Request::Caching do
       expect(subject.skips_cache?).to be_falsy
     end
   end
-
-  # Background
-  let(:request) { HTTP::Request.new(:get, "http://example.com/") }
 
   describe "#caching" do
     subject(:caching_request) { request.caching }
