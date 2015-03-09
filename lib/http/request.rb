@@ -82,8 +82,6 @@ module HTTP
 
       @headers["Host"]        ||= default_host
       @headers["User-Agent"]  ||= USER_AGENT
-      now = Time.now
-      @headers["Date"] = now.httpdate
     end
 
     # Returns new Request with updated uri
