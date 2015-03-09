@@ -197,6 +197,6 @@ RSpec.describe HTTP::Response::Caching do
 
   describe "#caching" do
     subject(:caching_response) { response.caching }
-    it { is_expected.to be caching_response }
+    it { is_expected.to be_kind_of described_class }
   end
 end
