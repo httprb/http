@@ -1,4 +1,8 @@
 RSpec.describe HTTP::Response::Caching do
+  let(:cache_control) { "" }
+  let(:headers) { {"cache-control" => cache_control} }
+  let(:response) { HTTP::Response.new(200, "http/1.1", headers, "") }
+
   subject(:caching_response) { described_class.new response }
 
   describe "#cache_headers" do
@@ -189,11 +193,6 @@ RSpec.describe HTTP::Response::Caching do
       expect(subject.current_age).to be_within(1).of(0)
     end
   end
-
-  # Background
-  let(:cache_control) { "" }
-  let(:headers) { {"cache-control" => cache_control} }
-  let(:response) { HTTP::Response.new(200, "http/1.1", headers, "") }
 
   describe "#caching" do
     subject(:caching_response) { response.caching }
