@@ -1,4 +1,5 @@
 require "support/dummy_server"
+require "http/cache"
 
 RSpec.describe HTTP::Client do
   run_server(:dummy) { DummyServer.new }
@@ -72,8 +73,6 @@ RSpec.describe HTTP::Client do
   end
 
   describe "caching" do
-    before { require "http/cache" }
-
     let(:sn) { SecureRandom.urlsafe_base64(3) }
 
     it "returns cached responses if they exist" do
