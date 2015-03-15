@@ -24,7 +24,6 @@ Gem::Specification.new do |gem|
 
   gem.add_runtime_dependency "http_parser.rb", "~> 0.6.0"
   gem.add_runtime_dependency "http-form_data", "~> 1.0.0"
-  gem.add_runtime_dependency "rack-cache",     "~> 1.2"
 
   gem.add_development_dependency "bundler", "~> 1.0"
 end

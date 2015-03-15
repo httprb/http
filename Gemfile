@@ -3,6 +3,8 @@ source "https://rubygems.org"
 gem "jruby-openssl" if defined? JRUBY_VERSION
 gem "rake"
 
+gem "rack-cache", "~> 1.2"
+
 group :development do
   gem "celluloid-io"
   gem "guard"
