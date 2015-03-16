@@ -8,7 +8,7 @@ gem "rack-cache", "~> 1.2"
 group :development do
   gem "celluloid-io"
   gem "guard"
-  gem "guard-rspec"
+  gem "guard-rspec", :require => false
   gem "pry"
 
   platforms :ruby_19, :ruby_20 do
