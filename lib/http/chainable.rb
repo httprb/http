@@ -106,7 +106,7 @@ module HTTP
     # @param opts
     # @return [HTTP::Client]
     # @see Redirector#initialize
-    def follow(opts = true)
+    def follow(opts = {})
       branch default_options.with_follow opts
     end
 

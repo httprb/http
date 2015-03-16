@@ -3,169 +3,376 @@ RSpec.describe HTTP::Redirector do
     HTTP::Response.new(status, "1.1", headers, body)
   end
 
-  def redirect_response(location, status)
+  def redirect_response(status, location)
     simple_response status, "", "Location" => location
   end
 
-  let(:max_hops)       { 5 }
-  subject(:redirector) { described_class.new max_hops }
-  let(:options) do
-    {
-      :max_hops => 5,
-      :strict => true
-    }
-  end
-  subject(:strict_redirector) { described_class.new options }
+  describe "#strict" do
+    subject { redirector.strict }
 
-  context "following 300 redirect" do
-    let(:orig_request)  { HTTP::Request.new :post, "http://www.example.com/" }
-    let(:orig_response) { redirect_response "http://example.com/", 300 }
-
-    it "follows without changing verb" do
-      redirector.perform(orig_request, orig_response) do |request|
-        expect(request.verb).to be orig_request.verb
-        simple_response 200
-      end
+    context "by default" do
+      let(:redirector) { described_class.new }
+      it { is_expected.to be true }
     end
   end
 
-  context "following 301 redirect" do
-    context "upon GET request" do
-      let(:orig_request)  { HTTP::Request.new :get, "http://www.example.com/" }
-      let(:orig_response) { redirect_response "http://example.com/", 301 }
+  describe "#max_hops" do
+    subject { redirector.max_hops }
 
-      it "follows without changing verb" do
-        redirector.perform(orig_request, orig_response) do |request|
-          expect(request.verb).to be orig_request.verb
-          simple_response 200
-        end
-      end
-    end
-
-    context "upon POST request in strict mode" do
-      let(:orig_request)   { HTTP::Request.new :post, "http://www.example.com/" }
-      let(:orig_response)  { redirect_response "http://example.com/", 301 }
-
-      it "raises StateError" do
-        expect { strict_redirector.perform(orig_request, orig_response) }.to raise_error HTTP::StateError
-      end
-    end
-
-    context "upon post request in non-strict mode" do
-      let(:orig_request)   { HTTP::Request.new :post, "http://www.example.com/" }
-      let(:orig_response)  { redirect_response "http://example.com/", 301 }
-
-      it "redirects to a GET request" do
-        redirector.perform(orig_request, orig_response) do |request|
-          expect(request.verb).to be :get
-          simple_response 200
-        end
-      end
+    context "by default" do
+      let(:redirector) { described_class.new }
+      it { is_expected.to eq 5 }
     end
   end
 
-  context "following 302 redirect" do
-    context "upon GET request" do
-      let(:orig_request)  { HTTP::Request.new :get, "http://www.example.com/" }
-      let(:orig_response) { redirect_response "http://example.com/", 302 }
+  fdescribe "#perform" do
+    let(:options)    { {} }
+    let(:redirector) { described_class.new options }
 
-      it "follows without changing verb" do
-        redirector.perform(orig_request, orig_response) do |request|
-          expect(request.verb).to be orig_request.verb
+    it "fails with TooManyRedirectsError if max hops reached" do
+      req = HTTP::Request.new :head, "http://example.com"
+      res = proc { |prev_req| redirect_response(301, "#{prev_req.uri}/1") }
+
+      expect { redirector.perform(req, res.call(req), &res) }
+        .to raise_error HTTP::Redirector::TooManyRedirectsError
+    end
+
+    it "fails with EndlessRedirectError if endless loop detected" do
+      req = HTTP::Request.new :head, "http://example.com"
+      res = redirect_response(301, req.uri)
+
+      expect { redirector.perform(req, res) { res } }
+        .to raise_error HTTP::Redirector::EndlessRedirectError
+    end
+
+    it "fails with StateError if there were no Location header" do
+      req = HTTP::Request.new :head, "http://example.com"
+      res = simple_response(301)
+
+      expect { |b| redirector.perform(req, res, &b) }
+        .to raise_error HTTP::StateError
+    end
+
+    it "returns first non-redirect response" do
+      req  = HTTP::Request.new :head, "http://example.com"
+      hops = [
+        redirect_response(301, "http://example.com/1"),
+        redirect_response(301, "http://example.com/2"),
+        redirect_response(301, "http://example.com/3"),
+        simple_response(200, "foo"),
+        redirect_response(301, "http://example.com/4"),
+        simple_response(200, "bar")
+      ]
+
+      res = redirector.perform(req, hops.shift) { hops.shift }
+      expect(res.to_s).to eq "foo"
+    end
+
+    context "following 300 redirect" do
+      context "with strict mode" do
+        let(:options) { {:strict => true} }
+
+        it "it follows with original verb if it's safe" do
+          req = HTTP::Request.new :head, "http://example.com"
+          res = redirect_response 300, "http://example.com/1"
+
+          redirector.perform(req, res) do |prev_req, _|
+            expect(prev_req.verb).to be :head
+            simple_response 200
+          end
+        end
+
+        it "raises StateError if original request was PUT" do
+          req = HTTP::Request.new :put, "http://example.com"
+          res = redirect_response 300, "http://example.com/1"
+
+          expect { redirector.perform(req, res) { simple_response 200 } }
+            .to raise_error HTTP::StateError
+        end
+
+        it "raises StateError if original request was POST" do
+          req = HTTP::Request.new :post, "http://example.com"
+          res = redirect_response 300, "http://example.com/1"
+
+          expect { redirector.perform(req, res) { simple_response 200 } }
+            .to raise_error HTTP::StateError
+        end
+
+        it "raises StateError if original request was DELETE" do
+          req = HTTP::Request.new :delete, "http://example.com"
+          res = redirect_response 300, "http://example.com/1"
+
+          expect { redirector.perform(req, res) { simple_response 200 } }
+            .to raise_error HTTP::StateError
+        end
+      end
+
+      context "with non-strict mode" do
+        let(:options) { {:strict => false} }
+
+        it "it follows with original verb if it's safe" do
+          req = HTTP::Request.new :head, "http://example.com"
+          res = redirect_response 300, "http://example.com/1"
+
+          redirector.perform(req, res) do |prev_req, _|
+            expect(prev_req.verb).to be :head
+            simple_response 200
+          end
+        end
+
+        it "it follows with GET if original request was PUT" do
+          req = HTTP::Request.new :put, "http://example.com"
+          res = redirect_response 300, "http://example.com/1"
+
+          redirector.perform(req, res) do |prev_req, _|
+            expect(prev_req.verb).to be :get
+            simple_response 200
+          end
+        end
+
+        it "it follows with GET if original request was POST" do
+          req = HTTP::Request.new :post, "http://example.com"
+          res = redirect_response 300, "http://example.com/1"
+
+          redirector.perform(req, res) do |prev_req, _|
+            expect(prev_req.verb).to be :get
+            simple_response 200
+          end
+        end
+
+        it "it follows with GET if original request was DELETE" do
+          req = HTTP::Request.new :delete, "http://example.com"
+          res = redirect_response 300, "http://example.com/1"
+
+          redirector.perform(req, res) do |prev_req, _|
+            expect(prev_req.verb).to be :get
+            simple_response 200
+          end
+        end
+      end
+    end
+
+    context "following 301 redirect" do
+      context "with strict mode" do
+        let(:options) { {:strict => true} }
+
+        it "it follows with original verb if it's safe" do
+          req = HTTP::Request.new :head, "http://example.com"
+          res = redirect_response 301, "http://example.com/1"
+
+          redirector.perform(req, res) do |prev_req, _|
+            expect(prev_req.verb).to be :head
+            simple_response 200
+          end
+        end
+
+        it "raises StateError if original request was PUT" do
+          req = HTTP::Request.new :put, "http://example.com"
+          res = redirect_response 301, "http://example.com/1"
+
+          expect { redirector.perform(req, res) { simple_response 200 } }
+            .to raise_error HTTP::StateError
+        end
+
+        it "raises StateError if original request was POST" do
+          req = HTTP::Request.new :post, "http://example.com"
+          res = redirect_response 301, "http://example.com/1"
+
+          expect { redirector.perform(req, res) { simple_response 200 } }
+            .to raise_error HTTP::StateError
+        end
+
+        it "raises StateError if original request was DELETE" do
+          req = HTTP::Request.new :delete, "http://example.com"
+          res = redirect_response 301, "http://example.com/1"
+
+          expect { redirector.perform(req, res) { simple_response 200 } }
+            .to raise_error HTTP::StateError
+        end
+      end
+
+      context "with non-strict mode" do
+        let(:options) { {:strict => false} }
+
+        it "it follows with original verb if it's safe" do
+          req = HTTP::Request.new :head, "http://example.com"
+          res = redirect_response 301, "http://example.com/1"
+
+          redirector.perform(req, res) do |prev_req, _|
+            expect(prev_req.verb).to be :head
+            simple_response 200
+          end
+        end
+
+        it "it follows with GET if original request was PUT" do
+          req = HTTP::Request.new :put, "http://example.com"
+          res = redirect_response 301, "http://example.com/1"
+
+          redirector.perform(req, res) do |prev_req, _|
+            expect(prev_req.verb).to be :get
+            simple_response 200
+          end
+        end
+
+        it "it follows with GET if original request was POST" do
+          req = HTTP::Request.new :post, "http://example.com"
+          res = redirect_response 301, "http://example.com/1"
+
+          redirector.perform(req, res) do |prev_req, _|
+            expect(prev_req.verb).to be :get
+            simple_response 200
+          end
+        end
+
+        it "it follows with GET if original request was DELETE" do
+          req = HTTP::Request.new :delete, "http://example.com"
+          res = redirect_response 301, "http://example.com/1"
+
+          redirector.perform(req, res) do |prev_req, _|
+            expect(prev_req.verb).to be :get
+            simple_response 200
+          end
+        end
+      end
+    end
+
+    context "following 302 redirect" do
+      context "with strict mode" do
+        let(:options) { {:strict => true} }
+
+        it "it follows with original verb if it's safe" do
+          req = HTTP::Request.new :head, "http://example.com"
+          res = redirect_response 302, "http://example.com/1"
+
+          redirector.perform(req, res) do |prev_req, _|
+            expect(prev_req.verb).to be :head
+            simple_response 200
+          end
+        end
+
+        it "raises StateError if original request was PUT" do
+          req = HTTP::Request.new :put, "http://example.com"
+          res = redirect_response 302, "http://example.com/1"
+
+          expect { redirector.perform(req, res) { simple_response 200 } }
+            .to raise_error HTTP::StateError
+        end
+
+        it "raises StateError if original request was POST" do
+          req = HTTP::Request.new :post, "http://example.com"
+          res = redirect_response 302, "http://example.com/1"
+
+          expect { redirector.perform(req, res) { simple_response 200 } }
+            .to raise_error HTTP::StateError
+        end
+
+        it "raises StateError if original request was DELETE" do
+          req = HTTP::Request.new :delete, "http://example.com"
+          res = redirect_response 302, "http://example.com/1"
+
+          expect { redirector.perform(req, res) { simple_response 200 } }
+            .to raise_error HTTP::StateError
+        end
+      end
+
+      context "with non-strict mode" do
+        let(:options) { {:strict => false} }
+
+        it "it follows with original verb if it's safe" do
+          req = HTTP::Request.new :head, "http://example.com"
+          res = redirect_response 302, "http://example.com/1"
+
+          redirector.perform(req, res) do |prev_req, _|
+            expect(prev_req.verb).to be :head
+            simple_response 200
+          end
+        end
+
+        it "it follows with GET if original request was PUT" do
+          req = HTTP::Request.new :put, "http://example.com"
+          res = redirect_response 302, "http://example.com/1"
+
+          redirector.perform(req, res) do |prev_req, _|
+            expect(prev_req.verb).to be :get
+            simple_response 200
+          end
+        end
+
+        it "it follows with GET if original request was POST" do
+          req = HTTP::Request.new :post, "http://example.com"
+          res = redirect_response 302, "http://example.com/1"
+
+          redirector.perform(req, res) do |prev_req, _|
+            expect(prev_req.verb).to be :get
+            simple_response 200
+          end
+        end
+
+        it "it follows with GET if original request was DELETE" do
+          req = HTTP::Request.new :delete, "http://example.com"
+          res = redirect_response 302, "http://example.com/1"
+
+          redirector.perform(req, res) do |prev_req, _|
+            expect(prev_req.verb).to be :get
+            simple_response 200
+          end
+        end
+      end
+    end
+
+    context "following 303 redirect" do
+      it "follows with HEAD if original request was HEAD" do
+        req = HTTP::Request.new :head, "http://example.com"
+        res = redirect_response 303, "http://example.com/1"
+
+        redirector.perform(req, res) do |prev_req, _|
+          expect(prev_req.verb).to be :head
+          simple_response 200
+        end
+      end
+
+      it "follows with GET if original request was GET" do
+        req = HTTP::Request.new :get, "http://example.com"
+        res = redirect_response 303, "http://example.com/1"
+
+        redirector.perform(req, res) do |prev_req, _|
+          expect(prev_req.verb).to be :get
+          simple_response 200
+        end
+      end
+
+      it "follows with GET if original request was neither GET nor HEAD" do
+        req = HTTP::Request.new :post, "http://example.com"
+        res = redirect_response 303, "http://example.com/1"
+
+        redirector.perform(req, res) do |prev_req, _|
+          expect(prev_req.verb).to be :get
           simple_response 200
         end
       end
     end
 
-    context "upon POST request in strict mode" do
-      let(:orig_request)   { HTTP::Request.new :post, "http://www.example.com/" }
-      let(:orig_response)  { redirect_response "http://example.com/", 302 }
+    context "following 307 redirect" do
+      it "follows with original request's verb" do
+        req = HTTP::Request.new :post, "http://example.com"
+        res = redirect_response 307, "http://example.com/1"
 
-      it "raises StateError" do
-        expect { strict_redirector.perform(orig_request, orig_response) }.to raise_error HTTP::StateError
-      end
-    end
-
-    context "upon post request in non-strict mode" do
-      let(:orig_request)   { HTTP::Request.new :post, "http://www.example.com/" }
-      let(:orig_response)  { redirect_response "http://example.com/", 302 }
-
-      it "redirects to a GET request" do
-        redirector.perform(orig_request, orig_response) do |request|
-          expect(request.verb).to be :get
-          simple_response 200
-        end
-      end
-    end
-  end
-
-  context "following 303 redirect" do
-    context "upon GET request" do
-      let(:orig_request)  { HTTP::Request.new :get, "http://www.example.com/" }
-      let(:orig_response) { redirect_response "http://example.com/", 303 }
-
-      it "follows without changing verb" do
-        redirector.perform(orig_request, orig_response) do |request|
-          expect(request.verb).to be orig_request.verb
+        redirector.perform(req, res) do |prev_req, _|
+          expect(prev_req.verb).to be :post
           simple_response 200
         end
       end
     end
 
-    context "upon HEAD request" do
-      let(:orig_request)  { HTTP::Request.new :head, "http://www.example.com/" }
-      let(:orig_response) { redirect_response "http://example.com/", 303 }
+    context "following 308 redirect" do
+      it "follows with original request's verb" do
+        req = HTTP::Request.new :post, "http://example.com"
+        res = redirect_response 308, "http://example.com/1"
 
-      it "follows without changing verb" do
-        redirector.perform(orig_request, orig_response) do |request|
-          expect(request.verb).to be :get
+        redirector.perform(req, res) do |prev_req, _|
+          expect(prev_req.verb).to be :post
           simple_response 200
         end
-      end
-    end
-
-    context "upon POST request in strict mode" do
-      let(:orig_request)   { HTTP::Request.new :post, "http://www.example.com/" }
-      let(:orig_response)  { redirect_response "http://example.com/", 303 }
-
-      it "raises StateError" do
-        expect { strict_redirector.perform(orig_request, orig_response) }.to raise_error HTTP::StateError
-      end
-    end
-
-    context "upon post request in non-strict mode" do
-      let(:orig_request)   { HTTP::Request.new :post, "http://www.example.com/" }
-      let(:orig_response)  { redirect_response "http://example.com/", 303 }
-
-      it "redirects to a GET request" do
-        redirector.perform(orig_request, orig_response) do |request|
-          expect(request.verb).to be :get
-          simple_response 200
-        end
-      end
-    end
-  end
-
-  context "following 307 redirect" do
-    let(:orig_request)  { HTTP::Request.new :post, "http://www.example.com/" }
-    let(:orig_response) { redirect_response "http://example.com/", 307 }
-
-    it "follows without changing verb" do
-      redirector.perform(orig_request, orig_response) do |request|
-        expect(request.verb).to be orig_request.verb
-        simple_response 200
-      end
-    end
-  end
-
-  context "following 308 redirect" do
-    let(:orig_request)  { HTTP::Request.new :post, "http://www.example.com/" }
-    let(:orig_response) { redirect_response "http://example.com/", 308 }
-
-    it "follows without changing verb" do
-      redirector.perform(orig_request, orig_response) do |request|
-        expect(request.verb).to be orig_request.verb
-        simple_response 200
       end
     end
   end

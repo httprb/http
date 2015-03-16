@@ -39,13 +39,11 @@ module HTTP
       req = HTTP::Request.new(verb, uri, headers, proxy, body)
       res = perform req, opts
 
-      if opts.follow
-        res = Redirector.new(opts.follow).perform req, res do |request|
-          perform request, opts
-        end
-      end
+      return res unless opts.follow
 
-      res
+      Redirector.new(opts.follow).perform req, res do |request|
+        perform request, opts
+      end
     end
 
     # Perform a single (no follow) HTTP request

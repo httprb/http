@@ -1,3 +1,5 @@
+require "set"
+
 module HTTP
   class Redirector
     # Notifies that we reached max allowed redirect hops
@@ -7,92 +9,88 @@ module HTTP
     class EndlessRedirectError < TooManyRedirectsError; end
 
     # HTTP status codes which indicate redirects
-    REDIRECT_CODES = [300, 301, 302, 303, 307, 308].freeze
+    REDIRECT_CODES = [300, 301, 302, 303, 307, 308].to_set.freeze
 
-    # :nodoc:
-    def initialize(options = nil)
-      options   = {:max_hops => 5, :strict => false} unless options.respond_to?(:fetch)
-      @strict   = options.fetch(:strict)
-      @max_hops = options.fetch(:max_hops, 5)
-      @max_hops = false if @max_hops && 1 > @max_hops.to_i
+    # Codes which which should raise StateError in strict mode if original
+    # request was any of {UNSAFE_VERBS}
+    STRICT_SENSITIVE_CODES = [300, 301, 302].to_set.freeze
+
+    # Insecure http verbs, which should trigger StateError in strict mode
+    # upon {STRICT_SENSITIVE_CODES}
+    UNSAFE_VERBS = [:put, :delete, :post].to_set.freeze
+
+    # Verbs which will remain unchanged upon See Other response.
+    SEE_OTHER_ALLOWED_VERBS = [:get, :head].to_set.freeze
+
+    # @!attribute [r] strict
+    #   Returns redirector policy.
+    #   @return [Boolean]
+    attr_reader :strict
+
+    # @!attribute [r] max_hops
+    #   Returns maximum allowed hops.
+    #   @return [Fixnum]
+    attr_reader :max_hops
+
+    # @param [#to_h] opts
+    # @option opts [Boolean] :strict (true) redirector hops policy
+    # @option opts [#to_i] :max_hops (5) maximum allowed amount of hops
+    def initialize(options = {})
+      options   = options.to_h
+
+      @strict   = options.fetch(:strict, true)
+      @max_hops = options.fetch(:max_hops, 5).to_i
     end
 
     # Follows redirects until non-redirect response found
-    def perform(request, response, &block)
-      reset(request, response)
-      follow(&block)
-    end
+    def perform(request, response)
+      @request  = request
+      @response = response
+      @visited  = []
 
-    private
-
-    # Reset redirector state
-    def reset(request, response)
-      @request, @response = request, response
-      @visited = []
-    end
-
-    # Follow redirects
-    def follow
-      while REDIRECT_CODES.include?(@response.code)
-        @visited << @request.uri.to_s
+      while REDIRECT_CODES.include? @response.status.code
+        @visited << "#{@request.verb} #{@request.uri}"
 
         fail TooManyRedirectsError if too_many_hops?
         fail EndlessRedirectError  if endless_loop?
 
-        uri = @response.headers["Location"]
-        fail StateError, "no Location header in redirect" unless uri
-
-        redirect(uri)
-
+        @request  = redirect_to @response.headers["Location"]
         @response = yield @request
       end
 
       @response
     end
 
-    # Redirect policy for follow
-    def redirect(uri)
-      if no_redirect?
-        redirect_mode(uri)
-      elsif 303 == @response.code
-        @request = @request.redirect uri, :get
-      else
-        @request = @request.redirect uri
-      end
-    end
-
-    # Strict/no-strict mode behaviour
-    def redirect_mode(uri)
-      if @strict
-        fail StateError, "no redirect in strict mode"
-      else
-        @request = @request.redirect uri, :get
-      end
-    end
+    private
 
     # Check if we reached max amount of redirect hops
+    # @return [Boolean]
     def too_many_hops?
-      @max_hops < @visited.count if @max_hops
+      1 <= @max_hops && @max_hops < @visited.count
     end
 
     # Check if we got into an endless loop
+    # @return [Boolean]
     def endless_loop?
-      2 < @visited.count(@visited.last)
+      2 <= @visited.count(@visited.last)
     end
 
-    # Check whether not to redirect
-    def no_redirect?
-      nor_get_or_head? && strict_no_redirect_codes?
-    end
+    # Redirect policy for follow
+    # @return [Request]
+    def redirect_to(uri)
+      fail StateError, "no Location header in redirect" unless uri
 
-    # Check if response code is 301, 302 or 303
-    def strict_no_redirect_codes?
-      [301, 302, 303].include? @response.code
-    end
+      verb = @request.verb
+      code = @response.status.code
 
-    # Check whether request verb is GET or HEAD
-    def nor_get_or_head?
-      @request.verb != :get && @request.verb != :head
+      if UNSAFE_VERBS.include?(verb) && STRICT_SENSITIVE_CODES.include?(code)
+        fail StateError, "can't follow #{@response.status} redirect" if @strict
+        verb = :get
+      end
+
+      verb = :get if !SEE_OTHER_ALLOWED_VERBS.include?(verb) && 303 == code
+
+      @request.redirect(uri, verb)
     end
   end
 end

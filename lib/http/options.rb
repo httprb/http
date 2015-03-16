@@ -72,6 +72,15 @@ module HTTP
       def_option method_name
     end
 
+    def follow=(value)
+      @follow = case
+                when !value                    then nil
+                when true == value             then {}
+                when value.respond_to?(:fetch) then value
+                else argument_error! "Unsupported follow options: #{value}"
+                end
+    end
+
     def_option :cache do |cache_or_cache_options|
       if cache_or_cache_options.respond_to? :perform
         cache_or_cache_options

@@ -60,7 +60,7 @@ RSpec.describe HTTP::Client do
     end
 
     it "fails if max amount of hops reached" do
-      client = StubbedClient.new(:follow => 5).stub(
+      client = StubbedClient.new(:follow => {:max_hops => 5}).stub(
         "http://example.com/"  => redirect_response("/1"),
         "http://example.com/1" => redirect_response("/2"),
         "http://example.com/2" => redirect_response("/3"),

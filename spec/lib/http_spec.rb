@@ -106,12 +106,12 @@ RSpec.describe HTTP do
 
   context "with redirects" do
     it "is easy for 301" do
-      response = HTTP.with_follow(true).get("#{dummy.endpoint}/redirect-301")
+      response = HTTP.follow.get("#{dummy.endpoint}/redirect-301")
       expect(response.to_s).to match(/<!doctype html>/)
     end
 
     it "is easy for 302" do
-      response = HTTP.with_follow(true).get("#{dummy.endpoint}/redirect-302")
+      response = HTTP.follow.get("#{dummy.endpoint}/redirect-302")
       expect(response.to_s).to match(/<!doctype html>/)
     end
   end
