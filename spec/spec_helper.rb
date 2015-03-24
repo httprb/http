@@ -19,6 +19,13 @@ require 'support/example_server'
 require 'support/proxy_server'
 require 'support/capture_warning'
 
+# Allow testing against a SSL server
+def certs_dir
+  Pathname.new File.expand_path('../../tmp/certs', __FILE__)
+end
+
+require 'support/create_certs'
+
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|

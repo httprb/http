@@ -52,7 +52,7 @@ module HTTP
 
       # TODO: keep-alive support
       @socket = options[:socket_class].open(req.socket_host, req.socket_port)
-      @socket = start_tls(@socket, options) if uri.is_a?(URI::HTTPS) && !req.using_proxy?
+      @socket = start_tls(@socket, uri.host, options) if uri.is_a?(URI::HTTPS) && !req.using_proxy?
 
       req.stream @socket
 
@@ -90,12 +90,17 @@ module HTTP
   private
 
     # Initialize TLS connection
-    def start_tls(socket, options)
+    def start_tls(socket, host, options)
       # TODO: abstract away SSLContexts so we can use other TLS libraries
       context = options[:ssl_context] || OpenSSL::SSL::SSLContext.new
       socket  = options[:ssl_socket_class].new(socket, context)
 
       socket.connect
+
+      if context.verify_mode == OpenSSL::SSL::VERIFY_PEER
+        socket.post_connection_check(host)
+      end
+
       socket
     end
 
