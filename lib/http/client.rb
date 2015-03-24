@@ -9,15 +9,14 @@ module HTTP
   class Client
     include Chainable
 
-    # Input buffer size
-    BUFFER_SIZE = 16_384
+    CONNECTION         = 'Connection'.freeze
+    KEEP_ALIVE         = 'Keep-Alive'.freeze
+    CLOSE              = 'close'.freeze
 
     attr_reader :default_options
 
     def initialize(default_options = {})
       @default_options = HTTP::Options.new(default_options)
-      @parser = HTTP::Response::Parser.new
-      @socket = nil
     end
 
     # Make an HTTP request
@@ -27,6 +26,13 @@ module HTTP
       headers = opts.headers
       proxy   = opts.proxy
       body    = make_request_body(opts, headers)
+
+      # Tell the server to keep the conn open
+      if default_options.persistent?
+        headers[CONNECTION] = KEEP_ALIVE
+      else
+        headers[CONNECTION] = CLOSE
+      end
 
       req = HTTP::Request.new(verb, uri, headers, proxy, body)
       res = perform req, opts
@@ -48,61 +54,50 @@ module HTTP
     end
 
     def make_request(req, options)
-      # finish previous response if client was re-used
-      # TODO: this is pretty wrong, as socket shoud be part of response
-      #       connection, so that re-use of client will not break multiple
-      #       chunked responses
-      finish_response
-
       uri = req.uri
+      if default_options.persistent? && base_host(req.uri) != default_options.persistent
+        raise StateError, "Persistence is enabled for #{default_options.persistent}, but we got #{base_host(req.uri)}"
 
-      # TODO: keep-alive support
-      @socket = options[:socket_class].open(req.socket_host, req.socket_port)
-      @socket = start_tls(@socket, options) if uri.is_a?(URI::HTTPS) && !req.using_proxy?
-
-      req.stream @socket
-
-      read_headers!
-
-      body = Response::Body.new(self)
-      res  = Response.new(@parser.status_code, @parser.http_version, @parser.headers, body, uri)
-
-      finish_response if :head == req.verb
-
-      res
-    end
-
-    # Read a chunk of the body
-    #
-    # @return [String] data chunk
-    # @return [Nil] when no more data left
-    def readpartial(size = BUFFER_SIZE)
-      return unless @socket
-
-      begin
-        read_more size
-        finished = @parser.finished?
-      rescue EOFError
-        finished = true
+      # We re-create the connection object because we want to let prior requests
+      # lazily load the body as long as possible, and this mimics prior functionality.
+      elsif !default_options.persistent? || ( @connection && !@connection.keep_alive? )
+        @connection = nil
       end
 
-      chunk = @parser.chunk
+      @connection ||= HTTP::Connection.new(req, options)
+      @connection.send_request(req)
+      @connection.read_headers!
 
-      finish_response if finished
+      res = Response.new(
+        @connection.parser.status_code,
+        @connection.parser.http_version,
+        @connection.parser.headers,
+        Response::Body.new(@connection),
+        uri
+      )
 
-      chunk.to_s
+      @connection.finish_response if req.verb == :head
+
+      res
+
+    # Network errors need to clear the connection allowing us to
+    # open a new one and process the next request properly.
+    rescue EOFError, IOError
+      if default_options.persistent?
+        @connection.close rescue nil
+        @connection = nil
+      end
+
+      raise
     end
 
     private
 
-    # Initialize TLS connection
-    def start_tls(socket, options)
-      # TODO: abstract away SSLContexts so we can use other TLS libraries
-      context = options[:ssl_context] || OpenSSL::SSL::SSLContext.new
-      socket  = options[:ssl_socket_class].new(socket, context)
-
-      socket.connect
-      socket
+    def base_host(uri)
+      base = uri.dup
+      base.query = nil
+      base.path = ""
+      base.to_s
     end
 
     # Merges query params if needed
@@ -146,27 +141,6 @@ module HTTP
         headers["Content-Type"] ||= "application/json"
         MimeType[:json].encode opts.json
       end
-    end
-
-    # Reads data from socket up until headers
-    def read_headers!
-      read_more BUFFER_SIZE until @parser.headers
-    rescue IOError, Errno::ECONNRESET, Errno::EPIPE => ex
-      return if ex.is_a?(EOFError) && @parser.headers
-      raise IOError, "problem making HTTP request: #{ex}"
-    end
-
-    # Callback for when we've reached the end of a response
-    def finish_response
-      @socket.close if @socket && !@socket.closed?
-      @parser.reset
-
-      @socket = nil
-    end
-
-    # Feeds some more data into parser
-    def read_more(size)
-      @parser << @socket.readpartial(size) unless @parser.finished?
     end
   end
 end

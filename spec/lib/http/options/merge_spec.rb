@@ -27,6 +27,7 @@ RSpec.describe HTTP::Options, "merge" do
 
     bar = HTTP::Options.new(
       :response  => :parsed_body,
+      :persistent  => 'https://www.googe.com',
       :params      => {:plop => "plip"},
       :form      => {:bar => "bar"},
       :body      => "body-bar",
@@ -40,6 +41,7 @@ RSpec.describe HTTP::Options, "merge" do
       :form      => {:bar => "bar"},
       :body      => "body-bar",
       :json      => {:bar => "bar"},
+      :persistent  => 'https://www.googe.com',
       :headers   => {"Foo" => "foo", "Accept"  => "xml", "Bar" => "bar"},
       :proxy     => {:proxy_address => "127.0.0.1", :proxy_port => 8080},
       :follow => nil,

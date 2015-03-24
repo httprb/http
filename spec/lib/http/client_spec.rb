@@ -3,6 +3,7 @@ require "http/cache"
 
 RSpec.describe HTTP::Client do
   run_server(:dummy) { DummyServer.new }
+  run_server(:dummy_ssl) { DummyServer.new(:ssl => true) }
 
   StubbedClient = Class.new(HTTP::Client) do
     def make_request(request, options)
@@ -165,28 +166,92 @@ RSpec.describe HTTP::Client do
     end
   end
 
+  describe "connection reuse" do
+    let(:client) do
+      described_class.new(
+        :persistent => reuse_conn
+      )
+    end
+
+    context "when enabled" do
+      let(:reuse_conn) { dummy.endpoint }
+
+      it "re-uses the socket" do
+        first_socket = client.get("#{dummy.endpoint}/socket").body.to_s
+        expect(first_socket).to_not eq('')
+
+        second_socket = client.get("#{dummy.endpoint}/socket").body.to_s
+        expect(second_socket).to eq(first_socket)
+      end
+
+      context "with a change in host" do
+        it "errors" do
+          expect { client.get("https://invalid.com/socket") }.to raise_error(/Persistence is enabled/i)
+        end
+      end
+    end
+
+    context "when disabled" do
+      let(:reuse_conn) { nil }
+
+      it "opens new sockets" do
+        first_socket = client.get("#{dummy.endpoint}/socket").body.to_s
+        expect(first_socket).to_not eq('')
+
+        second_socket = client.get("#{dummy.endpoint}/socket").body.to_s
+        expect(second_socket).to_not eq(first_socket)
+      end
+    end
+  end
+
+  describe "SSL" do
+    let(:client) do
+      described_class.new(
+        :ssl_context => OpenSSL::SSL::SSLContext.new.tap do |context|
+          context.options = OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:options]
+
+          context.verify_mode = OpenSSL::SSL::VERIFY_PEER
+          context.ca_file = File.join(certs_dir, "ca.crt")
+          context.cert = OpenSSL::X509::Certificate.new(
+            File.read(File.join(certs_dir, "client.crt"))
+          )
+          context.key = OpenSSL::PKey::RSA.new(
+            File.read(File.join(certs_dir, "client.key"))
+          )
+          context
+        end
+      )
+    end
+
+    it "works via SSL" do
+      response = client.get(dummy_ssl.endpoint)
+      expect(response.body.to_s).to eq("<!doctype html>")
+    end
+
+    context "with a mismatch host" do
+      it "errors" do
+        expect { client.get(dummy_ssl.endpoint.gsub("127.0.0.1", "localhost")) }
+          .to raise_error(OpenSSL::SSL::SSLError, /does not match/)
+      end
+    end
+  end
+
   describe "#perform" do
     let(:client) { described_class.new }
 
-    it "calls finish_response before actual performance" do
-      allow(TCPSocket).to receive(:open) { throw :halt }
-      expect(client).to receive(:finish_response)
-      catch(:halt) { client.head dummy.endpoint }
-    end
-
     it "calls finish_response once body was fully flushed" do
-      expect(client).to receive(:finish_response).twice.and_call_original
+      expect_any_instance_of(HTTP::Connection).to receive(:finish_response).and_call_original
       client.get(dummy.endpoint).to_s
     end
 
     context "with HEAD request" do
       it "does not iterates through body" do
-        expect(client).to_not receive(:readpartial)
+        expect_any_instance_of(HTTP::Connection).to_not receive(:readpartial)
         client.head(dummy.endpoint)
       end
 
       it "finishes response after headers were received" do
-        expect(client).to receive(:finish_response).twice.and_call_original
+        expect_any_instance_of(HTTP::Connection).to receive(:finish_response).and_call_original
         client.head(dummy.endpoint)
       end
     end

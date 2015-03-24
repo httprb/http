@@ -58,7 +58,7 @@ module HTTP
       self.headers.merge(headers)
     end
 
-    %w(proxy params form json body follow response socket_class ssl_socket_class ssl_context).each do |method_name|
+    %w(proxy params form json body follow response socket_class ssl_socket_class ssl_context persistent).each do |method_name|
       def_option method_name
     end
 
@@ -69,6 +69,10 @@ module HTTP
         require "http/cache"
         HTTP::Cache.new(cache_or_cache_options)
       end
+    end
+
+    def persistent?
+      !persistent.nil? && persistent != ''
     end
 
     def [](option)
