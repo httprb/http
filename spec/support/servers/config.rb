@@ -1,4 +1,8 @@
 module ServerConfig
+  def ssl?
+    !!config[:SSLEnable]
+  end
+
   def addr
     config[:BindAddress]
   end
