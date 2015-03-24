@@ -28,6 +28,7 @@ group :test do
   gem "rspec-its"
   gem "rubocop"
   gem "yardstick"
+  gem "certificate_authority"
 end
 
 group :doc do

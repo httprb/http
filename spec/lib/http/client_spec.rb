@@ -3,6 +3,7 @@ require "http/cache"
 
 RSpec.describe HTTP::Client do
   run_server(:dummy) { DummyServer.new }
+  run_server(:dummy_ssl) { DummyServer.new(:ssl => true) }
 
   StubbedClient = Class.new(HTTP::Client) do
     def make_request(request, options)
@@ -161,6 +162,38 @@ RSpec.describe HTTP::Client do
         end
 
         client.request(:get, "http://example.com/")
+      end
+    end
+  end
+
+  describe "SSL" do
+    let(:client) do
+      described_class.new(
+        :ssl_context => OpenSSL::SSL::SSLContext.new.tap do |context|
+          context.options = OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:options]
+
+          context.verify_mode = OpenSSL::SSL::VERIFY_PEER
+          context.ca_file = File.join(certs_dir, "ca.crt")
+          context.cert = OpenSSL::X509::Certificate.new(
+            File.read(File.join(certs_dir, "client.crt"))
+          )
+          context.key = OpenSSL::PKey::RSA.new(
+            File.read(File.join(certs_dir, "client.key"))
+          )
+          context
+        end
+      )
+    end
+
+    it "works via SSL" do
+      response = client.get(dummy_ssl.endpoint)
+      expect(response.body.to_s).to eq("<!doctype html>")
+    end
+
+    context "with a mismatch host" do
+      it "errors" do
+        expect { client.get(dummy_ssl.endpoint.gsub("127.0.0.1", "localhost")) }
+          .to raise_error(OpenSSL::SSL::SSLError, /does not match/)
       end
     end
   end

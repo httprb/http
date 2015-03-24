@@ -3,7 +3,7 @@ Metrics/BlockNesting:
 
 Metrics/ClassLength:
   CountComments: false
-  Max: 100
+  Max: 110
 
 Metrics/CyclomaticComplexity:
   Max: 8 # TODO: Lower to 6
