@@ -1,3 +1,11 @@
+0.6.4 (2015-03-25)
+------------------
+
+* SECURITY FIX: http.rb failed to call the `#post_connection_check` method on
+  SSL connections. This method implements hostname verification, and without it
+  `http.rb` was vulnerable to MitM attacks. The problem was corrected by calling
+  `#post_connection_check` (CVE-2015-1828) (@zanker, backported by @nicoolas25)
+
 0.6.3 (2014-11-14)
 ------------------
 
