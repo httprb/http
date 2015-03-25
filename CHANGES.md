@@ -15,6 +15,7 @@
   without it http.rb was vulnerable to MitM attacks. The problem was
   corrected by calling #post_connection_check (CVE-2015-1828)
 
+
 ## 0.7.2 (2015-03-02)
 
 * Swap from `form_data` to `http-form_data` (changed gem name).
