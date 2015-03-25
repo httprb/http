@@ -26,6 +26,7 @@ group :test do
   gem 'simplecov', '>= 0.9'
   gem 'yardstick'
   gem 'certificate_authority'
+  gem 'activemodel', '~> 3.0'
 end
 
 # Specify your gem's dependencies in http.gemspec
