@@ -100,6 +100,7 @@ module HTTP
       # TODO: abstract away SSLContexts so we can use other TLS libraries
       context = options[:ssl_context] || OpenSSL::SSL::SSLContext.new
       socket  = options[:ssl_socket_class].new(socket, context)
+      socket.sync_close = true if socket.respond_to?(:sync_close=)
 
       socket.connect
 
