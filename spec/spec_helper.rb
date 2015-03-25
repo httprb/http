@@ -14,6 +14,13 @@ require 'http'
 require 'support/example_server'
 require 'support/proxy_server'
 
+# Allow testing against a SSL server
+def certs_dir
+  Pathname.new File.expand_path('../../tmp/certs', __FILE__)
+end
+
+require 'support/create_certs'
+
 RSpec.configure do |config|
   config.expect_with :rspec do |c|
     c.syntax = :expect
