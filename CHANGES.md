@@ -1,3 +1,10 @@
+## 0.7.3 (2015-03-24)
+
+* SECURITY FIX: http.rb failed to call the #post_connection_check method
+  on SSL connections. This method implements hostname verification, and
+  without it http.rb was vulnerable to MitM attacks. The problem was
+  corrected by calling #post_connection_check (CVE-2015-1828)
+
 ## 0.7.2 (2015-03-02)
 
 * Swap from `form_data` to `http-form_data` (changed gem name).
