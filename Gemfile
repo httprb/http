@@ -27,6 +27,7 @@ group :test do
   gem 'yardstick'
   gem 'certificate_authority'
   gem 'activemodel', '~> 3.0'
+  gem 'i18n', '~> 0.6.0'
 end
 
 # Specify your gem's dependencies in http.gemspec
