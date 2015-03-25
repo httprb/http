@@ -25,6 +25,9 @@ group :test do
   gem 'rubocop', '~> 0.24.0', :platforms => [:ruby_19, :ruby_20, :ruby_21]
   gem 'simplecov', '>= 0.9'
   gem 'yardstick'
+  gem 'certificate_authority'
+  gem 'activemodel', '~> 3.0'
+  gem 'i18n', '~> 0.6.0'
 end
 
 # Specify your gem's dependencies in http.gemspec
