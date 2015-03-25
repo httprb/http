@@ -2,14 +2,14 @@ class DummyServer < WEBrick::HTTPServer
   class Servlet < WEBrick::HTTPServlet::AbstractServlet
     def not_found(_req, res)
       res.status = 404
-      res.body   = "Not Found"
+      res.body   = 'Not Found'
     end
 
     def self.handlers
       @handlers ||= {}
     end
 
-    %w(get post head).each do |method|
+    %w[get post head].each do |method|
       class_eval <<-RUBY, __FILE__, __LINE__
         def self.#{method}(path, &block)
           handlers["#{method}:\#{path}"] = block
@@ -22,9 +22,9 @@ class DummyServer < WEBrick::HTTPServer
       RUBY
     end
 
-    get "/" do |req, res|
+    get '/' do |_req, res|
       res.status = 200
-      res.body   = "<!doctype html>"
+      res.body   = '<!doctype html>'
     end
   end
 end
