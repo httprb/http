@@ -72,6 +72,13 @@ module HTTP
       branch(options).request verb, uri
     end
 
+    # Flag as persistent
+    # @param [String] host
+    # @raise [Request::Error] if Host is invalid
+    def persistent(host)
+      branch default_options.with_persistent host
+    end
+
     # Make a request through an HTTP proxy
     # @param [Array] proxy
     # @raise [Request::Error] if HTTP proxy is invalid

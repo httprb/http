@@ -8,7 +8,7 @@ module HTTP
 
       # @return [String,nil] the next `size` octets part of the
       # body, or nil if whole body has already been read.
-      def readpartial(size = HTTP::Client::BUFFER_SIZE)
+      def readpartial(size = HTTP::Connection::BUFFER_SIZE)
         stream!
         return nil if stream.eof?
 
