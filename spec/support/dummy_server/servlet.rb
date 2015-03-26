@@ -40,6 +40,20 @@ class DummyServer < WEBrick::HTTPServer
       end
     end
 
+    get "/sleep" do |_, res|
+      sleep 2
+
+      res.status = 200
+      res.body   = "hello"
+    end
+
+    post "/sleep" do |_, res|
+      sleep 2
+
+      res.status = 200
+      res.body   = "hello"
+    end
+
     ["", "/1", "/2"].each do |path|
       get "/socket#{path}" do |req, res|
         self.class.sockets << req.instance_variable_get(:@socket)

@@ -16,14 +16,22 @@ module HTTP
 
       @parser = Response::Parser.new
 
-      @socket = options[:socket_class].open(req.socket_host, req.socket_port)
+      @socket = options[:timeout_class].new(options[:timeout_options])
+      @socket.connect(options[:socket_class], req.socket_host, req.socket_port)
 
-      start_tls(req.uri.host, options[:ssl_socket_class], options[:ssl_context]) if req.uri.is_a?(URI::HTTPS) && !req.using_proxy?
+      @socket.start_tls(
+        req.uri.host,
+        options[:ssl_socket_class],
+        options[:ssl_context]
+      ) if req.uri.is_a?(URI::HTTPS) && !req.using_proxy?
 
       reset_timer
     end
 
     # Send a request to the server
+    #
+    # @param [Request] Request to send to the server
+    # @return [Nil]
     def send_request(req)
       if pending_response
         fail StateError, "Tried to send a request while one is pending already. Make sure you read off the body."
@@ -60,7 +68,7 @@ module HTTP
       chunk.to_s
     end
 
-    # Reads data from socket up until headers
+    # Reads data from socket up until headers are loaded
     def read_headers!
       read_more BUFFER_SIZE until parser.headers
       set_keep_alive
@@ -131,23 +139,5 @@ module HTTP
     end
 
     private :read_more
-
-    # Starts the SSL connection
-    def start_tls(host, ssl_socket_class, ssl_context)
-      # TODO: abstract away SSLContexts so we can use other TLS libraries
-      ssl_context ||= OpenSSL::SSL::SSLContext.new
-      @socket = ssl_socket_class.new(socket, ssl_context)
-      socket.sync_close = true
-
-      socket.connect
-
-      if ssl_context.verify_mode == OpenSSL::SSL::VERIFY_PEER
-        socket.post_connection_check(host)
-      end
-
-      socket
-    end
-
-    private :start_tls
   end
 end

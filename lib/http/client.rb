@@ -17,6 +17,7 @@ module HTTP
 
     def initialize(default_options = {})
       @default_options = HTTP::Options.new(default_options)
+      @connection = nil
     end
 
     # Make an HTTP request

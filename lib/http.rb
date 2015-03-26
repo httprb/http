@@ -1,6 +1,9 @@
 require "http/parser"
 
 require "http/errors"
+require "http/timeout/null"
+require "http/timeout/per_operation"
+require "http/timeout/global"
 require "http/chainable"
 require "http/client"
 require "http/connection"
