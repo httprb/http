@@ -1,5 +1,9 @@
 class DummyServer < WEBrick::HTTPServer
   class Servlet < WEBrick::HTTPServlet::AbstractServlet
+    def self.sockets
+      @sockets ||= []
+    end
+
     def not_found(_req, res)
       res.status = 404
       res.body   = "Not Found"
@@ -33,6 +37,14 @@ class DummyServer < WEBrick::HTTPServer
       else
         res["Content-Type"] = "text/html"
         res.body   = "<!doctype html>"
+      end
+    end
+
+    ["", "/1", "/2"].each do |path|
+      get "/socket#{path}" do |req, res|
+        self.class.sockets << req.instance_variable_get(:@socket)
+        res.status  = 200
+        res.body    = req.instance_variable_get(:@socket).object_id.to_s
       end
     end
 

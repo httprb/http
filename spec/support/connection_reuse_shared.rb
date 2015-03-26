@@ -1,0 +1,100 @@
+RSpec.shared_context "handles shared connections" do
+  describe "connection reuse" do
+    let(:sockets_used) do
+      [
+        client.get("#{server.endpoint}/socket/1").body.to_s,
+        client.get("#{server.endpoint}/socket/2").body.to_s
+      ]
+    end
+
+    context "when enabled" do
+      let(:reuse_conn) { server.endpoint }
+
+      context "without a host" do
+        it "infers host from persistent config" do
+          expect(client.get("/").body.to_s).to eq("<!doctype html>")
+        end
+      end
+
+      it "re-uses the socket" do
+        expect(sockets_used).to_not include("")
+        expect(sockets_used.uniq.length).to eq(1)
+      end
+
+      context "when trying to read a stale body" do
+        it "errors" do
+          first_res = client.get(server.endpoint)
+          second_res = client.get(server.endpoint)
+
+          # This should work, because it's the last request we made
+          expect(second_res.body.to_s).to eq("<!doctype html>")
+
+          # This should not work because we've not read anything
+          expect { first_res.body.to_s }.to raise_error(HTTP::StateError, /Sequence ID 1 does not match 2/i)
+        end
+      end
+
+      context "when reading a cached body" do
+        it "succeeds" do
+          first_res = client.get(server.endpoint)
+          first_res.body.to_s
+
+          second_res = client.get(server.endpoint)
+
+          expect(first_res.body.to_s).to eq("<!doctype html>")
+          expect(second_res.body.to_s).to eq("<!doctype html>")
+        end
+      end
+
+      context "when streaming" do
+        it "errors with a stale response" do
+          first_res = client.get(server.endpoint)
+          second_res = client.get(server.endpoint)
+
+          # This should work, because it's the last request we made
+          expect(second_res.body.to_s).to eq("<!doctype html>")
+
+          # This should not work because we've not read anything
+          expect { first_res.body.each(&:to_s) }.to raise_error(HTTP::StateError, /Sequence ID 1 does not match 2/i)
+        end
+      end
+
+      context "with a socket issue" do
+        it "transparently reopens" do
+          first_socket = client.get("#{server.endpoint}/socket").body.to_s
+          expect(first_socket).to_not eq("")
+
+          # Kill off the sockets we used
+          # rubocop:disable Style/RescueModifier
+          DummyServer::Servlet.sockets.each do |socket|
+            socket.close rescue nil
+          end
+          DummyServer::Servlet.sockets.clear
+          # rubocop:enable Style/RescueModifier
+
+          # Should error because we tried to use a bad socket
+          expect { client.get("#{server.endpoint}/socket").body.to_s }.to raise_error(IOError)
+
+          # Should succeed since we create a new socket
+          second_socket = client.get("#{server.endpoint}/socket").body.to_s
+          expect(second_socket).to_not eq(first_socket)
+        end
+      end
+
+      context "with a change in host" do
+        it "errors" do
+          expect { client.get("https://invalid.com/socket") }.to raise_error(/Persistence is enabled/i)
+        end
+      end
+    end
+
+    context "when disabled" do
+      let(:reuse_conn) { nil }
+
+      it "opens new sockets" do
+        expect(sockets_used).to_not include("")
+        expect(sockets_used.uniq.length).to eq(2)
+      end
+    end
+  end
+end

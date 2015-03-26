@@ -1,3 +1,4 @@
+require "support/connection_reuse_shared"
 require "support/dummy_server"
 require "http/cache"
 
@@ -166,9 +167,18 @@ RSpec.describe HTTP::Client do
     end
   end
 
+  include_context "handles shared connections" do
+    let(:reuse_conn) { nil }
+    let(:server) { dummy }
+    let(:client) { described_class.new(:persistent => reuse_conn) }
+  end
+
   describe "SSL" do
+    let(:reuse_conn) { nil }
+
     let(:client) do
       described_class.new(
+        :persistent => reuse_conn,
         :ssl_context => OpenSSL::SSL::SSLContext.new.tap do |context|
           context.options = OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:options]
 
@@ -183,6 +193,10 @@ RSpec.describe HTTP::Client do
           context
         end
       )
+    end
+
+    include_context "handles shared connections" do
+      let(:server) { dummy_ssl }
     end
 
     it "works via SSL" do
@@ -201,25 +215,19 @@ RSpec.describe HTTP::Client do
   describe "#perform" do
     let(:client) { described_class.new }
 
-    it "calls finish_response before actual performance" do
-      allow(TCPSocket).to receive(:open) { throw :halt }
-      expect(client).to receive(:finish_response)
-      catch(:halt) { client.head dummy.endpoint }
-    end
-
     it "calls finish_response once body was fully flushed" do
-      expect(client).to receive(:finish_response).twice.and_call_original
+      expect_any_instance_of(HTTP::Connection).to receive(:finish_response).and_call_original
       client.get(dummy.endpoint).to_s
     end
 
     context "with HEAD request" do
       it "does not iterates through body" do
-        expect(client).to_not receive(:readpartial)
+        expect_any_instance_of(HTTP::Connection).to_not receive(:readpartial)
         client.head(dummy.endpoint)
       end
 
       it "finishes response after headers were received" do
-        expect(client).to receive(:finish_response).twice.and_call_original
+        expect_any_instance_of(HTTP::Connection).to receive(:finish_response).and_call_original
         client.head(dummy.endpoint)
       end
     end

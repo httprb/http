@@ -9,15 +9,14 @@ module HTTP
   class Client
     include Chainable
 
-    # Input buffer size
-    BUFFER_SIZE = 16_384
+    CONNECTION         = "Connection".freeze
+    KEEP_ALIVE         = "Keep-Alive".freeze
+    CLOSE              = "close".freeze
 
     attr_reader :default_options
 
     def initialize(default_options = {})
       @default_options = HTTP::Options.new(default_options)
-      @parser = HTTP::Response::Parser.new
-      @socket = nil
     end
 
     # Make an HTTP request
@@ -27,6 +26,13 @@ module HTTP
       headers = opts.headers
       proxy   = opts.proxy
       body    = make_request_body(opts, headers)
+
+      # Tell the server to keep the conn open
+      if default_options.persistent?
+        headers[CONNECTION] = KEEP_ALIVE
+      else
+        headers[CONNECTION] = CLOSE
+      end
 
       req = HTTP::Request.new(verb, uri, headers, proxy, body)
       res = perform req, opts
@@ -48,67 +54,55 @@ module HTTP
     end
 
     def make_request(req, options)
-      # finish previous response if client was re-used
-      # TODO: this is pretty wrong, as socket shoud be part of response
-      #       connection, so that re-use of client will not break multiple
-      #       chunked responses
-      finish_response
+      verify_connection!(req.uri)
 
-      uri = req.uri
+      @connection ||= HTTP::Connection.new(req, options)
+      @connection.send_request(req)
+      @connection.read_headers!
 
-      # TODO: keep-alive support
-      @socket = options[:socket_class].open(req.socket_host, req.socket_port)
-      @socket = start_tls(@socket, uri.host, options) if uri.is_a?(URI::HTTPS) && !req.using_proxy?
+      res = Response.new(
+        @connection.parser.status_code,
+        @connection.parser.http_version,
+        @connection.parser.headers,
+        Response::Body.new(@connection),
+        req.uri
+      )
 
-      req.stream @socket
-
-      read_headers!
-
-      body = Response::Body.new(self)
-      res  = Response.new(@parser.status_code, @parser.http_version, @parser.headers, body, uri)
-
-      finish_response if :head == req.verb
+      @connection.finish_response if req.verb == :head
 
       res
-    end
 
-    # Read a chunk of the body
-    #
-    # @return [String] data chunk
-    # @return [Nil] when no more data left
-    def readpartial(size = BUFFER_SIZE)
-      return unless @socket
-
-      begin
-        read_more size
-        finished = @parser.finished?
-      rescue EOFError
-        finished = true
+    # On any exception we reset the conn. This is a safety measure, to ensure
+    # we don't have conns in a bad state resulting in mixed requests/responses
+    rescue
+      if default_options.persistent? && @connection
+        @connection.close
+        @connection = nil
       end
 
-      chunk = @parser.chunk
-
-      finish_response if finished
-
-      chunk.to_s
+      raise
     end
 
     private
 
-    # Initialize TLS connection
-    def start_tls(socket, host, options)
-      # TODO: abstract away SSLContexts so we can use other TLS libraries
-      context = options[:ssl_context] || OpenSSL::SSL::SSLContext.new
-      socket  = options[:ssl_socket_class].new(socket, context)
-      socket.sync_close = true if socket.respond_to?(:sync_close=)
+    # Verify our request isn't going to be made against another URI
+    def verify_connection!(uri)
+      if default_options.persistent? && base_host(uri) != default_options.persistent
+        fail StateError, "Persistence is enabled for #{default_options.persistent}, but we got #{base_host(uri)}"
 
-      socket.connect
-
-      if context.verify_mode == OpenSSL::SSL::VERIFY_PEER
-        socket.post_connection_check(host)
+      # We re-create the connection object because we want to let prior requests
+      # lazily load the body as long as possible, and this mimics prior functionality.
+      elsif !default_options.persistent? || (@connection && !@connection.keep_alive?)
+        @connection = nil
       end
+    end
 
-      socket
+    # Strips out query/path to give us a consistent way of comparing hosts
+    def base_host(uri)
+      base = uri.dup
+      base.query = nil
+      base.path = ""
+      base.to_s
     end
 
     # Merges query params if needed
@@ -128,7 +122,11 @@ module HTTP
     # @param [#to_s] uri
     # @return [URI]
     def normalize_uri(uri)
-      uri = URI uri.to_s
+      if default_options.persistent? && uri !~ /^http|https/
+        uri = URI("#{default_options.persistent}#{uri}")
+      else
+        uri = URI(uri.to_s)
+      end
 
       # Some proxies (seen on WEBRick) fail if URL has
       # empty path (e.g. `http://example.com`) while it's RFC-complaint:
@@ -152,27 +150,6 @@ module HTTP
         headers["Content-Type"] ||= "application/json"
         MimeType[:json].encode opts.json
       end
-    end
-
-    # Reads data from socket up until headers
-    def read_headers!
-      read_more BUFFER_SIZE until @parser.headers
-    rescue IOError, Errno::ECONNRESET, Errno::EPIPE => ex
-      return if ex.is_a?(EOFError) && @parser.headers
-      raise IOError, "problem making HTTP request: #{ex}"
-    end
-
-    # Callback for when we've reached the end of a response
-    def finish_response
-      @socket.close if @socket && !@socket.closed?
-      @parser.reset
-
-      @socket = nil
-    end
-
-    # Feeds some more data into parser
-    def read_more(size)
-      @parser << @socket.readpartial(size) unless @parser.finished?
     end
   end
 end
