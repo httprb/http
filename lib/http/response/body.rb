@@ -13,13 +13,10 @@ module HTTP
         @client       = client
         @streaming    = nil
         @contents     = nil
-        @active_seq   = client.sequence_id
       end
 
       # (see HTTP::Client#readpartial)
       def readpartial(*args)
-        check_sequence!
-
         stream!
         @client.readpartial(*args)
       end
@@ -36,7 +33,6 @@ module HTTP
         return @contents if @contents
 
         fail StateError, "body is being streamed" unless @streaming.nil?
-        check_sequence!
 
         begin
           @streaming = false
@@ -52,14 +48,6 @@ module HTTP
         @contents
       end
       alias_method :to_str, :to_s
-
-      def check_sequence!
-        return unless @active_seq != @client.sequence_id
-
-        fail StateError, "Sequence ID #{@active_seq} does not match #{@client.sequence_id}. You must read the entire request off."
-      end
-
-      private :check_sequence!
 
       # Assert that the body is actively being streamed
       def stream!
