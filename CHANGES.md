@@ -1,6 +1,7 @@
 ## 0.8.0.pre (2015-03-26)
 
 * Support for persistent HTTP connections (@zanker)
+* Add caching support. See #77 and #177. (@Asmod4n, @pezra)
 * Improve servers used in specs boot up. Issue was initially raised up
   by @olegkovalenko. See #176.
 * Reflect FormData rename changes (FormData -> HTTP::FormData). (@ixti)
