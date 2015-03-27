@@ -4,7 +4,7 @@ module HTTP
   # A connection to the HTTP server
   class Connection
     attr_reader :socket, :parser, :persistent,
-                :pending_request, :pending_response, :sequence_id
+                :pending_request, :pending_response
 
     # Attempt to read this much data
     BUFFER_SIZE = 16_384
@@ -13,7 +13,6 @@ module HTTP
       @persistent = options.persistent?
 
       @parser = Response::Parser.new
-      @sequence_id = 0
 
       @socket = options[:socket_class].open(req.socket_host, req.socket_port)
 
@@ -22,14 +21,13 @@ module HTTP
 
     # Send a request to the server
     def send_request(req)
-      if pending_request
-        fail StateError, "Tried to send a request while one is pending already. This cannot be called from multiple threads!"
+      if pending_response
+        fail StateError, "Tried to send a request while one is pending already. Make sure you read off the body."
       elsif pending_request
         fail StateError, "Tried to send a request while a response is pending. Make sure you've fully read the body from the request."
       end
 
       @pending_request = true
-      @sequence_id += 1
 
       req.stream socket
 

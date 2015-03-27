@@ -23,14 +23,8 @@ RSpec.shared_context "handles shared connections" do
 
       context "when trying to read a stale body" do
         it "errors" do
-          first_res = client.get(server.endpoint)
-          second_res = client.get(server.endpoint)
-
-          # This should work, because it's the last request we made
-          expect(second_res.body.to_s).to eq("<!doctype html>")
-
-          # This should not work because we've not read anything
-          expect { first_res.body.to_s }.to raise_error(HTTP::StateError, /Sequence ID 1 does not match 2/i)
+          client.get("#{server.endpoint}/not-found")
+          expect { client.get(server.endpoint) }.to raise_error(HTTP::StateError, /Tried to send a request/)
         end
       end
 
@@ -43,19 +37,6 @@ RSpec.shared_context "handles shared connections" do
 
           expect(first_res.body.to_s).to eq("<!doctype html>")
           expect(second_res.body.to_s).to eq("<!doctype html>")
-        end
-      end
-
-      context "when streaming" do
-        it "errors with a stale response" do
-          first_res = client.get(server.endpoint)
-          second_res = client.get(server.endpoint)
-
-          # This should work, because it's the last request we made
-          expect(second_res.body.to_s).to eq("<!doctype html>")
-
-          # This should not work because we've not read anything
-          expect { first_res.body.each(&:to_s) }.to raise_error(HTTP::StateError, /Sequence ID 1 does not match 2/i)
         end
       end
 
