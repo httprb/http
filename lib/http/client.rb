@@ -75,12 +75,14 @@ module HTTP
     # On any exception we reset the conn. This is a safety measure, to ensure
     # we don't have conns in a bad state resulting in mixed requests/responses
     rescue
-      if default_options.persistent? && @connection
-        @connection.close
-        @connection = nil
-      end
+      close if default_options.persistent?
 
       raise
+    end
+
+    def close
+      @connection.close if @connection
+      @connection = nil
     end
 
     private
@@ -93,7 +95,7 @@ module HTTP
       # We re-create the connection object because we want to let prior requests
       # lazily load the body as long as possible, and this mimics prior functionality.
       elsif !default_options.persistent? || (@connection && !@connection.keep_alive?)
-        @connection = nil
+        close
       end
     end
 
