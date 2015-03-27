@@ -74,6 +74,7 @@ module HTTP
     def persistent?
       !persistent.nil? && persistent != ""
     end
+    alias_method :open?, :persistent?
 
     def [](option)
       send(option) rescue nil

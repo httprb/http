@@ -78,6 +78,7 @@ module HTTP
     def persistent(host)
       branch default_options.with_persistent host
     end
+    alias_method :open, :persistent
 
     # Make a request through an HTTP proxy
     # @param [Array] proxy
