@@ -32,6 +32,7 @@ RSpec.describe HTTP::Options, "merge" do
       :form      => {:bar => "bar"},
       :body      => "body-bar",
       :json      => {:bar => "bar"},
+      :keep_alive_timeout => 10,
       :headers   => {:accept  => "xml", :bar => "bar"},
       :proxy     => {:proxy_address => "127.0.0.1", :proxy_port => 8080})
 
@@ -42,6 +43,7 @@ RSpec.describe HTTP::Options, "merge" do
       :body      => "body-bar",
       :json      => {:bar => "bar"},
       :persistent  => "https://www.googe.com",
+      :keep_alive_timeout => 10,
       :headers   => {"Foo" => "foo", "Accept"  => "xml", "Bar" => "bar"},
       :proxy     => {:proxy_address => "127.0.0.1", :proxy_port => 8080},
       :follow => nil,

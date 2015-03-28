@@ -3,7 +3,7 @@ require "http/response/parser"
 module HTTP
   # A connection to the HTTP server
   class Connection
-    attr_reader :socket, :parser, :persistent,
+    attr_reader :socket, :parser, :persistent, :keep_alive_timeout,
                 :pending_request, :pending_response
 
     # Attempt to read this much data
@@ -12,11 +12,15 @@ module HTTP
     def initialize(req, options)
       @persistent = options.persistent?
 
+      @keep_alive_timeout = options[:keep_alive_timeout]
+
       @parser = Response::Parser.new
 
       @socket = options[:socket_class].open(req.socket_host, req.socket_port)
 
       start_tls(req.uri.host, options[:ssl_socket_class], options[:ssl_context]) if req.uri.is_a?(URI::HTTPS) && !req.using_proxy?
+
+      reset_timer
     end
 
     # Send a request to the server
@@ -71,6 +75,7 @@ module HTTP
       close unless keep_alive?
 
       parser.reset
+      reset_timer
 
       @pending_response = nil
     end
@@ -87,6 +92,17 @@ module HTTP
     def keep_alive?
       !!@keep_alive && !socket.closed?
     end
+
+    # Whether our connection has expired
+    def expired?
+      !@conn_expires_at || @conn_expires_at < Time.now
+    end
+
+    def reset_timer
+      @conn_expires_at = Time.now + keep_alive_timeout if persistent
+    end
+
+    private :reset_timer
 
     # Store whether the connection should be kept alive.
     # Once we reset the parser, we lose all of this state.

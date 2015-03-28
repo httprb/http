@@ -62,6 +62,18 @@ RSpec.shared_context "handles shared connections" do
         end
       end
 
+      context "with a Keep-Alive timeout of 0" do
+        let(:keep_alive_timeout) { 0 }
+
+        it "automatically opens a new socket" do
+          first_socket = client.get("#{server.endpoint}/socket/1").body.to_s
+          sleep 0.1
+          second_socket = client.get("#{server.endpoint}/socket/2").body.to_s
+
+          expect(first_socket).to_not eq(second_socket)
+        end
+      end
+
       context "with a change in host" do
         it "errors" do
           expect { client.get("https://invalid.com/socket") }.to raise_error(/Persistence is enabled/i)
