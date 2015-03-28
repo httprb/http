@@ -94,7 +94,7 @@ module HTTP
 
       # We re-create the connection object because we want to let prior requests
       # lazily load the body as long as possible, and this mimics prior functionality.
-      elsif !default_options.persistent? || (@connection && !@connection.keep_alive?)
+      elsif @connection && (!@connection.keep_alive? || @connection.expired?)
         close
       end
     end

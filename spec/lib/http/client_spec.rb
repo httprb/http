@@ -169,16 +169,25 @@ RSpec.describe HTTP::Client do
 
   include_context "handles shared connections" do
     let(:reuse_conn) { nil }
+    let(:keep_alive_timeout) { 5 }
+
     let(:server) { dummy }
-    let(:client) { described_class.new(:persistent => reuse_conn) }
+    let(:client) do
+      described_class.new(
+        :persistent => reuse_conn,
+        :keep_alive_timeout => keep_alive_timeout
+      )
+    end
   end
 
   describe "SSL" do
     let(:reuse_conn) { nil }
+    let(:keep_alive_timeout) { 5 }
 
     let(:client) do
       described_class.new(
         :persistent => reuse_conn,
+        :keep_alive_timeout => keep_alive_timeout,
         :ssl_context => OpenSSL::SSL::SSLContext.new.tap do |context|
           context.options = OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:options]
 

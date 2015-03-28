@@ -44,6 +44,7 @@ module HTTP
                   :socket_class =>     self.class.default_socket_class,
                   :ssl_socket_class => self.class.default_ssl_socket_class,
                   :cache =>            self.class.default_cache,
+                  :keep_alive_timeout  => 5,
                   :headers =>          {}}
 
       opts_w_defaults = defaults.merge(options)
@@ -58,7 +59,11 @@ module HTTP
       self.headers.merge(headers)
     end
 
-    %w(proxy params form json body follow response socket_class ssl_socket_class ssl_context persistent).each do |method_name|
+    %w(
+      proxy params form json body follow response
+      socket_class ssl_socket_class ssl_context
+      persistent keep_alive_timeout
+    ).each do |method_name|
       def_option method_name
     end
 
