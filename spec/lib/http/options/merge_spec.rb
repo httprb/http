@@ -35,6 +35,7 @@ RSpec.describe HTTP::Options, "merge" do
       :keep_alive_timeout => 10,
       :headers   => {:accept  => "xml", :bar => "bar"},
       :timeout_options => {:foo => :bar},
+      :ssl       => {:foo => "bar"},
       :proxy     => {:proxy_address => "127.0.0.1", :proxy_port => 8080})
 
     expect(foo.merge(bar).to_hash).to eq(
@@ -47,6 +48,7 @@ RSpec.describe HTTP::Options, "merge" do
       :json      => {:bar => "bar"},
       :persistent  => "https://www.googe.com",
       :keep_alive_timeout => 10,
+      :ssl       => {:foo => "bar"},
       :headers   => {"Foo" => "foo", "Accept"  => "xml", "Bar" => "bar"},
       :proxy     => {:proxy_address => "127.0.0.1", :proxy_port => 8080},
       :follow => nil,
