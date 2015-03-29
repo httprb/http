@@ -2,6 +2,7 @@ require "cgi"
 require "uri"
 require "http/form_data"
 require "http/options"
+require "http/connection"
 require "http/redirector"
 
 module HTTP
@@ -62,9 +63,9 @@ module HTTP
       @connection.read_headers!
 
       res = Response.new(
-        @connection.parser.status_code,
-        @connection.parser.http_version,
-        @connection.parser.headers,
+        @connection.status_code,
+        @connection.http_version,
+        @connection.headers,
         Response::Body.new(@connection),
         req.uri
       )
