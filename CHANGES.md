@@ -1,4 +1,4 @@
-## 0.8.0.pre4 (2015-03-27)
+## 0.8.0.pre5 (2015-03-27)
 
 * Support for persistent HTTP connections (@zanker)
 * Add caching support. See #77 and #177. (@Asmod4n, @pezra)
