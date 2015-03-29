@@ -280,6 +280,7 @@ versions:
 * Ruby 2.0.0
 * Ruby 2.1.x
 * Ruby 2.2.x
+* JRuby 1.7.x
 
 If something doesn't work on one of these versions, it's a bug.
 
