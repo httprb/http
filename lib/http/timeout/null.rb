@@ -25,8 +25,6 @@ module HTTP
 
       # Configures the SSL connection and starts the connection
       def start_tls(host, ssl_socket_class, ssl_context)
-        # TODO: abstract away SSLContexts so we can use other TLS libraries
-        ssl_context ||= OpenSSL::SSL::SSLContext.new
         @socket = ssl_socket_class.new(socket, ssl_context)
         socket.sync_close = true
 

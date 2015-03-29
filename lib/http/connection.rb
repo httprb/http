@@ -22,7 +22,7 @@ module HTTP
       @socket.start_tls(
         req.uri.host,
         options[:ssl_socket_class],
-        options[:ssl_context]
+        options[:ssl_context] || setup_ssl_context(options[:ssl])
       ) if req.uri.is_a?(URI::HTTPS) && !req.using_proxy?
 
       reset_timer
@@ -139,5 +139,14 @@ module HTTP
     end
 
     private :read_more
+
+    # Sets up a SSL context
+    def setup_ssl_context(params)
+      ssl_context = OpenSSL::SSL::SSLContext.new
+      ssl_context.set_params(params) if params
+      ssl_context
+    end
+
+    private :setup_ssl_context
   end
 end

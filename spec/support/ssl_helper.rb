@@ -79,6 +79,14 @@ module SSLHelper
       context
     end
 
+    def client_params
+      {
+        :key => client_cert.key,
+        :cert => client_cert.cert,
+        :ca_file => ca.file
+      }
+    end
+
     %w(server client).each do |side|
       class_eval <<-RUBY, __FILE__, __LINE__
         def #{side}_cert

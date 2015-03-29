@@ -194,6 +194,17 @@ RSpec.describe HTTP::Client do
       expect { client.get(dummy_ssl.endpoint.gsub("127.0.0.1", "localhost")) }
         .to raise_error(OpenSSL::SSL::SSLError, /does not match/)
     end
+
+    context "with SSL options instead of a context" do
+      let(:client) do
+        described_class.new options.merge :ssl => SSLHelper.client_params
+      end
+
+      it "just works" do
+        response = client.get(dummy_ssl.endpoint)
+        expect(response.body.to_s).to eq("<!doctype html>")
+      end
+    end
   end
 
   describe "#perform" do
