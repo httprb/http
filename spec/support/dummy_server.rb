@@ -5,6 +5,7 @@ require "support/black_hole"
 require "support/dummy_server/servlet"
 require "support/servers/config"
 require "support/servers/runner"
+require "support/ssl_helper"
 
 class DummyServer < WEBrick::HTTPServer
   include ServerConfig
@@ -16,37 +17,25 @@ class DummyServer < WEBrick::HTTPServer
     :Logger       => BlackHole
   }.freeze
 
+  SSL_CONFIG = CONFIG.merge(
+    :SSLEnable            => true,
+    :SSLStartImmediately  => true
+  ).freeze
+
   def initialize(options = {})
-    if options[:ssl]
-      override_config = {
-        :SSLEnable            => true,
-        :SSLStartImmediately  => true
-      }
-    else
-      override_config = {}
-    end
-
-    super CONFIG.merge(override_config)
-
+    super(options[:ssl] ? SSL_CONFIG : CONFIG)
     mount("/", Servlet)
   end
 
   def endpoint
-    "#{ssl? ? 'https' : 'http'}://#{addr}:#{port}"
+    "#{scheme}://#{addr}:#{port}"
+  end
+
+  def scheme
+    config[:SSLEnable] ? "https" : "http"
   end
 
   def ssl_context
-    @ssl_context ||= begin
-      context = OpenSSL::SSL::SSLContext.new
-      context.verify_mode = OpenSSL::SSL::VERIFY_PEER
-      context.key = OpenSSL::PKey::RSA.new(
-        File.read(File.join(certs_dir, "server.key"))
-      )
-      context.cert = OpenSSL::X509::Certificate.new(
-        File.read(File.join(certs_dir, "server.crt"))
-      )
-      context.ca_file = File.join(certs_dir, "ca.crt")
-      context
-    end
+    @ssl_context ||= SSLHelper.server_context
   end
 end
