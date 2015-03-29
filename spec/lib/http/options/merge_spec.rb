@@ -34,10 +34,13 @@ RSpec.describe HTTP::Options, "merge" do
       :json      => {:bar => "bar"},
       :keep_alive_timeout => 10,
       :headers   => {:accept  => "xml", :bar => "bar"},
+      :timeout_options => {:foo => :bar},
       :proxy     => {:proxy_address => "127.0.0.1", :proxy_port => 8080})
 
     expect(foo.merge(bar).to_hash).to eq(
       :response  => :parsed_body,
+      :timeout_class  => described_class.default_timeout_class,
+      :timeout_options => {:foo => :bar},
       :params    => {:plop => "plip"},
       :form      => {:bar => "bar"},
       :body      => "body-bar",

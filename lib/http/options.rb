@@ -8,11 +8,13 @@ module HTTP
     @default_socket_class     = TCPSocket
     @default_ssl_socket_class = OpenSSL::SSL::SSLSocket
 
+    @default_timeout_class = HTTP::Timeout::Null
+
     @default_cache = Http::Cache::NullCache.new
 
     class << self
       attr_accessor :default_socket_class, :default_ssl_socket_class
-      attr_accessor :default_cache
+      attr_accessor :default_cache, :default_timeout_class
 
       def new(options = {})
         return options if options.is_a?(self)
@@ -41,6 +43,8 @@ module HTTP
     def initialize(options = {})
       defaults = {:response =>         :auto,
                   :proxy =>            {},
+                  :timeout_class =>    self.class.default_timeout_class,
+                  :timeout_options =>  {},
                   :socket_class =>     self.class.default_socket_class,
                   :ssl_socket_class => self.class.default_ssl_socket_class,
                   :cache =>            self.class.default_cache,
@@ -62,7 +66,7 @@ module HTTP
     %w(
       proxy params form json body follow response
       socket_class ssl_socket_class ssl_context
-      persistent keep_alive_timeout
+      persistent keep_alive_timeout timeout_class timeout_options
     ).each do |method_name|
       def_option method_name
     end

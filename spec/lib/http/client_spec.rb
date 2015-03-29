@@ -1,4 +1,4 @@
-require "support/connection_reuse_shared"
+require "support/http_handling_shared"
 require "support/dummy_server"
 require "http/cache"
 
@@ -167,44 +167,34 @@ RSpec.describe HTTP::Client do
     end
   end
 
-  include_context "handles shared connections" do
-    let(:reuse_conn) { nil }
-    let(:keep_alive_timeout) { 5 }
-
+  include_context "HTTP handling" do
+    let(:options) { {} }
     let(:server) { dummy }
-    let(:client) do
-      described_class.new(
-        :persistent => reuse_conn,
-        :keep_alive_timeout => keep_alive_timeout
-      )
-    end
+    let(:client) { described_class.new(options) }
   end
 
   describe "SSL" do
-    let(:reuse_conn) { nil }
-    let(:keep_alive_timeout) { 5 }
-
     let(:client) do
       described_class.new(
-        :persistent => reuse_conn,
-        :keep_alive_timeout => keep_alive_timeout,
-        :ssl_context => OpenSSL::SSL::SSLContext.new.tap do |context|
-          context.options = OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:options]
+        options.merge(
+          :ssl_context => OpenSSL::SSL::SSLContext.new.tap do |context|
+            context.options = OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:options]
 
-          context.verify_mode = OpenSSL::SSL::VERIFY_PEER
-          context.ca_file = File.join(certs_dir, "ca.crt")
-          context.cert = OpenSSL::X509::Certificate.new(
-            File.read(File.join(certs_dir, "client.crt"))
-          )
-          context.key = OpenSSL::PKey::RSA.new(
-            File.read(File.join(certs_dir, "client.key"))
-          )
-          context
-        end
+            context.verify_mode = OpenSSL::SSL::VERIFY_PEER
+            context.ca_file = File.join(certs_dir, "ca.crt")
+            context.cert = OpenSSL::X509::Certificate.new(
+              File.read(File.join(certs_dir, "client.crt"))
+            )
+            context.key = OpenSSL::PKey::RSA.new(
+              File.read(File.join(certs_dir, "client.key"))
+            )
+            context
+          end
+        )
       )
     end
 
-    include_context "handles shared connections" do
+    include_context "HTTP handling", true do
       let(:server) { dummy_ssl }
     end
 
