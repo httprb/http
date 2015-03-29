@@ -64,8 +64,11 @@ module HTTP
       @state = :dirty
 
       @connection ||= HTTP::Connection.new(req, options)
-      @connection.send_request(req)
-      @connection.read_headers!
+
+      unless @connection.failed_proxy_connect?
+        @connection.send_request(req)
+        @connection.read_headers!
+      end
 
       res = Response.new(
         @connection.status_code,
