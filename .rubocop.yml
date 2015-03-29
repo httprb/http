@@ -5,6 +5,9 @@ Metrics/ClassLength:
   CountComments: false
   Max: 110
 
+Metrics/PerceivedComplexity:
+  Max: 8
+
 Metrics/CyclomaticComplexity:
   Max: 8 # TODO: Lower to 6
 

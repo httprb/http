@@ -95,13 +95,13 @@ RSpec.shared_context "HTTP handling" do |ssl = false|
       it "errors if connecting takes too long" do
         socket = Socket.new(Socket::AF_INET, Socket::SOCK_STREAM, 0)
 
-        fake_socket = double(:to_io => socket)
-        expect(fake_socket).to receive(:connect_nonblock) do |*args|
+        fake_socket_id = double(:to_io => socket)
+        expect(fake_socket_id).to receive(:connect_nonblock) do |*args|
           sleep 1.25
           socket.connect_nonblock(*args)
         end
 
-        allow_any_instance_of(timeout_class).to receive(:socket).and_return(fake_socket)
+        allow_any_instance_of(timeout_class).to receive(:socket).and_return(fake_socket_id)
 
         expect { response }.to raise_error(HTTP::TimeoutError, /Timed out/)
       end
@@ -148,6 +148,18 @@ RSpec.shared_context "HTTP handling" do |ssl = false|
         expect(sockets_used.uniq.length).to eq(1)
       end
 
+      context "on a mixed state" do
+        it "re-opens the connection" do
+          first_socket_id = client.get("#{server.endpoint}/socket/1").body.to_s
+
+          client.instance_variable_set(:@state, :dirty)
+
+          second_socket_id = client.get("#{server.endpoint}/socket/2").body.to_s
+
+          expect(first_socket_id).to_not eq(second_socket_id)
+        end
+      end
+
       context "when trying to read a stale body" do
         it "errors" do
           client.get("#{server.endpoint}/not-found")
@@ -169,8 +181,8 @@ RSpec.shared_context "HTTP handling" do |ssl = false|
 
       context "with a socket issue" do
         it "transparently reopens" do
-          first_socket = client.get("#{server.endpoint}/socket").body.to_s
-          expect(first_socket).to_not eq("")
+          first_socket_id = client.get("#{server.endpoint}/socket").body.to_s
+          expect(first_socket_id).to_not eq("")
           # Kill off the sockets we used
           # rubocop:disable Style/RescueModifier
           DummyServer::Servlet.sockets.each do |socket|
@@ -183,8 +195,8 @@ RSpec.shared_context "HTTP handling" do |ssl = false|
           expect { client.get("#{server.endpoint}/socket").body.to_s }.to raise_error(IOError)
 
           # Should succeed since we create a new socket
-          second_socket = client.get("#{server.endpoint}/socket").body.to_s
-          expect(second_socket).to_not eq(first_socket)
+          second_socket_id = client.get("#{server.endpoint}/socket").body.to_s
+          expect(second_socket_id).to_not eq(first_socket_id)
         end
       end
 
