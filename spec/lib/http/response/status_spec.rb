@@ -68,12 +68,6 @@ RSpec.describe HTTP::Response::Status do
 
     # "Bad Request"
     its([400]) { is_expected.to be :bad_request }
-
-    # "Request-URI Too Long"
-    its([414]) { is_expected.to be :request_uri_too_long }
-
-    # "I'm a Teapot"
-    its([418]) { is_expected.to be :im_a_teapot }
   end
 
   described_class::SYMBOLS.each do |code, symbol|

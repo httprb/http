@@ -9,6 +9,7 @@ group :development do
   gem "celluloid-io"
   gem "guard"
   gem "guard-rspec", :require => false
+  gem "nokogiri", :require => false
   gem "pry"
 
   platforms :ruby_19, :ruby_20 do
