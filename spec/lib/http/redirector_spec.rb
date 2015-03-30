@@ -25,7 +25,7 @@ RSpec.describe HTTP::Redirector do
     end
   end
 
-  fdescribe "#perform" do
+  describe "#perform" do
     let(:options)    { {} }
     let(:redirector) { described_class.new options }
 
