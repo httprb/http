@@ -131,15 +131,14 @@ module HTTP
     def start_tls(req, options)
       return unless req.uri.is_a?(URI::HTTPS) && !req.using_proxy?
 
-      ssl_class   = options[:ssl_socket_class]
       ssl_context = options[:ssl_context]
 
       unless ssl_context
         ssl_context = OpenSSL::SSL::SSLContext.new
-        ssl_context.set_params options[:ssl] || {}
+        ssl_context.set_params(options[:ssl] || {})
       end
 
-      @socket.start_tls(req.uri.host, ssl_class, ssl_context)
+      @socket.start_tls(req.uri.host, options[:ssl_socket_class], ssl_context)
     end
 
     # Resets expiration of persistent connection.
