@@ -32,12 +32,10 @@ module HTTP
     #   @return [Fixnum]
     attr_reader :max_hops
 
-    # @param [#to_h] opts
+    # @param [Hash] opts
     # @option opts [Boolean] :strict (true) redirector hops policy
     # @option opts [#to_i] :max_hops (5) maximum allowed amount of hops
     def initialize(options = {})
-      options   = options.to_h
-
       @strict   = options.fetch(:strict, true)
       @max_hops = options.fetch(:max_hops, 5).to_i
     end
