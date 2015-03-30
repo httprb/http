@@ -19,6 +19,7 @@ module HTTP
     def initialize(default_options = {})
       @default_options = HTTP::Options.new(default_options)
       @connection = nil
+      @state = :clean
     end
 
     # Make an HTTP request
@@ -56,6 +57,8 @@ module HTTP
     def make_request(req, options)
       verify_connection!(req.uri)
 
+      @state = :dirty
+
       @connection ||= HTTP::Connection.new(req, options)
       @connection.send_request(req)
       @connection.read_headers!
@@ -69,6 +72,7 @@ module HTTP
       )
 
       @connection.finish_response if req.verb == :head
+      @state = :clean
 
       res
 
@@ -83,6 +87,7 @@ module HTTP
     def close
       @connection.close if @connection
       @connection = nil
+      @state = :clean
     end
 
     private
@@ -91,10 +96,13 @@ module HTTP
     def verify_connection!(uri)
       if default_options.persistent? && base_host(uri) != default_options.persistent
         fail StateError, "Persistence is enabled for #{default_options.persistent}, but we got #{base_host(uri)}"
-
       # We re-create the connection object because we want to let prior requests
       # lazily load the body as long as possible, and this mimics prior functionality.
       elsif @connection && (!@connection.keep_alive? || @connection.expired?)
+        close
+      # If we get into a bad state (eg, Timeout.timeout ensure being killed)
+      # close the connection to prevent potential for mixed responses.
+      elsif @state == :dirty
         close
       end
     end
