@@ -1,4 +1,4 @@
-RSpec.shared_context "HTTP handling" do |ssl = false|
+RSpec.shared_context "HTTP handling" do
   describe "timeouts" do
     let(:conn_timeout) { 1 }
     let(:read_timeout) { 1 }
@@ -73,55 +73,17 @@ RSpec.shared_context "HTTP handling" do |ssl = false|
 
       let(:response) { client.get(server.endpoint).body.to_s }
 
-      context "with localhost" do
-        let(:endpoint) { server.endpoint.sub("127.0.0.1", "localhost") }
-
-        it "errors if DNS takes too long" do
-          # Block the localhost lookup
-          expect(timeout_class::HostResolver)
-            .to receive(:getaddress).with("localhost").and_return(nil)
-
-          # Request
-          expect(Resolv::DNS).to receive(:open).with(:timeout => 1) do |_|
-            sleep 1.25
-            "127.0.0.1"
-          end
-
-          expect { client.get(server.endpoint.sub("127.0.0.1", "localhost")) }
-            .to raise_error(HTTP::TimeoutError, /Timed out/)
-        end
-      end
-
       it "errors if connecting takes too long" do
-        socket = Socket.new(Socket::AF_INET, Socket::SOCK_STREAM, 0)
-
-        fake_socket_id = double(:to_io => socket)
-        expect(fake_socket_id).to receive(:connect_nonblock) do |*args|
+        expect(TCPSocket).to receive(:open) do
           sleep 1.25
-          socket.connect_nonblock(*args)
         end
 
-        allow_any_instance_of(timeout_class).to receive(:socket).and_return(fake_socket_id)
-
-        expect { response }.to raise_error(HTTP::TimeoutError, /Timed out/)
+        expect { response }.to raise_error(HTTP::TimeoutError, /execution/)
       end
 
       it "errors if reading takes too long" do
         expect { client.get("#{server.endpoint}/sleep").body.to_s }
           .to raise_error(HTTP::TimeoutError, /Timed out/)
-      end
-
-      unless ssl
-        it "errors if writing takes too long" do
-          socket = Socket.new(Socket::AF_INET, Socket::SOCK_STREAM, 0)
-          allow_any_instance_of(timeout_class).to receive(:socket).and_return(socket)
-
-          expect(socket).to receive(:<<) do |*|
-            sleep 1.25
-          end
-
-          expect { response }.to raise_error(HTTP::TimeoutError, /Timed out/)
-        end
       end
     end
   end

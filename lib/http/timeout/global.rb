@@ -1,4 +1,3 @@
-# rubocop:disable Lint/HandleExceptions
 module HTTP
   module Timeout
     class Global < PerOperation
@@ -11,24 +10,24 @@ module HTTP
         @total_timeout = time_left
       end
 
-      # Abstracted out from the normal connect for SSL connections
-      def connect_with_timeout(*args)
+      def connect(socket_class, host, port)
+        reset_timer
+        ::Timeout.timeout(time_left, TimeoutError) do
+          @socket = socket_class.open(host, port)
+        end
+
+        log_time
+      end
+
+      def connect_ssl
         reset_timer
 
         begin
-          socket.connect_nonblock(*args)
-
+          socket.connect_nonblock
         rescue IO::WaitReadable
           IO.select([socket], nil, nil, time_left)
           log_time
           retry
-
-        rescue Errno::EINPROGRESS
-          IO.select(nil, [socket], nil, time_left)
-          log_time
-          retry
-
-        rescue Errno::EISCONN
         end
       end
 
@@ -58,26 +57,9 @@ module HTTP
         end
       end
 
+      alias_method :<<, :write
+
       private
-
-      # Create a DNS resolver
-      def resolve_address(host)
-        addr = HostResolver.getaddress(host)
-        return addr if addr
-
-        reset_timer
-
-        addr = Resolv::DNS.open(:timeout => time_left) do |dns|
-          dns.getaddress
-        end
-
-        log_time
-
-        addr
-
-      rescue Resolv::ResolvTimeout
-        raise TimeoutError, "DNS timed out after #{total_timeout} seconds"
-      end
 
       # Due to the run/retry nature of nonblocking I/O, it's easier to keep track of time
       # via method calls instead of a block to monitor.
@@ -96,4 +78,3 @@ module HTTP
     end
   end
 end
-# rubocop:enable Lint/HandleExceptions
