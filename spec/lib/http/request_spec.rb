@@ -71,7 +71,7 @@ RSpec.describe HTTP::Request do
 
     subject(:redirected) { request.redirect "http://blog.example.com/" }
 
-    its(:uri)     { is_expected.to eq URI.parse "http://blog.example.com/" }
+    its(:uri)     { is_expected.to eq HTTP::URI.parse "http://blog.example.com/" }
 
     its(:verb)    { is_expected.to eq request.verb }
     its(:body)    { is_expected.to eq request.body }
@@ -84,7 +84,7 @@ RSpec.describe HTTP::Request do
     context "with schema-less absolute URL given" do
       subject(:redirected) { request.redirect "//another.example.com/blog" }
 
-      its(:uri)     { is_expected.to eq URI.parse "http://another.example.com/blog" }
+      its(:uri)     { is_expected.to eq HTTP::URI.parse "http://another.example.com/blog" }
 
       its(:verb)    { is_expected.to eq request.verb }
       its(:body)    { is_expected.to eq request.body }
@@ -98,7 +98,7 @@ RSpec.describe HTTP::Request do
     context "with relative URL given" do
       subject(:redirected) { request.redirect "/blog" }
 
-      its(:uri)     { is_expected.to eq URI.parse "http://example.com/blog" }
+      its(:uri)     { is_expected.to eq HTTP::URI.parse "http://example.com/blog" }
 
       its(:verb)    { is_expected.to eq request.verb }
       its(:body)    { is_expected.to eq request.body }
@@ -110,14 +110,14 @@ RSpec.describe HTTP::Request do
 
       context "with original URI having non-standard port" do
         let(:request) { HTTP::Request.new(:post, "http://example.com:8080/", headers, proxy, body) }
-        its(:uri)     { is_expected.to eq URI.parse "http://example.com:8080/blog" }
+        its(:uri)     { is_expected.to eq HTTP::URI.parse "http://example.com:8080/blog" }
       end
     end
 
     context "with relative URL that misses leading slash given" do
       subject(:redirected) { request.redirect "blog" }
 
-      its(:uri)     { is_expected.to eq URI.parse "http://example.com/blog" }
+      its(:uri)     { is_expected.to eq HTTP::URI.parse "http://example.com/blog" }
 
       its(:verb)    { is_expected.to eq request.verb }
       its(:body)    { is_expected.to eq request.body }
@@ -129,7 +129,7 @@ RSpec.describe HTTP::Request do
 
       context "with original URI having non-standard port" do
         let(:request) { HTTP::Request.new(:post, "http://example.com:8080/", headers, proxy, body) }
-        its(:uri)     { is_expected.to eq URI.parse "http://example.com:8080/blog" }
+        its(:uri)     { is_expected.to eq HTTP::URI.parse "http://example.com:8080/blog" }
       end
     end
 

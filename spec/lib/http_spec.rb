@@ -14,7 +14,7 @@ RSpec.describe HTTP do
 
     context "with URI instance" do
       it "is easy" do
-        response = HTTP.get URI dummy.endpoint
+        response = HTTP.get HTTP::URI.parse dummy.endpoint
         expect(response.to_s).to match(/<!doctype html>/)
       end
     end

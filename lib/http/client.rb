@@ -1,9 +1,11 @@
 require "cgi"
 require "uri"
+
 require "http/form_data"
 require "http/options"
 require "http/connection"
 require "http/redirector"
+require "http/uri"
 
 module HTTP
   # Clients make requests and receive responses
@@ -13,6 +15,8 @@ module HTTP
     CONNECTION         = "Connection".freeze
     KEEP_ALIVE         = "Keep-Alive".freeze
     CLOSE              = "close".freeze
+
+    HTTP_OR_HTTPS_RE   = %r{^https?://}i
 
     attr_reader :default_options
 
@@ -109,33 +113,25 @@ module HTTP
 
     # Strips out query/path to give us a consistent way of comparing hosts
     def base_host(uri)
-      base = uri.dup
-      base.query = nil
-      base.path = ""
-      base.to_s
+      uri.omit(:query, :path).to_s
     end
 
     # Merges query params if needed
-    def make_request_uri(uri, options)
-      uri = normalize_uri uri
-
-      if options.params && !options.params.empty?
-        params    = CGI.parse(uri.query.to_s).merge(options.params || {})
-        uri.query = URI.encode_www_form params
-      end
-
-      uri
-    end
-
-    # Normalize URI
     #
     # @param [#to_s] uri
     # @return [URI]
-    def normalize_uri(uri)
-      if default_options.persistent? && uri !~ /^http|https/
-        uri = URI("#{default_options.persistent}#{uri}")
-      else
-        uri = URI(uri.to_s)
+    def make_request_uri(uri, options)
+      uri = uri.to_s
+
+      if default_options.persistent? && uri !~ HTTP_OR_HTTPS_RE
+        uri = "#{default_options.persistent}#{uri}"
+      end
+
+      uri = HTTP::URI.parse uri
+
+      if options.params && !options.params.empty?
+        params    = CGI.parse(uri.query.to_s).merge(options.params || {})
+        uri.query = ::URI.encode_www_form params
       end
 
       # Some proxies (seen on WEBRick) fail if URL has

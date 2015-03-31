@@ -129,7 +129,7 @@ module HTTP
     # @param (see #initialize)
     # @return [void]
     def start_tls(req, options)
-      return unless req.uri.is_a?(URI::HTTPS) && !req.using_proxy?
+      return unless req.uri.https? && !req.using_proxy?
 
       ssl_context = options[:ssl_context]
 
