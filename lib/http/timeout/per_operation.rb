@@ -31,6 +31,12 @@ module HTTP
         else
           raise TimeoutError, "Connection timed out after #{connect_timeout} seconds"
         end
+      rescue IO::WaitWritable
+        if IO.select(nil, [socket], nil, connect_timeout)
+          retry
+        else
+          raise TimeoutError, "Connection timed out after #{connect_timeout} seconds"
+        end
       end
 
       # Read data from the socket
