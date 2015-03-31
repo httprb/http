@@ -28,6 +28,10 @@ module HTTP
           IO.select([socket], nil, nil, time_left)
           log_time
           retry
+        rescue IO::WaitWritable
+          IO.select(nil, [socket], nil, time_left)
+          log_time
+          retry
         end
       end
 
