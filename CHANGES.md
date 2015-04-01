@@ -1,9 +1,13 @@
-## 0.8.0.pre5 (2015-03-27)
+## 0.8.0 (2015-04-01)
 
+* Properly handle WaitWritable for SSL. See #199. (@zanker)
+* Add support for non-ASCII URis. See #197. (@ixti)
+* Add configurable connection timeouts. See #187, #194, #195. (@zanker)
+* Refactor requests redirect following logic. See #179. (@ixti)
 * Support for persistent HTTP connections (@zanker)
 * Add caching support. See #77 and #177. (@Asmod4n, @pezra)
 * Improve servers used in specs boot up. Issue was initially raised up
-  by @olegkovalenko. See #176.
+  by @olegkovalenko. See #176. (@ixti)
 * Reflect FormData rename changes (FormData -> HTTP::FormData). (@ixti)
 * `HTTP::Headers` now raises `HTTP::InvalidHeaderNameError` in case of
   (surprise) invalid HTTP header field name (e.g.`"Foo:Bar"`). See #173.
