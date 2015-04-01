@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require "support/http_handling_shared"
 require "support/dummy_server"
 require "support/ssl_helper"
@@ -9,7 +11,7 @@ RSpec.describe HTTP::Client do
 
   StubbedClient = Class.new(HTTP::Client) do
     def make_request(request, options)
-      stubs.fetch(request.uri.to_s) { super(request, options) }
+      stubs.fetch(request.uri) { super(request, options) }
     end
 
     def stubs
@@ -17,7 +19,10 @@ RSpec.describe HTTP::Client do
     end
 
     def stub(stubs)
-      @stubs = stubs
+      @stubs = stubs.each_with_object({}) do |(k, v), o|
+        o[HTTP::URI.parse k] = v
+      end
+
       self
     end
   end
@@ -72,6 +77,23 @@ RSpec.describe HTTP::Client do
 
       expect { client.get("http://example.com/") }
         .to raise_error(HTTP::Redirector::TooManyRedirectsError)
+    end
+
+    context "with non-ASCII URLs" do
+      it "theoretically works like a charm" do
+        client = StubbedClient.new(:follow => true).stub(
+          "http://example.com/"      => redirect_response("/könig"),
+          "http://example.com/könig" => simple_response("OK")
+        )
+
+        expect { client.get "http://example.com/könig" }.not_to raise_error
+      end
+
+      it "works like a charm in real world" do
+        url    = "http://git.io/jNeY"
+        client = HTTP.follow
+        expect(client.get(url).to_s).to include "support for non-ascii URIs"
+      end
     end
   end
 
@@ -154,6 +176,19 @@ RSpec.describe HTTP::Client do
   end
 
   describe "#request" do
+    context "with non-ASCII URLs" do
+      it "theoretically works like a charm" do
+        client =  described_class.new
+        expect { client.get "#{dummy.endpoint}/könig" }.not_to raise_error
+      end
+
+      it "works like a charm in real world" do
+        url     = "https://github.com/httprb/http.rb/pull/197/ö無"
+        client  = HTTP.follow
+        expect(client.get(url).to_s).to include "support for non-ascii URIs"
+      end
+    end
+
     context "with explicitly given `Host` header" do
       let(:headers) { {"Host" => "another.example.com"} }
       let(:client)  { described_class.new :headers => headers }

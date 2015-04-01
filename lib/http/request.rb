@@ -1,14 +1,18 @@
+require "forwardable"
+require "base64"
+require "time"
+
 require "http/errors"
 require "http/headers"
 require "http/request/caching"
 require "http/request/writer"
 require "http/version"
-require "base64"
-require "uri"
-require "time"
+require "http/uri"
 
 module HTTP
   class Request
+    extend Forwardable
+
     include HTTP::Headers::Mixin
 
     # The method given was not understood
@@ -70,7 +74,7 @@ module HTTP
     # :nodoc:
     def initialize(verb, uri, headers = {}, proxy = {}, body = nil, version = "1.1") # rubocop:disable ParameterLists
       @verb   = verb.to_s.downcase.to_sym
-      @uri    = uri.is_a?(URI) ? uri : URI(uri.to_s)
+      @uri    = HTTP::URI.parse uri
       @scheme = @uri.scheme && @uri.scheme.to_s.downcase.to_sym
 
       fail(UnsupportedMethodError, "unknown method: #{verb}") unless METHODS.include?(@verb)
@@ -80,14 +84,13 @@ module HTTP
 
       @headers = HTTP::Headers.coerce(headers || {})
 
-      @headers["Host"]        ||= default_host
+      @headers["Host"]        ||= default_host_header_value
       @headers["User-Agent"]  ||= USER_AGENT
     end
 
     # Returns new Request with updated uri
     def redirect(uri, verb = @verb)
-      uri = @uri.merge uri.to_s
-      req = self.class.new(verb, uri, headers, proxy, body, version)
+      req = self.class.new(verb, @uri.join(uri), headers, proxy, body, version)
       req["Host"] = req.uri.host
       req
     end
@@ -116,17 +119,17 @@ module HTTP
 
     # Compute HTTP request header for direct or proxy request
     def request_header
-      "#{verb.to_s.upcase} #{path_for_request_header} HTTP/#{version}"
+      "#{verb.to_s.upcase} #{uri.normalize} HTTP/#{version}"
     end
 
     # Host for tcp socket
     def socket_host
-      using_proxy? ? proxy[:proxy_address] : uri.host
+      using_proxy? ? proxy[:proxy_address] : host
     end
 
     # Port for tcp socket
     def socket_port
-      using_proxy? ? proxy[:proxy_port] : uri.port
+      using_proxy? ? proxy[:proxy_port] : port
     end
 
     # @return [HTTP::Request::Caching]
@@ -136,32 +139,19 @@ module HTTP
 
     private
 
-    def path_for_request_header
-      if using_proxy?
-        uri
-      else
-        uri_path_with_query
-      end
+    # @!attribute [r] host
+    #   @return [String]
+    def_delegator :@uri, :host
+
+    # @!attribute [r] port
+    #   @return [Fixnum]
+    def port
+      @uri.port || @uri.default_port
     end
 
-    def uri_path_with_query
-      path = uri_has_query? ? "#{uri.path}?#{uri.query}" : uri.path
-      path.empty? ? "/" : path
-    end
-
-    def uri_has_query?
-      uri.query && !uri.query.empty?
-    end
-
-    # Default host (with port if needed) header value.
-    #
-    # @return [String]
-    def default_host
-      if PORTS[@scheme] == @uri.port
-        @uri.host
-      else
-        "#{@uri.host}:#{@uri.port}"
-      end
+    # @return [String] Default host (with port if needed) header value.
+    def default_host_header_value
+      PORTS[@scheme] != port ? "#{host}:#{port}" : host
     end
   end
 end
