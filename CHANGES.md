@@ -1,6 +1,6 @@
-## master (unreleased)
+## 0.8.1 (2015-04-02)
 
-* Add missing `require` of `resolv` std lib. See #202. (@ixti)
+* Add missing `require "resolv"`. See #202. (@ixti)
 * Add block-form `#persistent` calls. See #200, #201. (@ixti)
 
 
