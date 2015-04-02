@@ -1,7 +1,9 @@
+require "resolv"
+
 module HTTP
   module Timeout
     class PerOperation < Null
-      HostResolver = Resolv::Hosts.new.tap(&:lazy_initialize)
+      HostResolver = ::Resolv::Hosts.new.tap(&:lazy_initialize)
 
       CONNECT_TIMEOUT = 0.25
       WRITE_TIMEOUT = 0.25

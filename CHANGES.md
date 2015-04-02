@@ -1,5 +1,6 @@
 ## master (unreleased)
 
+* Add missing `require` of `resolv` std lib. See #202. (@ixti)
 * Add block-form `#persistent` calls. See #200, #201. (@ixti)
 
 
