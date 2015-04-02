@@ -1,3 +1,8 @@
+## master (unreleased)
+
+* _the future is unwritten_
+
+
 ## 0.8.1 (2015-04-02)
 
 * Add missing `require "resolv"`. See #202. (@ixti)
