@@ -163,4 +163,27 @@ RSpec.describe HTTP do
       expect(client.default_options[:cache]).to eq cache
     end
   end
+
+  describe ".persistent" do
+    let(:host) { "https://api.github.com" }
+
+    context "with host only given" do
+      subject { HTTP.persistent host }
+      it { is_expected.to be_an HTTP::Client }
+      it { is_expected.to be_persistent }
+    end
+
+    context "with host and block given" do
+      it "returns last evaluation of last expression" do
+        expect(HTTP.persistent(host) { :http }).to be :http
+      end
+
+      it "auto-closes connection" do
+        HTTP.persistent host do |client|
+          expect(client).to receive(:close).and_call_original
+          client.get("/repos/httprb/http.rb")
+        end
+      end
+    end
+  end
 end
