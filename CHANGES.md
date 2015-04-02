@@ -1,3 +1,8 @@
+## master (unreleased)
+
+* _the future is unwritten_
+
+
 ## 0.8.0 (2015-04-01)
 
 * Properly handle WaitWritable for SSL. See #199. (@zanker)
