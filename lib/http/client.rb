@@ -1,3 +1,5 @@
+require "forwardable"
+
 require "cgi"
 require "uri"
 
@@ -10,6 +12,7 @@ require "http/uri"
 module HTTP
   # Clients make requests and receive responses
   class Client
+    extend Forwardable
     include Chainable
 
     CONNECTION         = "Connection".freeze
@@ -58,6 +61,11 @@ module HTTP
       end
     end
 
+    # @!method persistent?
+    #   @see Options#persistent?
+    #   @return [Boolean] whenever client is persistent
+    def_delegator :default_options, :persistent?
+
     def make_request(req, options)
       verify_connection!(req.uri)
 
@@ -79,12 +87,10 @@ module HTTP
       @state = :clean
 
       res
-
-    # On any exception we reset the conn. This is a safety measure, to ensure
-    # we don't have conns in a bad state resulting in mixed requests/responses
     rescue
-      close if default_options.persistent?
-
+      # On any exception we reset the conn. This is a safety measure, to ensure
+      # we don't have conns in a bad state resulting in mixed requests/responses
+      close if persistent?
       raise
     end
 

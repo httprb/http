@@ -72,11 +72,41 @@ module HTTP
       branch(options).request verb, uri
     end
 
-    # Flag as persistent
-    # @param [String] host
-    # @raise [Request::Error] if Host is invalid
+    # @overload persistent(host)
+    #   Flags as persistent
+    #   @param [String] host
+    #   @raise [Request::Error] if Host is invalid
+    #   @return [HTTP::Client] Persistent client
+    # @overload persistent(host, &block)
+    #   Executes given block with persistent client and automatically closes
+    #   connection at the end of execution.
+    #
+    #   @example
+    #
+    #       def keys(users)
+    #         HTTP.persistent("https://github.com") do |http|
+    #           users.map { |u| http.get("/#{u}.keys").to_s }
+    #         end
+    #       end
+    #
+    #       # same as
+    #
+    #       def keys(users)
+    #         http = HTTP.persistent "https://github.com"
+    #         users.map { |u| http.get("/#{u}.keys").to_s }
+    #       ensure
+    #         http.close if http
+    #       end
+    #
+    #
+    #   @yieldparam [HTTP::Client] client Persistent client
+    #   @return [Object] result of last expression in the block
     def persistent(host)
-      branch default_options.with_persistent host
+      p_client = branch default_options.with_persistent host
+      return p_client unless block_given?
+      yield p_client
+    ensure
+      p_client.close
     end
 
     # Make a request through an HTTP proxy
