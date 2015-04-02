@@ -1,6 +1,6 @@
 ## master (unreleased)
 
-* _the future is unwritten_
+* Add block-form `#persistent` calls. See #200, #201. (@ixti)
 
 
 ## 0.8.0 (2015-04-01)
