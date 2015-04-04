@@ -5,6 +5,11 @@ require "support/proxy_server"
 
 RSpec.describe HTTP do
   run_server(:dummy) { DummyServer.new }
+  run_server(:dummy_ssl) { DummyServer.new(:ssl => true) }
+
+  let(:ssl_client) do
+    HTTP::Client.new :ssl_context => SSLHelper.client_context
+  end
 
   context "getting resources" do
     it "is easy" do
@@ -63,6 +68,18 @@ RSpec.describe HTTP do
         response = HTTP.via(proxy.addr, proxy.port, "username", "password").get dummy.endpoint
         expect(response.to_s).to match(/<!doctype html>/)
       end
+
+      context "ssl" do
+        it "responds with the endpoint's body" do
+          response = ssl_client.via(proxy.addr, proxy.port).get dummy_ssl.endpoint
+          expect(response.to_s).to match(/<!doctype html>/)
+        end
+
+        it "ignores credentials" do
+          response = ssl_client.via(proxy.addr, proxy.port, "username", "password").get dummy_ssl.endpoint
+          expect(response.to_s).to match(/<!doctype html>/)
+        end
+      end
     end
 
     context "proxy with authentication" do
@@ -86,6 +103,23 @@ RSpec.describe HTTP do
       it "responds with 407 if no credentials given" do
         response = HTTP.via(proxy.addr, proxy.port).get dummy.endpoint
         expect(response.status).to eq(407)
+      end
+
+      context "ssl" do
+        it "responds with the endpoint's body" do
+          response = ssl_client.via(proxy.addr, proxy.port, "username", "password").get dummy_ssl.endpoint
+          expect(response.to_s).to match(/<!doctype html>/)
+        end
+
+        it "responds with 407 when wrong credentials given" do
+          response = ssl_client.via(proxy.addr, proxy.port, "user", "pass").get dummy_ssl.endpoint
+          expect(response.status).to eq(407)
+        end
+
+        it "responds with 407 if no credentials given" do
+          response = ssl_client.via(proxy.addr, proxy.port).get dummy_ssl.endpoint
+          expect(response.status).to eq(407)
+        end
       end
     end
   end

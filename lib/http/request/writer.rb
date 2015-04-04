@@ -29,6 +29,12 @@ module HTTP
         send_request_body
       end
 
+      # Send headers needed to connect through proxy
+      def connect_through_proxy
+        add_headers
+        @socket << join_headers
+      end
+
       # Adds the headers to the header array for the given request body we are working
       # with
       def add_body_type_headers
@@ -50,9 +56,8 @@ module HTTP
       def send_request_header
         add_headers
         add_body_type_headers
-        header = join_headers
 
-        @socket << header
+        @socket << join_headers
       end
 
       def send_request_body

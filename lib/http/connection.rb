@@ -6,6 +6,7 @@ module HTTP
   # A connection to the HTTP server
   class Connection
     extend Forwardable
+
     # Attempt to read this much data
     BUFFER_SIZE = 16_384
 
@@ -18,16 +19,18 @@ module HTTP
     # @param [HTTP::Request] req
     # @param [HTTP::Options] options
     def initialize(req, options)
-      @persistent         = options.persistent?
-      @keep_alive_timeout = options[:keep_alive_timeout].to_f
-      @pending_request    = false
-      @pending_response   = false
+      @persistent           = options.persistent?
+      @keep_alive_timeout   = options[:keep_alive_timeout].to_f
+      @pending_request      = false
+      @pending_response     = false
+      @failed_proxy_connect = false
 
       @parser = Response::Parser.new
 
       @socket = options[:timeout_class].new(options[:timeout_options])
       @socket.connect(options[:socket_class], req.socket_host, req.socket_port)
 
+      send_proxy_connect_request(req)
       start_tls(req, options)
       reset_timer
     end
@@ -40,6 +43,11 @@ module HTTP
 
     # @see (HTTP::Response::Parser#headers)
     def_delegator :@parser, :headers
+
+    # @return [Boolean] whenever proxy connect failed
+    def failed_proxy_connect?
+      @failed_proxy_connect
+    end
 
     # Send a request to the server
     #
@@ -129,7 +137,7 @@ module HTTP
     # @param (see #initialize)
     # @return [void]
     def start_tls(req, options)
-      return unless req.uri.https? && !req.using_proxy?
+      return unless req.uri.https? && !failed_proxy_connect?
 
       ssl_context = options[:ssl_context]
 
@@ -139,6 +147,28 @@ module HTTP
       end
 
       @socket.start_tls(req.uri.host, options[:ssl_socket_class], ssl_context)
+    end
+
+    # Open tunnel through proxy
+    def send_proxy_connect_request(req)
+      return unless req.uri.https? && req.using_proxy?
+
+      @pending_request = true
+
+      req.connect_using_proxy @socket
+
+      @pending_request = false
+      @pending_response = true
+
+      read_headers!
+
+      if @parser.status_code == 200
+        @parser.reset
+        @pending_response = false
+        return
+      end
+
+      @failed_proxy_connect = true
     end
 
     # Resets expiration of persistent connection.
