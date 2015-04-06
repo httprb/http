@@ -20,27 +20,29 @@ module HTTP
 
       # Starts a SSL connection on a socket
       def connect_ssl
-        socket.connect
+        @socket.connect
       end
 
       # Configures the SSL connection and starts the connection
       def start_tls(host, ssl_socket_class, ssl_context)
         @socket = ssl_socket_class.new(socket, ssl_context)
-        socket.sync_close = true
+        @socket.sync_close = true if @socket.respond_to? :sync_close=
 
         connect_ssl
 
-        socket.post_connection_check(host) if ssl_context.verify_mode == OpenSSL::SSL::VERIFY_PEER
+        return unless ssl_context.verify_mode == OpenSSL::SSL::VERIFY_PEER
+
+        @socket.post_connection_check(host)
       end
 
       # Read from the socket
       def readpartial(size)
-        socket.readpartial(size)
+        @socket.readpartial(size)
       end
 
       # Write to the socket
       def write(data)
-        socket << data
+        @socket << data
       end
 
       alias_method :<<, :write
