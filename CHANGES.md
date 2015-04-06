@@ -3,6 +3,12 @@
 * _the future is unwritten_
 
 
+## 0.8.2 (2015-04-06)
+
+* Fix Celluloid::IO compatibility. See #203. (@ixti)
+* Cleanup obsolete code. (@zanker)
+
+
 ## 0.8.1 (2015-04-02)
 
 * Add missing `require "resolv"`. See #202. (@ixti)
