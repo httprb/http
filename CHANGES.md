@@ -1,6 +1,6 @@
 ## master (unreleased)
 
-* _the future is unwritten_
+* Add support of HTTPS connections through proxy. See #186. (@Connorhd)
 
 
 ## 0.8.2 (2015-04-06)
