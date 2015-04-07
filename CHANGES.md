@@ -1,3 +1,9 @@
+## 0.8.3 (2015-04-07)
+
+* Fix request headline. See #206. (@ixti)
+* Remove deprecated `Request#__method__`. (@ixti)
+
+
 ## 0.8.2 (2015-04-06)
 
 * Fix Celluloid::IO compatibility. See #203. (@ixti)
