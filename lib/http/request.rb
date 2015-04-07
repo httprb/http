@@ -67,7 +67,7 @@ module HTTP
     # :nodoc:
     def initialize(verb, uri, headers = {}, proxy = {}, body = nil, version = "1.1") # rubocop:disable ParameterLists
       @verb   = verb.to_s.downcase.to_sym
-      @uri    = HTTP::URI.parse uri
+      @uri    = HTTP::URI.parse(uri).normalize
       @scheme = @uri.scheme && @uri.scheme.to_s.downcase.to_sym
 
       fail(UnsupportedMethodError, "unknown method: #{verb}") unless METHODS.include?(@verb)
@@ -121,7 +121,8 @@ module HTTP
 
     # Compute HTTP request header for direct or proxy request
     def request_header
-      "#{verb.to_s.upcase} #{uri.normalize} HTTP/#{version}"
+      request_uri = using_proxy? ? uri : uri.omit(:scheme, :authority)
+      "#{verb.to_s.upcase} #{request_uri} HTTP/#{version}"
     end
 
     # Compute HTTP request header SSL proxy connection
