@@ -107,8 +107,8 @@ module HTTP
 
     # Verify our request isn't going to be made against another URI
     def verify_connection!(uri)
-      if default_options.persistent? && base_host(uri) != default_options.persistent
-        fail StateError, "Persistence is enabled for #{default_options.persistent}, but we got #{base_host(uri)}"
+      if default_options.persistent? && uri.origin != default_options.persistent
+        fail StateError, "Persistence is enabled for #{default_options.persistent}, but we got #{uri.origin}"
       # We re-create the connection object because we want to let prior requests
       # lazily load the body as long as possible, and this mimics prior functionality.
       elsif @connection && (!@connection.keep_alive? || @connection.expired?)
@@ -118,11 +118,6 @@ module HTTP
       elsif @state == :dirty
         close
       end
-    end
-
-    # Strips out query/path to give us a consistent way of comparing hosts
-    def base_host(uri)
-      uri.omit(:query, :path).to_s
     end
 
     # Merges query params if needed

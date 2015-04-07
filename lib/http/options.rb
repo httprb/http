@@ -2,6 +2,7 @@ require "http/headers"
 require "openssl"
 require "socket"
 require "http/cache/null_cache"
+require "http/uri"
 
 module HTTP
   class Options
@@ -81,6 +82,14 @@ module HTTP
                 end
     end
 
+    def persistent=(value)
+      @persistent = value ? HTTP::URI.parse(value).origin : nil
+    end
+
+    def persistent?
+      !persistent.nil?
+    end
+
     def_option :cache do |cache_or_cache_options|
       if cache_or_cache_options.respond_to? :perform
         cache_or_cache_options
@@ -88,10 +97,6 @@ module HTTP
         require "http/cache"
         HTTP::Cache.new(cache_or_cache_options)
       end
-    end
-
-    def persistent?
-      !persistent.nil? && persistent != ""
     end
 
     def [](option)
