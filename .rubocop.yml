@@ -57,6 +57,15 @@ Style/Lambda:
 Style/SingleSpaceBeforeFirstArg:
   Enabled: false
 
+Style/SpaceAroundOperators:
+  MultiSpaceAllowedForOperators:
+    - "="
+    - "=>"
+    - "||"
+    - "||="
+    - "&&"
+    - "&&="
+
 Style/SpaceInsideHashLiteralBraces:
   EnforcedStyle: no_space
 
