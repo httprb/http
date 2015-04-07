@@ -21,13 +21,6 @@ RSpec.describe HTTP::Request do
     expect(subject.verb).to eq(:get)
   end
 
-  it "provides a #__method__ method that outputs a deprecation warning and delegates to Object#method" do
-    warning = capture_warning do
-      expect(subject.__method__(:verb)).to eq(subject.method(:verb))
-    end
-    expect(warning).to match(/\[DEPRECATION\] HTTP::Request#__method__ is deprecated\. Use #method instead\.$/)
-  end
-
   it "sets given headers" do
     expect(subject["Accept"]).to eq("text/html")
   end
