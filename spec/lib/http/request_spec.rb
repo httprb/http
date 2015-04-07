@@ -1,8 +1,9 @@
 RSpec.describe HTTP::Request do
+  let(:proxy)       { {} }
   let(:headers)     { {:accept => "text/html"} }
-  let(:request_uri) { "http://example.com/" }
+  let(:request_uri) { "http://example.com/foo?bar=baz#moo" }
 
-  subject(:request) { HTTP::Request.new(:get, request_uri, headers) }
+  subject(:request) { HTTP::Request.new(:get, request_uri, headers, proxy) }
 
   it "includes HTTP::Headers::Mixin" do
     expect(described_class).to include HTTP::Headers::Mixin
@@ -135,5 +136,16 @@ RSpec.describe HTTP::Request do
   describe "#caching" do
     subject { request.caching }
     it { is_expected.to be_a HTTP::Request::Caching }
+  end
+
+  describe "#request_header" do
+    subject { request.request_header }
+
+    it { is_expected.to eq "GET /foo?bar=baz#moo HTTP/1.1" }
+
+    context "with proxy" do
+      let(:proxy) { {:user => "user", :pass => "pass"} }
+      it { is_expected.to eq "GET http://example.com/foo?bar=baz#moo HTTP/1.1" }
+    end
   end
 end
