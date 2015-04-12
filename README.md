@@ -40,7 +40,7 @@ Installation
 
 Add this line to your application's Gemfile:
 
-    gem 'http'
+    gem "http"
 
 And then execute:
 
@@ -52,7 +52,7 @@ Or install it yourself as:
 
 Inside of your Ruby program do:
 
-    require 'http'
+    require "http"
 
 ...to pull it in as a dependency.
 
@@ -70,7 +70,7 @@ Here's some simple examples to get you started:
 ### GET requests
 
 ```ruby
->> HTTP.get('https://github.com').to_s
+>> HTTP.get("https://github.com").to_s
 => "<html><head><meta http-equiv=\"content-type\" content=..."
 ```
 
@@ -78,7 +78,7 @@ That's all it takes! To obtain an `HTTP::Response` object instead of the respons
 body, all we have to do is omit the #to_s on the end:
 
 ```ruby
->> HTTP.get('https://github.com')
+>> HTTP.get("https://github.com")
 => #<HTTP/1.0 200 OK @headers={"Content-Type"=>"text/html; charset=UTF-8", "Date"=>"Fri, ...>
  => #<HTTP::Response/1.1 200 OK @headers={"Content-Type"=>"text/html; ...>
 ```
@@ -86,51 +86,51 @@ body, all we have to do is omit the #to_s on the end:
 We can also obtain an `HTTP::Response::Body` object for this response:
 
 ```ruby
->> HTTP.get('https://github.com').body
+>> HTTP.get("https://github.com").body
  => #<HTTP::Response::Body:814d7aac @streaming=false>
 ```
 
 The response body can be streamed with `HTTP::Response::Body#readpartial`:
 
 ```ruby
->> HTTP.get('https://github.com').body.readpartial
+>> HTTP.get("https://github.com").body.readpartial
  => "<!doctype html><html "
 ```
 
 In practice you'll want to bind the HTTP::Response::Body to a local variable (e.g.
-"body") and call readpartial on it repeatedly until it returns nil.
+"body") and call readpartial on it repeatedly until it returns `nil`.
 
 ### POST requests
 
 Making POST requests is simple too. Want to POST a form?
 
 ```ruby
-HTTP.post('http://example.com/resource', :form => {:foo => '42'})
+HTTP.post("http://example.com/resource", :form => {:foo => "42"})
 ```
 Making GET requests with query string parameters is as simple.
 
 ```ruby
-HTTP.get('http://example.com/resource', :params => {:foo => 'bar'})
+HTTP.get("http://example.com/resource", :params => {:foo => "bar"})
 ```
 
 Want to POST with a specific body, JSON for instance?
 
 ```ruby
-HTTP.post('http://example.com/resource', :json => { :foo => '42' })
+HTTP.post("http://example.com/resource", :json => { :foo => "42" })
 ```
 
 Or just a plain body?
 
 ```ruby
-HTTP.post('http://example.com/resource', :body => 'foo=42&bar=baz')
+HTTP.post("http://example.com/resource", :body => "foo=42&bar=baz")
 ```
 
 Posting a file?
 
 ``` ruby
-HTTP.post('http://examplc.com/resource', :form => {
-  :username => 'ixti',
-  :avatar   => HTTP::FormData::File.new('/home/ixit/avatar.png')
+HTTP.post("http://examplc.com/resource", :form => {
+  :username => "ixti",
+  :avatar   => HTTP::FormData::File.new("/home/ixit/avatar.png")
 })
 ```
 
@@ -142,15 +142,15 @@ Making request behind proxy is as simple as making them directly. Just specify
 hostname (or IP address) of your proxy server and its port, and here you go:
 
 ```ruby
-HTTP.via('proxy-hostname.local', 8080)
-  .get('http://example.com/resource')
+HTTP.via("proxy-hostname.local", 8080)
+  .get("http://example.com/resource")
 ```
 
 Proxy needs authentication? No problem:
 
 ```ruby
-HTTP.via('proxy-hostname.local', 8080, 'username', 'password')
-  .get('http://example.com/resource')
+HTTP.via("proxy-hostname.local", 8080, "username", "password")
+  .get("http://example.com/resource")
 ```
 
 ### Adding Headers
@@ -160,7 +160,7 @@ you want to get the latest commit of this library from GitHub in JSON format.
 One way we could do this is by tacking a filename on the end of the URL:
 
 ```ruby
-HTTP.get('https://github.com/httprb/http.rb/commit/HEAD.json')
+HTTP.get("https://github.com/httprb/http.rb/commit/HEAD.json")
 ```
 
 The GitHub API happens to support this approach, but really this is a bit of a
@@ -170,18 +170,18 @@ the full, raw power of HTTP, we can perform content negotiation the way HTTP
 intends us to, by using the Accept header:
 
 ```ruby
-HTTP.headers(:accept => 'application/json').
-  get('https://github.com/httprb/http.rb/commit/HEAD')
+HTTP.headers(:accept => "application/json")
+  .get("https://github.com/httprb/http.rb/commit/HEAD")
 ```
 
 This requests JSON from GitHub. GitHub is smart enough to understand our
-request and returns a response with Content-Type: application/json.
+request and returns a response with `Content-Type: application/json`.
 
 Shorter alias exists for `HTTP.headers`:
 
 ```ruby
-HTTP[:accept => 'application/json'].
-  get('https://github.com/httprb/http.rb/commit/HEAD')
+HTTP[:accept => "application/json"]
+  .get("https://github.com/httprb/http.rb/commit/HEAD")
 ```
 
 ### Authorization Header
@@ -190,23 +190,23 @@ With [HTTP Basic Authentication](http://tools.ietf.org/html/rfc2617) using
 a username and password:
 
 ```ruby
-HTTP.basic_auth(:user => 'user', :pass => 'pass')
+HTTP.basic_auth(:user => "user", :pass => "pass")
 # <HTTP::Headers {"Authorization"=>"Basic dXNlcjpwYXNz"}>
 ```
 
 Or with plain as-is value:
 
 ```ruby
-HTTP.auth('Bearer VGhlIEhUVFAgR2VtLCBST0NLUw')
+HTTP.auth("Bearer VGhlIEhUVFAgR2VtLCBST0NLUw")
 # <HTTP::Headers {"Authorization"=>"Bearer VGhlIEhUVFAgR2VtLCBST0NLUw"}>
 ```
 
 And Chain all together!
 
 ```ruby
-HTTP.basic_auth(:user => 'user', :pass => 'pass')
-  .headers('Cookie' => '9wq3w')
-  .get('https://example.com')
+HTTP.basic_auth(:user => "user", :pass => "pass")
+  .headers("Cookie" => "9wq3w")
+  .get("https://example.com")
 ```
 
 ### Content Negotiation
@@ -216,7 +216,7 @@ right? But usually it's not, and so we end up adding ".json" onto the ends of
 our URLs because the existing mechanisms make it too hard. It should be easy:
 
 ```ruby
-HTTP.accept(:json).get('https://github.com/httprb/http.rb/commit/HEAD')
+HTTP.accept(:json).get("https://github.com/httprb/http.rb/commit/HEAD")
 ```
 
 This adds the appropriate Accept header for retrieving a JSON response for the
@@ -229,8 +229,8 @@ Celluloid::IO actor. Here's a parallel HTTP fetcher combining http.rb with
 Celluloid::IO:
 
 ```ruby
-require 'celluloid/io'
-require 'http'
+require "celluloid/io"
+require "http"
 
 class HttpFetcher
   include Celluloid::IO
@@ -253,7 +253,7 @@ http.rb provides caching of HTTP request (per
 so.
 
 ```ruby
-require 'http'
+require "http"
 
 http = HTTP.cache(:metastore   => "file:/var/cache/my-app-http/meta",
                   :entitystore => "file:/var/cache/my-app-http/entity")
