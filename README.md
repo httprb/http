@@ -170,19 +170,16 @@ the full, raw power of HTTP, we can perform content negotiation the way HTTP
 intends us to, by using the Accept header:
 
 ```ruby
-HTTP.with_headers(:accept => 'application/json').
+HTTP.headers(:accept => 'application/json').
   get('https://github.com/httprb/http.rb/commit/HEAD')
 ```
 
 This requests JSON from GitHub. GitHub is smart enough to understand our
 request and returns a response with Content-Type: application/json.
 
-Shorter aliases exists for HTTP.with_headers:
+Shorter alias exists for `HTTP.headers`:
 
 ```ruby
-HTTP.with(:accept => 'application/json').
-  get('https://github.com/httprb/http.rb/commit/HEAD')
-
 HTTP[:accept => 'application/json'].
   get('https://github.com/httprb/http.rb/commit/HEAD')
 ```
@@ -208,7 +205,7 @@ And Chain all together!
 
 ```ruby
 HTTP.basic_auth(:user => 'user', :pass => 'pass')
-  .with('Cookie' => '9wq3w')
+  .headers('Cookie' => '9wq3w')
   .get('https://example.com')
 ```
 
@@ -258,8 +255,8 @@ so.
 ```ruby
 require 'http'
 
-http = HTTP.with_cache(metastore:   "file:/var/cache/my-app-http/meta",
-                       entitystore: "file:/var/cache/my-app-http/entity")
+http = HTTP.cache(:metastore   => "file:/var/cache/my-app-http/meta",
+                  :entitystore => "file:/var/cache/my-app-http/entity")
 
 http.get("http://example.com/")   # makes request
 http.get("http://example.com/")   # skips making request and returns

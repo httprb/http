@@ -190,10 +190,10 @@ RSpec.describe HTTP do
     end
   end
 
-  describe ".with_cache" do
+  describe ".cache" do
     it "sets cache option" do
       cache = double(:cache, :perform => nil)
-      client = HTTP.with_cache cache
+      client = HTTP.cache cache
       expect(client.default_options[:cache]).to eq cache
     end
   end

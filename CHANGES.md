@@ -1,5 +1,6 @@
 ## master (unreleased)
 
+* Deprecate chainable methods with `with_` prefix. See #207. (@ixti)
 * Add support of HTTPS connections through proxy. See #186. (@Connorhd)
 
 

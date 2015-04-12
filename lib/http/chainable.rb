@@ -140,20 +140,31 @@ module HTTP
       branch default_options.with_follow opts
     end
 
-    # @deprecated
+    # @deprecated will be removed in 1.0.0
     # @see #follow
     alias_method :with_follow, :follow
 
-    def with_cache(cache)
+    def cache(cache)
       branch default_options.with_cache(cache)
     end
 
+    # @deprecated will be removed in 1.0.0
+    # @see #cache
+    alias_method :with_cache, :cache
+
     # Make a request with the given headers
     # @param headers
-    def with_headers(headers)
+    def headers(headers)
       branch default_options.with_headers(headers)
     end
-    alias_method :with, :with_headers
+
+    # @deprecated will be removed in 1.0.0
+    # @see #headers
+    alias_method :with, :headers
+
+    # @deprecated will be removed in 1.0.0
+    # @see #headers
+    alias_method :with_headers, :headers
 
     # Accept the given MIME type(s)
     # @param type
