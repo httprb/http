@@ -206,12 +206,14 @@ module HTTP
       @default_options = HTTP::Options.new(opts)
     end
 
+    # @deprecated Will be removed in 1.0.0; Use `#default_options#headers`
     # Get headers of HTTP options
     def default_headers
       default_options.headers
     end
 
     # Set headers of HTTP options
+    # @deprecated Will be removed in 1.0.0; Use `#headers`
     # @param headers
     def default_headers=(headers)
       @default_options = default_options.dup do |opts|

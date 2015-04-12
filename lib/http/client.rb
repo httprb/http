@@ -21,8 +21,6 @@ module HTTP
 
     HTTP_OR_HTTPS_RE   = %r{^https?://}i
 
-    attr_reader :default_options
-
     def initialize(default_options = {})
       @default_options = HTTP::Options.new(default_options)
       @connection = nil

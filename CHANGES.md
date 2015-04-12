@@ -1,5 +1,6 @@
 ## master (unreleased)
 
+* Deprecate `#default_headers` and `#default_headers=`. (@ixti)
 * Deprecate chainable methods with `with_` prefix. See #207. (@ixti)
 * Add support of HTTPS connections through proxy. See #186. (@Connorhd)
 
