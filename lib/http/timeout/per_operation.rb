@@ -37,27 +37,62 @@ module HTTP
         end
       end
 
-      # Read data from the socket
-      def readpartial(size)
-        socket.read_nonblock(size)
-      rescue IO::WaitReadable
-        if IO.select([socket], nil, nil, read_timeout)
-          retry
-        else
-          raise TimeoutError, "Read timed out after #{read_timeout} seconds"
+      # NIO with exceptions
+      # rubocop:disable Metrics/BlockNesting
+      if RUBY_VERSION < "2.1.0"
+        # Read data from the socket
+        def readpartial(size)
+          socket.read_nonblock(size)
+        rescue IO::WaitReadable
+          if IO.select([socket], nil, nil, read_timeout)
+            retry
+          else
+            raise TimeoutError, "Read timed out after #{read_timeout} seconds"
+          end
+        rescue EOFError
+          :eof
         end
-      end
 
-      # Write data to the socket
-      def write(data)
-        socket.write_nonblock(data)
-      rescue IO::WaitWritable
-        if IO.select(nil, [socket], nil, write_timeout)
-          retry
-        else
-          raise TimeoutError, "Read timed out after #{write_timeout} seconds"
+        # Write data to the socket
+        def write(data)
+          socket.write_nonblock(data)
+        rescue IO::WaitWritable
+          if IO.select(nil, [socket], nil, write_timeout)
+            retry
+          else
+            raise TimeoutError, "Read timed out after #{write_timeout} seconds"
+          end
+        rescue EOFError
+          :eof
+        end
+
+      # NIO without exceptions
+      else
+        # Read data from the socket
+        def readpartial(size)
+          loop do
+            result = socket.read_nonblock(size, :exception => false)
+            break result unless result == :wait_readable
+
+            unless IO.select([socket], nil, nil, read_timeout)
+              fail TimeoutError, "Read timed out after #{read_timeout} seconds"
+            end
+          end
+        end
+
+        # Write data to the socket
+        def write(data)
+          loop do
+            result = socket.write_nonblock(data, :exception => false)
+            break unless result == :wait_writable
+
+            unless IO.select(nil, [socket], nil, write_timeout)
+              fail TimeoutError, "Read timed out after #{write_timeout} seconds"
+            end
+          end
         end
       end
+      # rubocop:enable Metrics/BlockNesting
     end
   end
 end

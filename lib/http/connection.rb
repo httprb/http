@@ -75,11 +75,10 @@ module HTTP
     def readpartial(size = BUFFER_SIZE)
       return unless @pending_response
 
-      begin
-        read_more size
-        finished = @parser.finished?
-      rescue EOFError
+      if read_more(size) == :eof
         finished = true
+      else
+        finished = @parser.finished?
       end
 
       chunk = @parser.chunk
@@ -92,10 +91,15 @@ module HTTP
     # Reads data from socket up until headers are loaded
     # @return [void]
     def read_headers!
-      read_more BUFFER_SIZE until @parser.headers
+      loop do
+        if read_more(BUFFER_SIZE) == :eof
+          fail EOFError unless @parser.headers?
+          break
+        end
+      end
+
       set_keep_alive
     rescue IOError, Errno::ECONNRESET, Errno::EPIPE => e
-      return if e.is_a?(EOFError) && @parser.headers
       raise IOError, "problem making HTTP request: #{e}"
     end
 
@@ -196,7 +200,15 @@ module HTTP
     # Feeds some more data into parser
     # @return [void]
     def read_more(size)
-      @parser << @socket.readpartial(size) unless @parser.finished?
+      return if @parser.finished?
+
+      value = @socket.readpartial(size)
+      if value == :eof
+        value
+      else
+        @parser << value
+        nil
+      end
     end
   end
 end

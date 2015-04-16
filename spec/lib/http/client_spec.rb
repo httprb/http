@@ -262,63 +262,6 @@ RSpec.describe HTTP::Client do
       end
     end
 
-    context "when server closes connection unexpectedly" do
-      before do
-        socket_spy = double
-
-        allow(socket_spy).to receive(:close) { nil }
-        allow(socket_spy).to receive(:closed?) { true }
-        allow(socket_spy).to receive(:readpartial) { chunks.shift.call }
-        allow(socket_spy).to receive(:<<) { nil }
-
-        allow(TCPSocket).to receive(:open) { socket_spy }
-      end
-
-      context "during headers reading" do
-        let :chunks do
-          [
-            proc { "HTTP/1.1 200 OK\r\n" },
-            proc { "Content-Type: text/html\r" },
-            proc { fail EOFError }
-          ]
-        end
-
-        it "raises IOError" do
-          expect { client.get dummy.endpoint }.to raise_error IOError
-        end
-      end
-
-      context "after headers were flushed" do
-        let :chunks do
-          [
-            proc { "HTTP/1.1 200 OK\r\n" },
-            proc { "Content-Type: text/html\r\n\r\n" },
-            proc { "unexpected end of f" },
-            proc { fail EOFError }
-          ]
-        end
-
-        it "reads partially arrived body" do
-          res = client.get(dummy.endpoint).to_s
-          expect(res).to eq "unexpected end of f"
-        end
-      end
-
-      context "when body and headers were flushed in one chunk" do
-        let :chunks do
-          [
-            proc { "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\nunexpected end of f" },
-            proc { fail EOFError }
-          ]
-        end
-
-        it "reads partially arrived body" do
-          res = client.get(dummy.endpoint).to_s
-          expect(res).to eq "unexpected end of f"
-        end
-      end
-    end
-
     context "when server fully flushes response in one chunk" do
       before do
         socket_spy = double
