@@ -138,8 +138,8 @@ RSpec.describe HTTP::Request do
     it { is_expected.to be_a HTTP::Request::Caching }
   end
 
-  describe "#request_header" do
-    subject { request.request_header }
+  describe "#headline" do
+    subject { request.headline }
 
     it { is_expected.to eq "GET /foo?bar=baz#moo HTTP/1.1" }
 

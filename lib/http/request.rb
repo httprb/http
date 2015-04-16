@@ -91,7 +91,7 @@ module HTTP
     # Stream the request to a socket
     def stream(socket)
       include_proxy_authorization_header if using_authenticated_proxy? && !@uri.https?
-      Request::Writer.new(socket, body, headers, request_header).stream
+      Request::Writer.new(socket, body, headers, headline).stream
     end
 
     # Is this request using a proxy?
@@ -120,10 +120,13 @@ module HTTP
     end
 
     # Compute HTTP request header for direct or proxy request
-    def request_header
+    def headline
       request_uri = using_proxy? ? uri : uri.omit(:scheme, :authority)
       "#{verb.to_s.upcase} #{request_uri} HTTP/#{version}"
     end
+
+    # @deprecated Will be removed in 1.0.0
+    alias_method :request_header, :headline
 
     # Compute HTTP request header SSL proxy connection
     def proxy_connect_header

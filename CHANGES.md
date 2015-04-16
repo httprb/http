@@ -1,5 +1,7 @@
 ## master (unreleased)
 
+* Deprecate `Request#request_header`. Use `Request#headline` instead. (@ixti)
+
 
 ## 0.8.4 (2015-04-23)
 
