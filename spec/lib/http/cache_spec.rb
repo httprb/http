@@ -6,8 +6,8 @@ RSpec.describe HTTP::Cache do
     subject { described_class }
 
     it "allows metastore and entitystore" do
-      expect(subject.new(:metastore => "heap:/", :entitystore => "heap:/"))
-        .to be_kind_of HTTP::Cache
+      expect(subject.new(:metastore => "heap:/", :entitystore => "heap:/")).
+        to be_kind_of HTTP::Cache
     end
   end
 
@@ -151,10 +151,10 @@ RSpec.describe HTTP::Cache do
 
     it "makes request with conditional request headers" do
       subject.perform(request, opts) do |actual_request, _|
-        expect(actual_request.headers["If-None-Match"])
-          .to eq cached_response.headers["Etag"]
-        expect(actual_request.headers["If-Modified-Since"])
-          .to eq cached_response.headers["Last-Modified"]
+        expect(actual_request.headers["If-None-Match"]).
+          to eq cached_response.headers["Etag"]
+        expect(actual_request.headers["If-Modified-Since"]).
+          to eq cached_response.headers["Last-Modified"]
 
         origin_response
       end

@@ -37,7 +37,7 @@ Style/Documentation:
   Enabled: false
 
 Style/DotPosition:
-  EnforcedStyle: leading
+  EnforcedStyle: trailing
 
 Style/DoubleNegation:
   Enabled: false

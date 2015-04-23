@@ -105,8 +105,8 @@ RSpec.describe HTTP::Response do
       body      = double :to_s => "foobar"
       response  = HTTP::Response.new(200, "1.1", headers, body)
 
-      expect(response.inspect)
-        .to eq '#<HTTP::Response/1.1 200 OK {"Content-Type"=>"text/plain"}>'
+      expect(response.inspect).
+        to eq '#<HTTP::Response/1.1 200 OK {"Content-Type"=>"text/plain"}>'
     end
   end
 

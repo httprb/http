@@ -80,11 +80,11 @@ module HTTP
       def conditional_headers_for(cached_response)
         headers = HTTP::Headers.new
 
-        cached_response.headers.get("Etag")
-          .each { |etag| headers.add("If-None-Match", etag) }
+        cached_response.headers.get("Etag").
+          each { |etag| headers.add("If-None-Match", etag) }
 
-        cached_response.headers.get("Last-Modified")
-          .each { |last_mod| headers.add("If-Modified-Since", last_mod) }
+        cached_response.headers.get("Last-Modified").
+          each { |last_mod| headers.add("If-Modified-Since", last_mod) }
 
         headers.add("Cache-Control", "max-age=0") if cache_headers.forces_revalidation?
 

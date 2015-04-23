@@ -82,8 +82,8 @@ RSpec.shared_context "HTTP handling" do
       end
 
       it "errors if reading takes too long" do
-        expect { client.get("#{server.endpoint}/sleep").body.to_s }
-          .to raise_error(HTTP::TimeoutError, /Timed out/)
+        expect { client.get("#{server.endpoint}/sleep").body.to_s }.
+          to raise_error(HTTP::TimeoutError, /Timed out/)
       end
     end
   end
