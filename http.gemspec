@@ -1,5 +1,6 @@
-# -*- encoding: utf-8 -*-
-require File.expand_path("../lib/http/version", __FILE__)
+lib = File.expand_path("../lib", __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+require "http/version"
 
 Gem::Specification.new do |gem|
   gem.authors       = ["Tony Arcieri", "Erik Michaels-Ober", "Aleksey V. Zapparov"]
