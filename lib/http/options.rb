@@ -30,7 +30,7 @@ module HTTP
 
       def def_option(name, &interpreter)
         defined_options << name.to_sym
-        interpreter ||= ->(v) { v }
+        interpreter ||= lambda { |v| v }
 
         attr_accessor name
         protected :"#{name}="

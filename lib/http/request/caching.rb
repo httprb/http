@@ -70,7 +70,7 @@ module HTTP
       end
 
       def env
-        {"rack-cache.cache_key" => ->(r) { r.uri.to_s }}
+        {"rack-cache.cache_key" => lambda { |r| r.uri.to_s }}
       end
 
       private
