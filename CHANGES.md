@@ -1,5 +1,6 @@
 ## master (unreleased)
 
+* Add simple timeouts configuration API. See #205. (@ixti)
 * Deprecate `Request#request_header`. Use `Request#headline` instead. (@ixti)
 
 

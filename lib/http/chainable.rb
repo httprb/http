@@ -72,6 +72,27 @@ module HTTP
       branch(options).request verb, uri
     end
 
+    # @param [#to_sym] klass
+    # @param [Hash] options
+    # @option options [Float] :read Read timeout
+    # @option options [Float] :write Write timeout
+    # @option options [Float] :connect Connect timeout
+    def timeout(klass, options = {})
+      klass = case klass.to_sym
+              when :null          then HTTP::Timeout::Null
+              when :global        then HTTP::Timeout::Global
+              when :per_operation then HTTP::Timeout::PerOperation
+              else fail Error, "Unsupported Timeout class: #{klass}"
+              end
+
+      [:read, :write, :connect].each do |k|
+        next unless options.key? k
+        options["#{k}_timeout".to_sym] = options.delete k
+      end
+
+      branch :timeout_class => klass, :timeout_options => options
+    end
+
     # @overload persistent(host)
     #   Flags as persistent
     #   @param [String] host
