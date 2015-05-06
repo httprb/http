@@ -72,12 +72,17 @@ module HTTP
       branch(options).request verb, uri
     end
 
-    # @param [#to_sym] klass
-    # @param [Hash] options
-    # @option options [Float] :read Read timeout
-    # @option options [Float] :write Write timeout
-    # @option options [Float] :connect Connect timeout
+    # @overload(options = {})
+    #   Syntax sugar for `timeout(:per_operation, options)`
+    # @overload(klass, options = {})
+    #   @param [#to_sym] klass
+    #   @param [Hash] options
+    #   @option options [Float] :read Read timeout
+    #   @option options [Float] :write Write timeout
+    #   @option options [Float] :connect Connect timeout
     def timeout(klass, options = {})
+      klass, options = options, {} if klass.is_a? Hash
+
       klass = case klass.to_sym
               when :null          then HTTP::Timeout::Null
               when :global        then HTTP::Timeout::Global
