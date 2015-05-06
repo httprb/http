@@ -30,7 +30,9 @@ module HTTP
     attr_reader :uri
 
     def initialize(status, version, headers, body, uri = nil) # rubocop:disable ParameterLists
-      @version, @body, @uri = version, body, uri
+      @version = version
+      @body    = body
+      @uri     = uri
       @status  = HTTP::Response::Status.new status
       @headers = HTTP::Headers.coerce(headers || {})
     end

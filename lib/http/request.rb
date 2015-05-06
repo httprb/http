@@ -73,7 +73,9 @@ module HTTP
       fail(UnsupportedMethodError, "unknown method: #{verb}") unless METHODS.include?(@verb)
       fail(UnsupportedSchemeError, "unknown scheme: #{scheme}") unless SCHEMES.include?(@scheme)
 
-      @proxy, @body, @version = proxy, body, version
+      @proxy   = proxy
+      @body    = body
+      @version = version
 
       @headers = HTTP::Headers.coerce(headers || {})
 

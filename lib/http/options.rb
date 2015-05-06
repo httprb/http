@@ -104,7 +104,9 @@ module HTTP
     end
 
     def merge(other)
-      h1, h2 = to_hash, other.to_hash
+      h1 = to_hash
+      h2 = other.to_hash
+
       merged = h1.merge(h2) do |k, v1, v2|
         case k
         when :headers
