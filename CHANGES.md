@@ -1,5 +1,10 @@
 ## master (unreleased)
 
+* _the future is unwritten_
+
+
+## 0.8.5 (2015-05-06)
+
 * Add simple timeouts configuration API. See #205. (@ixti)
 * Deprecate `Request#request_header`. Use `Request#headline` instead. (@ixti)
 
