@@ -276,6 +276,16 @@ http.rb's caching is backed by
 storage URL supported by rack-cache is supported by http.rb's cache.
 
 
+### Timeouts
+
+You can configure http.rb to fail if request (connect / read / write) takes too
+long:
+
+``` ruby
+HTTP.timeout(:connect => 5, :read => 10).get "http://example.com"
+```
+
+
 ## Supported Ruby Versions
 
 This library aims to support and is [tested against][travis] the following Ruby
