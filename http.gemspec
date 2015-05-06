@@ -3,7 +3,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require "http/version"
 
 Gem::Specification.new do |gem|
-  gem.authors       = ["Tony Arcieri", "Erik Michaels-Ober", "Aleksey V. Zapparov", "Zachary Anker"]
+  gem.authors       = ["Tony Arcieri", "Erik Michaels-Ober", "Alexey V. Zapparov", "Zachary Anker"]
   gem.email         = ["bascule@gmail.com"]
 
   gem.description   = <<-DESCRIPTION.strip.gsub(/\s+/, " ")
