@@ -1,12 +1,12 @@
-![http.rb](https://raw.github.com/httprb/http.rb/master/logo.png)
-==============
+# ![http.rb](https://raw.github.com/httprb/http.rb/master/logo.png)
+
 [![Gem Version](https://badge.fury.io/rb/http.svg)](http://rubygems.org/gems/http)
 [![Build Status](https://secure.travis-ci.org/httprb/http.rb.svg?branch=master)](http://travis-ci.org/httprb/http.rb)
 [![Code Climate](https://codeclimate.com/github/httprb/http.rb.svg?branch=master)](https://codeclimate.com/github/httprb/http.rb)
 [![Coverage Status](https://coveralls.io/repos/httprb/http.rb/badge.svg?branch=master)](https://coveralls.io/r/httprb/http.rb)
 
-About
------
+
+## About
 
 http.rb is an easy-to-use client library for making requests from Ruby. It uses
 a simple method chaining system for building requests, similar to Python's [Requests].
@@ -19,8 +19,8 @@ natively and outsources the parsing to native extensions.
 [requests]: http://docs.python-requests.org/en/latest/
 [http_parser.rb]: https://github.com/tmm1/http_parser.rb
 
-Help and Discussion
--------------------
+
+## Help and Discussion
 
 If you need help or just want to talk about the http.rb,
 visit the http.rb Google Group:
@@ -35,8 +35,8 @@ If you believe you've found a bug, please report it at:
 
 https://github.com/httprb/http.rb/issues
 
-Installation
-------------
+
+## Installation
 
 Add this line to your application's Gemfile:
 
@@ -56,16 +56,17 @@ Inside of your Ruby program do:
 
 ...to pull it in as a dependency.
 
-Documentation
--------------
+
+## Documentation
 
 [Please see the http.rb wiki](https://github.com/httprb/http.rb/wiki)
 for more detailed documentation and usage notes.
 
-Basic Usage
------------
+
+## Basic Usage
 
 Here's some simple examples to get you started:
+
 
 ### GET requests
 
@@ -99,6 +100,7 @@ The response body can be streamed with `HTTP::Response::Body#readpartial`:
 
 In practice you'll want to bind the HTTP::Response::Body to a local variable (e.g.
 "body") and call readpartial on it repeatedly until it returns `nil`.
+
 
 ### POST requests
 
@@ -136,6 +138,7 @@ HTTP.post("http://examplc.com/resource", :form => {
 
 It's easy!
 
+
 ### Proxy Support
 
 Making request behind proxy is as simple as making them directly. Just specify
@@ -152,6 +155,7 @@ Proxy needs authentication? No problem:
 HTTP.via("proxy-hostname.local", 8080, "username", "password")
   .get("http://example.com/resource")
 ```
+
 
 ### Adding Headers
 
@@ -184,6 +188,7 @@ HTTP[:accept => "application/json"]
   .get("https://github.com/httprb/http.rb/commit/HEAD")
 ```
 
+
 ### Authorization Header
 
 With [HTTP Basic Authentication](http://tools.ietf.org/html/rfc2617) using
@@ -209,6 +214,7 @@ HTTP.basic_auth(:user => "user", :pass => "pass")
   .get("https://example.com")
 ```
 
+
 ### Content Negotiation
 
 As important a concept as content negotiation is to HTTP, it sure should be easy,
@@ -221,6 +227,7 @@ HTTP.accept(:json).get("https://github.com/httprb/http.rb/commit/HEAD")
 
 This adds the appropriate Accept header for retrieving a JSON response for the
 given resource.
+
 
 ### Celluloid::IO Support
 
@@ -246,6 +253,7 @@ There's a little more to it, but that's the core idea!
 * [Full parallel HTTP fetcher example](https://github.com/httprb/http.rb/wiki/Parallel-requests-with-Celluloid%3A%3AIO)
 * See also: [Celluloid::IO](https://github.com/celluloid/celluloid-io)
 
+
 ### Caching
 
 http.rb provides caching of HTTP request (per
@@ -267,8 +275,8 @@ http.rb's caching is backed by
 [rack-cache's excellent storage subsystem](http://rtomayko.github.io/rack-cache/storage.html). Any
 storage URL supported by rack-cache is supported by http.rb's cache.
 
-Supported Ruby Versions
------------------------
+
+## Supported Ruby Versions
 
 This library aims to support and is [tested against][travis] the following Ruby
 versions:
@@ -294,8 +302,8 @@ dropped.
 
 [travis]: http://travis-ci.org/httprb/http.rb
 
-Contributing to http.rb
------------------------
+
+## Contributing to http.rb
 
 * Fork http.rb on GitHub
 * Make your changes
@@ -304,8 +312,8 @@ Contributing to http.rb
 * If we like them we'll merge them
 * If we've accepted a patch, feel free to ask for commit access!
 
-Copyright
----------
+
+## Copyright
 
 Copyright (c) 2011-15 Tony Arcieri, Erik Michaels-Ober, Aleksey V. Zapparov.
 See LICENSE.txt for further details.
