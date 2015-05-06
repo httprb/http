@@ -127,11 +127,6 @@ module HTTP
     end
     alias_method :through, :via
 
-    # Alias for with_response(:object)
-    def stream
-      with_response(:object)
-    end
-
     # Make client follow redirects.
     # @param opts
     # @return [HTTP::Client]
