@@ -254,6 +254,15 @@ There's a little more to it, but that's the core idea!
 * See also: [Celluloid::IO](https://github.com/celluloid/celluloid-io)
 
 
+#### WARNING
+
+Celluloid support [was broken][issue-203] with `0.8.0` release.
+For Celluloid support use `0.7` for now.
+
+
+[issue-203]: https://github.com/httprb/http.rb/issues/203
+
+
 ### Caching
 
 http.rb provides caching of HTTP request (per
