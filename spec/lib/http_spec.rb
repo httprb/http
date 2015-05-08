@@ -221,7 +221,7 @@ RSpec.describe HTTP do
     end
   end
 
-  fdescribe ".timeout" do
+  describe ".timeout" do
     context "without timeout type" do
       subject(:client) { HTTP.timeout :read => 123 }
 
