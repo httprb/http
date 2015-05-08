@@ -85,6 +85,17 @@ RSpec.shared_context "HTTP handling" do
         expect { client.get("#{server.endpoint}/sleep").body.to_s }.
           to raise_error(HTTP::TimeoutError, /Timed out/)
       end
+
+      context "it resets state when reusing connections" do
+        let(:options) { {:persistent => server.endpoint} }
+
+        let(:read_timeout) { 3 }
+
+        it "does not timeout" do
+          client.get("#{server.endpoint}/sleep").body.to_s
+          client.get("#{server.endpoint}/sleep").body.to_s
+        end
+      end
     end
   end
 
