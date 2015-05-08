@@ -277,18 +277,27 @@ storage URL supported by rack-cache is supported by http.rb's cache.
 
 ### Timeouts
 
-By default, HTTP does not timeout on a request. You can enable per operation (each read/write/connect call) or global (sum of all read/write/connect calls).
+By default, HTTP does not timeout on a request. You can enable per operation
+(each read/write/connect call) or global (sum of all read/write/connect calls).
 
 Per operation timeouts are what `Net::HTTP` and the majority of HTTP clients do:
 
 ``` ruby
-HTTP.timeout(:per_operation, :write => 2, :connect => 5, :read => 10).get "http://example.com"
+HTTP.timeout(:per_operation, :write => 2, :connect => 5, :read => 10)
+  .get "http://example.com"
+
+# For convinience, you can omit timeout type in this case. So following has
+# same result as the above:
+
+HTTP.timeout(:write => 2, :connect => 5, :read => 10).get "http://example.com"
 ```
 
-Global timeouts let you set an upper bound of how long a request can take, without having to rely on `Timeout.timeout`:
+Global timeouts let you set an upper bound of how long a request can take,
+without having to rely on `Timeout.timeout`:
 
 ``` ruby
-HTTP.timeout(:global, :write => 1, :connect => 1, :read => 1).get "http://example.com"
+HTTP.timeout(:global, :write => 1, :connect => 1, :read => 1)
+  .get "http://example.com"
 ```
 
 Uses a timeout of 3 seconds, for the entire `get` call.
