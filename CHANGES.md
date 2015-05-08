@@ -3,9 +3,13 @@
 * _the future is unwritten_
 
 
-## 0.8.6 (2015-05-08)
+## 0.8.7 (2015-05-08)
 
 * Fix `HTTP.timeout` API with options only given. (@ixti)
+
+
+## 0.8.6 (2015-05-08)
+
 * Reset global timeouts after the request finishes. See #215. (@zanker)
 
 
