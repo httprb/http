@@ -105,6 +105,7 @@ module HTTP
       close unless keep_alive?
 
       @parser.reset
+      @socket.reset_counter if @socket.respond_to?(:reset_counter)
       reset_timer
 
       @pending_response = false
