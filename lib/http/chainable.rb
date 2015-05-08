@@ -81,13 +81,13 @@ module HTTP
     #   @option options [Float] :write Write timeout
     #   @option options [Float] :connect Connect timeout
     def timeout(klass, options = {})
-      klass, options = options, {} if klass.is_a? Hash
+      klass, options = :per_operation, klass if klass.is_a? Hash
 
       klass = case klass.to_sym
               when :null          then HTTP::Timeout::Null
               when :global        then HTTP::Timeout::Global
               when :per_operation then HTTP::Timeout::PerOperation
-              else fail Error, "Unsupported Timeout class: #{klass}"
+              else fail ArgumentError, "Unsupported Timeout class: #{klass}"
               end
 
       [:read, :write, :connect].each do |k|

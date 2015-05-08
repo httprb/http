@@ -220,4 +220,62 @@ RSpec.describe HTTP do
       end
     end
   end
+
+  fdescribe ".timeout" do
+    context "without timeout type" do
+      subject(:client) { HTTP.timeout :read => 123 }
+
+      it "sets timeout_class to PerOperation" do
+        expect(client.default_options.timeout_class)
+          .to be HTTP::Timeout::PerOperation
+      end
+
+      it "sets given timeout options" do
+        expect(client.default_options.timeout_options)
+          .to eq :read_timeout => 123
+      end
+    end
+
+    context "with :null type" do
+      subject(:client) { HTTP.timeout :null, :read => 123 }
+
+      it "sets timeout_class to Null" do
+        expect(client.default_options.timeout_class)
+          .to be HTTP::Timeout::Null
+      end
+    end
+
+    context "with :per_operation type" do
+      subject(:client) { HTTP.timeout :per_operation, :read => 123 }
+
+      it "sets timeout_class to PerOperation" do
+        expect(client.default_options.timeout_class)
+          .to be HTTP::Timeout::PerOperation
+      end
+
+      it "sets given timeout options" do
+        expect(client.default_options.timeout_options)
+          .to eq :read_timeout => 123
+      end
+    end
+
+    context "with :global type" do
+      subject(:client) { HTTP.timeout :global, :read => 123 }
+
+      it "sets timeout_class to Global" do
+        expect(client.default_options.timeout_class)
+          .to be HTTP::Timeout::Global
+      end
+
+      it "sets given timeout options" do
+        expect(client.default_options.timeout_options)
+          .to eq :read_timeout => 123
+      end
+    end
+
+    it "fails with unknown timeout type" do
+      expect { HTTP.timeout(:foobar, :read => 123) }
+        .to raise_error(ArgumentError, /foobar/)
+    end
+  end
 end
