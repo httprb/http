@@ -131,6 +131,20 @@ RSpec.describe HTTP do
     end
   end
 
+  context "loading binary data" do
+    it "is encoded as bytes" do
+      response = HTTP.get "#{dummy.endpoint}/bytes"
+      expect(response.to_s.encoding).to eq(Encoding::ASCII_8BIT)
+    end
+  end
+
+  context "loading text" do
+    it "is utf-8 encoded" do
+      response = HTTP.get dummy.endpoint
+      expect(response.to_s.encoding).to eq(Encoding::UTF_8)
+    end
+  end
+
   context "posting with an explicit body" do
     it "is easy" do
       response = HTTP.post "#{dummy.endpoint}/body", :body => "testing-body"
