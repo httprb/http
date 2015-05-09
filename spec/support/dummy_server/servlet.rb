@@ -122,5 +122,11 @@ class DummyServer < WEBrick::HTTPServer
       res.status          = 200
       res["Content-Type"] = "text/html"
     end
+
+    get "/bytes" do |_req, res|
+      bytes = [80, 75, 3, 4, 20, 0, 0, 0, 8, 0, 123, 104, 169, 70, 99, 243, 243]
+      res["Content-Type"] = "application/octet-stream"
+      res.body = bytes.pack("c*")
+    end
   end
 end

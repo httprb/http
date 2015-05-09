@@ -1,6 +1,7 @@
 ## master (unreleased)
 
 * _the future is unwritten_
+* Enforce stringified body encoding. See #219. (@Connorhd)
 
 
 ## 0.8.8 (2015-05-09)
