@@ -132,7 +132,7 @@ module HTTP
 
     # Compute HTTP request header SSL proxy connection
     def proxy_connect_header
-      "CONNECT #{@uri.host}:#{@uri.port} HTTP/#{version}"
+      "CONNECT #{host}:#{port} HTTP/#{version}"
     end
 
     # Headers to send with proxy connect request
