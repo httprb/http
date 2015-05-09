@@ -1,6 +1,7 @@
 ## master (unreleased)
 
 * _the future is unwritten_
+* Fix CONNECT header for proxies. See #217. (@Connorhd)
 
 
 ## 0.8.7 (2015-05-08)
