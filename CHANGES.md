@@ -1,6 +1,7 @@
 ## master (unreleased)
 
 * _the future is unwritten_
+* Add cookies support. (@ixti)
 * Enforce stringified body encoding. See #219. (@Connorhd)
 
 

@@ -16,6 +16,9 @@ module HTTP
     # @see http://tools.ietf.org/html/rfc7230#section-3.2
     HEADER_NAME_RE = /^[A-Za-z0-9!#\$%&'*+\-.^_`|~]+$/
 
+    # Cookies header name
+    SET_COOKIE = "Set-Cookie".freeze
+
     # Class constructor.
     def initialize
       @pile = []
