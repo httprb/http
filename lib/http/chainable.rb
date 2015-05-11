@@ -187,6 +187,11 @@ module HTTP
     # @see #headers
     alias_method :with_headers, :headers
 
+    # Make a request with the given cookies
+    def cookies(cookies)
+      branch default_options.with_cookies(cookies)
+    end
+
     # Accept the given MIME type(s)
     # @param type
     def accept(type)

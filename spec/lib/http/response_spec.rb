@@ -1,6 +1,8 @@
 RSpec.describe HTTP::Response do
   let(:body)          { "Hello world!" }
-  subject(:response)  { HTTP::Response.new 200, "1.1", {}, body }
+  let(:uri)           { "http://example.com/" }
+  let(:headers)       { {} }
+  subject(:response)  { HTTP::Response.new 200, "1.1", headers, body, uri }
 
   it "includes HTTP::Headers::Mixin" do
     expect(described_class).to include HTTP::Headers::Mixin
@@ -9,15 +11,15 @@ RSpec.describe HTTP::Response do
   describe "to_a" do
     let(:body)         { "Hello world" }
     let(:content_type) { "text/plain" }
-    subject { HTTP::Response.new(200, "1.1", {"Content-Type" => content_type}, body) }
+    let(:headers)      { {"Content-Type" => content_type} }
 
     it "returns a Rack-like array" do
-      expect(subject.to_a).to eq([200, {"Content-Type" => content_type}, body])
+      expect(subject.to_a).to eq([200, headers, body])
     end
   end
 
   describe "mime_type" do
-    subject { HTTP::Response.new(200, "1.1", headers, "").mime_type }
+    subject { response.mime_type }
 
     context "without Content-Type header" do
       let(:headers) { {} }
@@ -36,7 +38,7 @@ RSpec.describe HTTP::Response do
   end
 
   describe "charset" do
-    subject { HTTP::Response.new(200, "1.1", headers, "").charset }
+    subject { response.charset }
 
     context "without Content-Type header" do
       let(:headers) { {} }
@@ -57,7 +59,6 @@ RSpec.describe HTTP::Response do
   describe "#parse" do
     let(:headers)   { {"Content-Type" => content_type} }
     let(:body)      { '{"foo":"bar"}' }
-    let(:response)  { HTTP::Response.new 200, "1.1", headers, body }
 
     context "with known content type" do
       let(:content_type) { "application/json" }
@@ -86,8 +87,7 @@ RSpec.describe HTTP::Response do
   end
 
   describe "#flush" do
-    let(:body)      { double :to_s => "" }
-    let(:response)  { HTTP::Response.new 200, "1.1", {}, body }
+    let(:body) { double :to_s => "" }
 
     it "returns response self-reference" do
       expect(response.flush).to be response
@@ -100,11 +100,10 @@ RSpec.describe HTTP::Response do
   end
 
   describe "#inspect" do
-    it "returns human0friendly response representation" do
-      headers   = {:content_type => "text/plain"}
-      body      = double :to_s => "foobar"
-      response  = HTTP::Response.new(200, "1.1", headers, body)
+    let(:headers) { {:content_type => "text/plain"} }
+    let(:body)    { double :to_s => "foobar" }
 
+    it "returns human-friendly response representation" do
       expect(response.inspect).
         to eq '#<HTTP::Response/1.1 200 OK {"Content-Type"=>"text/plain"}>'
     end
@@ -113,5 +112,26 @@ RSpec.describe HTTP::Response do
   describe "#caching" do
     subject { response.caching }
     it { is_expected.to be_a HTTP::Response::Caching }
+  end
+
+  describe "#cookies" do
+    let(:cookies) { ["a=1", "b=2; domain=example.com", "c=3; domain=bad.org"] }
+    let(:headers) { {"Set-Cookie" => cookies} }
+
+    subject(:jar) { response.cookies }
+
+    it { is_expected.to be_an HTTP::CookieJar }
+
+    it "contains cookies without domain restriction" do
+      expect(jar.count { |c| "a" == c.name }).to eq 1
+    end
+
+    it "contains cookies limited to domain of request uri" do
+      expect(jar.count { |c| "b" == c.name }).to eq 1
+    end
+
+    it "does not contains cookies limited to non-requeted uri" do
+      expect(jar.count { |c| "c" == c.name }).to eq 0
+    end
   end
 end

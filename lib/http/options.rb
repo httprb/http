@@ -42,23 +42,23 @@ module HTTP
     end
 
     def initialize(options = {})
-      defaults = {:response =>         :auto,
-                  :proxy =>            {},
-                  :timeout_class =>    self.class.default_timeout_class,
-                  :timeout_options =>  {},
-                  :socket_class =>     self.class.default_socket_class,
-                  :ssl_socket_class => self.class.default_ssl_socket_class,
-                  :ssl =>              {},
-                  :cache =>            self.class.default_cache,
-                  :keep_alive_timeout  => 5,
-                  :headers =>          {}}
+      defaults = {
+        :response =>         :auto,
+        :proxy =>            {},
+        :timeout_class =>    self.class.default_timeout_class,
+        :timeout_options =>  {},
+        :socket_class =>     self.class.default_socket_class,
+        :ssl_socket_class => self.class.default_ssl_socket_class,
+        :ssl =>              {},
+        :cache =>            self.class.default_cache,
+        :keep_alive_timeout  => 5,
+        :headers =>          {},
+        :cookies =>          {}
+      }
 
       opts_w_defaults = defaults.merge(options)
       opts_w_defaults[:headers] = HTTP::Headers.coerce(opts_w_defaults[:headers])
-
-      opts_w_defaults.each do |(opt_name, opt_val)|
-        self[opt_name] = opt_val
-      end
+      opts_w_defaults.each { |(k, v)| self[k] = v }
     end
 
     def_option :headers do |headers|
@@ -145,3 +145,6 @@ module HTTP
     end
   end
 end
+
+# require cookies options
+require "http/options/cookies"
