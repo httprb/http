@@ -22,7 +22,7 @@ module HTTP
     class UnsupportedSchemeError < RequestError; end
 
     # Default User-Agent header value
-    USER_AGENT = "RubyHTTPGem/#{HTTP::VERSION}".freeze
+    USER_AGENT = "http.rb/#{HTTP::VERSION}".freeze
 
     # RFC 2616: Hypertext Transfer Protocol -- HTTP/1.1
     METHODS = [:options, :get, :head, :post, :put, :delete, :trace, :connect]
