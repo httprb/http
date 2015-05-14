@@ -72,6 +72,32 @@ module HTTP
       branch(options).request verb, uri
     end
 
+    # @overload(options = {})
+    #   Syntax sugar for `timeout(:per_operation, options)`
+    # @overload(klass, options = {})
+    #   @param [#to_sym] klass
+    #   @param [Hash] options
+    #   @option options [Float] :read Read timeout
+    #   @option options [Float] :write Write timeout
+    #   @option options [Float] :connect Connect timeout
+    def timeout(klass, options = {})
+      klass, options = :per_operation, klass if klass.is_a? Hash
+
+      klass = case klass.to_sym
+              when :null          then HTTP::Timeout::Null
+              when :global        then HTTP::Timeout::Global
+              when :per_operation then HTTP::Timeout::PerOperation
+              else fail ArgumentError, "Unsupported Timeout class: #{klass}"
+              end
+
+      [:read, :write, :connect].each do |k|
+        next unless options.key? k
+        options["#{k}_timeout".to_sym] = options.delete k
+      end
+
+      branch :timeout_class => klass, :timeout_options => options
+    end
+
     # @overload persistent(host)
     #   Flags as persistent
     #   @param [String] host
@@ -127,11 +153,6 @@ module HTTP
     end
     alias_method :through, :via
 
-    # Alias for with_response(:object)
-    def stream
-      with_response(:object)
-    end
-
     # Make client follow redirects.
     # @param opts
     # @return [HTTP::Client]
@@ -140,20 +161,36 @@ module HTTP
       branch default_options.with_follow opts
     end
 
-    # @deprecated
+    # @deprecated will be removed in 1.0.0
     # @see #follow
     alias_method :with_follow, :follow
 
-    def with_cache(cache)
+    def cache(cache)
       branch default_options.with_cache(cache)
     end
 
+    # @deprecated will be removed in 1.0.0
+    # @see #cache
+    alias_method :with_cache, :cache
+
     # Make a request with the given headers
     # @param headers
-    def with_headers(headers)
+    def headers(headers)
       branch default_options.with_headers(headers)
     end
-    alias_method :with, :with_headers
+
+    # @deprecated will be removed in 1.0.0
+    # @see #headers
+    alias_method :with, :headers
+
+    # @deprecated will be removed in 1.0.0
+    # @see #headers
+    alias_method :with_headers, :headers
+
+    # Make a request with the given cookies
+    def cookies(cookies)
+      branch default_options.with_cookies(cookies)
+    end
 
     # Accept the given MIME type(s)
     # @param type
@@ -195,12 +232,14 @@ module HTTP
       @default_options = HTTP::Options.new(opts)
     end
 
+    # @deprecated Will be removed in 1.0.0; Use `#default_options#headers`
     # Get headers of HTTP options
     def default_headers
       default_options.headers
     end
 
     # Set headers of HTTP options
+    # @deprecated Will be removed in 1.0.0; Use `#headers`
     # @param headers
     def default_headers=(headers)
       @default_options = default_options.dup do |opts|

@@ -123,9 +123,9 @@ module HTTP
 
       # @return [Time] the time at which the server generated this response.
       def server_response_time
-        headers.get("Date")
-          .map(&method(:to_time_or_epoch))
-          .max || begin
+        headers.get("Date").
+          map(&method(:to_time_or_epoch)).
+          max || begin
                     # set it if it is not already set
                     headers["Date"] = received_at.httpdate
                     received_at

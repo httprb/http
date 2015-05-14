@@ -5,6 +5,7 @@ require "uri"
 
 require "http/form_data"
 require "http/options"
+require "http/headers"
 require "http/connection"
 require "http/redirector"
 require "http/uri"
@@ -21,8 +22,6 @@ module HTTP
 
     HTTP_OR_HTTPS_RE   = %r{^https?://}i
 
-    attr_reader :default_options
-
     def initialize(default_options = {})
       @default_options = HTTP::Options.new(default_options)
       @connection = nil
@@ -33,9 +32,9 @@ module HTTP
     def request(verb, uri, opts = {})
       opts    = @default_options.merge(opts)
       uri     = make_request_uri(uri, opts)
-      headers = opts.headers
-      proxy   = opts.proxy
+      headers = opts.headers.merge(Headers::SET_COOKIE => opts.cookies.values)
       body    = make_request_body(opts, headers)
+      proxy   = opts.proxy
 
       # Tell the server to keep the conn open
       if default_options.persistent?
@@ -72,8 +71,11 @@ module HTTP
       @state = :dirty
 
       @connection ||= HTTP::Connection.new(req, options)
-      @connection.send_request(req)
-      @connection.read_headers!
+
+      unless @connection.failed_proxy_connect?
+        @connection.send_request(req)
+        @connection.read_headers!
+      end
 
       res = Response.new(
         @connection.status_code,

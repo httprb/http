@@ -6,8 +6,11 @@ module HTTP
       def initialize(*args)
         super
 
-        @time_left = connect_timeout + read_timeout + write_timeout
-        @total_timeout = time_left
+        reset_counter
+      end
+
+      def reset_counter
+        @time_left = @total_timeout = connect_timeout + read_timeout + write_timeout
       end
 
       def connect(socket_class, host, port)

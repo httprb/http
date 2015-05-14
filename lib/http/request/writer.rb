@@ -7,11 +7,11 @@ module HTTP
       # Types valid to be used as body source
       VALID_BODY_TYPES = [String, NilClass, Enumerable]
 
-      def initialize(socket, body, headers, headerstart) # rubocop:disable ParameterLists
+      def initialize(socket, body, headers, headline) # rubocop:disable ParameterLists
         @body           = body
         @socket         = socket
         @headers        = headers
-        @request_header = [headerstart]
+        @request_header = [headline]
 
         validate_body_type!
       end
@@ -27,6 +27,12 @@ module HTTP
       def stream
         send_request_header
         send_request_body
+      end
+
+      # Send headers needed to connect through proxy
+      def connect_through_proxy
+        add_headers
+        @socket << join_headers
       end
 
       # Adds the headers to the header array for the given request body we are working
@@ -50,9 +56,8 @@ module HTTP
       def send_request_header
         add_headers
         add_body_type_headers
-        header = join_headers
 
-        @socket << header
+        @socket << join_headers
       end
 
       def send_request_body

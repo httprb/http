@@ -1,8 +1,9 @@
-# -*- encoding: utf-8 -*-
-require File.expand_path("../lib/http/version", __FILE__)
+lib = File.expand_path("../lib", __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+require "http/version"
 
 Gem::Specification.new do |gem|
-  gem.authors       = ["Tony Arcieri", "Erik Michaels-Ober", "Aleksey V. Zapparov"]
+  gem.authors       = ["Tony Arcieri", "Erik Michaels-Ober", "Alexey V. Zapparov", "Zachary Anker"]
   gem.email         = ["bascule@gmail.com"]
 
   gem.description   = <<-DESCRIPTION.strip.gsub(/\s+/, " ")
@@ -24,6 +25,7 @@ Gem::Specification.new do |gem|
 
   gem.add_runtime_dependency "http_parser.rb", "~> 0.6.0"
   gem.add_runtime_dependency "http-form_data", "~> 1.0.1"
+  gem.add_runtime_dependency "http-cookie",    "~> 1.0"
   gem.add_runtime_dependency "addressable",    "~> 2.3"
 
   gem.add_development_dependency "bundler", "~> 1.0"

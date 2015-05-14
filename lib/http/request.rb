@@ -73,7 +73,9 @@ module HTTP
       fail(UnsupportedMethodError, "unknown method: #{verb}") unless METHODS.include?(@verb)
       fail(UnsupportedSchemeError, "unknown scheme: #{scheme}") unless SCHEMES.include?(@scheme)
 
-      @proxy, @body, @version = proxy, body, version
+      @proxy   = proxy
+      @body    = body
+      @version = version
 
       @headers = HTTP::Headers.coerce(headers || {})
 
@@ -90,8 +92,8 @@ module HTTP
 
     # Stream the request to a socket
     def stream(socket)
-      include_proxy_authorization_header if using_authenticated_proxy?
-      Request::Writer.new(socket, body, headers, request_header).stream
+      include_proxy_authorization_header if using_authenticated_proxy? && !@uri.https?
+      Request::Writer.new(socket, body, headers, headline).stream
     end
 
     # Is this request using a proxy?
@@ -106,14 +108,41 @@ module HTTP
 
     # Compute and add the Proxy-Authorization header
     def include_proxy_authorization_header
-      digest = Base64.encode64("#{proxy[:proxy_username]}:#{proxy[:proxy_password]}").chomp
-      headers["Proxy-Authorization"] = "Basic #{digest}"
+      headers["Proxy-Authorization"] = proxy_authorization_header
+    end
+
+    def proxy_authorization_header
+      digest = Base64.strict_encode64("#{proxy[:proxy_username]}:#{proxy[:proxy_password]}")
+      "Basic #{digest}"
+    end
+
+    # Setup tunnel through proxy for SSL request
+    def connect_using_proxy(socket)
+      Request::Writer.new(socket, nil, proxy_connect_headers, proxy_connect_header).connect_through_proxy
     end
 
     # Compute HTTP request header for direct or proxy request
-    def request_header
+    def headline
       request_uri = using_proxy? ? uri : uri.omit(:scheme, :authority)
       "#{verb.to_s.upcase} #{request_uri} HTTP/#{version}"
+    end
+
+    # @deprecated Will be removed in 1.0.0
+    alias_method :request_header, :headline
+
+    # Compute HTTP request header SSL proxy connection
+    def proxy_connect_header
+      "CONNECT #{host}:#{port} HTTP/#{version}"
+    end
+
+    # Headers to send with proxy connect request
+    def proxy_connect_headers
+      connect_headers = HTTP::Headers.coerce(
+        "Host" => headers["Host"],
+        "User-Agent" => headers["User-Agent"]
+      )
+      connect_headers["Proxy-Authorization"] = proxy_authorization_header if using_authenticated_proxy?
+      connect_headers
     end
 
     # Host for tcp socket

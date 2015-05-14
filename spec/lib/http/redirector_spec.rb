@@ -33,24 +33,24 @@ RSpec.describe HTTP::Redirector do
       req = HTTP::Request.new :head, "http://example.com"
       res = proc { |prev_req| redirect_response(301, "#{prev_req.uri}/1") }
 
-      expect { redirector.perform(req, res.call(req), &res) }
-        .to raise_error HTTP::Redirector::TooManyRedirectsError
+      expect { redirector.perform(req, res.call(req), &res) }.
+        to raise_error HTTP::Redirector::TooManyRedirectsError
     end
 
     it "fails with EndlessRedirectError if endless loop detected" do
       req = HTTP::Request.new :head, "http://example.com"
       res = redirect_response(301, req.uri)
 
-      expect { redirector.perform(req, res) { res } }
-        .to raise_error HTTP::Redirector::EndlessRedirectError
+      expect { redirector.perform(req, res) { res } }.
+        to raise_error HTTP::Redirector::EndlessRedirectError
     end
 
     it "fails with StateError if there were no Location header" do
       req = HTTP::Request.new :head, "http://example.com"
       res = simple_response(301)
 
-      expect { |b| redirector.perform(req, res, &b) }
-        .to raise_error HTTP::StateError
+      expect { |b| redirector.perform(req, res, &b) }.
+        to raise_error HTTP::StateError
     end
 
     it "returns first non-redirect response" do
@@ -86,24 +86,24 @@ RSpec.describe HTTP::Redirector do
           req = HTTP::Request.new :put, "http://example.com"
           res = redirect_response 300, "http://example.com/1"
 
-          expect { redirector.perform(req, res) { simple_response 200 } }
-            .to raise_error HTTP::StateError
+          expect { redirector.perform(req, res) { simple_response 200 } }.
+            to raise_error HTTP::StateError
         end
 
         it "raises StateError if original request was POST" do
           req = HTTP::Request.new :post, "http://example.com"
           res = redirect_response 300, "http://example.com/1"
 
-          expect { redirector.perform(req, res) { simple_response 200 } }
-            .to raise_error HTTP::StateError
+          expect { redirector.perform(req, res) { simple_response 200 } }.
+            to raise_error HTTP::StateError
         end
 
         it "raises StateError if original request was DELETE" do
           req = HTTP::Request.new :delete, "http://example.com"
           res = redirect_response 300, "http://example.com/1"
 
-          expect { redirector.perform(req, res) { simple_response 200 } }
-            .to raise_error HTTP::StateError
+          expect { redirector.perform(req, res) { simple_response 200 } }.
+            to raise_error HTTP::StateError
         end
       end
 
@@ -170,24 +170,24 @@ RSpec.describe HTTP::Redirector do
           req = HTTP::Request.new :put, "http://example.com"
           res = redirect_response 301, "http://example.com/1"
 
-          expect { redirector.perform(req, res) { simple_response 200 } }
-            .to raise_error HTTP::StateError
+          expect { redirector.perform(req, res) { simple_response 200 } }.
+            to raise_error HTTP::StateError
         end
 
         it "raises StateError if original request was POST" do
           req = HTTP::Request.new :post, "http://example.com"
           res = redirect_response 301, "http://example.com/1"
 
-          expect { redirector.perform(req, res) { simple_response 200 } }
-            .to raise_error HTTP::StateError
+          expect { redirector.perform(req, res) { simple_response 200 } }.
+            to raise_error HTTP::StateError
         end
 
         it "raises StateError if original request was DELETE" do
           req = HTTP::Request.new :delete, "http://example.com"
           res = redirect_response 301, "http://example.com/1"
 
-          expect { redirector.perform(req, res) { simple_response 200 } }
-            .to raise_error HTTP::StateError
+          expect { redirector.perform(req, res) { simple_response 200 } }.
+            to raise_error HTTP::StateError
         end
       end
 
@@ -254,24 +254,24 @@ RSpec.describe HTTP::Redirector do
           req = HTTP::Request.new :put, "http://example.com"
           res = redirect_response 302, "http://example.com/1"
 
-          expect { redirector.perform(req, res) { simple_response 200 } }
-            .to raise_error HTTP::StateError
+          expect { redirector.perform(req, res) { simple_response 200 } }.
+            to raise_error HTTP::StateError
         end
 
         it "raises StateError if original request was POST" do
           req = HTTP::Request.new :post, "http://example.com"
           res = redirect_response 302, "http://example.com/1"
 
-          expect { redirector.perform(req, res) { simple_response 200 } }
-            .to raise_error HTTP::StateError
+          expect { redirector.perform(req, res) { simple_response 200 } }.
+            to raise_error HTTP::StateError
         end
 
         it "raises StateError if original request was DELETE" do
           req = HTTP::Request.new :delete, "http://example.com"
           res = redirect_response 302, "http://example.com/1"
 
-          expect { redirector.perform(req, res) { simple_response 200 } }
-            .to raise_error HTTP::StateError
+          expect { redirector.perform(req, res) { simple_response 200 } }.
+            to raise_error HTTP::StateError
         end
       end
 

@@ -60,8 +60,8 @@ RSpec.describe HTTP::Client do
         "http://example.com/" => redirect_response("/")
       )
 
-      expect { client.get("http://example.com/") }
-        .to raise_error(HTTP::Redirector::EndlessRedirectError)
+      expect { client.get("http://example.com/") }.
+        to raise_error(HTTP::Redirector::EndlessRedirectError)
     end
 
     it "fails if max amount of hops reached" do
@@ -75,8 +75,8 @@ RSpec.describe HTTP::Client do
         "http://example.com/6" => simple_response("OK")
       )
 
-      expect { client.get("http://example.com/") }
-        .to raise_error(HTTP::Redirector::TooManyRedirectsError)
+      expect { client.get("http://example.com/") }.
+        to raise_error(HTTP::Redirector::TooManyRedirectsError)
     end
 
     context "with non-ASCII URLs" do
@@ -103,17 +103,17 @@ RSpec.describe HTTP::Client do
     it "returns cached responses if they exist" do
       cached_response = simple_response("cached").caching
       StubbedClient.new(:cache =>
-                        HTTP::Cache.new(:metastore => "heap:/", :entitystore => "heap:/"))
-        .stub("http://example.com/#{sn}" => cached_response)
-        .get("http://example.com/#{sn}")
+                        HTTP::Cache.new(:metastore => "heap:/", :entitystore => "heap:/")).
+        stub("http://example.com/#{sn}" => cached_response).
+        get("http://example.com/#{sn}")
 
       # cache is now warm
 
-      client = StubbedClient.new(:cache => HTTP::Cache.new(:metastore => "heap:/", :entitystore => "heap:/"))
-               .stub("http://example.com/#{sn}" => simple_response("OK"))
+      client = StubbedClient.new(:cache => HTTP::Cache.new(:metastore => "heap:/", :entitystore => "heap:/")).
+               stub("http://example.com/#{sn}" => simple_response("OK"))
 
-      expect(client.get("http://example.com/#{sn}").body.to_s)
-        .to eq cached_response.body.to_s
+      expect(client.get("http://example.com/#{sn}").body.to_s).
+        to eq cached_response.body.to_s
     end
   end
 
@@ -226,8 +226,8 @@ RSpec.describe HTTP::Client do
     end
 
     it "fails with OpenSSL::SSL::SSLError if host mismatch" do
-      expect { client.get(dummy_ssl.endpoint.gsub("127.0.0.1", "localhost")) }
-        .to raise_error(OpenSSL::SSL::SSLError, /does not match/)
+      expect { client.get(dummy_ssl.endpoint.gsub("127.0.0.1", "localhost")) }.
+        to raise_error(OpenSSL::SSL::SSLError, /does not match/)
     end
 
     context "with SSL options instead of a context" do

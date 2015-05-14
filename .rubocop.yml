@@ -3,7 +3,7 @@ Metrics/BlockNesting:
 
 Metrics/ClassLength:
   CountComments: false
-  Max: 110
+  Max: 120
 
 Metrics/PerceivedComplexity:
   Max: 8
@@ -18,6 +18,10 @@ Metrics/LineLength:
 Metrics/MethodLength:
   CountComments: false
   Max: 22 # TODO: Lower to 15
+
+Metrics/ModuleLength:
+  CountComments: false
+  Max: 120
 
 Metrics/ParameterLists:
   Max: 3
@@ -37,7 +41,7 @@ Style/Documentation:
   Enabled: false
 
 Style/DotPosition:
-  EnforcedStyle: leading
+  EnforcedStyle: trailing
 
 Style/DoubleNegation:
   Enabled: false

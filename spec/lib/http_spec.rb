@@ -5,6 +5,11 @@ require "support/proxy_server"
 
 RSpec.describe HTTP do
   run_server(:dummy) { DummyServer.new }
+  run_server(:dummy_ssl) { DummyServer.new(:ssl => true) }
+
+  let(:ssl_client) do
+    HTTP::Client.new :ssl_context => SSLHelper.client_context
+  end
 
   context "getting resources" do
     it "is easy" do
@@ -63,6 +68,18 @@ RSpec.describe HTTP do
         response = HTTP.via(proxy.addr, proxy.port, "username", "password").get dummy.endpoint
         expect(response.to_s).to match(/<!doctype html>/)
       end
+
+      context "ssl" do
+        it "responds with the endpoint's body" do
+          response = ssl_client.via(proxy.addr, proxy.port).get dummy_ssl.endpoint
+          expect(response.to_s).to match(/<!doctype html>/)
+        end
+
+        it "ignores credentials" do
+          response = ssl_client.via(proxy.addr, proxy.port, "username", "password").get dummy_ssl.endpoint
+          expect(response.to_s).to match(/<!doctype html>/)
+        end
+      end
     end
 
     context "proxy with authentication" do
@@ -87,6 +104,23 @@ RSpec.describe HTTP do
         response = HTTP.via(proxy.addr, proxy.port).get dummy.endpoint
         expect(response.status).to eq(407)
       end
+
+      context "ssl" do
+        it "responds with the endpoint's body" do
+          response = ssl_client.via(proxy.addr, proxy.port, "username", "password").get dummy_ssl.endpoint
+          expect(response.to_s).to match(/<!doctype html>/)
+        end
+
+        it "responds with 407 when wrong credentials given" do
+          response = ssl_client.via(proxy.addr, proxy.port, "user", "pass").get dummy_ssl.endpoint
+          expect(response.status).to eq(407)
+        end
+
+        it "responds with 407 if no credentials given" do
+          response = ssl_client.via(proxy.addr, proxy.port).get dummy_ssl.endpoint
+          expect(response.status).to eq(407)
+        end
+      end
     end
   end
 
@@ -94,6 +128,20 @@ RSpec.describe HTTP do
     it "is easy" do
       response = HTTP.post "#{dummy.endpoint}/form", :form => {:example => "testing-form"}
       expect(response.to_s).to eq("passed :)")
+    end
+  end
+
+  context "loading binary data" do
+    it "is encoded as bytes" do
+      response = HTTP.get "#{dummy.endpoint}/bytes"
+      expect(response.to_s.encoding).to eq(Encoding::ASCII_8BIT)
+    end
+  end
+
+  context "loading text" do
+    it "is utf-8 encoded" do
+      response = HTTP.get dummy.endpoint
+      expect(response.to_s.encoding).to eq(Encoding::UTF_8)
     end
   end
 
@@ -151,15 +199,15 @@ RSpec.describe HTTP do
 
     it "sets Authorization header with proper BasicAuth value" do
       client = HTTP.basic_auth :user => "foo", :pass => "bar"
-      expect(client.default_headers[:authorization])
-        .to match(%r{^Basic [A-Za-z0-9+/]+=*$})
+      expect(client.default_headers[:authorization]).
+        to match(%r{^Basic [A-Za-z0-9+/]+=*$})
     end
   end
 
-  describe ".with_cache" do
+  describe ".cache" do
     it "sets cache option" do
       cache = double(:cache, :perform => nil)
-      client = HTTP.with_cache cache
+      client = HTTP.cache cache
       expect(client.default_options[:cache]).to eq cache
     end
   end
@@ -184,6 +232,64 @@ RSpec.describe HTTP do
           client.get("/repos/httprb/http.rb")
         end
       end
+    end
+  end
+
+  describe ".timeout" do
+    context "without timeout type" do
+      subject(:client) { HTTP.timeout :read => 123 }
+
+      it "sets timeout_class to PerOperation" do
+        expect(client.default_options.timeout_class).
+          to be HTTP::Timeout::PerOperation
+      end
+
+      it "sets given timeout options" do
+        expect(client.default_options.timeout_options).
+          to eq :read_timeout => 123
+      end
+    end
+
+    context "with :null type" do
+      subject(:client) { HTTP.timeout :null, :read => 123 }
+
+      it "sets timeout_class to Null" do
+        expect(client.default_options.timeout_class).
+          to be HTTP::Timeout::Null
+      end
+    end
+
+    context "with :per_operation type" do
+      subject(:client) { HTTP.timeout :per_operation, :read => 123 }
+
+      it "sets timeout_class to PerOperation" do
+        expect(client.default_options.timeout_class).
+          to be HTTP::Timeout::PerOperation
+      end
+
+      it "sets given timeout options" do
+        expect(client.default_options.timeout_options).
+          to eq :read_timeout => 123
+      end
+    end
+
+    context "with :global type" do
+      subject(:client) { HTTP.timeout :global, :read => 123 }
+
+      it "sets timeout_class to Global" do
+        expect(client.default_options.timeout_class).
+          to be HTTP::Timeout::Global
+      end
+
+      it "sets given timeout options" do
+        expect(client.default_options.timeout_options).
+          to eq :read_timeout => 123
+      end
+    end
+
+    it "fails with unknown timeout type" do
+      expect { HTTP.timeout(:foobar, :read => 123) }.
+        to raise_error(ArgumentError, /foobar/)
     end
   end
 end

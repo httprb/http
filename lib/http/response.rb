@@ -5,6 +5,8 @@ require "http/content_type"
 require "http/mime_type"
 require "http/response/caching"
 require "http/response/status"
+require "http/uri"
+require "http/cookie_jar"
 require "time"
 
 module HTTP
@@ -30,7 +32,9 @@ module HTTP
     attr_reader :uri
 
     def initialize(status, version, headers, body, uri = nil) # rubocop:disable ParameterLists
-      @version, @body, @uri = version, body, uri
+      @version = version
+      @body    = body
+      @uri     = uri && HTTP::URI.parse(uri)
       @status  = HTTP::Response::Status.new status
       @headers = HTTP::Headers.coerce(headers || {})
     end
@@ -89,6 +93,12 @@ module HTTP
     # @return [String, nil]
     def charset
       @charset ||= content_type.charset
+    end
+
+    def cookies
+      @cookies ||= headers.each_with_object CookieJar.new do |(k, v), jar|
+        jar.parse(v, uri) if k == Headers::SET_COOKIE
+      end
     end
 
     # Parse response body with corresponding MIME type adapter.

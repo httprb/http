@@ -36,9 +36,9 @@ module HTTP
 
         begin
           @streaming = false
-          @contents = ""
+          @contents = "".force_encoding(Encoding::UTF_8)
           while (chunk = @client.readpartial)
-            @contents << chunk
+            @contents << chunk.force_encoding(Encoding::ASCII_8BIT)
           end
         rescue
           @contents = nil

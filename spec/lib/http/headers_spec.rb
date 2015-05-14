@@ -29,13 +29,13 @@ RSpec.describe HTTP::Headers do
     end
 
     it "fails with empty header name" do
-      expect { headers.set "", "foo bar" }
-        .to raise_error HTTP::InvalidHeaderNameError
+      expect { headers.set "", "foo bar" }.
+        to raise_error HTTP::InvalidHeaderNameError
     end
 
     it "fails with invalid header name" do
-      expect { headers.set "foo bar", "baz" }
-        .to raise_error HTTP::InvalidHeaderNameError
+      expect { headers.set "foo bar", "baz" }.
+        to raise_error HTTP::InvalidHeaderNameError
     end
   end
 
@@ -77,13 +77,13 @@ RSpec.describe HTTP::Headers do
     end
 
     it "fails with empty header name" do
-      expect { headers.delete "" }
-        .to raise_error HTTP::InvalidHeaderNameError
+      expect { headers.delete "" }.
+        to raise_error HTTP::InvalidHeaderNameError
     end
 
     it "fails with invalid header name" do
-      expect { headers.delete "foo bar" }
-        .to raise_error HTTP::InvalidHeaderNameError
+      expect { headers.delete "foo bar" }.
+        to raise_error HTTP::InvalidHeaderNameError
     end
   end
 
@@ -111,13 +111,13 @@ RSpec.describe HTTP::Headers do
     end
 
     it "fails with empty header name" do
-      expect { headers.add "", "foobar" }
-        .to raise_error HTTP::InvalidHeaderNameError
+      expect { headers.add "", "foobar" }.
+        to raise_error HTTP::InvalidHeaderNameError
     end
 
     it "fails with invalid header name" do
-      expect { headers.add "foo bar", "baz" }
-        .to raise_error HTTP::InvalidHeaderNameError
+      expect { headers.add "foo bar", "baz" }.
+        to raise_error HTTP::InvalidHeaderNameError
     end
   end
 
@@ -139,13 +139,13 @@ RSpec.describe HTTP::Headers do
     end
 
     it "fails with empty header name" do
-      expect { headers.get "" }
-        .to raise_error HTTP::InvalidHeaderNameError
+      expect { headers.get "" }.
+        to raise_error HTTP::InvalidHeaderNameError
     end
 
     it "fails with invalid header name" do
-      expect { headers.get "foo bar" }
-        .to raise_error HTTP::InvalidHeaderNameError
+      expect { headers.get "foo bar" }.
+        to raise_error HTTP::InvalidHeaderNameError
     end
   end
 

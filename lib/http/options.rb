@@ -30,7 +30,7 @@ module HTTP
 
       def def_option(name, &interpreter)
         defined_options << name.to_sym
-        interpreter ||= ->(v) { v }
+        interpreter ||= lambda { |v| v }
 
         attr_accessor name
         protected :"#{name}="
@@ -42,23 +42,23 @@ module HTTP
     end
 
     def initialize(options = {})
-      defaults = {:response =>         :auto,
-                  :proxy =>            {},
-                  :timeout_class =>    self.class.default_timeout_class,
-                  :timeout_options =>  {},
-                  :socket_class =>     self.class.default_socket_class,
-                  :ssl_socket_class => self.class.default_ssl_socket_class,
-                  :ssl =>              {},
-                  :cache =>            self.class.default_cache,
-                  :keep_alive_timeout  => 5,
-                  :headers =>          {}}
+      defaults = {
+        :response =>         :auto,
+        :proxy =>            {},
+        :timeout_class =>    self.class.default_timeout_class,
+        :timeout_options =>  {},
+        :socket_class =>     self.class.default_socket_class,
+        :ssl_socket_class => self.class.default_ssl_socket_class,
+        :ssl =>              {},
+        :cache =>            self.class.default_cache,
+        :keep_alive_timeout  => 5,
+        :headers =>          {},
+        :cookies =>          {}
+      }
 
       opts_w_defaults = defaults.merge(options)
       opts_w_defaults[:headers] = HTTP::Headers.coerce(opts_w_defaults[:headers])
-
-      opts_w_defaults.each do |(opt_name, opt_val)|
-        self[opt_name] = opt_val
-      end
+      opts_w_defaults.each { |(k, v)| self[k] = v }
     end
 
     def_option :headers do |headers|
@@ -104,7 +104,9 @@ module HTTP
     end
 
     def merge(other)
-      h1, h2 = to_hash, other.to_hash
+      h1 = to_hash
+      h2 = other.to_hash
+
       merged = h1.merge(h2) do |k, v1, v2|
         case k
         when :headers
@@ -118,9 +120,9 @@ module HTTP
     end
 
     def to_hash
-      hash_pairs = self.class
-                   .defined_options
-                   .flat_map { |opt_name| [opt_name, self[opt_name]] }
+      hash_pairs = self.class.
+                   defined_options.
+                   flat_map { |opt_name| [opt_name, self[opt_name]] }
       Hash[*hash_pairs]
     end
 
@@ -143,3 +145,6 @@ module HTTP
     end
   end
 end
+
+# require cookies options
+require "http/options/cookies"

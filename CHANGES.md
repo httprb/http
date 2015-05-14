@@ -1,3 +1,37 @@
+## 0.8.9 (2015-05-11)
+
+* Add cookies support. (@ixti)
+* Enforce stringified body encoding. See #219. (@Connorhd)
+
+
+## 0.8.8 (2015-05-09)
+
+* Fix CONNECT header for proxies. See #217. (@Connorhd)
+
+
+## 0.8.7 (2015-05-08)
+
+* Fix `HTTP.timeout` API with options only given. (@ixti)
+
+
+## 0.8.6 (2015-05-08)
+
+* Reset global timeouts after the request finishes. See #215. (@zanker)
+
+
+## 0.8.5 (2015-05-06)
+
+* Add simple timeouts configuration API. See #205. (@ixti)
+* Deprecate `Request#request_header`. Use `Request#headline` instead. (@ixti)
+
+
+## 0.8.4 (2015-04-23)
+
+* Deprecate `#default_headers` and `#default_headers=`. (@ixti)
+* Deprecate chainable methods with `with_` prefix. See #207. (@ixti)
+* Add support of HTTPS connections through proxy. See #186. (@Connorhd)
+
+
 ## 0.8.3 (2015-04-07)
 
 * Fix request headline. See #206. (@ixti)

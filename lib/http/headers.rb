@@ -16,6 +16,9 @@ module HTTP
     # @see http://tools.ietf.org/html/rfc7230#section-3.2
     HEADER_NAME_RE = /^[A-Za-z0-9!#\$%&'*+\-.^_`|~]+$/
 
+    # Cookies header name
+    SET_COOKIE = "Set-Cookie".freeze
+
     # Class constructor.
     def initialize
       @pile = []
@@ -117,10 +120,9 @@ module HTTP
     #
     # @return [Enumerator] if no block given
     # @return [Headers] self-reference
-    def each(&blk)
-      return @pile.each unless blk
-
-      @pile.each(&blk)
+    def each
+      return to_enum(__method__) unless block_given?
+      @pile.each { |arr| yield(arr) }
       self
     end
 
