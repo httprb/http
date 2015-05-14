@@ -32,7 +32,7 @@ module HTTP
     def request(verb, uri, opts = {})
       opts    = @default_options.merge(opts)
       uri     = make_request_uri(uri, opts)
-      headers = opts.headers.merge(Headers::SET_COOKIE => opts.cookies.values)
+      headers = make_request_headers(opts)
       body    = make_request_body(opts, headers)
       proxy   = opts.proxy
 
@@ -143,6 +143,15 @@ module HTTP
       uri.path = "/" if uri.path.empty?
 
       uri
+    end
+
+    # Creates request headers with cookies (if any) merged in
+    def make_request_headers(opts)
+      cookies = opts.cookies.values
+      return opts.headers if cookies.empty?
+
+      cookies = opts.headers.get(Headers::COOKIE).concat(cookies).join("; ")
+      opts.headers.merge(Headers::COOKIE => cookies)
     end
 
     # Create the request body object to send
