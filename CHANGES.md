@@ -1,3 +1,9 @@
+## master (unreleased)
+
+* _the future is unwritten_
+* Use "http.rb" in the User-Agent string. See #227. (@tarcieri)
+
+
 ## 0.8.10 (2015-05-14)
 
 * Fix cookie headers generation. (@ixti)
