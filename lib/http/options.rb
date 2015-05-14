@@ -65,6 +65,13 @@ module HTTP
       self.headers.merge(headers)
     end
 
+    def_option :cookies do |cookies|
+      cookies.each_with_object self.cookies.dup do |(k, v), jar|
+        cookie = k.is_a?(Cookie) ? k : Cookie.new(k.to_s, v.to_s)
+        jar[cookie.name] = cookie.cookie_value
+      end
+    end
+
     %w(
       proxy params form json body follow response
       socket_class ssl_socket_class ssl_context ssl
@@ -145,6 +152,3 @@ module HTTP
     end
   end
 end
-
-# require cookies options
-require "http/options/cookies"

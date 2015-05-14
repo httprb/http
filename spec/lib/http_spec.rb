@@ -292,4 +292,32 @@ RSpec.describe HTTP do
         to raise_error(ArgumentError, /foobar/)
     end
   end
+
+  describe ".cookies" do
+    let(:endpoint) { "#{dummy.endpoint}/cookies" }
+
+    it "passes correct `Cookie` header" do
+      expect(HTTP.cookies(:abc => :def).get(endpoint).to_s).
+        to eq "abc: def"
+    end
+
+    it "properly works with cookie jars from response" do
+      res = HTTP.get(endpoint).flush
+
+      expect(HTTP.cookies(res.cookies).get(endpoint).to_s).
+        to eq "foo: bar"
+    end
+
+    it "properly merges cookies" do
+      res     = HTTP.get(endpoint).flush
+      client  = HTTP.cookies(:foo => 123, :bar => 321).cookies(res.cookies)
+
+      expect(client.get(endpoint).to_s).to eq "foo: bar\nbar: 321"
+    end
+
+    it "properly merges Cookie headers and cookies" do
+      client = HTTP.headers("Cookie" => "foo=bar").cookies(:baz => :moo)
+      expect(client.get(endpoint).to_s).to eq "foo: bar\nbaz: moo"
+    end
+  end
 end

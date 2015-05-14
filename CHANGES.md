@@ -1,6 +1,6 @@
-## master (unreleased)
+## 0.8.10 (2015-05-14)
 
-* _the future is unwritten_
+* Fix cookie headers generation. (@ixti)
 
 
 ## 0.8.9 (2015-05-11)

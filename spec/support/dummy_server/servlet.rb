@@ -128,5 +128,10 @@ class DummyServer < WEBrick::HTTPServer
       res["Content-Type"] = "application/octet-stream"
       res.body = bytes.pack("c*")
     end
+
+    get "/cookies" do |req, res|
+      res["Set-Cookie"] = "foo=bar"
+      res.body = req.cookies.map { |c| [c.name, c.value].join ": " }.join("\n")
+    end
   end
 end
