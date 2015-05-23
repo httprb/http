@@ -1,6 +1,6 @@
-## master (unreleased)
+## 0.8.11 (2015-05-22)
 
-* _the future is unwritten_
+* SNI support for HTTPS connections. See #229. (@tarcieri)
 * Use "http.rb" in the User-Agent string. See #227. (@tarcieri)
 
 
