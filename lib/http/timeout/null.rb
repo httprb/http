@@ -26,6 +26,7 @@ module HTTP
       # Configures the SSL connection and starts the connection
       def start_tls(host, ssl_socket_class, ssl_context)
         @socket = ssl_socket_class.new(socket, ssl_context)
+        @socket.hostname = host if @socket.respond_to? :hostname=
         @socket.sync_close = true if @socket.respond_to? :sync_close=
 
         connect_ssl
