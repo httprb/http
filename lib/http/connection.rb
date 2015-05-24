@@ -1,5 +1,7 @@
 require "forwardable"
 
+require "http/client"
+require "http/headers"
 require "http/response/parser"
 
 module HTTP
@@ -51,7 +53,7 @@ module HTTP
 
     # Send a request to the server
     #
-    # @param [Request] Request to send to the server
+    # @param [Request] req Request to send to the server
     # @return [nil]
     def send_request(req)
       if @pending_response
@@ -186,9 +188,9 @@ module HTTP
 
       case @parser.http_version
       when HTTP_1_0 # HTTP/1.0 requires opt in for Keep Alive
-        @keep_alive = @parser.headers[Client::CONNECTION] == HTTP::Client::KEEP_ALIVE
+        @keep_alive = @parser.headers[Headers::CONNECTION] == Client::KEEP_ALIVE
       when HTTP_1_1 # HTTP/1.1 is opt-out
-        @keep_alive = @parser.headers[Client::CONNECTION] != HTTP::Client::CLOSE
+        @keep_alive = @parser.headers[Headers::CONNECTION] != Client::CLOSE
       else # Anything else we assume doesn't supportit
         @keep_alive = false
       end

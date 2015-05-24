@@ -78,7 +78,7 @@ module HTTP
     #
     # @return [HTTP::ContentType]
     def content_type
-      @content_type ||= ContentType.parse headers["Content-Type"]
+      @content_type ||= ContentType.parse headers[Headers::CONTENT_TYPE]
     end
 
     # MIME type of response (if any)

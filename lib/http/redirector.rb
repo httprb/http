@@ -1,5 +1,7 @@
 require "set"
 
+require "http/headers"
+
 module HTTP
   class Redirector
     # Notifies that we reached max allowed redirect hops
@@ -35,9 +37,9 @@ module HTTP
     # @param [Hash] opts
     # @option opts [Boolean] :strict (true) redirector hops policy
     # @option opts [#to_i] :max_hops (5) maximum allowed amount of hops
-    def initialize(options = {})
-      @strict   = options.fetch(:strict, true)
-      @max_hops = options.fetch(:max_hops, 5).to_i
+    def initialize(opts = {})
+      @strict   = opts.fetch(:strict, true)
+      @max_hops = opts.fetch(:max_hops, 5).to_i
     end
 
     # Follows redirects until non-redirect response found
@@ -52,7 +54,7 @@ module HTTP
         fail TooManyRedirectsError if too_many_hops?
         fail EndlessRedirectError  if endless_loop?
 
-        @request  = redirect_to @response.headers["Location"]
+        @request  = redirect_to @response.headers[Headers::LOCATION]
         @response = yield @request
       end
 

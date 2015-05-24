@@ -16,7 +16,6 @@ module HTTP
     extend Forwardable
     include Chainable
 
-    CONNECTION         = "Connection".freeze
     KEEP_ALIVE         = "Keep-Alive".freeze
     CLOSE              = "close".freeze
 
@@ -35,13 +34,6 @@ module HTTP
       headers = make_request_headers(opts)
       body    = make_request_body(opts, headers)
       proxy   = opts.proxy
-
-      # Tell the server to keep the conn open
-      if default_options.persistent?
-        headers[CONNECTION] = KEEP_ALIVE
-      else
-        headers[CONNECTION] = CLOSE
-      end
 
       req = HTTP::Request.new(verb, uri, headers, proxy, body)
       res = perform req, opts
@@ -147,11 +139,22 @@ module HTTP
 
     # Creates request headers with cookies (if any) merged in
     def make_request_headers(opts)
-      cookies = opts.cookies.values
-      return opts.headers if cookies.empty?
+      headers = opts.headers
 
-      cookies = opts.headers.get(Headers::COOKIE).concat(cookies).join("; ")
-      opts.headers.merge(Headers::COOKIE => cookies)
+      # Tell the server to keep the conn open
+      if default_options.persistent?
+        headers[Headers::CONNECTION] = KEEP_ALIVE
+      else
+        headers[Headers::CONNECTION] = CLOSE
+      end
+
+      cookies = opts.cookies.values
+      unless cookies.empty?
+        cookies = opts.headers.get(Headers::COOKIE).concat(cookies).join("; ")
+        headers[Headers::COOKIE] = cookies
+      end
+
+      headers
     end
 
     # Create the request body object to send
@@ -161,11 +164,11 @@ module HTTP
         opts.body
       when opts.form
         form = HTTP::FormData.create opts.form
-        headers["Content-Type"]   ||= form.content_type
-        headers["Content-Length"] ||= form.content_length
+        headers[Headers::CONTENT_TYPE]   ||= form.content_type
+        headers[Headers::CONTENT_LENGTH] ||= form.content_length
         form.to_s
       when opts.json
-        headers["Content-Type"] ||= "application/json"
+        headers[Headers::CONTENT_TYPE] ||= "application/json"
         MimeType[:json].encode opts.json
       end
     end

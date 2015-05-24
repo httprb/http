@@ -1,5 +1,7 @@
 require "base64"
 
+require "http/headers"
+
 module HTTP
   module Chainable
     # Request a get sans response body

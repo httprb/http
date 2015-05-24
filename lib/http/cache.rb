@@ -51,8 +51,8 @@ module HTTP
       handle_response(cached_resp, actual_resp, req)
     end
 
-    # @returns [Response] the most useful of the responses after
-    # updating the cache as appropriate
+    # @return [Response] the most useful of the responses after
+    #   updating the cache as appropriate
     def handle_response(cached_resp, actual_resp, req)
       if actual_resp.status.not_modified? && cached_resp
         logger.debug { "<#{req.uri}> not modified, using cached version." }

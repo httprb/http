@@ -1,3 +1,4 @@
+require "http/headers"
 require "http/cache/headers"
 require "http/response/string_body"
 require "http/response/io_body"
@@ -25,7 +26,7 @@ module HTTP
         expired? || cache_headers.must_revalidate?
       end
 
-      # @returns [Boolean] true iff this response has expired
+      # @return [Boolean] true iff this response has expired
       def expired?
         current_age >= cache_headers.max_age
       end
@@ -52,7 +53,7 @@ module HTTP
       # Algo from https://tools.ietf.org/html/rfc2616#section-13.2.3
       def current_age
         now = Time.now
-        age_value  = headers.get("Age").map(&:to_i).max || 0
+        age_value  = headers.get(HTTP::Headers::AGE).map(&:to_i).max || 0
 
         apparent_age = [0, received_at - server_response_time].max
         corrected_received_age = [apparent_age, age_value].max
@@ -116,18 +117,18 @@ module HTTP
       end
 
       def vary
-        headers.get("Vary").first
+        headers.get(HTTP::Headers::VARY).first
       end
 
       protected
 
       # @return [Time] the time at which the server generated this response.
       def server_response_time
-        headers.get("Date").
+        headers.get(HTTP::Headers::DATE).
           map(&method(:to_time_or_epoch)).
           max || begin
                     # set it if it is not already set
-                    headers["Date"] = received_at.httpdate
+                    headers[HTTP::Headers::DATE] = received_at.httpdate
                     received_at
                   end
       end

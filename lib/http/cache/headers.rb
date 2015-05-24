@@ -53,23 +53,23 @@ module HTTP
 
       # @return [Boolean] is the vary header set to '*'
       def vary_star?
-        get("Vary").any? { |v| "*" == v.strip }
+        get(HTTP::Headers::VARY).any? { |v| "*" == v.strip }
       end
 
       private
 
       # @return [Boolean] true when cache-control header matches the pattern
       def matches?(pattern)
-        get("Cache-Control").any? { |v| v =~ pattern }
+        get(HTTP::Headers::CACHE_CONTROL).any? { |v| v =~ pattern }
       end
 
       # @return [Numeric] number of seconds until the time in the
       # expires header is reached.
       #
       # ---
-      # Some servers send a "Expire: -1" header which must be treated as expired
+      # Some servers send a "Expires: -1" header which must be treated as expired
       def seconds_til_expires
-        get("Expires").
+        get(HTTP::Headers::EXPIRES).
           map { |e| http_date_to_ttl(e) }.
           max
       end
@@ -89,7 +89,7 @@ module HTTP
 
       # @return [Numeric] the value of the max-age component of cache control
       def explicit_max_age
-        get("Cache-Control").
+        get(HTTP::Headers::CACHE_CONTROL).
           map { |v| (/max-age=(\d+)/i).match(v) }.
           compact.
           map { |m| m[1].to_i }.

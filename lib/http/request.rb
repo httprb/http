@@ -79,14 +79,14 @@ module HTTP
 
       @headers = HTTP::Headers.coerce(headers || {})
 
-      @headers["Host"]        ||= default_host_header_value
-      @headers["User-Agent"]  ||= USER_AGENT
+      @headers[Headers::HOST]        ||= default_host_header_value
+      @headers[Headers::USER_AGENT]  ||= USER_AGENT
     end
 
     # Returns new Request with updated uri
     def redirect(uri, verb = @verb)
       req = self.class.new(verb, @uri.join(uri), headers, proxy, body, version)
-      req["Host"] = req.uri.host
+      req[Headers::HOST] = req.uri.host
       req
     end
 
@@ -108,7 +108,7 @@ module HTTP
 
     # Compute and add the Proxy-Authorization header
     def include_proxy_authorization_header
-      headers["Proxy-Authorization"] = proxy_authorization_header
+      headers[Headers::PROXY_AUTHORIZATION] = proxy_authorization_header
     end
 
     def proxy_authorization_header
@@ -138,10 +138,12 @@ module HTTP
     # Headers to send with proxy connect request
     def proxy_connect_headers
       connect_headers = HTTP::Headers.coerce(
-        "Host" => headers["Host"],
-        "User-Agent" => headers["User-Agent"]
+        Headers::HOST        => headers[Headers::HOST],
+        Headers::USER_AGENT  => headers[Headers::USER_AGENT]
       )
-      connect_headers["Proxy-Authorization"] = proxy_authorization_header if using_authenticated_proxy?
+
+      connect_headers[Headers::PROXY_AUTHORIZATION] = proxy_authorization_header if using_authenticated_proxy?
+
       connect_headers
     end
 

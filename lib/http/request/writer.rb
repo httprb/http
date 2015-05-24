@@ -1,8 +1,16 @@
+require "http/headers"
+
 module HTTP
   class Request
     class Writer
       # CRLF is the universal HTTP delimiter
-      CRLF = "\r\n"
+      CRLF = "\r\n".freeze
+
+      # Chunked data termintaor.
+      ZERO = "0".freeze
+
+      # Chunked transfer encoding
+      CHUNKED = "chunked".freeze
 
       # Types valid to be used as body source
       VALID_BODY_TYPES = [String, NilClass, Enumerable]
@@ -38,9 +46,9 @@ module HTTP
       # Adds the headers to the header array for the given request body we are working
       # with
       def add_body_type_headers
-        if @body.is_a?(String) && !@headers["Content-Length"]
-          @request_header << "Content-Length: #{@body.bytesize}"
-        elsif @body.is_a?(Enumerable) && "chunked" != @headers["Transfer-Encoding"]
+        if @body.is_a?(String) && !@headers[Headers::CONTENT_LENGTH]
+          @request_header << "#{Headers::CONTENT_LENGTH}: #{@body.bytesize}"
+        elsif @body.is_a?(Enumerable) && CHUNKED != @headers[Headers::TRANSFER_ENCODING]
           fail(RequestError, "invalid transfer encoding")
         end
       end
@@ -69,7 +77,7 @@ module HTTP
             @socket << chunk << CRLF
           end
 
-          @socket << "0" << CRLF * 2
+          @socket << ZERO << CRLF << CRLF
         end
       end
 
