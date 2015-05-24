@@ -78,20 +78,28 @@ module HTTP
         REASONS[code]
       end
 
+      # @return [String] string representation of HTTP status
+      def to_s
+        "#{code} #{reason}".strip
+      end
+
       # Symbolized {#reason}
       #
       # @return [nil] unless code is well-known (see REASONS)
       # @return [Symbol]
-      def symbolize
+      def to_sym
         SYMBOLS[code]
       end
+
+      # @deprecated Will be removed in 1.0.0
+      alias_method :symbolize, :to_sym
 
       # Printable version of HTTP Status, surrounded by quote marks,
       # with special characters escaped.
       #
       # (see String#inspect)
       def inspect
-        "#{code} #{reason}".inspect
+        "#<#{self.class} #{self}>"
       end
 
       SYMBOLS.each do |code, symbol|

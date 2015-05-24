@@ -55,7 +55,7 @@ RSpec.describe HTTP::Response::Status do
   describe "#inspect" do
     it "returns quoted code and reason phrase" do
       status = described_class.new 200
-      expect(status.inspect).to eq '"200 OK"'
+      expect(status.inspect).to eq "#<HTTP::Response::Status 200 OK>"
     end
   end
 
