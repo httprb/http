@@ -195,7 +195,7 @@ module HTTP
     # Accept the given MIME type(s)
     # @param type
     def accept(type)
-      with :accept => MimeType.normalize(type)
+      headers Headers::ACCEPT => MimeType.normalize(type)
     end
 
     # Make a request with the given Authorization header
@@ -204,7 +204,7 @@ module HTTP
       # shim for deprecated auth(:basic, opts).
       # will be removed in 0.8.0
       return basic_auth(opts) if :basic == value
-      with :authorization => value.to_s
+      headers Headers::AUTHORIZATION => value.to_s
     end
 
     # Make a request with the given Basic authorization header

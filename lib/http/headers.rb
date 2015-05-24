@@ -16,11 +16,18 @@ module HTTP
     # @see http://tools.ietf.org/html/rfc7230#section-3.2
     HEADER_NAME_RE = /^[A-Za-z0-9!#\$%&'*+\-.^_`|~]+$/
 
-    # Set-Cookie (response) header name
+    # Response Header: An HTTP cookie.
     SET_COOKIE = "Set-Cookie".freeze
 
-    # Cookie (request) header name
+    # Request Header: An HTTP cookie previously sent by the server with
+    # Set-Cookie.
     COOKIE = "Cookie".freeze
+
+    # Request Header: Content-Types that are acceptable for the response.
+    ACCEPT = "Accept".freeze
+
+    # Request Header: Authentication credentials for HTTP authentication.
+    AUTHORIZATION = "Authorization".freeze
 
     # Class constructor.
     def initialize
