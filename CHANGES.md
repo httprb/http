@@ -1,3 +1,8 @@
+## 0.8.12 (2015-05-26)
+
+* Fix `HTTP.timeout` API (was loosing previously defined options). (@ixti)
+
+
 ## 0.8.11 (2015-05-22)
 
 * SNI support for HTTPS connections. See #229. (@tarcieri)
