@@ -97,7 +97,10 @@ module HTTP
         options["#{k}_timeout".to_sym] = options.delete k
       end
 
-      branch :timeout_class => klass, :timeout_options => options
+      branch default_options.merge(
+        :timeout_class => klass,
+        :timeout_options => options
+      )
     end
 
     # @overload persistent(host)
