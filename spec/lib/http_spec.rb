@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 require "json"
 
 require "support/dummy_server"
@@ -161,6 +163,28 @@ RSpec.describe HTTP do
     it "is encoded as bytes" do
       response = HTTP.get "#{dummy.endpoint}/bytes"
       expect(response.to_s.encoding).to eq(Encoding::ASCII_8BIT)
+    end
+  end
+
+  context "loading endpoint with charset" do
+    it "uses charset from headers" do
+      response = HTTP.get "#{dummy.endpoint}/iso-8859-1"
+      expect(response.to_s.encoding).to eq(Encoding::ISO8859_1)
+      expect(response.to_s.encode(Encoding::UTF_8)).to eq("testæ")
+    end
+
+    context "with encoding option" do
+      it "respects option" do
+        response = HTTP.get "#{dummy.endpoint}/iso-8859-1", "encoding" => Encoding::ASCII_8BIT
+        expect(response.to_s.encoding).to eq(Encoding::ASCII_8BIT)
+      end
+    end
+  end
+
+  context "passing a string encoding type" do
+    it "finds encoding" do
+      response = HTTP.get dummy.endpoint, "encoding" => "ascii"
+      expect(response.to_s.encoding).to eq(Encoding::ASCII)
     end
   end
 
