@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 class DummyServer < WEBrick::HTTPServer
   class Servlet < WEBrick::HTTPServlet::AbstractServlet
     def self.sockets
@@ -127,6 +129,11 @@ class DummyServer < WEBrick::HTTPServer
       bytes = [80, 75, 3, 4, 20, 0, 0, 0, 8, 0, 123, 104, 169, 70, 99, 243, 243]
       res["Content-Type"] = "application/octet-stream"
       res.body = bytes.pack("c*")
+    end
+
+    get "/iso-8859-1" do |_req, res|
+      res["Content-Type"] = "text/plain; charset=ISO-8859-1"
+      res.body = "testæ".encode(Encoding::ISO8859_1)
     end
 
     get "/cookies" do |req, res|

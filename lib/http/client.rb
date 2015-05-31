@@ -73,7 +73,8 @@ module HTTP
         @connection.status_code,
         @connection.http_version,
         @connection.headers,
-        Response::Body.new(@connection),
+        @connection,
+        options.encoding,
         req.uri
       )
 

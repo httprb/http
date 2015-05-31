@@ -31,12 +31,18 @@ module HTTP
     # @return [URI, nil]
     attr_reader :uri
 
-    def initialize(status, version, headers, body, uri = nil) # rubocop:disable ParameterLists
-      @version = version
-      @body    = body
-      @uri     = uri && HTTP::URI.parse(uri)
-      @status  = HTTP::Response::Status.new status
-      @headers = HTTP::Headers.coerce(headers || {})
+    def initialize(status, version, headers, connection_or_body, encoding = nil, uri = nil) # rubocop:disable ParameterLists
+      @version  = version
+      @uri      = uri && HTTP::URI.parse(uri)
+      @status   = HTTP::Response::Status.new status
+      @headers  = HTTP::Headers.coerce(headers || {})
+      @encoding = encoding
+
+      if connection_or_body.is_a? HTTP::Connection
+        @body = Response::Body.new(connection_or_body, resolved_encoding)
+      else
+        @body = connection_or_body
+      end
     end
 
     # @!method reason
@@ -119,6 +125,16 @@ module HTTP
     # @return [HTTP::Response::Caching]
     def caching
       Caching.new self
+    end
+
+    private
+
+    # Work out what encoding to assume for the body
+    def resolved_encoding
+      return @encoding if @encoding
+      return charset if charset
+      return Encoding::UTF_8 if mime_type && mime_type.start_with?("text/")
+      Encoding::BINARY
     end
   end
 end

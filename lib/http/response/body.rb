@@ -9,10 +9,11 @@ module HTTP
       include Enumerable
       def_delegator :to_s, :empty?
 
-      def initialize(client)
-        @client       = client
-        @streaming    = nil
-        @contents     = nil
+      def initialize(client, encoding)
+        @client    = client
+        @streaming = nil
+        @contents  = nil
+        @encoding  = encoding
       end
 
       # (see HTTP::Client#readpartial)
@@ -36,9 +37,9 @@ module HTTP
 
         begin
           @streaming = false
-          @contents = "".force_encoding(Encoding::UTF_8)
+          @contents = "".force_encoding(@encoding)
           while (chunk = @client.readpartial)
-            @contents << chunk.force_encoding(Encoding::ASCII_8BIT)
+            @contents << chunk.force_encoding(@encoding)
           end
         rescue
           @contents = nil
