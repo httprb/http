@@ -17,6 +17,11 @@ require "http"
 require "rspec/its"
 require "support/capture_warning"
 
+# Are we in a flaky environment?
+def flaky_env?
+  defined?(JRUBY_VERSION) && ENV["CI"]
+end
+
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|

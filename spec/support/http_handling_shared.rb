@@ -50,6 +50,7 @@ RSpec.shared_context "HTTP handling" do
           let(:read_timeout) { 0 }
 
           it "times out" do
+            skip "flaky environment" if flaky_env?
             expect { response }.to raise_error(HTTP::TimeoutError, /Read/i)
           end
         end
@@ -123,6 +124,8 @@ RSpec.shared_context "HTTP handling" do
 
       context "on a mixed state" do
         it "re-opens the connection" do
+          skip "flaky environment" if flaky_env?
+
           first_socket_id = client.get("#{server.endpoint}/socket/1").body.to_s
 
           client.instance_variable_set(:@state, :dirty)
@@ -154,6 +157,8 @@ RSpec.shared_context "HTTP handling" do
 
       context "with a socket issue" do
         it "transparently reopens" do
+          skip "flaky environment" if flaky_env?
+
           first_socket_id = client.get("#{server.endpoint}/socket").body.to_s
           expect(first_socket_id).to_not eq("")
           # Kill off the sockets we used
@@ -184,6 +189,8 @@ RSpec.shared_context "HTTP handling" do
       let(:options) { {} }
 
       it "opens new sockets" do
+        skip "flaky environment" if flaky_env?
+
         expect(sockets_used).to_not include("")
         expect(sockets_used.uniq.length).to eq(2)
       end

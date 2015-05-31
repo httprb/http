@@ -42,6 +42,8 @@ RSpec.shared_context "handles shared connections" do
 
       context "with a socket issue" do
         it "transparently reopens" do
+          skip "flaky environment" if flaky_env?
+
           first_socket = client.get("#{server.endpoint}/socket").body.to_s
           expect(first_socket).to_not eq("")
 
