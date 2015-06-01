@@ -23,17 +23,26 @@ module HTTP
     # @return [URI, nil]
     attr_reader :uri
 
-    def initialize(status, version, headers, connection_or_body, encoding = nil, uri = nil) # rubocop:disable ParameterLists
-      @version  = version
-      @uri      = uri && HTTP::URI.parse(uri)
-      @status   = HTTP::Response::Status.new status
-      @headers  = HTTP::Headers.coerce(headers || {})
-      @encoding = encoding
+    # Inits a new instance
+    #
+    # @option opts [Integer] :status Status code
+    # @option opts [String] :version HTTP version
+    # @option opts [Hash] :headers
+    # @option opts [HTTP::Connection] :connection
+    # @option opts [String] :encoding Encoding to use when reading body
+    # @option opts [String] :body
+    # @option opts [String] :uri
+    def initialize(opts)
+      @version  = opts.fetch(:version)
+      @uri      = opts.include?(:uri) && HTTP::URI.parse(opts.fetch(:uri))
+      @status   = HTTP::Response::Status.new opts.fetch(:status)
+      @headers  = HTTP::Headers.coerce(opts.fetch(:headers, {}))
+      @encoding = opts.fetch(:encoding, nil)
 
-      if connection_or_body.is_a? HTTP::Connection
-        @body = Response::Body.new(connection_or_body, resolved_encoding)
+      if opts.include?(:connection)
+        @body = Response::Body.new(opts.fetch(:connection), resolved_encoding)
       else
-        @body = connection_or_body
+        @body = opts.fetch(:body)
       end
     end
 

@@ -61,12 +61,12 @@ module HTTP
       end
 
       res = Response.new(
-        @connection.status_code,
-        @connection.http_version,
-        @connection.headers,
-        @connection,
-        options.encoding,
-        req.uri
+        :status => @connection.status_code,
+        :version => @connection.http_version,
+        :headers => @connection.headers,
+        :connection => @connection,
+        :encoding => options.encoding,
+        :uri => req.uri
       )
 
       @connection.finish_response if req.verb == :head
