@@ -124,12 +124,7 @@ module HTTP
 
     # Work out what encoding to assume for the body
     def resolved_encoding
-      return @encoding        if @encoding
-      return charset          if charset
-      return Encoding::UTF_8  if mime_type && mime_type.start_with?("text/".freeze)
-
-      Encoding::BINARY
+      @encoding || charset || Encoding::BINARY
     end
-
   end
 end

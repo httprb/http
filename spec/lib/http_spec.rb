@@ -162,7 +162,7 @@ RSpec.describe HTTP do
   context "loading binary data" do
     it "is encoded as bytes" do
       response = HTTP.get "#{dummy.endpoint}/bytes"
-      expect(response.to_s.encoding).to eq(Encoding::ASCII_8BIT)
+      expect(response.to_s.encoding).to eq(Encoding::BINARY)
     end
   end
 
@@ -175,8 +175,8 @@ RSpec.describe HTTP do
 
     context "with encoding option" do
       it "respects option" do
-        response = HTTP.get "#{dummy.endpoint}/iso-8859-1", "encoding" => Encoding::ASCII_8BIT
-        expect(response.to_s.encoding).to eq(Encoding::ASCII_8BIT)
+        response = HTTP.get "#{dummy.endpoint}/iso-8859-1", "encoding" => Encoding::BINARY
+        expect(response.to_s.encoding).to eq(Encoding::BINARY)
       end
     end
   end
@@ -188,10 +188,10 @@ RSpec.describe HTTP do
     end
   end
 
-  context "loading text" do
-    it "is utf-8 encoded" do
+  context "loading text with no charset" do
+    it "is binary encoded" do
       response = HTTP.get dummy.endpoint
-      expect(response.to_s.encoding).to eq(Encoding::UTF_8)
+      expect(response.to_s.encoding).to eq(Encoding::BINARY)
     end
   end
 
