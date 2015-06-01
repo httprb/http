@@ -1,7 +1,14 @@
 RSpec.describe HTTP::Response::Caching do
   let(:cache_control) { "" }
   let(:headers) { {"cache-control" => cache_control} }
-  let(:response) { HTTP::Response.new(200, "http/1.1", headers, "") }
+  let(:response) do
+    HTTP::Response.new(
+      :status => 200,
+      :version => "http/1.1",
+      :headers => headers,
+      :body => ""
+    )
+  end
 
   subject(:caching_response) { described_class.new response }
 
@@ -175,7 +182,13 @@ RSpec.describe HTTP::Response::Caching do
   end
 
   describe "basic 400 response " do
-    let(:response) { HTTP::Response.new(400, "http/1.1", {}, "") }
+    let(:response) do
+      HTTP::Response.new(
+        :status => 400,
+        :version => "http/1.1",
+        :body => ""
+      )
+    end
 
     it "is not cacheable" do
       expect(subject.cacheable?).to be_falsy

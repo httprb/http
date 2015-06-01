@@ -24,7 +24,12 @@ RSpec.describe HTTP::Request::Caching do
     it "can construct a new conditional version of itself based on a caching response" do
       mod_date    = Time.now.httpdate
       headers     = {"Etag" => "foo", "Last-Modified" => mod_date}
-      cached_resp = HTTP::Response.new(200, "http/1.1", headers, "")
+      cached_resp = HTTP::Response.new(
+        :status => 200,
+        :version => "http/1.1",
+        :headers => headers,
+        :body => ""
+      )
       cond_req = subject.conditional_on_changes_to(cached_resp)
 
       expect(cond_req.headers["If-None-Match"]).to eq "foo"
@@ -53,7 +58,12 @@ RSpec.describe HTTP::Request::Caching do
     it "can construct a condition version of itself based on a caching response" do
       mod_date    = Time.now.httpdate
       headers     = {"Etag" => "foo", "Last-Modified" => mod_date}
-      cached_resp = HTTP::Response.new(200, "http/1.1", headers, "")
+      cached_resp = HTTP::Response.new(
+        :status => 200,
+        :version => "http/1.1",
+        :headers => headers,
+        :body => ""
+      )
       cond_req    = subject.conditional_on_changes_to(cached_resp)
 
       expect(cond_req.headers["If-None-Match"]).to eq "foo"
