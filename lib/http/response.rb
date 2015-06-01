@@ -142,7 +142,6 @@ module HTTP
     def resolved_encoding
       return @encoding if @encoding
       return charset if charset
-      return Encoding::UTF_8 if mime_type && mime_type.start_with?("text/")
       Encoding::BINARY
     end
   end
