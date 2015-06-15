@@ -6,11 +6,8 @@ module HTTP
       def initialize(*args)
         super
 
-        reset_counter
-      end
-
-      def reset_counter
-        @time_left = @total_timeout = connect_timeout + read_timeout + write_timeout
+        @time_left = connect_timeout + read_timeout + write_timeout
+        @total_timeout = time_left
       end
 
       def connect(socket_class, host, port)
@@ -38,29 +35,65 @@ module HTTP
         end
       end
 
-      # Read from the socket
-      def readpartial(size)
-        reset_timer
+      # NIO with exceptions
+      if RUBY_VERSION < "2.1.0"
+        # Read from the socket
+        def readpartial(size)
+          reset_timer
 
-        begin
-          socket.read_nonblock(size)
-        rescue IO::WaitReadable
-          IO.select([socket], nil, nil, time_left)
-          log_time
-          retry
+          begin
+            socket.read_nonblock(size)
+          rescue IO::WaitReadable
+            IO.select([socket], nil, nil, time_left)
+            log_time
+            retry
+          end
+        rescue EOFError
+          :eof
         end
-      end
 
-      # Write to the socket
-      def write(data)
-        reset_timer
+        # Write to the socket
+        def write(data)
+          reset_timer
 
-        begin
-          socket << data
-        rescue IO::WaitWritable
-          IO.select(nil, [socket], nil, time_left)
-          log_time
-          retry
+          begin
+            socket.write_nonblock(data)
+          rescue IO::WaitWritable
+            IO.select(nil, [socket], nil, time_left)
+            log_time
+            retry
+          end
+        rescue EOFError
+          :eof
+        end
+
+      # NIO without exceptions
+      else
+
+        # Read from the socket
+        def readpartial(size)
+          reset_timer
+
+          loop do
+            result = socket.read_nonblock(size, :exception => false)
+            break result unless result == :wait_readable
+
+            IO.select([socket], nil, nil, time_left)
+            log_time
+          end
+        end
+
+        # Write to the socket
+        def write(data)
+          reset_timer
+
+          loop do
+            result = socket.write_nonblock(data, :exception => false)
+            break unless result == :wait_writable
+
+            IO.select(nil, [socket], nil, time_left)
+            log_time
+          end
         end
       end
 
