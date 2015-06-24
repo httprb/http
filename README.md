@@ -228,6 +228,18 @@ HTTP.accept(:json).get("https://github.com/httprb/http.rb/commit/HEAD")
 This adds the appropriate Accept header for retrieving a JSON response for the
 given resource.
 
+### Reuse HTTP connection: HTTP Keep-Alive
+
+If you have many successive requests against the same host, you better want to
+reuse the same connection again and again:
+
+```ruby
+contents = []
+targets = %w(Hypertext_Transfer_Protocol Git GitHub Linux Hurd)
+HTTP.persistent('http://en.wikipedia.org').do |http|
+  targets.each { |target| contents << http.get("/wiki/#{target}") }
+end
+```
 
 ### Celluloid::IO Support
 
