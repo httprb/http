@@ -46,6 +46,28 @@ module HTTP
         @socket << data
       end
 
+      # Retry reading
+      def __rescue_readable(&block)
+        yield
+      rescue IO::WaitReadable
+        if IO.select([socket], nil, nil, read_timeout)
+          retry
+        else
+          raise TimeoutError, "Read timed out after #{read_timeout} seconds"
+        end
+      end
+
+      # Retry writing
+      def __rescue_writable(&block)
+        yield
+      rescue IO::WaitWritable
+        if IO.select(nil, [socket], nil, write_timeout)
+          retry
+        else
+          raise TimeoutError, "Read timed out after #{write_timeout} seconds"
+        end
+      end
+
       alias_method :<<, :write
     end
   end
