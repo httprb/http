@@ -47,7 +47,7 @@ module HTTP
       end
 
       # Retry reading
-      def __rescue_readable(&block)
+      def __rescue_readable
         yield
       rescue IO::WaitReadable
         if IO.select([socket], nil, nil, read_timeout)
@@ -58,7 +58,7 @@ module HTTP
       end
 
       # Retry writing
-      def __rescue_writable(&block)
+      def __rescue_writable
         yield
       rescue IO::WaitWritable
         if IO.select(nil, [socket], nil, write_timeout)
