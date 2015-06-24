@@ -22,8 +22,8 @@ module HTTP
       end
 
       def connect_ssl
-        __rescue_readable do
-          __rescue_writable do
+        rescue_readable do
+          rescue_writable do
             socket.connect_nonblock
           end
         end
@@ -31,14 +31,14 @@ module HTTP
 
       # Read data from the socket
       def readpartial(size)
-        __rescue_readable do
+        rescue_readable do
           socket.read_nonblock(size)
         end
       end
 
       # Write data to the socket
       def write(data)
-        __rescue_writable do
+        rescue_writable do
           socket.write_nonblock(data)
         end
       end
