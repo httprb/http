@@ -22,40 +22,24 @@ module HTTP
       end
 
       def connect_ssl
-        socket.connect_nonblock
-      rescue IO::WaitReadable
-        if IO.select([socket], nil, nil, connect_timeout)
-          retry
-        else
-          raise TimeoutError, "Connection timed out after #{connect_timeout} seconds"
-        end
-      rescue IO::WaitWritable
-        if IO.select(nil, [socket], nil, connect_timeout)
-          retry
-        else
-          raise TimeoutError, "Connection timed out after #{connect_timeout} seconds"
+        rescue_readable do
+          rescue_writable do
+            socket.connect_nonblock
+          end
         end
       end
 
       # Read data from the socket
       def readpartial(size)
-        socket.read_nonblock(size)
-      rescue IO::WaitReadable
-        if IO.select([socket], nil, nil, read_timeout)
-          retry
-        else
-          raise TimeoutError, "Read timed out after #{read_timeout} seconds"
+        rescue_readable do
+          socket.read_nonblock(size)
         end
       end
 
       # Write data to the socket
       def write(data)
-        socket.write_nonblock(data)
-      rescue IO::WaitWritable
-        if IO.select(nil, [socket], nil, write_timeout)
-          retry
-        else
-          raise TimeoutError, "Read timed out after #{write_timeout} seconds"
+        rescue_writable do
+          socket.write_nonblock(data)
         end
       end
     end
