@@ -66,7 +66,7 @@ module HTTP
         if IO.select(nil, [socket], nil, write_timeout)
           retry
         else
-          raise TimeoutError, "Read timed out after #{write_timeout} seconds"
+          raise TimeoutError, "Write timed out after #{write_timeout} seconds"
         end
       end
     end
