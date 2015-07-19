@@ -48,6 +48,7 @@ module HTTP
       alias_method :<<, :write
 
       private
+
       # Retry reading
       def rescue_readable
         yield

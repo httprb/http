@@ -1,6 +1,5 @@
 source "https://rubygems.org"
 
-gem "jruby-openssl" if defined? JRUBY_VERSION
 gem "rake"
 
 gem "rack-cache", "~> 1.2"
@@ -23,8 +22,6 @@ group :test do
   gem "coveralls"
   gem "simplecov",    ">= 0.9"
   gem "json",         ">= 1.8.1"
-  gem "mime-types",   "~> 1.25",  :platforms => [:jruby]
-  gem "rest-client",  "~> 1.6.0", :platforms => [:jruby]
   gem "rspec",        "~> 3.0"
   gem "rspec-its"
   gem "rubocop"
@@ -33,7 +30,7 @@ group :test do
 end
 
 group :doc do
-  gem "redcarpet"
+  gem "kramdown"
   gem "yard"
 end
 
