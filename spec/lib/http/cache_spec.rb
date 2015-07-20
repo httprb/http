@@ -25,7 +25,7 @@ RSpec.describe HTTP::Cache do
   subject { described_class.new(:metastore => "heap:/", :entitystore => "heap:/") }
 
   describe "#perform" do
-    it "calls request_performer block when cache miss" do
+    xit "calls request_performer block when cache miss" do
       expect do |b|
         subject.perform(request, opts) do |*args|
           b.to_proc.call(*args)
