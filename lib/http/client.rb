@@ -45,19 +45,13 @@ module HTTP
       end
     end
 
-    # Perform a single (no follow) HTTP request
-    def perform(req, options)
-      options.cache.perform(req, options) do |r, opts|
-        make_request(r, opts)
-      end
-    end
-
     # @!method persistent?
     #   @see Options#persistent?
     #   @return [Boolean] whenever client is persistent
     def_delegator :default_options, :persistent?
 
-    def make_request(req, options)
+    # Perform a single (no follow) HTTP request
+    def perform(req, options)
       verify_connection!(req.uri)
 
       @state = :dirty

@@ -109,11 +109,6 @@ RSpec.describe HTTP::Response do
     end
   end
 
-  describe "#caching" do
-    subject { response.caching }
-    it { is_expected.to be_a HTTP::Response::Caching }
-  end
-
   describe "#cookies" do
     let(:cookies) { ["a=1", "b=2; domain=example.com", "c=3; domain=bad.org"] }
     let(:headers) { {"Set-Cookie" => cookies} }

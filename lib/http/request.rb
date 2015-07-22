@@ -4,7 +4,6 @@ require "time"
 
 require "http/errors"
 require "http/headers"
-require "http/request/caching"
 require "http/request/writer"
 require "http/version"
 require "http/uri"
@@ -155,11 +154,6 @@ module HTTP
     # Port for tcp socket
     def socket_port
       using_proxy? ? proxy[:proxy_port] : port
-    end
-
-    # @return [HTTP::Request::Caching]
-    def caching
-      Caching.new self
     end
 
     private

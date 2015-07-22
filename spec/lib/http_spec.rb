@@ -204,14 +204,6 @@ RSpec.describe HTTP do
     end
   end
 
-  describe ".cache" do
-    it "sets cache option" do
-      cache = double(:cache, :perform => nil)
-      client = HTTP.cache cache
-      expect(client.default_options[:cache]).to eq cache
-    end
-  end
-
   describe ".persistent" do
     let(:host) { "https://api.github.com" }
 
