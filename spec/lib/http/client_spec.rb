@@ -4,13 +4,11 @@ require "support/http_handling_shared"
 require "support/dummy_server"
 require "support/ssl_helper"
 
-require "http/cache"
-
 RSpec.describe HTTP::Client do
   run_server(:dummy) { DummyServer.new }
 
   StubbedClient = Class.new(HTTP::Client) do
-    def make_request(request, options)
+    def perform(request, options)
       stubs.fetch(request.uri) { super(request, options) }
     end
 
@@ -94,26 +92,6 @@ RSpec.describe HTTP::Client do
         client = HTTP.follow
         expect(client.get(url).to_s).to include "support for non-ascii URIs"
       end
-    end
-  end
-
-  describe "caching" do
-    let(:sn) { SecureRandom.urlsafe_base64(3) }
-
-    it "returns cached responses if they exist" do
-      cached_response = simple_response("cached").caching
-      StubbedClient.new(:cache =>
-                        HTTP::Cache.new(:metastore => "heap:/", :entitystore => "heap:/")).
-        stub("http://example.com/#{sn}" => cached_response).
-        get("http://example.com/#{sn}")
-
-      # cache is now warm
-
-      client = StubbedClient.new(:cache => HTTP::Cache.new(:metastore => "heap:/", :entitystore => "heap:/")).
-               stub("http://example.com/#{sn}" => simple_response("OK"))
-
-      expect(client.get("http://example.com/#{sn}").body.to_s).
-        to eq cached_response.body.to_s
     end
   end
 

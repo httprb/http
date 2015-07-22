@@ -1,21 +1,16 @@
 require "http/headers"
 require "openssl"
 require "socket"
-require "http/cache/null_cache"
 require "http/uri"
 
 module HTTP
   class Options
     @default_socket_class     = TCPSocket
     @default_ssl_socket_class = OpenSSL::SSL::SSLSocket
-
-    @default_timeout_class = HTTP::Timeout::Null
-
-    @default_cache = Http::Cache::NullCache.new
+    @default_timeout_class    = HTTP::Timeout::Null
 
     class << self
-      attr_accessor :default_socket_class, :default_ssl_socket_class
-      attr_accessor :default_cache, :default_timeout_class
+      attr_accessor :default_socket_class, :default_ssl_socket_class, :default_timeout_class
 
       def new(options = {})
         return options if options.is_a?(self)
@@ -43,17 +38,16 @@ module HTTP
 
     def initialize(options = {})
       defaults = {
-        :response =>         :auto,
-        :proxy =>            {},
-        :timeout_class =>    self.class.default_timeout_class,
-        :timeout_options =>  {},
-        :socket_class =>     self.class.default_socket_class,
-        :ssl_socket_class => self.class.default_ssl_socket_class,
-        :ssl =>              {},
-        :cache =>            self.class.default_cache,
-        :keep_alive_timeout  => 5,
-        :headers =>          {},
-        :cookies =>          {}
+        :response           => :auto,
+        :proxy              => {},
+        :timeout_class      => self.class.default_timeout_class,
+        :timeout_options    => {},
+        :socket_class       => self.class.default_socket_class,
+        :ssl_socket_class   => self.class.default_ssl_socket_class,
+        :ssl                => {},
+        :keep_alive_timeout => 5,
+        :headers            => {},
+        :cookies            => {}
       }
 
       opts_w_defaults = defaults.merge(options)
@@ -95,15 +89,6 @@ module HTTP
 
     def persistent?
       !persistent.nil?
-    end
-
-    def_option :cache do |cache_or_cache_options|
-      if cache_or_cache_options.respond_to? :perform
-        cache_or_cache_options
-      else
-        require "http/cache"
-        HTTP::Cache.new(cache_or_cache_options)
-      end
     end
 
     def [](option)

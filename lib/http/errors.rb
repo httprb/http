@@ -14,9 +14,6 @@ module HTTP
   # Generic Timeout error
   class TimeoutError < Error; end
 
-  # Generic Cache error
-  class CacheError < Error; end
-
   # Header name is invalid
   class InvalidHeaderNameError < Error; end
 end

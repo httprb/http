@@ -265,28 +265,6 @@ There's a little more to it, but that's the core idea!
 * [Full parallel HTTP fetcher example](https://github.com/httprb/http.rb/wiki/Parallel-requests-with-Celluloid%3A%3AIO)
 * See also: [Celluloid::IO](https://github.com/celluloid/celluloid-io)
 
-### Caching
-
-http.rb provides caching of HTTP request (per
-[RFC 7234](https://tools.ietf.org/html/rfc7234)) when configured to do
-so.
-
-```ruby
-require "http"
-
-http = HTTP.cache(:metastore   => "file:/var/cache/my-app-http/meta",
-                  :entitystore => "file:/var/cache/my-app-http/entity")
-
-http.get("http://example.com/")   # makes request
-http.get("http://example.com/")   # skips making request and returns
-                                  # previously cached response
-```
-
-http.rb's caching is backed by
-[rack-cache's excellent storage subsystem](http://rtomayko.github.io/rack-cache/storage.html). Any
-storage URL supported by rack-cache is supported by http.rb's cache.
-
-
 ### Timeouts
 
 By default, HTTP does not timeout on a request. You can enable per operation

@@ -170,14 +170,6 @@ module HTTP
     # @see #follow
     alias_method :with_follow, :follow
 
-    def cache(cache)
-      branch default_options.with_cache(cache)
-    end
-
-    # @deprecated will be removed in 1.0.0
-    # @see #cache
-    alias_method :with_cache, :cache
-
     # Make a request with the given headers
     # @param headers
     def headers(headers)
