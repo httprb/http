@@ -1,3 +1,9 @@
+## 0.9.0.pre (2015-07-22)
+
+* Support for caching removed. See #240. (@tarcieri)
+* JRuby 9000 compatibility
+
+
 ## 0.8.12 (2015-05-26)
 
 * Fix `HTTP.timeout` API (was loosing previously defined options). (@ixti)
