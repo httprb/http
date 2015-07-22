@@ -88,7 +88,10 @@ module HTTP
       return if rack_resp.nil?
 
       HTTP::Response.new(
-        rack_resp.status, "1.1", rack_resp.headers, stringify(rack_resp.body)
+        :status => rack_resp.status,
+        :version => "1.1",
+        :headers => rack_resp.headers,
+        :body => stringify(rack_resp.body)
       ).caching
     end
 

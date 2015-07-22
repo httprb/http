@@ -31,12 +31,27 @@ module HTTP
     # @return [URI, nil]
     attr_reader :uri
 
-    def initialize(status, version, headers, body, uri = nil) # rubocop:disable ParameterLists
-      @version = version
-      @body    = body
-      @uri     = uri && HTTP::URI.parse(uri)
-      @status  = HTTP::Response::Status.new status
-      @headers = HTTP::Headers.coerce(headers || {})
+    # Inits a new instance
+    #
+    # @option opts [Integer] :status Status code
+    # @option opts [String] :version HTTP version
+    # @option opts [Hash] :headers
+    # @option opts [HTTP::Connection] :connection
+    # @option opts [String] :encoding Encoding to use when reading body
+    # @option opts [String] :body
+    # @option opts [String] :uri
+    def initialize(opts)
+      @version  = opts.fetch(:version)
+      @uri      = opts.include?(:uri) && HTTP::URI.parse(opts.fetch(:uri))
+      @status   = HTTP::Response::Status.new opts.fetch(:status)
+      @headers  = HTTP::Headers.coerce(opts.fetch(:headers, {}))
+      @encoding = opts.fetch(:encoding, nil)
+
+      if opts.include?(:connection)
+        @body = Response::Body.new(opts.fetch(:connection), resolved_encoding)
+      else
+        @body = opts.fetch(:body)
+      end
     end
 
     # @!method reason
@@ -119,6 +134,15 @@ module HTTP
     # @return [HTTP::Response::Caching]
     def caching
       Caching.new self
+    end
+
+    private
+
+    # Work out what encoding to assume for the body
+    def resolved_encoding
+      return @encoding if @encoding
+      return charset if charset
+      Encoding::BINARY
     end
   end
 end

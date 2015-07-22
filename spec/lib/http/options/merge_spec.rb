@@ -56,6 +56,7 @@ RSpec.describe HTTP::Options, "merge" do
       :ssl_socket_class => described_class.default_ssl_socket_class,
       :ssl_context      => nil,
       :cache      => described_class.default_cache,
-      :cookies    => {})
+      :cookies    => {},
+      :encoding   => nil)
   end
 end

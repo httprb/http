@@ -2,7 +2,16 @@ RSpec.describe HTTP::Response do
   let(:body)          { "Hello world!" }
   let(:uri)           { "http://example.com/" }
   let(:headers)       { {} }
-  subject(:response)  { HTTP::Response.new 200, "1.1", headers, body, uri }
+
+  subject(:response) do
+    HTTP::Response.new(
+      :status => 200,
+      :version => "1.1",
+      :headers => headers,
+      :body => body,
+      :uri => uri
+    )
+  end
 
   it "includes HTTP::Headers::Mixin" do
     expect(described_class).to include HTTP::Headers::Mixin

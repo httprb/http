@@ -53,7 +53,8 @@ module HTTP
         :cache =>            self.class.default_cache,
         :keep_alive_timeout  => 5,
         :headers =>          {},
-        :cookies =>          {}
+        :cookies =>          {},
+        :encoding =>         nil
       }
 
       opts_w_defaults = defaults.merge(options)
@@ -70,6 +71,10 @@ module HTTP
         cookie = k.is_a?(Cookie) ? k : Cookie.new(k.to_s, v.to_s)
         jar[cookie.name] = cookie.cookie_value
       end
+    end
+
+    def_option :encoding do |encoding|
+      self.encoding = Encoding.find(encoding)
     end
 
     %w(

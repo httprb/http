@@ -1,6 +1,11 @@
 RSpec.describe HTTP::Redirector do
   def simple_response(status, body = "", headers = {})
-    HTTP::Response.new(status, "1.1", headers, body)
+    HTTP::Response.new(
+      :status => status,
+      :version => "1.1",
+      :headers => headers,
+      :body => body
+    )
   end
 
   def redirect_response(status, location)
