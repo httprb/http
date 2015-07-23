@@ -35,7 +35,7 @@ Top three reasons:
    http.rb achieves the best performance of any Ruby HTTP library which
    implements the HTTP protocol in Ruby instead of C:
 
-  | tach                     | total     |
+  | HTTP client              | time      |
   |--------------------------|-----------|
   | curb (persistent)        | 2.519088  |
   | em-http-request          | 2.731645  |
