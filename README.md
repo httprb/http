@@ -20,6 +20,39 @@ natively and outsources the parsing to native extensions.
 [http_parser.rb]: https://github.com/tmm1/http_parser.rb
 
 
+## Another Ruby HTTP library? Why should I care?
+
+There are a lot of HTTP libraries to choose from in the Ruby ecosystem.
+So why would you choose this one?
+
+Top three reasons:
+
+1. API: http.rb offers a clean, easy-to-use API that should be a breath
+   of fresh air after using something like Net::HTTP
+2. Maturity: http.rb is one of the most mature Ruby HTTP clients, supporting
+   features like persistent connections and fine-grained timeouts.
+3. Performance: using native parsers and a clean, lightweight implementation,
+   http.rb achieves the best performance of any Ruby HTTP library which
+   implements the HTTP protocol in Ruby instead of C:
+
+  | tach                     | total     |
+  |--------------------------|-----------|
+  | curb (persistent)        | 2.519088  |
+  | em-http-request          | 2.731645  |
+  | Typhoeus                 | 2.851911  |
+  | StreamlyFFI (persistent) | 2.853786  |
+  | http.rb (persistent)     | 2.970702  |
+  | http.rb                  | 3.588964  |
+  | HTTParty                 | 3.931913  |
+  | Net::HTTP                | 3.959342  |
+  | Net::HTTP (persistent)   | 4.043674  |
+  | open-uri                 | 4.479817  |
+  | Excon (persistent)       | 4.618361  |
+  | Excon                    | 4.701262  |
+  | RestClient               | 26.832668 |
+
+Benchmarks performed using excon's benchmarking tool
+
 ## Help and Discussion
 
 If you need help or just want to talk about the http.rb,
