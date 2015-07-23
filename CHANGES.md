@@ -1,4 +1,4 @@
-## 0.9.0.pre (2015-07-22)
+## 0.9.0 (2015-07-23)
 
 * Support for caching removed. See #240. (@tarcieri)
 * JRuby 9000 compatibility

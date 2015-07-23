@@ -1,3 +1,3 @@
 module HTTP
-  VERSION = "0.9.0.pre".freeze
+  VERSION = "0.9.0".freeze
 end
