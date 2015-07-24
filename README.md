@@ -28,9 +28,11 @@ So why would you choose this one?
 Top three reasons:
 
 1. **Clean API**: http.rb offers an easy-to-use API that should be a
-   breath of fresh air after using something like Net::HTTP
+   breath of fresh air after using something like Net::HTTP.
+
 2. **Maturity**: http.rb is one of the most mature Ruby HTTP clients, supporting
    features like persistent connections and fine-grained timeouts.
+
 3. **Performance**: using native parsers and a clean, lightweight implementation,
    http.rb achieves the best performance of any Ruby HTTP library which
    implements the HTTP protocol in Ruby instead of C:
