@@ -1,9 +1,9 @@
 # ![http.rb](https://raw.github.com/httprb/http.rb/master/logo.png)
 
 [![Gem Version](https://badge.fury.io/rb/http.svg)](http://rubygems.org/gems/http)
-[![Build Status](https://secure.travis-ci.org/httprb/http.rb.svg?branch=master)](http://travis-ci.org/httprb/http.rb)
-[![Code Climate](https://codeclimate.com/github/httprb/http.rb.svg?branch=master)](https://codeclimate.com/github/httprb/http.rb)
-[![Coverage Status](https://coveralls.io/repos/httprb/http.rb/badge.svg?branch=master)](https://coveralls.io/r/httprb/http.rb)
+[![Build Status](https://secure.travis-ci.org/httprb/http.svg?branch=master)](http://travis-ci.org/httprb/http)
+[![Code Climate](https://codeclimate.com/github/httprb/http.svg?branch=master)](https://codeclimate.com/github/httprb/http)
+[![Coverage Status](https://coveralls.io/repos/httprb/http/badge.svg?branch=master)](https://coveralls.io/r/httprb/http)
 
 
 ## About
@@ -94,7 +94,7 @@ Inside of your Ruby program do:
 
 ## Documentation
 
-[Please see the http.rb wiki](https://github.com/httprb/http.rb/wiki)
+[Please see the http.rb wiki](https://github.com/httprb/http/wiki)
 for more detailed documentation and usage notes.
 
 
@@ -199,7 +199,7 @@ you want to get the latest commit of this library from GitHub in JSON format.
 One way we could do this is by tacking a filename on the end of the URL:
 
 ```ruby
-HTTP.get("https://github.com/httprb/http.rb/commit/HEAD.json")
+HTTP.get("https://github.com/httprb/http/commit/HEAD.json")
 ```
 
 The GitHub API happens to support this approach, but really this is a bit of a
@@ -210,7 +210,7 @@ intends us to, by using the Accept header:
 
 ```ruby
 HTTP.headers(:accept => "application/json")
-  .get("https://github.com/httprb/http.rb/commit/HEAD")
+  .get("https://github.com/httprb/http/commit/HEAD")
 ```
 
 This requests JSON from GitHub. GitHub is smart enough to understand our
@@ -220,7 +220,7 @@ Shorter alias exists for `HTTP.headers`:
 
 ```ruby
 HTTP[:accept => "application/json"]
-  .get("https://github.com/httprb/http.rb/commit/HEAD")
+  .get("https://github.com/httprb/http/commit/HEAD")
 ```
 
 
@@ -257,7 +257,7 @@ right? But usually it's not, and so we end up adding ".json" onto the ends of
 our URLs because the existing mechanisms make it too hard. It should be easy:
 
 ```ruby
-HTTP.accept(:json).get("https://github.com/httprb/http.rb/commit/HEAD")
+HTTP.accept(:json).get("https://github.com/httprb/http/commit/HEAD")
 ```
 
 This adds the appropriate Accept header for retrieving a JSON response for the
@@ -297,7 +297,7 @@ end
 
 There's a little more to it, but that's the core idea!
 
-* [Full parallel HTTP fetcher example](https://github.com/httprb/http.rb/wiki/Parallel-requests-with-Celluloid%3A%3AIO)
+* [Full parallel HTTP fetcher example](https://github.com/httprb/http/wiki/Parallel-requests-with-Celluloid%3A%3AIO)
 * See also: [Celluloid::IO](https://github.com/celluloid/celluloid-io)
 
 ### Timeouts
@@ -355,7 +355,7 @@ patches in a timely fashion. If critical issues for a particular implementation
 exist at the time of a major release, support for that Ruby version may be
 dropped.
 
-[travis]: http://travis-ci.org/httprb/http.rb
+[travis]: http://travis-ci.org/httprb/http
 
 
 ## Contributing to http.rb
