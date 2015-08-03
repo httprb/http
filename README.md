@@ -276,8 +276,6 @@ HTTP.persistent('http://en.wikipedia.org') do |http|
 end
 ```
 
-o
-
 ### Celluloid::IO Support
 
 http.rb makes it simple to make multiple concurrent HTTP requests from a
