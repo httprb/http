@@ -271,10 +271,12 @@ reuse the same connection again and again:
 ```ruby
 contents = []
 targets = %w(Hypertext_Transfer_Protocol Git GitHub Linux Hurd)
-HTTP.persistent('http://en.wikipedia.org').do |http|
+HTTP.persistent('http://en.wikipedia.org') do |http|
   targets.each { |target| contents << http.get("/wiki/#{target}") }
 end
 ```
+
+o
 
 ### Celluloid::IO Support
 
