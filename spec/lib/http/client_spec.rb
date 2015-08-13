@@ -164,7 +164,7 @@ RSpec.describe HTTP::Client do
   describe "#request" do
     context "with non-ASCII URLs" do
       it "theoretically works like a charm" do
-        client =  described_class.new
+        client = described_class.new
         expect { client.get "#{dummy.endpoint}/könig" }.not_to raise_error
       end
 

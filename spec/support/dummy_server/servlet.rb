@@ -36,7 +36,7 @@ class DummyServer < WEBrick::HTTPServer
         res.body = '{"json": true}'
       else
         res["Content-Type"] = "text/html"
-        res.body   = "<!doctype html>"
+        res.body = "<!doctype html>"
       end
     end
 

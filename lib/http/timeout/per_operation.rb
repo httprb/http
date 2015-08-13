@@ -30,7 +30,6 @@ module HTTP
       end
 
       # NIO with exceptions
-      # rubocop:disable Metrics/BlockNesting
       if RUBY_VERSION < "2.1.0"
         # Read data from the socket
         def readpartial(size)

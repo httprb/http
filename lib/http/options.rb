@@ -91,8 +91,13 @@ module HTTP
       !persistent.nil?
     end
 
+    # @deprecated
     def [](option)
-      send(option) rescue nil
+      send(option)
+    rescue
+      warn "[DEPRECATED] `HTTP::Options#[:#{option}]` was deprecated. " \
+        "Use `HTTP::Options##{option}` instead."
+      nil
     end
 
     def merge(other)

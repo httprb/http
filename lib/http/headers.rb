@@ -47,7 +47,7 @@ module HTTP
     # @param [Array<#to_s>, #to_s] value header value(s) to be appended
     # @return [void]
     def add(name, value)
-      name  = normalize_header name.to_s
+      name = normalize_header name.to_s
       Array(value).each { |v| @pile << [name, v.to_s] }
     end
 
