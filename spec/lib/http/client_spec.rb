@@ -160,6 +160,14 @@ RSpec.describe HTTP::Client do
 
       client.get("http://example.com/?a[]=b&a[]=c", :params => {:d => "e"})
     end
+
+    it "properly encodes colons" do
+      expect(HTTP::Request).to receive(:new) do |_, uri|
+        expect(uri.query).to eq "t=1970-01-01T00%3A00%3A00Z"
+      end
+
+      client.get("http://example.com/", :params => {:t => "1970-01-01T00:00:00Z"})
+    end
   end
 
   describe "passing json" do
