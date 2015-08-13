@@ -1,8 +1,5 @@
 require "forwardable"
 
-require "cgi"
-require "uri"
-
 require "http/form_data"
 require "http/options"
 require "http/headers"
@@ -109,7 +106,7 @@ module HTTP
     #
     # @param [#to_s] uri
     # @return [URI]
-    def make_request_uri(uri, options)
+    def make_request_uri(uri, opts)
       uri = uri.to_s
 
       if default_options.persistent? && uri !~ HTTP_OR_HTTPS_RE
@@ -118,9 +115,8 @@ module HTTP
 
       uri = HTTP::URI.parse uri
 
-      if options.params && !options.params.empty?
-        params    = CGI.parse(uri.query.to_s).merge(options.params || {})
-        uri.query = ::URI.encode_www_form params
+      if opts.params && !opts.params.empty?
+        uri.query = [uri.query, HTTP::URI.form_encode(opts.params)].compact.join("&")
       end
 
       # Some proxies (seen on WEBRick) fail if URL has
