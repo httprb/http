@@ -25,9 +25,9 @@ group :test do
   gem "json",         ">= 1.8.1"
   gem "mime-types",   "~> 1.25",  :platforms => [:jruby]
   gem "rest-client",  "~> 1.6.0", :platforms => [:jruby]
-  gem "rspec",        "~> 3.0"
+  gem "rspec",        "~> 3.2.0"
   gem "rspec-its"
-  gem "rubocop"
+  gem "rubocop",      "~> 0.31.0"
   gem "yardstick"
   gem "certificate_authority"
 end
