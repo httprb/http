@@ -1,3 +1,8 @@
+## 0.9.1 (2015-08-14)
+
+* Fix params special-chars escaping. See #246. (@ixti)
+
+
 ## 0.9.0 (2015-07-23)
 
 * Support for caching removed. See #240. (@tarcieri)
