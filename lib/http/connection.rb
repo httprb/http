@@ -208,9 +208,11 @@ module HTTP
       return if @parser.finished?
 
       value = @socket.readpartial(size)
-      @parser << value unless value == :eof
-
-      nil
+      if value == :eof
+        :eof
+      elsif value
+        @parser << value
+      end
     end
   end
 end
