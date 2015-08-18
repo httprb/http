@@ -1,3 +1,6 @@
+## 0.9.2 (2015-08-18)
+* Fixed exceptionless NIO EOF handling. (@zanker)
+
 ## 0.9.1 (2015-08-14)
 
 * Fix params special-chars escaping. See #246. (@ixti)

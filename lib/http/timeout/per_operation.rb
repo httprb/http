@@ -55,7 +55,11 @@ module HTTP
         def readpartial(size)
           loop do
             result = socket.read_nonblock(size, :exception => false)
-            break result unless result == :wait_readable
+            if result.nil?
+              return :eof
+            elsif result != :wait_readable
+              return result
+            end
 
             unless IO.select([socket], nil, nil, read_timeout)
               fail TimeoutError, "Read timed out after #{read_timeout} seconds"
