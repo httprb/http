@@ -123,7 +123,7 @@ module HTTP
     # Compute HTTP request header for direct or proxy request
     def headline
       request_uri = using_proxy? ? uri : uri.omit(:scheme, :authority)
-      "#{verb.to_s.upcase} #{request_uri} HTTP/#{version}"
+      "#{verb.to_s.upcase} #{request_uri.omit :fragment} HTTP/#{version}"
     end
 
     # @deprecated Will be removed in 1.0.0

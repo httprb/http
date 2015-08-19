@@ -136,11 +136,11 @@ RSpec.describe HTTP::Request do
   describe "#headline" do
     subject { request.headline }
 
-    it { is_expected.to eq "GET /foo?bar=baz#moo HTTP/1.1" }
+    it { is_expected.to eq "GET /foo?bar=baz HTTP/1.1" }
 
     context "with proxy" do
       let(:proxy) { {:user => "user", :pass => "pass"} }
-      it { is_expected.to eq "GET http://example.com/foo?bar=baz#moo HTTP/1.1" }
+      it { is_expected.to eq "GET http://example.com/foo?bar=baz HTTP/1.1" }
     end
   end
 end
