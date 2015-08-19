@@ -2,10 +2,10 @@ require "addressable/uri"
 
 module HTTP
   class URI < Addressable::URI
-    # HTTP scheme
+    # @private
     HTTP_SCHEME = "http".freeze
 
-    # HTTPS scheme
+    # @private
     HTTPS_SCHEME = "https".freeze
 
     # @return [True] if URI is HTTP

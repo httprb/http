@@ -67,7 +67,7 @@ module HTTP
     # :nodoc:
     def initialize(verb, uri, headers = {}, proxy = {}, body = nil, version = "1.1") # rubocop:disable ParameterLists
       @verb   = verb.to_s.downcase.to_sym
-      @uri    = HTTP::URI.parse(uri).normalize
+      @uri    = normalize_uri uri
       @scheme = @uri.scheme && @uri.scheme.to_s.downcase.to_sym
 
       fail(UnsupportedMethodError, "unknown method: #{verb}") unless METHODS.include?(@verb)
@@ -177,6 +177,19 @@ module HTTP
     # @return [String] Default host (with port if needed) header value.
     def default_host_header_value
       PORTS[@scheme] != port ? "#{host}:#{port}" : host
+    end
+
+    # @return [HTTP::URI] URI with all componentes but query being normalized.
+    def normalize_uri(uri)
+      uri = HTTP::URI.parse uri
+
+      HTTP::URI.new(
+        :scheme     => uri.normalized_scheme,
+        :authority  => uri.normalized_authority,
+        :path       => uri.normalized_path,
+        :query      => uri.query,
+        :fragment   => uri.normalized_fragment
+      )
     end
   end
 end
