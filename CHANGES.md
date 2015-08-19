@@ -12,6 +12,11 @@
 * JRuby 9000 compatibility
 
 
+## 0.8.14 (2015-08-19)
+
+* Backport request URI normalization fixes from master. (@ixti)
+
+
 ## 0.8.13 (2015-08-14)
 
 * Backport params special-chars escaping fix from `v0.9.1`. (@ixti)
