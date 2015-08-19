@@ -1,3 +1,5 @@
+# coding: utf-8
+
 RSpec.describe HTTP::Request do
   let(:proxy)       { {} }
   let(:headers)     { {:accept => "text/html"} }
