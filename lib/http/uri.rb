@@ -19,5 +19,10 @@ module HTTP
     def https?
       HTTPS_SCHEME == scheme
     end
+
+    # @return [String] human-readable representation of URI
+    def inspect
+      format("#<%s:%#0x URI:%s>", self.class, object_id, to_s)
+    end
   end
 end
