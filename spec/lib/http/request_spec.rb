@@ -1,7 +1,7 @@
 RSpec.describe HTTP::Request do
   let(:proxy)       { {} }
   let(:headers)     { {:accept => "text/html"} }
-  let(:request_uri) { "http://example.com/foo?bar=baz#moo" }
+  let(:request_uri) { "http://example.com/foo?bar=baz" }
 
   subject(:request) { HTTP::Request.new(:get, request_uri, headers, proxy) }
 
@@ -134,9 +134,34 @@ RSpec.describe HTTP::Request do
   end
 
   describe "#headline" do
-    subject { request.headline }
+    subject(:headline) { request.headline }
 
     it { is_expected.to eq "GET /foo?bar=baz HTTP/1.1" }
+
+    context "when URI contains encoded query" do
+      let(:encoded_query) { "t=1970-01-01T01%3A00%3A00%2B01%3A00" }
+      let(:request_uri) { "http://example.com/foo/?#{encoded_query}" }
+
+      it "does not unencodes query part" do
+        expect(headline).to eq "GET /foo/?#{encoded_query} HTTP/1.1"
+      end
+    end
+
+    context "when URI contains non-ASCII path" do
+      let(:request_uri) { "http://example.com/キョ" }
+
+      it "encodes non-ASCII path part" do
+        expect(headline).to eq "GET /%E3%82%AD%E3%83%A7 HTTP/1.1"
+      end
+    end
+
+    context "when URI contains fragment" do
+      let(:request_uri) { "http://example.com/foo#bar" }
+
+      it "omits fragment part" do
+        expect(headline).to eq "GET /foo HTTP/1.1"
+      end
+    end
 
     context "with proxy" do
       let(:proxy) { {:user => "user", :pass => "pass"} }
