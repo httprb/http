@@ -1,5 +1,14 @@
+## 0.9.3 (2015-08-19)
+
+* Fixed request URI normalization. See #246. (@ixti)
+  - Avoids query component normalization
+  - Omits fragment component in headline
+
+
 ## 0.9.2 (2015-08-18)
+
 * Fixed exceptionless NIO EOF handling. (@zanker)
+
 
 ## 0.9.1 (2015-08-14)
 
