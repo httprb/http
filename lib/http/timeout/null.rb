@@ -39,6 +39,8 @@ module HTTP
       # Read from the socket
       def readpartial(size)
         @socket.readpartial(size)
+      rescue EOFError
+        :eof
       end
 
       # Write to the socket
