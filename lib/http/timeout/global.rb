@@ -1,3 +1,7 @@
+require "timeout"
+
+require "http/timeout/per_operation"
+
 module HTTP
   module Timeout
     class Global < PerOperation

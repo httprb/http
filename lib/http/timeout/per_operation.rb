@@ -1,3 +1,7 @@
+require "timeout"
+
+require "http/timeout/null"
+
 module HTTP
   module Timeout
     class PerOperation < Null
