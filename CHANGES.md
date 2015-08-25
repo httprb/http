@@ -1,3 +1,10 @@
+## 0.9.4 (2015-08-26)
+
+* Fixes regression when body streaming was failing on some URIs.
+  See #246. (@zanker)
+* Fixes require timeout statements. See #243. (@ixti)
+
+
 ## 0.9.3 (2015-08-19)
 
 * Fixed request URI normalization. See #246. (@ixti)
