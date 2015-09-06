@@ -1,3 +1,8 @@
+## 0.9.5 (2015-09-06)
+
+* Fixed infinite hang/timeout when a request contained more than ~16,363 bytes.
+  See #252. (@zanker)
+
 ## 0.9.4 (2015-08-26)
 
 * Fixes regression when body streaming was failing on some URIs.
