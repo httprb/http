@@ -61,7 +61,7 @@ module HTTP
           reset_timer
 
           begin
-            socket.write_nonblock(data)
+            return socket.write_nonblock(data)
           rescue IO::WaitWritable
             IO.select(nil, [socket], nil, time_left)
             log_time
@@ -97,7 +97,7 @@ module HTTP
 
           loop do
             result = socket.write_nonblock(data, :exception => false)
-            break unless result == :wait_writable
+            return result unless result == :wait_writable
 
             IO.select(nil, [socket], nil, time_left)
             log_time

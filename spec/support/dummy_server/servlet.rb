@@ -133,5 +133,10 @@ class DummyServer < WEBrick::HTTPServer
       res["Set-Cookie"] = "foo=bar"
       res.body = req.cookies.map { |c| [c.name, c.value].join ": " }.join("\n")
     end
+
+    post "/echo-body" do |req, res|
+      res.status = 200
+      res.body   = req.body
+    end
   end
 end

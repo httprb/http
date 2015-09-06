@@ -267,8 +267,8 @@ RSpec.describe HTTP::Client do
 
         allow(socket_spy).to receive(:close) { nil }
         allow(socket_spy).to receive(:closed?) { true }
-        allow(socket_spy).to receive(:readpartial) { chunks.shift }
-        allow(socket_spy).to receive(:<<) { nil }
+        allow(socket_spy).to receive(:readpartial) { chunks[0] }
+        allow(socket_spy).to receive(:write) { chunks[0].length }
 
         allow(TCPSocket).to receive(:open) { socket_spy }
       end

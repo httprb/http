@@ -75,7 +75,7 @@ module HTTP
         def write(data)
           loop do
             result = socket.write_nonblock(data, :exception => false)
-            break unless result == :wait_writable
+            return result unless result == :wait_writable
 
             unless IO.select(nil, [socket], nil, write_timeout)
               fail TimeoutError, "Read timed out after #{write_timeout} seconds"

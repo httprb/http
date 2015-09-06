@@ -12,6 +12,9 @@ module HTTP
       # Chunked transfer encoding
       CHUNKED = "chunked".freeze
 
+      # End of a chunked transfer
+      CHUNKED_END = "#{ZERO}#{CRLF}#{CRLF}".freeze
+
       # Types valid to be used as body source
       VALID_BODY_TYPES = [String, NilClass, Enumerable]
 
@@ -40,7 +43,7 @@ module HTTP
       # Send headers needed to connect through proxy
       def connect_through_proxy
         add_headers
-        @socket << join_headers
+        write(join_headers)
       end
 
       # Adds the headers to the header array for the given request body we are working
@@ -65,23 +68,34 @@ module HTTP
         add_headers
         add_body_type_headers
 
-        @socket << join_headers
+        write(join_headers)
       end
 
       def send_request_body
         if @body.is_a?(String)
-          @socket << @body
+          write(@body)
         elsif @body.is_a?(Enumerable)
           @body.each do |chunk|
-            @socket << chunk.bytesize.to_s(16) << CRLF
-            @socket << chunk << CRLF
+            write(chunk.bytesize.to_s(16) << CRLF)
+            write(chunk << CRLF)
           end
 
-          @socket << ZERO << CRLF << CRLF
+          write(CHUNKED_END)
         end
       end
 
       private
+
+      def write(data)
+        while data.present?
+          length = @socket.write(data)
+          if data.length > length
+            data = data[length..-1]
+          else
+            break
+          end
+        end
+      end
 
       def validate_body_type!
         return if VALID_BODY_TYPES.any? { |type| @body.is_a? type }
