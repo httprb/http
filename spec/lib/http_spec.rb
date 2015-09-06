@@ -44,6 +44,32 @@ RSpec.describe HTTP do
         expect(response.to_s.include?("json")).to be true
       end
     end
+
+    context "with a large request body" do
+      %w(global null per_operation).each do |timeout|
+        context "with a #{timeout} timeout" do
+          [16_000, 16_500, 17_000, 34_000, 68_000].each do |size|
+            [0, rand(0..100), rand(100..1000)].each do |fuzzer|
+              context "with a #{size} body and #{fuzzer} of fuzzing" do
+                let(:client) { HTTP.timeout(timeout, :read => 2, :write => 2, :connect => 2) }
+
+                let(:characters) { ("A".."Z").to_a }
+                let(:request_body) do
+                  (size + fuzzer).times.map { |i| characters[i % characters.length] }.join
+                end
+
+                it "returns a large body" do
+                  response = client.post("#{dummy.endpoint}/echo-body", :body => request_body)
+
+                  expect(response.body.to_s).to eq(request_body)
+                  expect(response.headers["Content-Length"].to_i).to eq(request_body.length)
+                end
+              end
+            end
+          end
+        end
+      end
+    end
   end
 
   describe ".via" do

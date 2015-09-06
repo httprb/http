@@ -45,7 +45,7 @@ module HTTP
 
       # Write to the socket
       def write(data)
-        @socket << data
+        @socket.write(data)
       end
       alias_method :<<, :write
 
