@@ -87,7 +87,7 @@ module HTTP
       private
 
       def write(data)
-        while data.present?
+        until data.empty?
           length = @socket.write(data)
           if data.length > length
             data = data[length..-1]
