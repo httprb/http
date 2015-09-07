@@ -1,3 +1,8 @@
+## 0.9.6 (2015-09-06)
+
+* Removed use of an ActiveSupport specific method #present?
+  See #254. (@tonyarcieri)
+
 ## 0.9.5 (2015-09-06)
 
 * Fixed infinite hang/timeout when a request contained more than ~16,363 bytes.
