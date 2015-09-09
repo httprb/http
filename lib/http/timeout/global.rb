@@ -104,16 +104,14 @@ module HTTP
 
       # Wait for a socket to become readable
       def wait_readable_or_timeout
-        timed_out = IO.select([@socket], nil, nil, time_left).nil?
+        IO.select([@socket], nil, nil, time_left)
         log_time
-        return :timeout if timed_out
       end
 
       # Wait for a socket to become writable
       def wait_writable_or_timeout
-        timed_out = IO.select(nil, [@socket], nil, time_left).nil?
+        IO.select(nil, [@socket], nil, time_left)
         log_time
-        return :timeout if timed_out
       end
 
       # Due to the run/retry nature of nonblocking I/O, it's easier to keep track of time
