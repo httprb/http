@@ -41,54 +41,12 @@ module HTTP
 
       # Read from the socket
       def readpartial(size)
-        reset_timer
-
-        loop do
-          begin
-            result = read_nonblock(size)
-
-            case result
-            when :wait_readable
-              wait_readable_or_timeout
-            when :wait_writable
-              wait_writable_or_timeout
-            when NilClass
-              return :eof
-            else return result
-            end
-          rescue IO::WaitReadable
-            wait_readable_or_timeout
-          rescue IO::WaitWritable
-            wait_writable_or_timeout
-          end
-        end
-      rescue EOFError
-        :eof
+        perform_io { read_nonblock(size) }
       end
 
       # Write to the socket
       def write(data)
-        reset_timer
-
-        loop do
-          begin
-            result = write_nonblock(data)
-
-            case result
-            when :wait_readable
-              wait_readable_or_timeout
-            when :wait_writable
-              wait_writable_or_timeout
-            else return result
-            end
-          rescue IO::WaitReadable
-            wait_readable_or_timeout
-          rescue IO::WaitWritable
-            wait_writable_or_timeout
-          end
-        end
-      rescue EOFError
-        :eof
+        perform_io { write_nonblock(data) }
       end
 
       alias_method :<<, :write
@@ -115,6 +73,33 @@ module HTTP
           @socket.write_nonblock(data, :exception => false)
         end
 
+      end
+
+      # Perform the given I/O operation with the given argument
+      def perform_io
+        reset_timer
+
+        loop do
+          begin
+            result = yield
+
+            case result
+            when :wait_readable
+              wait_readable_or_timeout
+            when :wait_writable
+              wait_writable_or_timeout
+            when NilClass
+              return :eof
+            else return result
+            end
+          rescue IO::WaitReadable
+            wait_readable_or_timeout
+          rescue IO::WaitWritable
+            wait_writable_or_timeout
+          end
+        end
+      rescue EOFError
+        :eof
       end
 
       # Wait for a socket to become readable
