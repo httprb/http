@@ -39,75 +39,97 @@ module HTTP
         end
       end
 
-      # NIO with exceptions
-      if RUBY_VERSION < "2.1.0"
-        # Read from the socket
-        def readpartial(size)
-          reset_timer
+      # Read from the socket
+      def readpartial(size)
+        reset_timer
 
+        loop do
           begin
-            socket.read_nonblock(size)
-          rescue IO::WaitReadable
-            IO.select([socket], nil, nil, time_left)
-            log_time
-            retry
-          end
-        rescue EOFError
-          :eof
-        end
+            result = read_nonblock(size)
 
-        # Write to the socket
-        def write(data)
-          reset_timer
-
-          begin
-            return socket.write_nonblock(data)
-          rescue IO::WaitWritable
-            IO.select(nil, [socket], nil, time_left)
-            log_time
-            retry
-          end
-        rescue EOFError
-          :eof
-        end
-
-      # NIO without exceptions
-      else
-
-        # Read from the socket
-        def readpartial(size)
-          reset_timer
-
-          loop do
-            result = socket.read_nonblock(size, :exception => false)
-            if result.nil?
+            case result
+            when :wait_readable
+              wait_readable_or_timeout
+            when :wait_writable
+              wait_writable_or_timeout
+            when NilClass
               return :eof
-            elsif result != :wait_readable
-              return result
+            else return result
             end
-
-            IO.select([socket], nil, nil, time_left)
-            log_time
+          rescue IO::WaitReadable
+            wait_readable_or_timeout
+          rescue IO::WaitWritable
+            wait_writable_or_timeout
           end
         end
+      rescue EOFError
+        :eof
+      end
 
-        # Write to the socket
-        def write(data)
-          reset_timer
+      # Write to the socket
+      def write(data)
+        reset_timer
 
-          loop do
-            result = socket.write_nonblock(data, :exception => false)
-            return result unless result == :wait_writable
+        loop do
+          begin
+            result = write_nonblock(data)
 
-            IO.select(nil, [socket], nil, time_left)
-            log_time
+            case result
+            when :wait_readable
+              wait_readable_or_timeout
+            when :wait_writable
+              wait_writable_or_timeout
+            else return result
+            end
+          rescue IO::WaitReadable
+            wait_readable_or_timeout
+          rescue IO::WaitWritable
+            wait_writable_or_timeout
           end
         end
+      rescue EOFError
+        :eof
       end
 
       alias_method :<<, :write
 
       private
+
+      if RUBY_VERSION < "2.1.0"
+
+        def read_nonblock(size)
+          @socket.read_nonblock(size)
+        end
+
+        def write_nonblock(data)
+          @socket.write_nonblock(data)
+        end
+
+      else
+
+        def read_nonblock(size)
+          @socket.read_nonblock(size, :exception => false)
+        end
+
+        def write_nonblock(data)
+          @socket.write_nonblock(data, :exception => false)
+        end
+
+      end
+
+      # Wait for a socket to become readable
+      def wait_readable_or_timeout
+        timed_out = IO.select([@socket], nil, nil, time_left).nil?
+        log_time
+        return :timeout if timed_out
+      end
+
+      # Wait for a socket to become writable
+      def wait_writable_or_timeout
+        timed_out = IO.select(nil, [@socket], nil, time_left).nil?
+        log_time
+        return :timeout if timed_out
+      end
 
       # Due to the run/retry nature of nonblocking I/O, it's easier to keep track of time
       # via method calls instead of a block to monitor.
