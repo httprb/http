@@ -84,13 +84,10 @@ module HTTP
             result = yield
 
             case result
-            when :wait_readable
-              wait_readable_or_timeout
-            when :wait_writable
-              wait_writable_or_timeout
-            when NilClass
-              return :eof
-            else return result
+            when :wait_readable then wait_readable_or_timeout
+            when :wait_writable then wait_writable_or_timeout
+            when NilClass       then return :eof
+            else                return result
             end
           rescue IO::WaitReadable
             wait_readable_or_timeout
