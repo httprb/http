@@ -1,140 +1,191 @@
 ## 0.9.7 (2015-09-19)
 
 * Unified strategy for handling exception-based and exceptionless non-blocking
-  I/O. Fixes SSL support on JRuby 9000. See #258. (@tonyarcieri)
+  I/O. Fixes SSL support on JRuby 9000. See [#258][]. ([@tarcieri][])
+
+[#258]: https://github.com/httprb/http/pull/258
+
 
 ## 0.9.6 (2015-09-06)
 
 * Removed use of an ActiveSupport specific method #present?
-  See #254. (@tonyarcieri)
+  See [#254][]. ([@tarcieri][])
+
+[#254]: https://github.com/httprb/http/pull/254
+
 
 ## 0.9.5 (2015-09-06)
 
 * Fixed infinite hang/timeout when a request contained more than ~16,363 bytes.
-  See #252. (@zanker)
+  See [#252][]. ([@zanker][])
+
+[#252]: https://github.com/httprb/http/pull/252
+
 
 ## 0.9.4 (2015-08-26)
 
 * Fixes regression when body streaming was failing on some URIs.
-  See #246. (@zanker)
-* Fixes require timeout statements. See #243. (@ixti)
+  See [#246][]. ([@zanker][])
+* Fixes require timeout statements. See [#243][]. ([@ixti][])
+
+[#246]: https://github.com/httprb/http/issues/246
+[#243]: https://github.com/httprb/http/issues/243
 
 
 ## 0.9.3 (2015-08-19)
 
-* Fixed request URI normalization. See #246. (@ixti)
+* Fixed request URI normalization. See [#246][]. ([@ixti][])
   - Avoids query component normalization
   - Omits fragment component in headline
+
+[#246]: https://github.com/httprb/http/issues/246
 
 
 ## 0.9.2 (2015-08-18)
 
-* Fixed exceptionless NIO EOF handling. (@zanker)
+* Fixed exceptionless NIO EOF handling. ([@zanker][])
 
 
 ## 0.9.1 (2015-08-14)
 
-* Fix params special-chars escaping. See #246. (@ixti)
+* Fix params special-chars escaping. See [#246][]. ([@ixti][])
+
+[#246]: https://github.com/httprb/http/issues/246
 
 
 ## 0.9.0 (2015-07-23)
 
-* Support for caching removed. See #240. (@tarcieri)
+* Support for caching removed. See [#240][]. ([@tarcieri][])
 * JRuby 9000 compatibility
+
+[#240]: https://github.com/httprb/http/pull/240
 
 
 ## 0.8.14 (2015-08-19)
 
-* Backport request URI normalization fixes from master. (@ixti)
+* Backport request URI normalization fixes from master. ([@ixti][])
 
 
 ## 0.8.13 (2015-08-14)
 
-* Backport params special-chars escaping fix from `v0.9.1`. (@ixti)
+* Backport params special-chars escaping fix from `v0.9.1`. ([@ixti][])
 
 
 ## 0.8.12 (2015-05-26)
 
-* Fix `HTTP.timeout` API (was loosing previously defined options). (@ixti)
+* Fix `HTTP.timeout` API (was loosing previously defined options). ([@ixti][])
 
 
 ## 0.8.11 (2015-05-22)
 
-* SNI support for HTTPS connections. See #229. (@tarcieri)
-* Use "http.rb" in the User-Agent string. See #227. (@tarcieri)
+* SNI support for HTTPS connections. See [#229][]. ([@tarcieri][])
+* Use "http.rb" in the User-Agent string. See [#227][]. ([@tarcieri][])
+
+[#229]: https://github.com/httprb/http/pull/229
+[#227]: https://github.com/httprb/http/pull/227
 
 
 ## 0.8.10 (2015-05-14)
 
-* Fix cookie headers generation. (@ixti)
+* Fix cookie headers generation. ([@ixti][])
 
 
 ## 0.8.9 (2015-05-11)
 
-* Add cookies support. (@ixti)
-* Enforce stringified body encoding. See #219. (@Connorhd)
+* Add cookies support. ([@ixti][])
+* Enforce stringified body encoding. See [#219][]. ([@Connorhd][])
+
+[#219]: https://github.com/httprb/http/pull/219
 
 
 ## 0.8.8 (2015-05-09)
 
-* Fix CONNECT header for proxies. See #217. (@Connorhd)
+* Fix CONNECT header for proxies. See [#217][]. ([@Connorhd][])
+
+[#217]: https://github.com/httprb/http/issues/217
 
 
 ## 0.8.7 (2015-05-08)
 
-* Fix `HTTP.timeout` API with options only given. (@ixti)
+* Fix `HTTP.timeout` API with options only given. ([@ixti][])
 
 
 ## 0.8.6 (2015-05-08)
 
-* Reset global timeouts after the request finishes. See #215. (@zanker)
+* Reset global timeouts after the request finishes. See [#215][]. ([@zanker][])
+
+[#215]: https://github.com/httprb/http/pull/215
 
 
 ## 0.8.5 (2015-05-06)
 
-* Add simple timeouts configuration API. See #205. (@ixti)
-* Deprecate `Request#request_header`. Use `Request#headline` instead. (@ixti)
+* Add simple timeouts configuration API. See [#205][]. ([@ixti][])
+* Deprecate `Request#request_header`. Use `Request#headline` instead. ([@ixti][])
+
+[#205]: https://github.com/httprb/http/issues/205
 
 
 ## 0.8.4 (2015-04-23)
 
-* Deprecate `#default_headers` and `#default_headers=`. (@ixti)
-* Deprecate chainable methods with `with_` prefix. See #207. (@ixti)
-* Add support of HTTPS connections through proxy. See #186. (@Connorhd)
+* Deprecate `#default_headers` and `#default_headers=`. ([@ixti][])
+* Deprecate chainable methods with `with_` prefix. See [#207][]. ([@ixti][])
+* Add support of HTTPS connections through proxy. See [#186][]. ([@Connorhd][])
+
+[#207]: https://github.com/httprb/http/issues/207
+[#186]: https://github.com/httprb/http/pull/186
 
 
 ## 0.8.3 (2015-04-07)
 
-* Fix request headline. See #206. (@ixti)
-* Remove deprecated `Request#__method__`. (@ixti)
+* Fix request headline. See [#206][]. ([@ixti][])
+* Remove deprecated `Request#__method__`. ([@ixti][])
+
+[#206]: https://github.com/httprb/http/issues/206
 
 
 ## 0.8.2 (2015-04-06)
 
-* Fix Celluloid::IO compatibility. See #203. (@ixti)
-* Cleanup obsolete code. (@zanker)
+* Fix Celluloid::IO compatibility. See [#203][]. ([@ixti][])
+* Cleanup obsolete code. ([@zanker][])
+
+[#203]: https://github.com/httprb/http/issues/203
 
 
 ## 0.8.1 (2015-04-02)
 
-* Add missing `require "resolv"`. See #202. (@ixti)
-* Add block-form `#persistent` calls. See #200, #201. (@ixti)
+* Add missing `require "resolv"`. See [#202][]. ([@ixti][])
+* Add block-form `#persistent` calls. See [#200][], [#201][]. ([@ixti][])
+
+[#202]: https://github.com/httprb/http/issues/202
+[#200]: https://github.com/httprb/http/issues/200
+[#201]: https://github.com/httprb/http/pull/201
 
 
 ## 0.8.0 (2015-04-01)
 
-* Properly handle WaitWritable for SSL. See #199. (@zanker)
-* Add support for non-ASCII URis. See #197. (@ixti)
-* Add configurable connection timeouts. See #187, #194, #195. (@zanker)
-* Refactor requests redirect following logic. See #179. (@ixti)
-* Support for persistent HTTP connections (@zanker)
-* Add caching support. See #77 and #177. (@Asmod4n, @pezra)
+* Properly handle WaitWritable for SSL. See [#199][]. ([@zanker][])
+* Add support for non-ASCII URis. See [#197][]. ([@ixti][])
+* Add configurable connection timeouts. See [#187][], [#194][], [#195][]. ([@zanker][])
+* Refactor requests redirect following logic. See [#179][]. ([@ixti][])
+* Support for persistent HTTP connections ([@zanker][])
+* Add caching support. See [#77][] and [#177][]. ([@Asmod4n][], [@pezra][])
 * Improve servers used in specs boot up. Issue was initially raised up
-  by @olegkovalenko. See #176. (@ixti)
-* Reflect FormData rename changes (FormData -> HTTP::FormData). (@ixti)
+  by [@olegkovalenko][]. See [#176][]. ([@ixti][])
+* Reflect FormData rename changes (FormData -> HTTP::FormData). ([@ixti][])
 * `HTTP::Headers` now raises `HTTP::InvalidHeaderNameError` in case of
-  (surprise) invalid HTTP header field name (e.g.`"Foo:Bar"`). See #173.
-  (@ixti)
+  (surprise) invalid HTTP header field name (e.g.`"Foo:Bar"`). See [#173][].
+  ([@ixti][])
+
+[#199]: https://github.com/httprb/http/pull/199
+[#197]: https://github.com/httprb/http/pull/197
+[#187]: https://github.com/httprb/http/pull/187
+[#194]: https://github.com/httprb/http/pull/194
+[#195]: https://github.com/httprb/http/pull/195
+[#179]: https://github.com/httprb/http/pull/179
+[#77]: https://github.com/httprb/http/issues/77
+[#177]: https://github.com/httprb/http/pull/177
+[#176]: https://github.com/httprb/http/pull/176
+[#173]: https://github.com/httprb/http/pull/173
 
 
 ## 0.7.3 (2015-03-24)
@@ -142,7 +193,7 @@
 * SECURITY FIX: http.rb failed to call the `#post_connection_check` method on
   SSL connections. This method implements hostname verification, and without it
   `http.rb` was vulnerable to MitM attacks. The problem was corrected by calling
-  `#post_connection_check` (CVE-2015-1828) (@zanker)
+  `#post_connection_check` (CVE-2015-1828) ([@zanker][])
 
 
 ## 0.7.2 (2015-03-02)
@@ -158,29 +209,36 @@
 
 ## 0.7.0 (2015-01-02)
 
-* Add support of multipart form data. See #73, #167. (@ixti)
+* Add support of multipart form data. See [#73][], [#167][]. ([@ixti][])
 * Fix URI path normalization: `https://github.com` -> `https://github.com/`.
-  (@ixti)
-* Fix handling of EOF which caused infinite loop. See #163, #166 and #152. (@mickm, @ixti)
-* Drop Ruby 1.8.7 support. (@ixti)
-* Fix default Host header value. See #150. (@ixti)
-* Remove BearerToken authorization header. (@ixti)
+  ([@ixti][])
+* Fix handling of EOF which caused infinite loop. See [#163][], [#166][] and [#152][]. ([@mickm][], [@ixti][])
+* Drop Ruby 1.8.7 support. ([@ixti][])
+* Fix default Host header value. See [#150][]. ([@ixti][])
+* Remove BearerToken authorization header. ([@ixti][])
 * `#auth` sugar now accepts only string value of Authorization header.
   Calling `#auth(:basic, opts)` is deprecated, use `#basic_auth(opts)` instead.
-  (@ixti)
-* Fix handling of chunked responses without Content-Length header. (@ixti)
+  ([@ixti][])
+* Fix handling of chunked responses without Content-Length header. ([@ixti][])
 * Remove `HTTP::Request#method` and deprecate `HTTP::Request#__method__`
-  (@sferik)
+  ([@sferik][])
 * Deprecate `HTTP::Response::STATUS_CODES`,
-  use `HTTP::Response::Status::REASONS` instead (@ixti)
-* Deprecate `HTTP::Response::SYMBOL_TO_STATUS_CODE` (@ixti)
-* Deprecate `HTTP::Response#status_code` (@ixti)
-* `HTTP::Response#status` now returns `HTTP::Response::Status`. (@ixti)
+  use `HTTP::Response::Status::REASONS` instead ([@ixti][])
+* Deprecate `HTTP::Response::SYMBOL_TO_STATUS_CODE` ([@ixti][])
+* Deprecate `HTTP::Response#status_code` ([@ixti][])
+* `HTTP::Response#status` now returns `HTTP::Response::Status`. ([@ixti][])
 * `HTTP::Response#reason` and `HTTP::Response#code` are proxies them
-  to corresponding methods of `HTTP::Response#status` (@ixti)
+  to corresponding methods of `HTTP::Response#status` ([@ixti][])
 * Rename `HTTP.with_follow` to `HTTP.follow` and mark former one as being
-  deprecated (@ixti)
-* Delegate `HTTP::Response#readpartial` to `HTTP::Response::Body` (@ixti)
+  deprecated ([@ixti][])
+* Delegate `HTTP::Response#readpartial` to `HTTP::Response::Body` ([@ixti][])
+
+[#73]: https://github.com/httprb/http/issues/73
+[#167]: https://github.com/httprb/http/pull/167
+[#163]: https://github.com/httprb/http/pull/163
+[#166]: https://github.com/httprb/http/pull/166
+[#152]: https://github.com/httprb/http/issues/152
+[#150]: https://github.com/httprb/http/issues/150
 
 
 ## 0.6.4 (2015-03-25)
@@ -188,55 +246,59 @@
 * SECURITY FIX: http.rb failed to call the `#post_connection_check` method on
   SSL connections. This method implements hostname verification, and without it
   `http.rb` was vulnerable to MitM attacks. The problem was corrected by calling
-  `#post_connection_check` (CVE-2015-1828) (@zanker, backported by @nicoolas25)
+  `#post_connection_check` (CVE-2015-1828) ([@zanker][], backported by [@nicoolas25][])
 
 
 ## 0.6.3 (2014-11-14)
 
-* Backported EOF fix from master branch. See #166. (@ixti)
+* Backported EOF fix from master branch. See [#166][]. ([@ixti][])
+
+[#166]: https://github.com/httprb/http/pull/166
 
 
 ## 0.6.2 (2014-08-06)
 
-* Fix default Host header value. See #150. (@ixti)
-* Deprecate BearerToken authorization header. (@ixti)
-* Fix handling of chunked responses without Content-Length header. (@ixti)
+* Fix default Host header value. See [#150][]. ([@ixti][])
+* Deprecate BearerToken authorization header. ([@ixti][])
+* Fix handling of chunked responses without Content-Length header. ([@ixti][])
 * Rename `HTTP.with_follow` to `HTTP.follow` and mark former one as being
-  deprecated (@ixti)
+  deprecated ([@ixti][])
+
+[#150]: https://github.com/httprb/http/issues/150
 
 
 ## 0.6.1 (2014-05-07)
 
-* Fix request `Content-Length` calculation for Unicode (@challengeechallengee)
-* Add `Response#flush` (@ixti)
-* Fix `Response::Body#readpartial` default size (@hannesg, @ixti)
-* Add missing `CRLF` for chunked bodies (@hannesg)
-* Fix forgotten CGI require (@ixti)
-* Improve README (@tarcieri)
+* Fix request `Content-Length` calculation for Unicode ([@challengeechallengee][])
+* Add `Response#flush` ([@ixti][])
+* Fix `Response::Body#readpartial` default size ([@hannesg][], [@ixti][])
+* Add missing `CRLF` for chunked bodies ([@hannesg][])
+* Fix forgotten CGI require ([@ixti][])
+* Improve README ([@tarcieri][])
 
 
 ## 0.6.0 (2014-04-04)
 
-* Rename `HTTP::Request#method` to `HTTP::Request#verb` (@krainboltgreene)
-* Add `HTTP::ResponseBody` class (@tarcieri)
-* Change API of response on `HTTP::Client.request` and "friends" (`#get`, `#post`, etc) (@tarcieri)
-* Add `HTTP::Response#readpartial` (@tarcieri)
-* Add `HTTP::Headers` class (@ixti)
-* Fix and improve following redirects (@ixti)
-* Add `HTTP::Request#redirect` (@ixti)
-* Add `HTTP::Response#content_type` (@ixti)
-* Add `HTTP::Response#mime_type` (@ixti)
-* Add `HTTP::Response#charset` (@ixti)
-* Improve error message upon invalid URI scheme (@ixti)
-* Consolidate errors under common `HTTP::Error` namespace (@ixti)
-* Add easy way of adding Authorization header (@ixti)
-* Fix proxy support (@hundredwatt)
-* Fix and improve query params handing (@jwinter)
-* Change API of custom MIME type parsers (@ixti)
-* Remove `HTTP::Chainable#with_response` (@ixti)
-* Remove `HTTP::Response::BodyDelegator` (@ixti)
-* Remove `HTTP::Response#parsed_body` (@ixti)
-* Bump up input buffer from 4K to 16K (@tarcieri)
+* Rename `HTTP::Request#method` to `HTTP::Request#verb` ([@krainboltgreene][])
+* Add `HTTP::ResponseBody` class ([@tarcieri][])
+* Change API of response on `HTTP::Client.request` and "friends" (`#get`, `#post`, etc) ([@tarcieri][])
+* Add `HTTP::Response#readpartial` ([@tarcieri][])
+* Add `HTTP::Headers` class ([@ixti][])
+* Fix and improve following redirects ([@ixti][])
+* Add `HTTP::Request#redirect` ([@ixti][])
+* Add `HTTP::Response#content_type` ([@ixti][])
+* Add `HTTP::Response#mime_type` ([@ixti][])
+* Add `HTTP::Response#charset` ([@ixti][])
+* Improve error message upon invalid URI scheme ([@ixti][])
+* Consolidate errors under common `HTTP::Error` namespace ([@ixti][])
+* Add easy way of adding Authorization header ([@ixti][])
+* Fix proxy support ([@hundredwatt][])
+* Fix and improve query params handing ([@jwinter][])
+* Change API of custom MIME type parsers ([@ixti][])
+* Remove `HTTP::Chainable#with_response` ([@ixti][])
+* Remove `HTTP::Response::BodyDelegator` ([@ixti][])
+* Remove `HTTP::Response#parsed_body` ([@ixti][])
+* Bump up input buffer from 4K to 16K ([@tarcieri][])
 
 ``` ruby
 # Main API change you will mention is that `request` method and it's
@@ -282,7 +344,7 @@ end
 
 ## 0.5.1 (2014-05-27)
 
-* Backports redirector fixes from 0.6.0 (@ixti)
+* Backports redirector fixes from 0.6.0 ([@ixti][])
 * EOL of 0.5.X branch.
 
 
