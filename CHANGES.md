@@ -1,3 +1,8 @@
+## 0.9.7 (2015-09-19)
+
+* Unified strategy for handling exception-based and exceptionless non-blocking
+  I/O. Fixes SSL support on JRuby 9000. See #258. (@tonyarcieri)
+
 ## 0.9.6 (2015-09-06)
 
 * Removed use of an ActiveSupport specific method #present?
