@@ -248,7 +248,7 @@
 
 ## 0.6.1 (2014-05-07)
 
-* Fix request `Content-Length` calculation for Unicode ([@challengeechallengee][])
+* Fix request `Content-Length` calculation for Unicode ([@challengee][])
 * Add `Response#flush` ([@ixti][])
 * Fix `Response::Body#readpartial` default size ([@hannesg][], [@ixti][])
 * Add missing `CRLF` for chunked bodies ([@hannesg][])
@@ -387,7 +387,7 @@ end
 [@mickm]: https://github.com/mickm
 [@sferik]: https://github.com/sferik
 [@nicoolas25]: https://github.com/nicoolas25
-[@challengeechallengee]: https://github.com/challengeechallengee
+[@challengee]: https://github.com/challengee
 [@hannesg]: https://github.com/hannesg
 [@krainboltgreene]: https://github.com/krainboltgreene
 [@hundredwatt]: https://github.com/hundredwatt
