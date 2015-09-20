@@ -23,7 +23,7 @@ end
 require "yardstick/rake/verify"
 Yardstick::Rake::Verify.new do |verify|
   verify.require_exact_threshold = false
-  verify.threshold = 58
+  verify.threshold = 55
 end
 
 task :generate_status_codes do
