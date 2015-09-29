@@ -88,9 +88,9 @@ RSpec.shared_context "HTTP handling" do
       end
 
       context "it resets state when reusing connections" do
-        let(:options) { {:persistent => server.endpoint} }
+        let(:extra_options) { {:persistent => server.endpoint} }
 
-        let(:read_timeout) { 3 }
+        let(:read_timeout) { 2.5 }
 
         it "does not timeout" do
           client.get("#{server.endpoint}/sleep").body.to_s

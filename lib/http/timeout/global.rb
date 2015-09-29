@@ -9,7 +9,11 @@ module HTTP
 
       def initialize(*args)
         super
+        reset_counter
+      end
 
+      # To future me: Don't remove this again, past you was smarter.
+      def reset_counter
         @time_left = connect_timeout + read_timeout + write_timeout
         @total_timeout = time_left
       end
