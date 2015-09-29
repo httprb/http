@@ -1,3 +1,9 @@
+## 0.9.8 (2015-09-29)
+
+* [#260](https://github.com/httprb/http/pull/258):
+  Fixed global timeout persisting time left across requests when reusing connections.
+  ([@zanker][])
+
 ## 0.9.7 (2015-09-19)
 
 * [#258](https://github.com/httprb/http/pull/258):
