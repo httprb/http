@@ -190,16 +190,19 @@ RSpec.describe HTTP::Client do
   end
 
   include_context "HTTP handling" do
+    let(:extra_options) { {} }
     let(:options) { {} }
     let(:server)  { dummy }
-    let(:client)  { described_class.new(options) }
+    let(:client)  { described_class.new(options.merge(extra_options)) }
   end
 
   describe "working with SSL" do
     run_server(:dummy_ssl) { DummyServer.new(:ssl => true) }
 
+    let(:extra_options) { {} }
+
     let(:client) do
-      described_class.new options.merge :ssl_context => SSLHelper.client_context
+      described_class.new options.merge(:ssl_context => SSLHelper.client_context).merge(extra_options)
     end
 
     include_context "HTTP handling" do
