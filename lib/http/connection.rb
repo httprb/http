@@ -35,6 +35,9 @@ module HTTP
       send_proxy_connect_request(req)
       start_tls(req, options)
       reset_timer
+
+    rescue SocketError, SystemCallError => ex
+      raise HTTP::Error.new(ex)
     end
 
     # @see (HTTP::Response::Parser#status_code)

@@ -337,5 +337,10 @@ RSpec.describe HTTP do
       client = HTTP.headers("Cookie" => "foo=bar").cookies(:baz => :moo)
       expect(client.get(endpoint).to_s).to eq "foo: bar\nbaz: moo"
     end
+
+    it "throws correct error" do
+      expect { HTTP.get('http://thishostshouldnotexists.com') }.to raise_error(HTTP::Error)
+      expect { HTTP.get('http://127.0.0.1:000') }.to raise_error(HTTP::Error)
+    end
   end
 end
