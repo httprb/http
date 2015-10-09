@@ -37,7 +37,7 @@ RSpec.describe HTTP::Request::Writer do
       let(:body) { 123 }
 
       it "raises an error" do
-        expect { writer }.to raise_error
+        expect { writer }.to raise_error(HTTP::RequestError)
       end
     end
   end
@@ -59,12 +59,12 @@ RSpec.describe HTTP::Request::Writer do
 
       context "when Transfer-Encoding not set" do
         let(:headers) { HTTP::Headers.new }
-        specify { expect { writer.stream }.to raise_error }
+        specify { expect { writer.stream }.to raise_error(HTTP::RequestError) }
       end
 
       context "when Transfer-Encoding is not chunked" do
         let(:headers) { HTTP::Headers.coerce "Transfer-Encoding" => "gzip" }
-        specify { expect { writer.stream }.to raise_error }
+        specify { expect { writer.stream }.to raise_error(HTTP::RequestError) }
       end
     end
 
