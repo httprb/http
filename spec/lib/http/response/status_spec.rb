@@ -34,8 +34,8 @@ RSpec.describe HTTP::Response::Status do
     end
   end
 
-  describe "#symbolize" do
-    subject { described_class.new(code).symbolize }
+  describe "#to_sym" do
+    subject { described_class.new(code).to_sym }
 
     context "with unknown code" do
       let(:code) { 1024 }

@@ -166,23 +166,11 @@ module HTTP
       branch default_options.with_follow opts
     end
 
-    # @deprecated will be removed in 1.0.0
-    # @see #follow
-    alias_method :with_follow, :follow
-
     # Make a request with the given headers
     # @param headers
     def headers(headers)
       branch default_options.with_headers(headers)
     end
-
-    # @deprecated will be removed in 1.0.0
-    # @see #headers
-    alias_method :with, :headers
-
-    # @deprecated will be removed in 1.0.0
-    # @see #headers
-    alias_method :with_headers, :headers
 
     # Make a request with the given cookies
     def cookies(cookies)
@@ -197,10 +185,7 @@ module HTTP
 
     # Make a request with the given Authorization header
     # @param [#to_s] value Authorization header value
-    def auth(value, opts = nil)
-      # shim for deprecated auth(:basic, opts).
-      # will be removed in 0.8.0
-      return basic_auth(opts) if :basic == value
+    def auth(value)
       headers Headers::AUTHORIZATION => value.to_s
     end
 
@@ -227,21 +212,6 @@ module HTTP
     # @return [HTTP::Options]
     def default_options=(opts)
       @default_options = HTTP::Options.new(opts)
-    end
-
-    # @deprecated Will be removed in 1.0.0; Use `#default_options#headers`
-    # Get headers of HTTP options
-    def default_headers
-      default_options.headers
-    end
-
-    # Set headers of HTTP options
-    # @deprecated Will be removed in 1.0.0; Use `#headers`
-    # @param headers
-    def default_headers=(headers)
-      @default_options = default_options.dup do |opts|
-        opts.headers = headers
-      end
     end
 
     private

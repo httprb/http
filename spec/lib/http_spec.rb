@@ -201,12 +201,12 @@ RSpec.describe HTTP do
   describe ".auth" do
     it "sets Authorization header to the given value" do
       client = HTTP.auth "abc"
-      expect(client.default_headers[:authorization]).to eq "abc"
+      expect(client.default_options.headers[:authorization]).to eq "abc"
     end
 
     it "accepts any #to_s object" do
       client = HTTP.auth double :to_s => "abc"
-      expect(client.default_headers[:authorization]).to eq "abc"
+      expect(client.default_options.headers[:authorization]).to eq "abc"
     end
   end
 
@@ -225,7 +225,7 @@ RSpec.describe HTTP do
 
     it "sets Authorization header with proper BasicAuth value" do
       client = HTTP.basic_auth :user => "foo", :pass => "bar"
-      expect(client.default_headers[:authorization]).
+      expect(client.default_options.headers[:authorization]).
         to match(%r{^Basic [A-Za-z0-9+/]+=*$})
     end
   end

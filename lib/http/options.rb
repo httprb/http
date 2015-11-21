@@ -91,15 +91,6 @@ module HTTP
       !persistent.nil?
     end
 
-    # @deprecated
-    def [](option)
-      send(option)
-    rescue
-      warn "[DEPRECATED] `HTTP::Options#[:#{option}]` was deprecated. " \
-        "Use `HTTP::Options##{option}` instead."
-      nil
-    end
-
     def merge(other)
       h1 = to_hash
       h2 = other.to_hash
@@ -119,7 +110,7 @@ module HTTP
     def to_hash
       hash_pairs = self.class.
                    defined_options.
-                   flat_map { |opt_name| [opt_name, self[opt_name]] }
+                   flat_map { |opt_name| [opt_name, send(opt_name)] }
       Hash[*hash_pairs]
     end
 
