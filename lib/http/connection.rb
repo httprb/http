@@ -152,7 +152,7 @@ module HTTP
 
       unless ssl_context
         ssl_context = OpenSSL::SSL::SSLContext.new
-        ssl_context.set_params(Hash(options.ssl))
+        ssl_context.set_params(options.ssl || {})
       end
 
       @socket.start_tls(req.uri.host, options.ssl_socket_class, ssl_context)
