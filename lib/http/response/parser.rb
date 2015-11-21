@@ -42,7 +42,8 @@ module HTTP
       end
 
       def chunk
-        chunk, @chunk = @chunk, nil
+        chunk  = @chunk
+        @chunk = nil
         chunk
       end
 

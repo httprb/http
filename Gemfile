@@ -20,11 +20,11 @@ end
 group :test do
   gem "backports"
   gem "coveralls"
-  gem "simplecov",    ">= 0.9"
-  gem "json",         ">= 1.8.1"
-  gem "rspec",        "~> 3.0"
+  gem "simplecov", ">= 0.9"
+  gem "json",      ">= 1.8.1"
+  gem "rubocop",   "=  0.35.1"
+  gem "rspec",     "~> 3.0"
   gem "rspec-its"
-  gem "rubocop"
   gem "yardstick"
   gem "certificate_authority"
 end

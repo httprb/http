@@ -83,7 +83,10 @@ module HTTP
     #   @option options [Float] :write Write timeout
     #   @option options [Float] :connect Connect timeout
     def timeout(klass, options = {})
-      klass, options = :per_operation, klass if klass.is_a? Hash
+      if klass.is_a? Hash
+        options = klass
+        klass   = :per_operation
+      end
 
       klass = case klass.to_sym
               when :null          then HTTP::Timeout::Null
