@@ -126,9 +126,6 @@ module HTTP
       "#{verb.to_s.upcase} #{request_uri.omit :fragment} HTTP/#{version}"
     end
 
-    # @deprecated Will be removed in 1.0.0
-    alias_method :request_header, :headline
-
     # Compute HTTP request header SSL proxy connection
     def proxy_connect_header
       "CONNECT #{host}:#{port} HTTP/#{version}"

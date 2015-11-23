@@ -14,13 +14,6 @@ module HTTP
 
     include HTTP::Headers::Mixin
 
-    # @deprecated Will be removed in 1.0.0
-    #   Use Status::REASONS
-    STATUS_CODES = Status::REASONS
-
-    # @deprecated Will be removed in 1.0.0
-    SYMBOL_TO_STATUS_CODE = Hash[STATUS_CODES.map { |k, v| [v.downcase.gsub(/\s|-/, "_").to_sym, k] }].freeze
-
     # @return [Status]
     attr_reader :status
 
@@ -45,9 +38,6 @@ module HTTP
     # @!method code
     #   @return (see HTTP::Response::Status#code)
     def_delegator :status, :code
-
-    # @deprecated Will be removed in 1.0.0
-    alias_method :status_code, :code
 
     # @!method to_s
     #   (see HTTP::Response::Body#to_s)

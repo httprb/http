@@ -91,9 +91,6 @@ module HTTP
         SYMBOLS[code]
       end
 
-      # @deprecated Will be removed in 1.0.0
-      alias_method :symbolize, :to_sym
-
       # Printable version of HTTP Status, surrounded by quote marks,
       # with special characters escaped.
       #

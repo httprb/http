@@ -51,9 +51,6 @@ module HTTP
       Array(value).each { |v| @pile << [name, v.to_s] }
     end
 
-    # @deprecated Will be removed in 1.0.0
-    alias_method :append, :add
-
     # Returns list of header values if any.
     #
     # @return [Array<String>]

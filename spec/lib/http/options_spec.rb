@@ -1,9 +1,8 @@
 RSpec.describe HTTP::Options do
   subject { described_class.new(:response => :body) }
 
-  it "behaves like a Hash for reading" do
-    expect(subject[:response]).to eq(:body)
-    expect(subject[:nosuchone]).to be nil
+  it "has reader methods for attributes" do
+    expect(subject.response).to eq(:body)
   end
 
   it "coerces to a Hash" do

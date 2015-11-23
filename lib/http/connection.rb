@@ -22,15 +22,15 @@ module HTTP
     # @param [HTTP::Options] options
     def initialize(req, options)
       @persistent           = options.persistent?
-      @keep_alive_timeout   = options[:keep_alive_timeout].to_f
+      @keep_alive_timeout   = options.keep_alive_timeout.to_f
       @pending_request      = false
       @pending_response     = false
       @failed_proxy_connect = false
 
       @parser = Response::Parser.new
 
-      @socket = options[:timeout_class].new(options[:timeout_options])
-      @socket.connect(options[:socket_class], req.socket_host, req.socket_port)
+      @socket = options.timeout_class.new(options.timeout_options)
+      @socket.connect(options.socket_class, req.socket_host, req.socket_port)
 
       send_proxy_connect_request(req)
       start_tls(req, options)
@@ -148,14 +148,14 @@ module HTTP
     def start_tls(req, options)
       return unless req.uri.https? && !failed_proxy_connect?
 
-      ssl_context = options[:ssl_context]
+      ssl_context = options.ssl_context
 
       unless ssl_context
         ssl_context = OpenSSL::SSL::SSLContext.new
-        ssl_context.set_params(options[:ssl] || {})
+        ssl_context.set_params(options.ssl || {})
       end
 
-      @socket.start_tls(req.uri.host, options[:ssl_socket_class], ssl_context)
+      @socket.start_tls(req.uri.host, options.ssl_socket_class, ssl_context)
     end
 
     # Open tunnel through proxy

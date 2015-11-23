@@ -1,3 +1,19 @@
+## HEAD
+
+* [#265](https://github.com/httprb/http/pull/265/):
+  Remove deprecations ([@tarcieri]):
+  - HTTP::Chainable#with_follow (use #follow)
+  - HTTP::Chainable#with, #with_headers (use #headers)
+  - HTTP::Chainable#auth(:basic, ...) (use #basic_auth)
+  - HTTP::Chainable#default_headers (use #default_options[:headers])
+  - HTTP::Headers#append (use #add)
+  - HTTP::Options#[] hash-like API deprecated in favor of explicit methods
+  - HTTP::Request#request_header (use #headline)
+  - HTTP::Response::STATUS_CODES (use HTTP::Status::REASONS)
+  - HTTP::Response::SYMBOL_TO_STATUS_CODE (no replacement)
+  - HTTP::Response#status_code (use #status or #code)
+  - HTTP::Response::Status#symbolize (use #to_sym)
+
 ## 0.9.8 (2015-09-29)
 
 * [#260](https://github.com/httprb/http/pull/258):
