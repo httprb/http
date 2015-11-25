@@ -276,30 +276,6 @@ HTTP.persistent('http://en.wikipedia.org') do |http|
 end
 ```
 
-### Celluloid::IO Support
-
-http.rb makes it simple to make multiple concurrent HTTP requests from a
-Celluloid::IO actor. Here's a parallel HTTP fetcher combining http.rb with
-Celluloid::IO:
-
-```ruby
-require "celluloid/io"
-require "http"
-
-class HttpFetcher
-  include Celluloid::IO
-
-  def fetch(url)
-    HTTP.get(url, socket_class: Celluloid::IO::TCPSocket)
-  end
-end
-```
-
-There's a little more to it, but that's the core idea!
-
-* [Full parallel HTTP fetcher example](https://github.com/httprb/http/wiki/Parallel-requests-with-Celluloid%3A%3AIO)
-* See also: [Celluloid::IO](https://github.com/celluloid/celluloid-io)
-
 ### Timeouts
 
 By default, HTTP does not timeout on a request. You can enable per operation
