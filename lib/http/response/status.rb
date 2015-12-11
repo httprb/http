@@ -108,6 +108,7 @@ module HTTP
       end
 
       def __setobj__(obj)
+        raise HTTP::UnexpectedError.new('expected object to respond_to #to_i') unless obj.respond_to?(:to_i)
         @code = obj.to_i
       end
 
