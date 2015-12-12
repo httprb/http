@@ -173,8 +173,7 @@ RSpec.shared_context "HTTP handling" do
           # rubocop:enable Style/RescueModifier
 
           # Should error because we tried to use a bad socket
-          expect { client.get("#{server.endpoint}/socket").body.to_s }
-            .to raise_error HTTP::ConnectionError
+          expect { client.get("#{server.endpoint}/socket").body.to_s }.to raise_error HTTP::ConnectionError
 
           # Should succeed since we create a new socket
           second_socket_id = client.get("#{server.endpoint}/socket").body.to_s
