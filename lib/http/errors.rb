@@ -16,7 +16,4 @@ module HTTP
 
   # Header name is invalid
   class InvalidHeaderNameError < Error; end
-
-  # Something unexpected happened, probably a bug
-  class UnexpectedError < Error;end
 end
