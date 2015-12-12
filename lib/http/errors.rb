@@ -2,6 +2,9 @@ module HTTP
   # Generic error
   class Error < StandardError; end
 
+  # Generic Connection error
+  class ConnectionError < Error; end
+
   # Generic Request error
   class RequestError < Error; end
 

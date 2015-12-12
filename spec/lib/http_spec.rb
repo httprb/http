@@ -338,9 +338,12 @@ RSpec.describe HTTP do
       expect(client.get(endpoint).to_s).to eq "foo: bar\nbaz: moo"
     end
 
-    it "throws correct error" do
-      expect { HTTP.get('http://thishostshouldnotexists.com') }.to raise_error(HTTP::Error)
-      expect { HTTP.get('http://127.0.0.1:000') }.to raise_error(HTTP::Error)
+    it "unifies socket errors into HTTP::ConnectionError" do
+      expect { HTTP.get "http://thishostshouldnotexists.com" }
+        .to raise_error HTTP::ConnectionError
+
+      expect { HTTP.get "http://127.0.0.1:000" }
+        .to raise_error HTTP::ConnectionError
     end
   end
 end

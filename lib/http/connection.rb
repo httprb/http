@@ -36,8 +36,8 @@ module HTTP
       start_tls(req, options)
       reset_timer
 
-    rescue SocketError, SystemCallError => ex
-      raise HTTP::Error.new(ex)
+    rescue SocketError, SystemCallError => e
+      raise HTTP::ConnectionError, e.message
     end
 
     # @see (HTTP::Response::Parser#status_code)
