@@ -56,7 +56,8 @@ RSpec.shared_context "handles shared connections" do
           # rubocop:enable Style/RescueModifier
 
           # Should error because we tried to use a bad socket
-          expect { client.get("#{server.endpoint}/socket").body.to_s }.to raise_error(IOError)
+          expect { client.get("#{server.endpoint}/socket").body.to_s }
+            .to raise_error HTTP::ConnectionError
 
           # Should succeed since we create a new socket
           second_socket = client.get("#{server.endpoint}/socket").body.to_s
