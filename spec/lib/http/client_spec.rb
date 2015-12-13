@@ -26,11 +26,18 @@ RSpec.describe HTTP::Client do
   end
 
   def redirect_response(location, status = 302)
-    HTTP::Response.new(status, "1.1", {"Location" => location}, "")
+    HTTP::Response.new(
+      :status => status,
+      :version => "1.1",
+      :headers => {"Location" => location},
+      :body => "")
   end
 
   def simple_response(body, status = 200)
-    HTTP::Response.new(status, "1.1", {}, body)
+    HTTP::Response.new(
+      :status => status,
+      :version => "1.1",
+      :body => body)
   end
 
   describe "following redirects" do

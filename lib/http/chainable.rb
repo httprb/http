@@ -180,6 +180,11 @@ module HTTP
       branch default_options.with_cookies(cookies)
     end
 
+    # Force a specific encoding for response body
+    def encoding(encoding)
+      branch default_options.with_encoding(encoding)
+    end
+
     # Accept the given MIME type(s)
     # @param type
     def accept(type)

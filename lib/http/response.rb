@@ -23,12 +23,27 @@ module HTTP
     # @return [URI, nil]
     attr_reader :uri
 
-    def initialize(status, version, headers, body, uri = nil) # rubocop:disable ParameterLists
-      @version = version
-      @body    = body
-      @uri     = uri && HTTP::URI.parse(uri)
-      @status  = HTTP::Response::Status.new status
-      @headers = HTTP::Headers.coerce(headers || {})
+    # Inits a new instance
+    #
+    # @option opts [Integer] :status Status code
+    # @option opts [String] :version HTTP version
+    # @option opts [Hash] :headers
+    # @option opts [HTTP::Connection] :connection
+    # @option opts [String] :encoding Encoding to use when reading body
+    # @option opts [String] :body
+    # @option opts [String] :uri
+    def initialize(opts)
+      @version  = opts.fetch(:version)
+      @uri      = opts.include?(:uri) && HTTP::URI.parse(opts.fetch(:uri))
+      @status   = HTTP::Response::Status.new opts.fetch(:status)
+      @headers  = HTTP::Headers.coerce(opts.fetch(:headers, {}))
+
+      if opts.include?(:connection)
+        encoding = opts[:encoding] || charset || Encoding::BINARY
+        @body = Response::Body.new(opts.fetch(:connection), encoding)
+      else
+        @body = opts.fetch(:body)
+      end
     end
 
     # @!method reason
@@ -70,19 +85,15 @@ module HTTP
       @content_type ||= ContentType.parse headers[Headers::CONTENT_TYPE]
     end
 
-    # MIME type of response (if any)
-    #
-    # @return [String, nil]
-    def mime_type
-      @mime_type ||= content_type.mime_type
-    end
+    # @!method mime_type
+    #   MIME type of response (if any)
+    #   @return [String, nil]
+    def_delegator :content_type, :mime_type
 
-    # Charset of response (if any)
-    #
-    # @return [String, nil]
-    def charset
-      @charset ||= content_type.charset
-    end
+    # @!method charset
+    #   Charset of response (if any)
+    #   @return [String, nil]
+    def_delegator :content_type, :charset
 
     def cookies
       @cookies ||= headers.each_with_object CookieJar.new do |(k, v), jar|
