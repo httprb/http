@@ -20,6 +20,7 @@ module HTTP
 
     # @param [HTTP::Request] req
     # @param [HTTP::Options] options
+    # @raise [HTTP::ConnectionError] when failed to connect
     def initialize(req, options)
       @persistent           = options.persistent?
       @keep_alive_timeout   = options.keep_alive_timeout.to_f
@@ -35,6 +36,8 @@ module HTTP
       send_proxy_connect_request(req)
       start_tls(req, options)
       reset_timer
+    rescue SocketError, SystemCallError => e
+      raise ConnectionError, "failed to connect: #{e}"
     end
 
     # @see (HTTP::Response::Parser#status_code)
@@ -104,7 +107,7 @@ module HTTP
 
       set_keep_alive
     rescue IOError, Errno::ECONNRESET, Errno::EPIPE => e
-      raise IOError, "problem making HTTP request: #{e}"
+      raise ConnectionError, "failed to read headers: #{e}"
     end
 
     # Callback for when we've reached the end of a response
