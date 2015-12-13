@@ -73,9 +73,7 @@ module HTTP
 
       res
     rescue
-      # On any exception we reset the conn. This is a safety measure, to ensure
-      # we don't have conns in a bad state resulting in mixed requests/responses
-      close if persistent?
+      close
       raise
     end
 
