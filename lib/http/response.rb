@@ -37,10 +37,10 @@ module HTTP
       @uri      = opts.include?(:uri) && HTTP::URI.parse(opts.fetch(:uri))
       @status   = HTTP::Response::Status.new opts.fetch(:status)
       @headers  = HTTP::Headers.coerce(opts.fetch(:headers, {}))
-      @encoding = opts.fetch(:encoding, nil)
 
       if opts.include?(:connection)
-        @body = Response::Body.new(opts.fetch(:connection), resolved_encoding)
+        encoding = opts[:encoding] || charset || Encoding::BINARY
+        @body = Response::Body.new(opts.fetch(:connection), encoding)
       else
         @body = opts.fetch(:body)
       end
@@ -85,19 +85,15 @@ module HTTP
       @content_type ||= ContentType.parse headers[Headers::CONTENT_TYPE]
     end
 
-    # MIME type of response (if any)
-    #
-    # @return [String, nil]
-    def mime_type
-      @mime_type ||= content_type.mime_type
-    end
+    # @!method mime_type
+    #   MIME type of response (if any)
+    #   @return [String, nil]
+    def_delegator :content_type, :mime_type
 
-    # Charset of response (if any)
-    #
-    # @return [String, nil]
-    def charset
-      @charset ||= content_type.charset
-    end
+    # @!method charset
+    #   Charset of response (if any)
+    #   @return [String, nil]
+    def_delegator :content_type, :charset
 
     def cookies
       @cookies ||= headers.each_with_object CookieJar.new do |(k, v), jar|
@@ -118,13 +114,6 @@ module HTTP
     # Inspect a response
     def inspect
       "#<#{self.class}/#{@version} #{code} #{reason} #{headers.to_h.inspect}>"
-    end
-
-    private
-
-    # Work out what encoding to assume for the body
-    def resolved_encoding
-      @encoding || charset || Encoding::BINARY
     end
   end
 end
