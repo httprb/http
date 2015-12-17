@@ -53,6 +53,7 @@ RSpec.describe HTTP::Options, "merge" do
       :proxy     => {:proxy_address => "127.0.0.1", :proxy_port => 8080},
       :follow => nil,
       :socket_class     => described_class.default_socket_class,
+      :socket_factory   => nil,
       :ssl_socket_class => described_class.default_ssl_socket_class,
       :ssl_context      => nil,
       :cookies          => {})

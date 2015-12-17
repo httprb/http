@@ -30,7 +30,11 @@ module HTTP
       @parser = Response::Parser.new
 
       @socket = options.timeout_class.new(options.timeout_options)
-      @socket.connect(options.socket_class, req.socket_host, req.socket_port)
+      if options.socket_factory
+        @socket.factory_connect(options.socket_factory, req.socket_host, req.socket_port)
+      else
+        @socket.connect(options.socket_class, req.socket_host, req.socket_port)
+      end
 
       send_proxy_connect_request(req)
       start_tls(req, options)
