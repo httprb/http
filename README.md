@@ -55,6 +55,10 @@ Top three reasons:
 
 Benchmarks performed using excon's benchmarking tool
 
+DISCLAIMER: Most benchmarks you find in READMEs are crap,
+including this one. These are out-of-date. If you care about
+performance, benchmark for yourself for your own use cases!
+
 ## Help and Discussion
 
 If you need help or just want to talk about the http.rb,
