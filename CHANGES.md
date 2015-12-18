@@ -1,4 +1,4 @@
-## 1.0.0.pre1 (2015-12-05)
+## 1.0.0.pre2 (2015-12-18)
 
 * [#265](https://github.com/httprb/http/pull/265/):
   Remove deprecations ([@tarcieri]):
@@ -14,6 +14,21 @@
   - HTTP::Response#status_code (use #status or #code)
   - HTTP::Response::Status#symbolize (use #to_sym)
 
+* [#269](https://github.com/httprb/http/pull/273/):
+  Close connection in case of error during request.
+  ([@ixti])
+
+* [#271](https://github.com/httprb/http/pull/273/):
+  High-level exception wrappers for low-level I/O errors.
+  ([@ixti])
+
+* [#273](https://github.com/httprb/http/pull/273/):
+  Add encoding option.
+  ([@connorhd])
+
+* [#275](https://github.com/httprb/http/pull/273/):
+  Support for disabling Nagle's algorithm with `HTTP.nodelay`.
+  ([@nerdrew])
 
 ## 0.9.8 (2015-09-29)
 
