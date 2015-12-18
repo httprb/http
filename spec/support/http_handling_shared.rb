@@ -59,6 +59,9 @@ RSpec.shared_context "HTTP handling" do
           let(:read_timeout) { 2.5 }
 
           it "does not time out" do
+            # TODO: investigate sporadic JRuby timeouts on CI
+            skip "flaky environment" if flaky_env?
+
             expect { client.get("#{server.endpoint}/sleep").body.to_s }.to_not raise_error
           end
         end
@@ -94,7 +97,7 @@ RSpec.shared_context "HTTP handling" do
 
         it "does not timeout" do
           # TODO: investigate sporadic JRuby timeouts on CI
-          skip if defined?(JRUBY_VERSION)
+          skip "flaky environment" if flaky_env?
 
           client.get("#{server.endpoint}/sleep").body.to_s
           client.get("#{server.endpoint}/sleep").body.to_s
