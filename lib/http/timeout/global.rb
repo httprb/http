@@ -18,10 +18,11 @@ module HTTP
         @total_timeout = time_left
       end
 
-      def connect(socket_class, host, port)
+      def connect(socket_class, host, port, nodelay = false) # rubocop:disable ParameterLists
         reset_timer
         ::Timeout.timeout(time_left, TimeoutError) do
           @socket = socket_class.open(host, port)
+          @socket.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1) if nodelay
         end
 
         log_time
