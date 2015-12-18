@@ -30,6 +30,10 @@
   Support for disabling Nagle's algorithm with `HTTP.nodelay`.
   ([@nerdrew])
 
+* [#276](https://github.com/httprb/http/pull/276)
+  Use Encoding::BINARY as the default encoding for HTTP::Response::Body.
+  ([@tarcieri])
+
 ## 0.9.8 (2015-09-29)
 
 * [#260](https://github.com/httprb/http/pull/258):
