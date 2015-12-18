@@ -9,7 +9,7 @@ module HTTP
       include Enumerable
       def_delegator :to_s, :empty?
 
-      def initialize(client, encoding)
+      def initialize(client, encoding = Encoding::BINARY)
         @client    = client
         @streaming = nil
         @contents  = nil
