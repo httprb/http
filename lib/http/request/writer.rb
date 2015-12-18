@@ -18,7 +18,7 @@ module HTTP
       # Types valid to be used as body source
       VALID_BODY_TYPES = [String, NilClass, Enumerable]
 
-      def initialize(socket, body, headers, headline) # rubocop:disable ParameterLists
+      def initialize(socket, body, headers, headline)
         @body           = body
         @socket         = socket
         @headers        = headers
