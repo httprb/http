@@ -19,9 +19,10 @@ module HTTP
         @connect_timeout = options.fetch(:connect_timeout, CONNECT_TIMEOUT)
       end
 
-      def connect(socket_class, host, port)
+      def connect(socket_class, host, port, nodelay = false)
         ::Timeout.timeout(connect_timeout, TimeoutError) do
           @socket = socket_class.open(host, port)
+          @socket.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1) if nodelay
         end
       end
 

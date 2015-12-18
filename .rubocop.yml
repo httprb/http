@@ -24,7 +24,7 @@ Metrics/ModuleLength:
   Max: 120
 
 Metrics/ParameterLists:
-  Max: 3
+  Max: 5
   CountKeywordArgs: true
 
 Metrics/AbcSize:

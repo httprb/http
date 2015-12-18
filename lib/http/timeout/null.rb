@@ -14,8 +14,9 @@ module HTTP
       end
 
       # Connects to a socket
-      def connect(socket_class, host, port)
+      def connect(socket_class, host, port, nodelay = false)
         @socket = socket_class.open(host, port)
+        @socket.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1) if nodelay
       end
 
       # Starts a SSL connection on a socket

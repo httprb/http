@@ -222,6 +222,11 @@ module HTTP
       @default_options = HTTP::Options.new(opts)
     end
 
+    # Set TCP_NODELAY on the socket
+    def nodelay
+      branch default_options.with_nodelay(true)
+    end
+
     private
 
     # :nodoc:

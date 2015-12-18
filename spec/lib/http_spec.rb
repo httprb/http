@@ -367,4 +367,34 @@ RSpec.describe HTTP do
       expect { HTTP.get "http://127.0.0.1:000" }.to raise_error HTTP::ConnectionError
     end
   end
+
+  describe ".nodelay" do
+    before do
+      HTTP.default_options = {:socket_class => socket_spy_class}
+    end
+
+    after do
+      HTTP.default_options = {}
+    end
+
+    let(:socket_spy_class) do
+      Class.new(TCPSocket) do
+        def self.setsockopt_calls
+          @setsockopt_calls ||= []
+        end
+
+        def setsockopt(*args)
+          self.class.setsockopt_calls << args
+          super
+        end
+      end
+    end
+
+    it "sets TCP_NODELAY on the underlying socket" do
+      HTTP.get(dummy.endpoint)
+      expect(socket_spy_class.setsockopt_calls).to eq([])
+      HTTP.nodelay.get(dummy.endpoint)
+      expect(socket_spy_class.setsockopt_calls).to eq([[Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1]])
+    end
+  end
 end

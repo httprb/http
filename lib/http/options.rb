@@ -43,6 +43,7 @@ module HTTP
         :timeout_class      => self.class.default_timeout_class,
         :timeout_options    => {},
         :socket_class       => self.class.default_socket_class,
+        :nodelay            => false,
         :ssl_socket_class   => self.class.default_ssl_socket_class,
         :ssl                => {},
         :keep_alive_timeout => 5,
@@ -73,7 +74,7 @@ module HTTP
 
     %w(
       proxy params form json body follow response
-      socket_class ssl_socket_class ssl_context ssl
+      socket_class nodelay ssl_socket_class ssl_context ssl
       persistent keep_alive_timeout timeout_class timeout_options
     ).each do |method_name|
       def_option method_name
