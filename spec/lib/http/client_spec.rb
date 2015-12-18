@@ -238,6 +238,21 @@ RSpec.describe HTTP::Client do
     end
   end
 
+  describe "working with a socket factory" do
+    let(:client) do
+      described_class.new(socket_factory: lambda { |host, port|
+        sock = TCPSocket.open(host, port)
+        sock.setsockopt(Socket::Option.int(:INET, Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1))
+        sock
+      })
+    end
+
+    it "just works" do
+      response = client.get(dummy.endpoint)
+      expect(response.body.to_s).to eq("<!doctype html>")
+    end
+  end
+
   describe "#perform" do
     let(:client) { described_class.new }
 

@@ -25,6 +25,12 @@ module HTTP
         end
       end
 
+      def factory_connect(socket_factory, host, port)
+        ::Timeout.timeout(connect_timeout, TimeoutError) do
+          @socket = socket_factory.call(host, port)
+        end
+      end
+
       def connect_ssl
         rescue_readable do
           rescue_writable do

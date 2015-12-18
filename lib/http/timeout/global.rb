@@ -27,6 +27,15 @@ module HTTP
         log_time
       end
 
+      def factory_connect(socket_factory, host, port)
+        reset_timer
+        ::Timeout.timeout(time_left, TimeoutError) do
+          @socket = socket_factory.call(host, port)
+        end
+
+        log_time
+      end
+
       def connect_ssl
         reset_timer
 

@@ -18,6 +18,11 @@ module HTTP
         @socket = socket_class.open(host, port)
       end
 
+      # Connects to a socket using a factory (callable)
+      def factory_connect(socket_factory, host, port)
+        @socket = socket_factory.call(host, port)
+      end
+
       # Starts a SSL connection on a socket
       def connect_ssl
         @socket.connect
