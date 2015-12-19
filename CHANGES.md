@@ -1,4 +1,4 @@
-## 1.0.0.pre2 (2015-12-18)
+## 1.0.0.pre3 (2015-12-18)
 
 * [#265](https://github.com/httprb/http/pull/265/):
   Remove deprecations ([@tarcieri]):
@@ -33,6 +33,7 @@
 * [#276](https://github.com/httprb/http/pull/276)
   Use Encoding::BINARY as the default encoding for HTTP::Response::Body.
   ([@tarcieri])
+
 
 ## 0.9.8 (2015-09-29)
 
@@ -435,3 +436,4 @@ end
 [@krainboltgreene]: https://github.com/krainboltgreene
 [@hundredwatt]: https://github.com/hundredwatt
 [@jwinter]: https://github.com/jwinter
+[@nerdrew]: https://github.com/nerdrew
