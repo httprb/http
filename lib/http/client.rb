@@ -32,13 +32,13 @@ module HTTP
       body    = make_request_body(opts, headers)
       proxy   = opts.proxy
 
-      req = HTTP::Request.new({
+      req = HTTP::Request.new(
         :verb    => verb,
         :uri     => uri,
         :headers => headers,
         :proxy   => proxy,
         :body    => body
-      })
+      )
 
       res = perform(req, opts)
       return res unless opts.follow

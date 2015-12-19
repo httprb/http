@@ -6,12 +6,12 @@ RSpec.describe HTTP::Request do
   let(:request_uri) { "http://example.com/foo?bar=baz" }
 
   subject :request do
-    HTTP::Request.new({
+    HTTP::Request.new(
       :verb     => :get,
       :uri      => request_uri,
       :headers  => headers,
       :proxy    => proxy
-    })
+    )
   end
 
   it "includes HTTP::Headers::Mixin" do
@@ -72,13 +72,13 @@ RSpec.describe HTTP::Request do
     let(:body)      { "The Ultimate Question" }
 
     let :request do
-      HTTP::Request.new({
+      HTTP::Request.new(
         :verb    => :post,
         :uri     => "http://example.com/",
         :headers => headers,
         :proxy   => proxy,
         :body    => body
-      })
+      )
     end
 
     subject(:redirected) { request.redirect "http://blog.example.com/" }
@@ -122,13 +122,13 @@ RSpec.describe HTTP::Request do
 
       context "with original URI having non-standard port" do
         let :request do
-          HTTP::Request.new({
+          HTTP::Request.new(
             :verb    => :post,
             :uri     => "http://example.com:8080/",
             :headers => headers,
             :proxy   => proxy,
             :body    => body
-          })
+          )
         end
 
         its(:uri) { is_expected.to eq HTTP::URI.parse "http://example.com:8080/blog" }
@@ -150,13 +150,13 @@ RSpec.describe HTTP::Request do
 
       context "with original URI having non-standard port" do
         let :request do
-          HTTP::Request.new({
+          HTTP::Request.new(
             :verb    => :post,
             :uri     => "http://example.com:8080/",
             :headers => headers,
             :proxy   => proxy,
             :body    => body
-          })
+          )
         end
 
         its(:uri) { is_expected.to eq HTTP::URI.parse "http://example.com:8080/blog" }

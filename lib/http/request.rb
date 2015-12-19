@@ -88,14 +88,14 @@ module HTTP
 
     # Returns new Request with updated uri
     def redirect(uri, verb = @verb)
-      req = self.class.new({
+      req = self.class.new(
         :verb    => verb,
         :uri     => @uri.join(uri),
         :headers => headers,
         :proxy   => proxy,
         :body    => body,
         :version => version
-      })
+      )
 
       req[Headers::HOST] = req.uri.host
       req
