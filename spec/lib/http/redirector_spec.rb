@@ -1,10 +1,10 @@
 RSpec.describe HTTP::Redirector do
   def simple_response(status, body = "", headers = {})
     HTTP::Response.new(
-      :status => status,
+      :status  => status,
       :version => "1.1",
       :headers => headers,
-      :body => body
+      :body    => body
     )
   end
 

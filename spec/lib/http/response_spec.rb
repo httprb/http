@@ -5,11 +5,11 @@ RSpec.describe HTTP::Response do
 
   subject(:response) do
     HTTP::Response.new(
-      :status => 200,
+      :status  => 200,
       :version => "1.1",
       :headers => headers,
-      :body => body,
-      :uri => uri
+      :body    => body,
+      :uri     => uri
     )
   end
 
