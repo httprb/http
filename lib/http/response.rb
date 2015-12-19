@@ -34,13 +34,15 @@ module HTTP
     # @option opts [String] :uri
     def initialize(opts)
       @version  = opts.fetch(:version)
-      @uri      = opts.include?(:uri) && HTTP::URI.parse(opts.fetch(:uri))
-      @status   = HTTP::Response::Status.new opts.fetch(:status)
-      @headers  = HTTP::Headers.coerce(opts.fetch(:headers, {}))
+      @uri      = HTTP::URI.parse(opts.fetch :uri) if opts.include? :uri
+      @status   = HTTP::Response::Status.new(opts.fetch :status)
+      @headers  = HTTP::Headers.coerce(opts[:headers] || {})
 
       if opts.include?(:connection)
-        encoding = opts[:encoding] || charset || Encoding::BINARY
-        @body = Response::Body.new(opts.fetch(:connection), encoding)
+        connection = opts.fetch(:connection)
+        encoding   = opts[:encoding] || charset || Encoding::BINARY
+
+        @body = Response::Body.new(connection, encoding)
       else
         @body = opts.fetch(:body)
       end

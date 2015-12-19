@@ -109,48 +109,48 @@ RSpec.describe HTTP::Client do
     before { allow(client).to receive :perform }
 
     it "accepts params within the provided URL" do
-      expect(HTTP::Request).to receive(:new) do |_, uri|
-        expect(CGI.parse uri.query).to eq("foo" => %w(bar))
+      expect(HTTP::Request).to receive(:new) do |opts|
+        expect(CGI.parse opts[:uri].query).to eq("foo" => %w(bar))
       end
 
       client.get("http://example.com/?foo=bar")
     end
 
     it "combines GET params from the URI with the passed in params" do
-      expect(HTTP::Request).to receive(:new) do |_, uri|
-        expect(CGI.parse uri.query).to eq("foo" => %w(bar), "baz" => %w(quux))
+      expect(HTTP::Request).to receive(:new) do |opts|
+        expect(CGI.parse opts[:uri].query).to eq("foo" => %w(bar), "baz" => %w(quux))
       end
 
       client.get("http://example.com/?foo=bar", :params => {:baz => "quux"})
     end
 
     it "merges duplicate values" do
-      expect(HTTP::Request).to receive(:new) do |_, uri|
-        expect(uri.query).to match(/^(a=1&a=2|a=2&a=1)$/)
+      expect(HTTP::Request).to receive(:new) do |opts|
+        expect(opts[:uri].query).to match(/^(a=1&a=2|a=2&a=1)$/)
       end
 
       client.get("http://example.com/?a=1", :params => {:a => 2})
     end
 
     it "does not modifies query part if no params were given" do
-      expect(HTTP::Request).to receive(:new) do |_, uri|
-        expect(uri.query).to eq "deadbeef"
+      expect(HTTP::Request).to receive(:new) do |opts|
+        expect(opts[:uri].query).to eq "deadbeef"
       end
 
       client.get("http://example.com/?deadbeef")
     end
 
     it "does not corrupts index-less arrays" do
-      expect(HTTP::Request).to receive(:new) do |_, uri|
-        expect(CGI.parse uri.query).to eq "a[]" => %w(b c), "d" => %w(e)
+      expect(HTTP::Request).to receive(:new) do |opts|
+        expect(CGI.parse opts[:uri].query).to eq "a[]" => %w(b c), "d" => %w(e)
       end
 
       client.get("http://example.com/?a[]=b&a[]=c", :params => {:d => "e"})
     end
 
     it "properly encodes colons" do
-      expect(HTTP::Request).to receive(:new) do |_, uri|
-        expect(uri.query).to eq "t=1970-01-01T00%3A00%3A00Z"
+      expect(HTTP::Request).to receive(:new) do |opts|
+        expect(opts[:uri].query).to eq "t=1970-01-01T00%3A00%3A00Z"
       end
 
       client.get("http://example.com/", :params => {:t => "1970-01-01T00:00:00Z"})
@@ -162,8 +162,8 @@ RSpec.describe HTTP::Client do
       client = HTTP::Client.new
       allow(client).to receive(:perform)
 
-      expect(HTTP::Request).to receive(:new) do |*args|
-        expect(args.last).to eq('{"foo":"bar"}')
+      expect(HTTP::Request).to receive(:new) do |opts|
+        expect(opts[:body]).to eq '{"foo":"bar"}'
       end
 
       client.get("http://example.com/", :json => {:foo => :bar})

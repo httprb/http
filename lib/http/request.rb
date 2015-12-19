@@ -63,20 +63,24 @@ module HTTP
     attr_reader :uri
     attr_reader :proxy, :body, :version
 
-    # :nodoc:
-    def initialize(verb, uri, headers = {}, proxy = {}, body = nil, version = "1.1") # rubocop:disable ParameterLists
-      @verb   = verb.to_s.downcase.to_sym
-      @uri    = normalize_uri uri
-      @scheme = @uri.scheme && @uri.scheme.to_s.downcase.to_sym
+    # @option opts [String] :version
+    # @option opts [#to_s] :verb HTTP request method
+    # @option opts [HTTP::URI, #to_s] :uri
+    # @option opts [Hash] :headers
+    # @option opts [Hash] :proxy
+    # @option opts [String] :body
+    def initialize(opts)
+      @verb   = opts.fetch(:verb).to_s.downcase.to_sym
+      @uri    = normalize_uri(opts.fetch :uri)
+      @scheme = @uri.scheme.to_s.downcase.to_sym if @uri.scheme
 
       fail(UnsupportedMethodError, "unknown method: #{verb}") unless METHODS.include?(@verb)
       fail(UnsupportedSchemeError, "unknown scheme: #{scheme}") unless SCHEMES.include?(@scheme)
 
-      @proxy   = proxy
-      @body    = body
-      @version = version
-
-      @headers = HTTP::Headers.coerce(headers || {})
+      @proxy   = opts[:proxy] || {}
+      @body    = opts[:body]
+      @version = opts[:version] || "1.1"
+      @headers = HTTP::Headers.coerce(opts[:headers] || {})
 
       @headers[Headers::HOST]        ||= default_host_header_value
       @headers[Headers::USER_AGENT]  ||= USER_AGENT
@@ -84,7 +88,15 @@ module HTTP
 
     # Returns new Request with updated uri
     def redirect(uri, verb = @verb)
-      req = self.class.new(verb, @uri.join(uri), headers, proxy, body, version)
+      req = self.class.new(
+        :verb    => verb,
+        :uri     => @uri.join(uri),
+        :headers => headers,
+        :proxy   => proxy,
+        :body    => body,
+        :version => version
+      )
+
       req[Headers::HOST] = req.uri.host
       req
     end
