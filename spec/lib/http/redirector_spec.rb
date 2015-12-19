@@ -35,7 +35,7 @@ RSpec.describe HTTP::Redirector do
     let(:redirector) { described_class.new options }
 
     it "fails with TooManyRedirectsError if max hops reached" do
-      req = HTTP::Request.new :head, "http://example.com"
+      req = HTTP::Request.new :verb => :head, :uri => "http://example.com"
       res = proc { |prev_req| redirect_response(301, "#{prev_req.uri}/1") }
 
       expect { redirector.perform(req, res.call(req), &res) }.
@@ -43,7 +43,7 @@ RSpec.describe HTTP::Redirector do
     end
 
     it "fails with EndlessRedirectError if endless loop detected" do
-      req = HTTP::Request.new :head, "http://example.com"
+      req = HTTP::Request.new :verb => :head, :uri => "http://example.com"
       res = redirect_response(301, req.uri)
 
       expect { redirector.perform(req, res) { res } }.
@@ -51,7 +51,7 @@ RSpec.describe HTTP::Redirector do
     end
 
     it "fails with StateError if there were no Location header" do
-      req = HTTP::Request.new :head, "http://example.com"
+      req = HTTP::Request.new :verb => :head, :uri => "http://example.com"
       res = simple_response(301)
 
       expect { |b| redirector.perform(req, res, &b) }.
@@ -59,7 +59,7 @@ RSpec.describe HTTP::Redirector do
     end
 
     it "returns first non-redirect response" do
-      req  = HTTP::Request.new :head, "http://example.com"
+      req  = HTTP::Request.new :verb => :head, :uri => "http://example.com"
       hops = [
         redirect_response(301, "http://example.com/1"),
         redirect_response(301, "http://example.com/2"),
@@ -78,7 +78,7 @@ RSpec.describe HTTP::Redirector do
         let(:options) { {:strict => true} }
 
         it "it follows with original verb if it's safe" do
-          req = HTTP::Request.new :head, "http://example.com"
+          req = HTTP::Request.new :verb => :head, :uri => "http://example.com"
           res = redirect_response 300, "http://example.com/1"
 
           redirector.perform(req, res) do |prev_req, _|
@@ -88,7 +88,7 @@ RSpec.describe HTTP::Redirector do
         end
 
         it "raises StateError if original request was PUT" do
-          req = HTTP::Request.new :put, "http://example.com"
+          req = HTTP::Request.new :verb => :put, :uri => "http://example.com"
           res = redirect_response 300, "http://example.com/1"
 
           expect { redirector.perform(req, res) { simple_response 200 } }.
@@ -96,7 +96,7 @@ RSpec.describe HTTP::Redirector do
         end
 
         it "raises StateError if original request was POST" do
-          req = HTTP::Request.new :post, "http://example.com"
+          req = HTTP::Request.new :verb => :post, :uri => "http://example.com"
           res = redirect_response 300, "http://example.com/1"
 
           expect { redirector.perform(req, res) { simple_response 200 } }.
@@ -104,7 +104,7 @@ RSpec.describe HTTP::Redirector do
         end
 
         it "raises StateError if original request was DELETE" do
-          req = HTTP::Request.new :delete, "http://example.com"
+          req = HTTP::Request.new :verb => :delete, :uri => "http://example.com"
           res = redirect_response 300, "http://example.com/1"
 
           expect { redirector.perform(req, res) { simple_response 200 } }.
@@ -116,7 +116,7 @@ RSpec.describe HTTP::Redirector do
         let(:options) { {:strict => false} }
 
         it "it follows with original verb if it's safe" do
-          req = HTTP::Request.new :head, "http://example.com"
+          req = HTTP::Request.new :verb => :head, :uri => "http://example.com"
           res = redirect_response 300, "http://example.com/1"
 
           redirector.perform(req, res) do |prev_req, _|
@@ -126,7 +126,7 @@ RSpec.describe HTTP::Redirector do
         end
 
         it "it follows with GET if original request was PUT" do
-          req = HTTP::Request.new :put, "http://example.com"
+          req = HTTP::Request.new :verb => :put, :uri => "http://example.com"
           res = redirect_response 300, "http://example.com/1"
 
           redirector.perform(req, res) do |prev_req, _|
@@ -136,7 +136,7 @@ RSpec.describe HTTP::Redirector do
         end
 
         it "it follows with GET if original request was POST" do
-          req = HTTP::Request.new :post, "http://example.com"
+          req = HTTP::Request.new :verb => :post, :uri => "http://example.com"
           res = redirect_response 300, "http://example.com/1"
 
           redirector.perform(req, res) do |prev_req, _|
@@ -146,7 +146,7 @@ RSpec.describe HTTP::Redirector do
         end
 
         it "it follows with GET if original request was DELETE" do
-          req = HTTP::Request.new :delete, "http://example.com"
+          req = HTTP::Request.new :verb => :delete, :uri => "http://example.com"
           res = redirect_response 300, "http://example.com/1"
 
           redirector.perform(req, res) do |prev_req, _|
@@ -162,7 +162,7 @@ RSpec.describe HTTP::Redirector do
         let(:options) { {:strict => true} }
 
         it "it follows with original verb if it's safe" do
-          req = HTTP::Request.new :head, "http://example.com"
+          req = HTTP::Request.new :verb => :head, :uri => "http://example.com"
           res = redirect_response 301, "http://example.com/1"
 
           redirector.perform(req, res) do |prev_req, _|
@@ -172,7 +172,7 @@ RSpec.describe HTTP::Redirector do
         end
 
         it "raises StateError if original request was PUT" do
-          req = HTTP::Request.new :put, "http://example.com"
+          req = HTTP::Request.new :verb => :put, :uri => "http://example.com"
           res = redirect_response 301, "http://example.com/1"
 
           expect { redirector.perform(req, res) { simple_response 200 } }.
@@ -180,7 +180,7 @@ RSpec.describe HTTP::Redirector do
         end
 
         it "raises StateError if original request was POST" do
-          req = HTTP::Request.new :post, "http://example.com"
+          req = HTTP::Request.new :verb => :post, :uri => "http://example.com"
           res = redirect_response 301, "http://example.com/1"
 
           expect { redirector.perform(req, res) { simple_response 200 } }.
@@ -188,7 +188,7 @@ RSpec.describe HTTP::Redirector do
         end
 
         it "raises StateError if original request was DELETE" do
-          req = HTTP::Request.new :delete, "http://example.com"
+          req = HTTP::Request.new :verb => :delete, :uri => "http://example.com"
           res = redirect_response 301, "http://example.com/1"
 
           expect { redirector.perform(req, res) { simple_response 200 } }.
@@ -200,7 +200,7 @@ RSpec.describe HTTP::Redirector do
         let(:options) { {:strict => false} }
 
         it "it follows with original verb if it's safe" do
-          req = HTTP::Request.new :head, "http://example.com"
+          req = HTTP::Request.new :verb => :head, :uri => "http://example.com"
           res = redirect_response 301, "http://example.com/1"
 
           redirector.perform(req, res) do |prev_req, _|
@@ -210,7 +210,7 @@ RSpec.describe HTTP::Redirector do
         end
 
         it "it follows with GET if original request was PUT" do
-          req = HTTP::Request.new :put, "http://example.com"
+          req = HTTP::Request.new :verb => :put, :uri => "http://example.com"
           res = redirect_response 301, "http://example.com/1"
 
           redirector.perform(req, res) do |prev_req, _|
@@ -220,7 +220,7 @@ RSpec.describe HTTP::Redirector do
         end
 
         it "it follows with GET if original request was POST" do
-          req = HTTP::Request.new :post, "http://example.com"
+          req = HTTP::Request.new :verb => :post, :uri => "http://example.com"
           res = redirect_response 301, "http://example.com/1"
 
           redirector.perform(req, res) do |prev_req, _|
@@ -230,7 +230,7 @@ RSpec.describe HTTP::Redirector do
         end
 
         it "it follows with GET if original request was DELETE" do
-          req = HTTP::Request.new :delete, "http://example.com"
+          req = HTTP::Request.new :verb => :delete, :uri => "http://example.com"
           res = redirect_response 301, "http://example.com/1"
 
           redirector.perform(req, res) do |prev_req, _|
@@ -246,7 +246,7 @@ RSpec.describe HTTP::Redirector do
         let(:options) { {:strict => true} }
 
         it "it follows with original verb if it's safe" do
-          req = HTTP::Request.new :head, "http://example.com"
+          req = HTTP::Request.new :verb => :head, :uri => "http://example.com"
           res = redirect_response 302, "http://example.com/1"
 
           redirector.perform(req, res) do |prev_req, _|
@@ -256,7 +256,7 @@ RSpec.describe HTTP::Redirector do
         end
 
         it "raises StateError if original request was PUT" do
-          req = HTTP::Request.new :put, "http://example.com"
+          req = HTTP::Request.new :verb => :put, :uri => "http://example.com"
           res = redirect_response 302, "http://example.com/1"
 
           expect { redirector.perform(req, res) { simple_response 200 } }.
@@ -264,7 +264,7 @@ RSpec.describe HTTP::Redirector do
         end
 
         it "raises StateError if original request was POST" do
-          req = HTTP::Request.new :post, "http://example.com"
+          req = HTTP::Request.new :verb => :post, :uri => "http://example.com"
           res = redirect_response 302, "http://example.com/1"
 
           expect { redirector.perform(req, res) { simple_response 200 } }.
@@ -272,7 +272,7 @@ RSpec.describe HTTP::Redirector do
         end
 
         it "raises StateError if original request was DELETE" do
-          req = HTTP::Request.new :delete, "http://example.com"
+          req = HTTP::Request.new :verb => :delete, :uri => "http://example.com"
           res = redirect_response 302, "http://example.com/1"
 
           expect { redirector.perform(req, res) { simple_response 200 } }.
@@ -284,7 +284,7 @@ RSpec.describe HTTP::Redirector do
         let(:options) { {:strict => false} }
 
         it "it follows with original verb if it's safe" do
-          req = HTTP::Request.new :head, "http://example.com"
+          req = HTTP::Request.new :verb => :head, :uri => "http://example.com"
           res = redirect_response 302, "http://example.com/1"
 
           redirector.perform(req, res) do |prev_req, _|
@@ -294,7 +294,7 @@ RSpec.describe HTTP::Redirector do
         end
 
         it "it follows with GET if original request was PUT" do
-          req = HTTP::Request.new :put, "http://example.com"
+          req = HTTP::Request.new :verb => :put, :uri => "http://example.com"
           res = redirect_response 302, "http://example.com/1"
 
           redirector.perform(req, res) do |prev_req, _|
@@ -304,7 +304,7 @@ RSpec.describe HTTP::Redirector do
         end
 
         it "it follows with GET if original request was POST" do
-          req = HTTP::Request.new :post, "http://example.com"
+          req = HTTP::Request.new :verb => :post, :uri => "http://example.com"
           res = redirect_response 302, "http://example.com/1"
 
           redirector.perform(req, res) do |prev_req, _|
@@ -314,7 +314,7 @@ RSpec.describe HTTP::Redirector do
         end
 
         it "it follows with GET if original request was DELETE" do
-          req = HTTP::Request.new :delete, "http://example.com"
+          req = HTTP::Request.new :verb => :delete, :uri => "http://example.com"
           res = redirect_response 302, "http://example.com/1"
 
           redirector.perform(req, res) do |prev_req, _|
@@ -327,7 +327,7 @@ RSpec.describe HTTP::Redirector do
 
     context "following 303 redirect" do
       it "follows with HEAD if original request was HEAD" do
-        req = HTTP::Request.new :head, "http://example.com"
+        req = HTTP::Request.new :verb => :head, :uri => "http://example.com"
         res = redirect_response 303, "http://example.com/1"
 
         redirector.perform(req, res) do |prev_req, _|
@@ -337,7 +337,7 @@ RSpec.describe HTTP::Redirector do
       end
 
       it "follows with GET if original request was GET" do
-        req = HTTP::Request.new :get, "http://example.com"
+        req = HTTP::Request.new :verb => :get, :uri => "http://example.com"
         res = redirect_response 303, "http://example.com/1"
 
         redirector.perform(req, res) do |prev_req, _|
@@ -347,7 +347,7 @@ RSpec.describe HTTP::Redirector do
       end
 
       it "follows with GET if original request was neither GET nor HEAD" do
-        req = HTTP::Request.new :post, "http://example.com"
+        req = HTTP::Request.new :verb => :post, :uri => "http://example.com"
         res = redirect_response 303, "http://example.com/1"
 
         redirector.perform(req, res) do |prev_req, _|
@@ -359,7 +359,7 @@ RSpec.describe HTTP::Redirector do
 
     context "following 307 redirect" do
       it "follows with original request's verb" do
-        req = HTTP::Request.new :post, "http://example.com"
+        req = HTTP::Request.new :verb => :post, :uri => "http://example.com"
         res = redirect_response 307, "http://example.com/1"
 
         redirector.perform(req, res) do |prev_req, _|
@@ -371,7 +371,7 @@ RSpec.describe HTTP::Redirector do
 
     context "following 308 redirect" do
       it "follows with original request's verb" do
-        req = HTTP::Request.new :post, "http://example.com"
+        req = HTTP::Request.new :verb => :post, :uri => "http://example.com"
         res = redirect_response 308, "http://example.com/1"
 
         redirector.perform(req, res) do |prev_req, _|
