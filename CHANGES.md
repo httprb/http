@@ -1,4 +1,4 @@
-## 1.0.0.pre3 (2015-12-18)
+## 1.0.0.pre4 (2015-12-18)
 
 * [#265](https://github.com/httprb/http/pull/265/):
   Remove deprecations ([@tarcieri]):
@@ -33,6 +33,10 @@
 * [#276](https://github.com/httprb/http/pull/276)
   Use Encoding::BINARY as the default encoding for HTTP::Response::Body.
   ([@tarcieri])
+
+* [#278](https://github.com/httprb/http/pull/278)
+  Use an options hash for HTTP::Request's initializer API.
+  ([@ixti])
 
 
 ## 0.9.8 (2015-09-29)
