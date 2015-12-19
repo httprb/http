@@ -36,8 +36,9 @@ module HTTP
 
       # Stream the request to a socket
       def stream
-        send_request_header
-        send_request_body
+        add_headers
+        add_body_type_headers
+        send_request
       end
 
       # Send headers needed to connect through proxy
@@ -64,23 +65,24 @@ module HTTP
         @request_header.join(CRLF) + (CRLF) * 2
       end
 
-      def send_request_header
-        add_headers
-        add_body_type_headers
+      def send_request
+        headers = join_headers
 
-        write(join_headers)
-      end
+        case @body
+        when NilClass
+          write(headers)
+        when String
+          write(headers << @body)
+        when Enumerable
+          write(headers)
 
-      def send_request_body
-        if @body.is_a?(String)
-          write(@body)
-        elsif @body.is_a?(Enumerable)
           @body.each do |chunk|
             write(chunk.bytesize.to_s(16) << CRLF)
             write(chunk << CRLF)
           end
 
           write(CHUNKED_END)
+        else fail TypeError, "invalid body type: #{@body.class}"
         end
       end
 
