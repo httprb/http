@@ -8,8 +8,9 @@
 
 ## About
 
-http.rb is an easy-to-use client library for making requests from Ruby. It uses
-a simple method chaining system for building requests, similar to Python's [Requests].
+HTTP (The Gem! a.k.a. http.rb) is an easy-to-use client library for making requests
+from Ruby. It uses a simple method chaining system for building requests, similar to
+Python's [Requests].
 
 Under the hood, http.rb uses [http_parser.rb], a fast HTTP parsing native
 extension based on the Node.js parser and a Java port thereof. This library
