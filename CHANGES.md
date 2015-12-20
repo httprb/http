@@ -35,9 +35,13 @@
   ([@tarcieri])
 
 * [#278](https://github.com/httprb/http/pull/278)
-  Use an options hash for HTTP::Request's initializer API.
+  Use an options hash for HTTP::Request initializer API.
   ([@ixti])
 
+* [#279](https://github.com/httprb/http/pull/279)
+  Send headers and body in one write if possible.
+  This avoids a pathological case in Nagle's algorithm.
+  ([@tarcieri])
 
 ## 0.9.8 (2015-09-29)
 
