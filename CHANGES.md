@@ -43,6 +43,10 @@
   This avoids a pathological case in Nagle's algorithm.
   ([@tarcieri])
 
+* [#281](https://github.com/httprb/http/pull/281)
+  Remove legacy 'Http' constant alias to 'HTTP'.
+  ([@tarcieri])
+
 ## 0.9.8 (2015-09-29)
 
 * [#260](https://github.com/httprb/http/pull/258):
