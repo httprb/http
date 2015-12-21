@@ -23,5 +23,3 @@ module HTTP
     alias_method :[], :headers
   end
 end
-
-Http = HTTP unless defined?(Http)
