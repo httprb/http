@@ -320,8 +320,9 @@ versions:
 * Ruby 2.0.0
 * Ruby 2.1.x
 * Ruby 2.2.x
+* Ruby 2.3.x
 * JRuby 1.7.x
-* JRuby 9000
+* JRuby 9000+
 
 If something doesn't work on one of these versions, it's a bug.
 
