@@ -1,4 +1,4 @@
-## 1.0.0.pre4 (2015-12-18)
+## 1.0.0 (2015-12-25)
 
 * [#265](https://github.com/httprb/http/pull/265/):
   Remove deprecations ([@tarcieri]):
