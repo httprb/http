@@ -50,26 +50,43 @@ module HTTP
       end
       alias_method :<<, :write
 
+      # These cops can be re-eanbled after we go Ruby 2.0+ only
+      # rubocop:disable Lint/UselessAccessModifier, Metrics/BlockNesting
+
       private
 
-      # Retry reading
-      def rescue_readable
-        yield
-      rescue IO::WaitReadable
-        if IO.select([socket], nil, nil, read_timeout)
-          retry
-        else
+      if RUBY_VERSION < "2.0.0"
+        # Retry reading
+        def rescue_readable
+          yield
+        rescue IO::WaitReadable
+          retry if IO.select([socket], nil, nil, read_timeout)
           raise TimeoutError, "Read timed out after #{read_timeout} seconds"
         end
-      end
 
-      # Retry writing
-      def rescue_writable
-        yield
-      rescue IO::WaitWritable
-        if IO.select(nil, [socket], nil, write_timeout)
-          retry
-        else
+        # Retry writing
+        def rescue_writable
+          yield
+        rescue IO::WaitWritable
+          retry if IO.select(nil, [socket], nil, write_timeout)
+          raise TimeoutError, "Write timed out after #{write_timeout} seconds"
+        end
+      else
+        require "io/wait"
+
+        # Retry reading
+        def rescue_readable
+          yield
+        rescue IO::WaitReadable
+          retry if socket.to_io.wait_readable(read_timeout)
+          raise TimeoutError, "Read timed out after #{read_timeout} seconds"
+        end
+
+        # Retry writing
+        def rescue_writable
+          yield
+        rescue IO::WaitWritable
+          retry if socket.to_io.wait_writable(write_timeout)
           raise TimeoutError, "Write timed out after #{write_timeout} seconds"
         end
       end
