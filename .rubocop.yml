@@ -1,3 +1,6 @@
+AllCops:
+  DisplayCopNames: true
+
 Metrics/BlockNesting:
   Max: 2
 
