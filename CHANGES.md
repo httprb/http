@@ -1,3 +1,9 @@
+## 1.0.1 (2015-12-27)
+
+* [#283](https://github.com/httprb/http/pull/283):
+  Use io/wait on supported platforms.
+  ([@tarcieri])
+
 ## 1.0.0 (2015-12-25)
 
 * [#265](https://github.com/httprb/http/pull/265/):
