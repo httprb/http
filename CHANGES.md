@@ -20,11 +20,11 @@
   - HTTP::Response#status_code (use #status or #code)
   - HTTP::Response::Status#symbolize (use #to_sym)
 
-* [#269](https://github.com/httprb/http/pull/273/):
+* [#269](https://github.com/httprb/http/pull/269/):
   Close connection in case of error during request.
   ([@ixti])
 
-* [#271](https://github.com/httprb/http/pull/273/):
+* [#271](https://github.com/httprb/http/pull/271/):
   High-level exception wrappers for low-level I/O errors.
   ([@ixti])
 
@@ -32,7 +32,7 @@
   Add encoding option.
   ([@connorhd])
 
-* [#275](https://github.com/httprb/http/pull/273/):
+* [#275](https://github.com/httprb/http/pull/275/):
   Support for disabling Nagle's algorithm with `HTTP.nodelay`.
   ([@nerdrew])
 
@@ -55,7 +55,7 @@
 
 ## 0.9.8 (2015-09-29)
 
-* [#260](https://github.com/httprb/http/pull/258):
+* [#260](https://github.com/httprb/http/pull/260):
   Fixed global timeout persisting time left across requests when reusing connections.
   ([@zanker])
 
