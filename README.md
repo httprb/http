@@ -270,14 +270,36 @@ given resource.
 
 ### Reuse HTTP connection: HTTP Keep-Alive
 
-If you have many successive requests against the same host, you better want to
-reuse the same connection again and again:
+If you need to make many successive requests against the same host, you can create
+one persistent connection to the host:
+
+```ruby
+c = HTTP.persistent('http://api.icndb.com')
+```
+
+Then you can issue multiple requests on this connection:
+
+```ruby
+100.times do
+  c.get('/jokes/random')
+end
+```
+
+You can close the connection when you no longer need it:
+
+```ruby
+c.close
+```
+
+Alternatively, you can pass a block to `persistent`. It will be executed with
+the connection as the argument. The connection will be closed automatically
+when the block finishes:
 
 ```ruby
 contents = []
 targets = %w(Hypertext_Transfer_Protocol Git GitHub Linux Hurd)
-HTTP.persistent('http://en.wikipedia.org') do |http|
-  targets.each { |target| contents << http.get("/wiki/#{target}") }
+HTTP.persistent('http://en.wikipedia.org') do |c|
+  targets.each { |target| contents << c.get("/wiki/#{target}") }
 end
 ```
 
