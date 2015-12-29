@@ -268,40 +268,58 @@ HTTP.accept(:json).get("https://github.com/httprb/http/commit/HEAD")
 This adds the appropriate Accept header for retrieving a JSON response for the
 given resource.
 
+
 ### Reuse HTTP connection: HTTP Keep-Alive
 
-If you need to make many successive requests against the same host, you can create
-one persistent connection to the host:
+If you need to make many successive requests against the same host,
+you can create client with persistent connection to the host:
 
-```ruby
-c = HTTP.persistent('http://api.icndb.com')
+``` ruby
+begin
+  # create HTTP client with persistent connection to api.icndb.com:
+  http = HTTP.persistent "http://api.icndb.com"
+
+  # issue multiple requests using same connection:
+  jokes = 100.times.map { http.get("/jokes/random").to_s }
+ensure
+  # close underlying connection when you don't need it anymore
+  http.close if http
+end
+
 ```
 
-Then you can issue multiple requests on this connection:
+If the optional code block is given, it will be passed the clietn with
+persistent connection to the host as an argument and `client.close` will be
+automatically called when the block terminates.
+The value of the block will be returned:
 
-```ruby
-100.times do
-  c.get('/jokes/random')
+``` ruby
+jokes = HTTP.persistent "http://api.icndb.com" do |http|
+  100.times.map { http.get("/jokes/random").to_s }
 end
 ```
 
-You can close the connection when you no longer need it:
+##### NOTICE
 
-```ruby
-c.close
-```
+You must consume response before sending next request via persistent connection.
+That means you need to call `#to_s`, `#parse` or `#flush` on response object.
+In the example above we used `http.get("/jokes/random").to_s` to get response
+bodies. That works perfectly fine, because `#to_s` reads off the response.
 
-Alternatively, you can pass a block to `persistent`. It will be executed with
-the connection as the argument. The connection will be closed automatically
-when the block finishes:
+Sometimes you don't need response body, or need whole response object to
+access it's status, headers etc instead. You can either call `#to_s` to
+make sure response was flushed and then use response object itself, or use
+`#flush` (syntax sugar for `#tap(&:to_s)` that will do that for you:
 
-```ruby
-contents = []
-targets = %w(Hypertext_Transfer_Protocol Git GitHub Linux Hurd)
-HTTP.persistent('http://en.wikipedia.org') do |c|
-  targets.each { |target| contents << c.get("/wiki/#{target}") }
+
+``` ruby
+contents = HTTP.persistent "http://en.wikipedia.org" do |http|
+  %w(Hypertext_Transfer_Protocol Git GitHub Linux Hurd).map do
+    http.get("/wiki/#{target}").flush
+  end
 end
 ```
+
 
 ### Timeouts
 
