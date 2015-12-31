@@ -75,7 +75,7 @@ RSpec.describe HTTP::Redirector do
 
     context "following 300 redirect" do
       context "with strict mode" do
-        let(:options) { {:strict => true} }
+        let(:options) { { :strict => true } }
 
         it "it follows with original verb if it's safe" do
           req = HTTP::Request.new :verb => :head, :uri => "http://example.com"
@@ -113,7 +113,7 @@ RSpec.describe HTTP::Redirector do
       end
 
       context "with non-strict mode" do
-        let(:options) { {:strict => false} }
+        let(:options) { { :strict => false } }
 
         it "it follows with original verb if it's safe" do
           req = HTTP::Request.new :verb => :head, :uri => "http://example.com"
@@ -159,7 +159,7 @@ RSpec.describe HTTP::Redirector do
 
     context "following 301 redirect" do
       context "with strict mode" do
-        let(:options) { {:strict => true} }
+        let(:options) { { :strict => true } }
 
         it "it follows with original verb if it's safe" do
           req = HTTP::Request.new :verb => :head, :uri => "http://example.com"
@@ -197,7 +197,7 @@ RSpec.describe HTTP::Redirector do
       end
 
       context "with non-strict mode" do
-        let(:options) { {:strict => false} }
+        let(:options) { { :strict => false } }
 
         it "it follows with original verb if it's safe" do
           req = HTTP::Request.new :verb => :head, :uri => "http://example.com"
@@ -243,7 +243,7 @@ RSpec.describe HTTP::Redirector do
 
     context "following 302 redirect" do
       context "with strict mode" do
-        let(:options) { {:strict => true} }
+        let(:options) { { :strict => true } }
 
         it "it follows with original verb if it's safe" do
           req = HTTP::Request.new :verb => :head, :uri => "http://example.com"
@@ -281,7 +281,7 @@ RSpec.describe HTTP::Redirector do
       end
 
       context "with non-strict mode" do
-        let(:options) { {:strict => false} }
+        let(:options) { { :strict => false } }
 
         it "it follows with original verb if it's safe" do
           req = HTTP::Request.new :verb => :head, :uri => "http://example.com"

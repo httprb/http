@@ -2,7 +2,7 @@
 
 RSpec.describe HTTP::Request do
   let(:proxy)       { {} }
-  let(:headers)     { {:accept => "text/html"} }
+  let(:headers)     { { :accept => "text/html" } }
   let(:request_uri) { "http://example.com/foo?bar=baz" }
 
   subject :request do
@@ -67,8 +67,8 @@ RSpec.describe HTTP::Request do
   end
 
   describe "#redirect" do
-    let(:headers)   { {:accept => "text/html"} }
-    let(:proxy)     { {:proxy_username => "douglas", :proxy_password => "adams"} }
+    let(:headers)   { { :accept => "text/html" } }
+    let(:proxy)     { { :proxy_username => "douglas", :proxy_password => "adams" } }
     let(:body)      { "The Ultimate Question" }
 
     let :request do
@@ -200,7 +200,7 @@ RSpec.describe HTTP::Request do
     end
 
     context "with proxy" do
-      let(:proxy) { {:user => "user", :pass => "pass"} }
+      let(:proxy) { { :user => "user", :pass => "pass" } }
       it { is_expected.to eq "GET http://example.com/foo?bar=baz HTTP/1.1" }
     end
   end

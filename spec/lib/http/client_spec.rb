@@ -72,7 +72,7 @@ RSpec.describe HTTP::Client do
     end
 
     it "fails if max amount of hops reached" do
-      client = StubbedClient.new(:follow => {:max_hops => 5}).stub(
+      client = StubbedClient.new(:follow => { :max_hops => 5 }).stub(
         "http://example.com/"  => redirect_response("/1"),
         "http://example.com/1" => redirect_response("/2"),
         "http://example.com/2" => redirect_response("/3"),
@@ -121,7 +121,7 @@ RSpec.describe HTTP::Client do
         expect(CGI.parse opts[:uri].query).to eq("foo" => %w(bar), "baz" => %w(quux))
       end
 
-      client.get("http://example.com/?foo=bar", :params => {:baz => "quux"})
+      client.get("http://example.com/?foo=bar", :params => { :baz => "quux" })
     end
 
     it "merges duplicate values" do
@@ -129,7 +129,7 @@ RSpec.describe HTTP::Client do
         expect(opts[:uri].query).to match(/^(a=1&a=2|a=2&a=1)$/)
       end
 
-      client.get("http://example.com/?a=1", :params => {:a => 2})
+      client.get("http://example.com/?a=1", :params => { :a => 2 })
     end
 
     it "does not modifies query part if no params were given" do
@@ -145,7 +145,7 @@ RSpec.describe HTTP::Client do
         expect(CGI.parse opts[:uri].query).to eq "a[]" => %w(b c), "d" => %w(e)
       end
 
-      client.get("http://example.com/?a[]=b&a[]=c", :params => {:d => "e"})
+      client.get("http://example.com/?a[]=b&a[]=c", :params => { :d => "e" })
     end
 
     it "properly encodes colons" do
@@ -153,7 +153,7 @@ RSpec.describe HTTP::Client do
         expect(opts[:uri].query).to eq "t=1970-01-01T00%3A00%3A00Z"
       end
 
-      client.get("http://example.com/", :params => {:t => "1970-01-01T00:00:00Z"})
+      client.get("http://example.com/", :params => { :t => "1970-01-01T00:00:00Z" })
     end
   end
 
@@ -166,7 +166,7 @@ RSpec.describe HTTP::Client do
         expect(opts[:body]).to eq '{"foo":"bar"}'
       end
 
-      client.get("http://example.com/", :json => {:foo => :bar})
+      client.get("http://example.com/", :json => { :foo => :bar })
     end
   end
 
@@ -185,7 +185,7 @@ RSpec.describe HTTP::Client do
     end
 
     context "with explicitly given `Host` header" do
-      let(:headers) { {"Host" => "another.example.com"} }
+      let(:headers) { { "Host" => "another.example.com" } }
       let(:client)  { described_class.new :headers => headers }
 
       it "keeps `Host` header as is" do
