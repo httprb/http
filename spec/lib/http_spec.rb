@@ -28,14 +28,14 @@ RSpec.describe HTTP do
 
     context "with query string parameters" do
       it "is easy" do
-        response = HTTP.get "#{dummy.endpoint}/params", :params => {:foo => "bar"}
+        response = HTTP.get "#{dummy.endpoint}/params", :params => { :foo => "bar" }
         expect(response.to_s).to match(/Params!/)
       end
     end
 
     context "with query string parameters in the URI and opts hash" do
       it "includes both" do
-        response = HTTP.get "#{dummy.endpoint}/multiple-params?foo=bar", :params => {:baz => "quux"}
+        response = HTTP.get "#{dummy.endpoint}/multiple-params?foo=bar", :params => { :baz => "quux" }
         expect(response.to_s).to match(/More Params!/)
       end
     end
@@ -154,7 +154,7 @@ RSpec.describe HTTP do
 
   context "posting forms to resources" do
     it "is easy" do
-      response = HTTP.post "#{dummy.endpoint}/form", :form => {:example => "testing-form"}
+      response = HTTP.post "#{dummy.endpoint}/form", :form => { :example => "testing-form" }
       expect(response.to_s).to eq("passed :)")
     end
   end
@@ -370,7 +370,7 @@ RSpec.describe HTTP do
 
   describe ".nodelay" do
     before do
-      HTTP.default_options = {:socket_class => socket_spy_class}
+      HTTP.default_options = { :socket_class => socket_spy_class }
     end
 
     after do

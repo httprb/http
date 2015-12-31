@@ -147,12 +147,12 @@ In practice you'll want to bind the HTTP::Response::Body to a local variable (e.
 Making POST requests is simple too. Want to POST a form?
 
 ```ruby
-HTTP.post("http://example.com/resource", :form => {:foo => "42"})
+HTTP.post("http://example.com/resource", :form => { :foo => "42" })
 ```
 Making GET requests with query string parameters is as simple.
 
 ```ruby
-HTTP.get("http://example.com/resource", :params => {:foo => "bar"})
+HTTP.get("http://example.com/resource", :params => { :foo => "bar" })
 ```
 
 Want to POST with a specific body, JSON for instance?

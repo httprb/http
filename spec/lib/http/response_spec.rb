@@ -109,7 +109,7 @@ RSpec.describe HTTP::Response do
   end
 
   describe "#inspect" do
-    let(:headers) { {:content_type => "text/plain"} }
+    let(:headers) { { :content_type => "text/plain" } }
     let(:body)    { double :to_s => "foobar" }
 
     it "returns human-friendly response representation" do
