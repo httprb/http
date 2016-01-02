@@ -288,7 +288,7 @@ end
 
 ```
 
-If the optional code block is given, it will be passed the clietn with
+If the optional code block is given, it will be passed the client with
 persistent connection to the host as an argument and `client.close` will be
 automatically called when the block terminates.
 The value of the block will be returned:
