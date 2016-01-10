@@ -72,10 +72,10 @@ module HTTP
         when NilClass
           write(headers)
         when String
-          # It's important to send the request in a single write call if
-          # in order to play nicely with Nagle's algorithm. Making two writes
-          # in a row triggers a pathological case where Nagle is expecting a
-          # third write that never happens.
+          # It's important to send the request in a single write call when
+          # possible in order to play nicely with Nagle's algorithm. Making
+          # two writes in a row triggers a pathological case where Nagle is
+          # expecting a third write that never happens.
           write(headers << @body)
         when Enumerable
           write(headers)
