@@ -68,21 +68,20 @@ module HTTP
       def send_request
         headers = join_headers
 
+        # It's important to send the request in a single write call when
+        # possible in order to play nicely with Nagle's algorithm. Making
+        # two writes in a row triggers a pathological case where Nagle is
+        # expecting a third write that never happens.
         case @body
         when NilClass
           write(headers)
         when String
-          # It's important to send the request in a single write call when
-          # possible in order to play nicely with Nagle's algorithm. Making
-          # two writes in a row triggers a pathological case where Nagle is
-          # expecting a third write that never happens.
           write(headers << @body)
         when Enumerable
           write(headers)
 
           @body.each do |chunk|
-            write(chunk.bytesize.to_s(16) << CRLF)
-            write(chunk << CRLF)
+            write(chunk.bytesize.to_s(16) << CRLF << chunk << CRLF)
           end
 
           write(CHUNKED_END)
