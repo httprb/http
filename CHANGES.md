@@ -1,8 +1,16 @@
+## 1.0.2 (2016-01-15)
+
+* [#295](https://github.com/httprb/http/pull/295):
+  Fix redirect following when used with persistent mode.
+  ([@ixti])
+
+
 ## 1.0.1 (2015-12-27)
 
 * [#283](https://github.com/httprb/http/pull/283):
   Use io/wait on supported platforms.
   ([@tarcieri])
+
 
 ## 1.0.0 (2015-12-25)
 
@@ -52,6 +60,7 @@
 * [#281](https://github.com/httprb/http/pull/281)
   Remove legacy 'Http' constant alias to 'HTTP'.
   ([@tarcieri])
+
 
 ## 0.9.8 (2015-09-29)
 
