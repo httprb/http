@@ -54,6 +54,8 @@ module HTTP
         fail TooManyRedirectsError if too_many_hops?
         fail EndlessRedirectError  if endless_loop?
 
+        @response.flush
+
         @request  = redirect_to @response.headers[Headers::LOCATION]
         @response = yield @request
       end
