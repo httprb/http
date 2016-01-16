@@ -1,5 +1,5 @@
 module ServerRunner
-  def run_server(name, &_block)
+  def run_server(name)
     let! name do
       server = yield
 
