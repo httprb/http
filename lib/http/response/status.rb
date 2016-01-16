@@ -28,7 +28,7 @@ module HTTP
 
           fail Error, "Can't coerce #{object.class}(#{object}) to #{self}"
         end
-        alias_method :[], :coerce
+        alias [] coerce
 
         private
 

@@ -11,7 +11,7 @@ module HTTP
       def add(data)
         @parser << data
       end
-      alias_method :<<, :add
+      alias << add
 
       def headers?
         !!@headers

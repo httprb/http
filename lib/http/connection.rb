@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require "forwardable"
 
 require "http/client"
@@ -80,13 +81,8 @@ module HTTP
     def readpartial(size = BUFFER_SIZE)
       return unless @pending_response
 
-      if read_more(size) == :eof
-        finished = true
-      else
-        finished = @parser.finished?
-      end
-
-      chunk = @parser.chunk
+      finished = (read_more(size) == :eof) || @parser.finished?
+      chunk    = @parser.chunk
 
       finish_response if finished
 
@@ -100,8 +96,8 @@ module HTTP
         if read_more(BUFFER_SIZE) == :eof
           fail EOFError unless @parser.headers?
           break
-        else
-          break if @parser.headers?
+        elsif @parser.headers?
+          break
         end
       end
 
@@ -169,18 +165,18 @@ module HTTP
 
       req.connect_using_proxy @socket
 
-      @pending_request = false
+      @pending_request  = false
       @pending_response = true
 
       read_headers!
 
-      if @parser.status_code == 200
-        @parser.reset
-        @pending_response = false
+      if @parser.status_code != 200
+        @failed_proxy_connect = true
         return
       end
 
-      @failed_proxy_connect = true
+      @parser.reset
+      @pending_response = false
     end
 
     # Resets expiration of persistent connection.
@@ -195,14 +191,15 @@ module HTTP
     def set_keep_alive
       return @keep_alive = false unless @persistent
 
-      case @parser.http_version
-      when HTTP_1_0 # HTTP/1.0 requires opt in for Keep Alive
-        @keep_alive = @parser.headers[Headers::CONNECTION] == Client::KEEP_ALIVE
-      when HTTP_1_1 # HTTP/1.1 is opt-out
-        @keep_alive = @parser.headers[Headers::CONNECTION] != Client::CLOSE
-      else # Anything else we assume doesn't supportit
-        @keep_alive = false
-      end
+      @keep_alive =
+        case @parser.http_version
+        when HTTP_1_0 # HTTP/1.0 requires opt in for Keep Alive
+          @parser.headers[Headers::CONNECTION] == Client::KEEP_ALIVE
+        when HTTP_1_1 # HTTP/1.1 is opt-out
+          @parser.headers[Headers::CONNECTION] != Client::CLOSE
+        else # Anything else we assume doesn't supportit
+          false
+        end
     end
 
     # Feeds some more data into parser

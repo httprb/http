@@ -30,7 +30,7 @@ module HTTP
       delete(name)
       add(name, value)
     end
-    alias_method :[]=, :set
+    alias []= set
 
     # Removes header.
     #
@@ -80,7 +80,7 @@ module HTTP
     def to_h
       Hash[keys.map { |k| [k, self[k]] }]
     end
-    alias_method :to_hash, :to_h
+    alias to_hash to_h
 
     # Returns headers key/value pairs.
     #
@@ -179,7 +179,7 @@ module HTTP
         object.each { |k, v| headers.add k, v }
         headers
       end
-      alias_method :[], :coerce
+      alias [] coerce
     end
 
     private

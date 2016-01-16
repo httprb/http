@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require "forwardable"
 require "base64"
 require "time"
@@ -23,26 +24,28 @@ module HTTP
     # Default User-Agent header value
     USER_AGENT = "http.rb/#{HTTP::VERSION}".freeze
 
-    # RFC 2616: Hypertext Transfer Protocol -- HTTP/1.1
-    METHODS = [:options, :get, :head, :post, :put, :delete, :trace, :connect]
+    METHODS = [
+      # RFC 2616: Hypertext Transfer Protocol -- HTTP/1.1
+      :options, :get, :head, :post, :put, :delete, :trace, :connect,
 
-    # RFC 2518: HTTP Extensions for Distributed Authoring -- WEBDAV
-    METHODS.concat [:propfind, :proppatch, :mkcol, :copy, :move, :lock, :unlock]
+      # RFC 2518: HTTP Extensions for Distributed Authoring -- WEBDAV
+      :propfind, :proppatch, :mkcol, :copy, :move, :lock, :unlock,
 
-    # RFC 3648: WebDAV Ordered Collections Protocol
-    METHODS.concat [:orderpatch]
+      # RFC 3648: WebDAV Ordered Collections Protocol
+      :orderpatch,
 
-    # RFC 3744: WebDAV Access Control Protocol
-    METHODS.concat [:acl]
+      # RFC 3744: WebDAV Access Control Protocol
+      :acl,
 
-    # draft-dusseault-http-patch: PATCH Method for HTTP
-    METHODS.concat [:patch]
+      # draft-dusseault-http-patch: PATCH Method for HTTP
+      :patch,
 
-    # draft-reschke-webdav-search: WebDAV Search
-    METHODS.concat [:search]
+      # draft-reschke-webdav-search: WebDAV Search
+      :search
+    ].freeze
 
     # Allowed schemes
-    SCHEMES = [:http, :https, :ws, :wss]
+    SCHEMES = [:http, :https, :ws, :wss].freeze
 
     # Default ports of supported schemes
     PORTS = {
@@ -50,7 +53,7 @@ module HTTP
       :https  => 443,
       :ws     => 80,
       :wss    => 443
-    }
+    }.freeze
 
     # Method is given as a lowercase symbol e.g. :get, :post
     attr_reader :verb
@@ -71,7 +74,7 @@ module HTTP
     # @option opts [String] :body
     def initialize(opts)
       @verb   = opts.fetch(:verb).to_s.downcase.to_sym
-      @uri    = normalize_uri(opts.fetch :uri)
+      @uri    = normalize_uri(opts.fetch(:uri))
       @scheme = @uri.scheme.to_s.downcase.to_sym if @uri.scheme
 
       fail(UnsupportedMethodError, "unknown method: #{verb}") unless METHODS.include?(@verb)

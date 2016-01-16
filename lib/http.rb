@@ -20,6 +20,6 @@ module HTTP
 
   class << self
     # HTTP[:accept => 'text/html'].get(...)
-    alias_method :[], :headers
+    alias [] headers
   end
 end

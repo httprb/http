@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module HTTP
   class Headers
     # Content-Types that are acceptable for the response.

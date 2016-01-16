@@ -61,17 +61,8 @@ Style/HashSyntax:
 Style/Lambda:
   Enabled: false
 
-Style/SingleSpaceBeforeFirstArg:
-  Enabled: false
-
 Style/SpaceAroundOperators:
-  MultiSpaceAllowedForOperators:
-    - "="
-    - "=>"
-    - "||"
-    - "||="
-    - "&&"
-    - "&&="
+  AllowForAlignment: true
 
 Style/SpaceInsideHashLiteralBraces:
   EnforcedStyle: no_space

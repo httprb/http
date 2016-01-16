@@ -96,7 +96,7 @@ RSpec.describe HTTP::Response::Status do
   describe ".coerce" do
     context "with String" do
       it "coerces reasons" do
-        expect(described_class.coerce "Bad request").to eq described_class.new 400
+        expect(described_class.coerce("Bad request")).to eq described_class.new 400
       end
 
       it "fails when reason is unknown" do
@@ -106,26 +106,26 @@ RSpec.describe HTTP::Response::Status do
 
     context "with Symbol" do
       it "coerces symbolized reasons" do
-        expect(described_class.coerce :bad_request).to eq described_class.new 400
+        expect(described_class.coerce(:bad_request)).to eq described_class.new 400
       end
 
       it "fails when symbolized reason is unknown" do
-        expect { described_class.coerce :foobar }.to raise_error HTTP::Error
+        expect { described_class.coerce(:foobar) }.to raise_error HTTP::Error
       end
     end
 
     context "with Numeric" do
       it "coerces as Fixnum code" do
-        expect(described_class.coerce 200.1).to eq described_class.new 200
+        expect(described_class.coerce(200.1)).to eq described_class.new 200
       end
     end
 
     it "fails if coercion failed" do
-      expect { described_class.coerce true }.to raise_error HTTP::Error
+      expect { described_class.coerce(true) }.to raise_error HTTP::Error
     end
 
     it "is aliased as `.[]`" do
-      expect(described_class.method :coerce).to eq described_class.method :[]
+      expect(described_class.method(:coerce)).to eq described_class.method :[]
     end
   end
 end

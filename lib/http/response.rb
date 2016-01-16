@@ -34,8 +34,8 @@ module HTTP
     # @option opts [String] :uri
     def initialize(opts)
       @version  = opts.fetch(:version)
-      @uri      = HTTP::URI.parse(opts.fetch :uri) if opts.include? :uri
-      @status   = HTTP::Response::Status.new(opts.fetch :status)
+      @uri      = HTTP::URI.parse(opts.fetch(:uri)) if opts.include? :uri
+      @status   = HTTP::Response::Status.new(opts.fetch(:status))
       @headers  = HTTP::Headers.coerce(opts[:headers] || {})
 
       if opts.include?(:connection)
@@ -59,7 +59,7 @@ module HTTP
     # @!method to_s
     #   (see HTTP::Response::Body#to_s)
     def_delegator :body, :to_s
-    alias_method :to_str, :to_s
+    alias to_str to_s
 
     # @!method readpartial
     #   (see HTTP::Response::Body#readpartial)
