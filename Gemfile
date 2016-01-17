@@ -22,7 +22,7 @@ group :test do
   gem "coveralls"
   gem "simplecov", ">= 0.9"
   gem "json",      ">= 1.8.1"
-  gem "rubocop",   "=  0.35.1"
+  gem "rubocop",   "=  0.36.0"
   gem "rspec",     "~> 3.0"
   gem "rspec-its"
   gem "yardstick"

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require "base64"
 
 require "http/headers"
@@ -153,13 +154,11 @@ module HTTP
       proxy_hash[:proxy_username] = proxy[2] if proxy[2].is_a?(String)
       proxy_hash[:proxy_password] = proxy[3] if proxy[3].is_a?(String)
 
-      if [2, 4].include?(proxy_hash.keys.size)
-        branch default_options.with_proxy(proxy_hash)
-      else
-        fail(RequestError, "invalid HTTP proxy: #{proxy_hash}")
-      end
+      fail(RequestError, "invalid HTTP proxy: #{proxy_hash}") unless [2, 4].include?(proxy_hash.keys.size)
+
+      branch default_options.with_proxy(proxy_hash)
     end
-    alias_method :through, :via
+    alias through via
 
     # Make client follow redirects.
     # @param opts
@@ -206,7 +205,7 @@ module HTTP
       user = opts.fetch :user
       pass = opts.fetch :pass
 
-      auth("Basic " << Base64.strict_encode64("#{user}:#{pass}"))
+      auth("Basic " + Base64.strict_encode64("#{user}:#{pass}"))
     end
 
     # Get options for HTTP

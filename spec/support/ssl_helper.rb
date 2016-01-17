@@ -6,7 +6,7 @@ module SSLHelper
   CERTS_PATH = Pathname.new File.expand_path("../../../tmp/certs", __FILE__)
 
   class RootCertificate < ::CertificateAuthority::Certificate
-    EXTENSIONS = {"keyUsage" => {"usage" => %w(critical keyCertSign)}}
+    EXTENSIONS = {"keyUsage" => {"usage" => %w(critical keyCertSign)}}.freeze
 
     def initialize
       super()

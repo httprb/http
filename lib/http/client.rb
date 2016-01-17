@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require "forwardable"
 
 require "http/form_data"
@@ -137,13 +138,10 @@ module HTTP
       headers = opts.headers
 
       # Tell the server to keep the conn open
-      if default_options.persistent?
-        headers[Headers::CONNECTION] = KEEP_ALIVE
-      else
-        headers[Headers::CONNECTION] = CLOSE
-      end
+      headers[Headers::CONNECTION] = default_options.persistent? ? KEEP_ALIVE : CLOSE
 
       cookies = opts.cookies.values
+
       unless cookies.empty?
         cookies = opts.headers.get(Headers::COOKIE).concat(cookies).join("; ")
         headers[Headers::COOKIE] = cookies

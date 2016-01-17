@@ -1,7 +1,7 @@
 module ServerRunner
-  def run_server(name, &block)
+  def run_server(name)
     let! name do
-      server = block.call
+      server = yield
 
       Thread.new { server.start }
 

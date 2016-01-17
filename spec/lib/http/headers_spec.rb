@@ -111,7 +111,7 @@ RSpec.describe HTTP::Headers do
     end
 
     it "fails with empty header name" do
-      expect { headers.add "", "foobar" }.
+      expect { headers.add("", "foobar") }.
         to raise_error HTTP::InvalidHeaderNameError
     end
 
@@ -122,29 +122,29 @@ RSpec.describe HTTP::Headers do
   end
 
   describe "#get" do
-    before { headers.set "Content-Type", "application/json" }
+    before { headers.set("Content-Type", "application/json") }
 
     it "returns array of associated values" do
-      expect(headers.get "Content-Type").to eq %w(application/json)
+      expect(headers.get("Content-Type")).to eq %w(application/json)
     end
 
     it "normalizes header name" do
-      expect(headers.get :content_type).to eq %w(application/json)
+      expect(headers.get(:content_type)).to eq %w(application/json)
     end
 
     context "when header does not exists" do
       it "returns empty array" do
-        expect(headers.get :accept).to eq []
+        expect(headers.get(:accept)).to eq []
       end
     end
 
     it "fails with empty header name" do
-      expect { headers.get "" }.
+      expect { headers.get("") }.
         to raise_error HTTP::InvalidHeaderNameError
     end
 
     it "fails with invalid header name" do
-      expect { headers.get "foo bar" }.
+      expect { headers.get("foo bar") }.
         to raise_error HTTP::InvalidHeaderNameError
     end
   end
@@ -453,15 +453,18 @@ RSpec.describe HTTP::Headers do
       let(:headers) { {"Set-Cookie" => "hoo=ray", "set-cookie" => "woo=hoo"} }
 
       it "adds all headers" do
-        expect(described_class.coerce(headers).to_a).to match_array([
-          %w(Set-Cookie hoo=ray),
-          %w(Set-Cookie woo=hoo)
-        ])
+        expect(described_class.coerce(headers).to_a).
+          to match_array(
+            [
+              %w(Set-Cookie hoo=ray),
+              %w(Set-Cookie woo=hoo)
+            ]
+          )
       end
     end
 
     it "is aliased as .[]" do
-      expect(described_class.method :coerce).to eq described_class.method(:[])
+      expect(described_class.method(:coerce)).to eq described_class.method(:[])
     end
   end
 end

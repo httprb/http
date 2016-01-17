@@ -57,7 +57,7 @@ RSpec.describe HTTP do
 
                 let(:characters) { ("A".."Z").to_a }
                 let(:request_body) do
-                  (size + fuzzer).times.map { |i| characters[i % characters.length] }.join
+                  Array.new(size + fuzzer) { |i| characters[i % characters.length] }.join
                 end
 
                 it "returns a large body" do

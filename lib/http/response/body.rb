@@ -48,7 +48,7 @@ module HTTP
 
         @contents
       end
-      alias_method :to_str, :to_s
+      alias to_str to_s
 
       # Assert that the body is actively being streamed
       def stream!

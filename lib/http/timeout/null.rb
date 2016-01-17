@@ -48,7 +48,7 @@ module HTTP
       def write(data)
         @socket.write(data)
       end
-      alias_method :<<, :write
+      alias << write
 
       # These cops can be re-eanbled after we go Ruby 2.0+ only
       # rubocop:disable Lint/UselessAccessModifier, Metrics/BlockNesting

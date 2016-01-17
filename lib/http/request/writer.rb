@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require "http/headers"
 
 module HTTP
@@ -16,7 +17,7 @@ module HTTP
       CHUNKED_END = "#{ZERO}#{CRLF}#{CRLF}".freeze
 
       # Types valid to be used as body source
-      VALID_BODY_TYPES = [String, NilClass, Enumerable]
+      VALID_BODY_TYPES = [String, NilClass, Enumerable].freeze
 
       def initialize(socket, body, headers, headline)
         @body           = body
@@ -62,7 +63,7 @@ module HTTP
       def join_headers
         # join the headers array with crlfs, stick two on the end because
         # that ends the request header
-        @request_header.join(CRLF) + (CRLF) * 2
+        @request_header.join(CRLF) + CRLF * 2
       end
 
       def send_request
@@ -94,11 +95,8 @@ module HTTP
       def write(data)
         until data.empty?
           length = @socket.write(data)
-          if data.length > length
-            data = data[length..-1]
-          else
-            break
-          end
+          break unless data.length > length
+          data = data[length..-1]
         end
       end
 
