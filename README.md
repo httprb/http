@@ -79,20 +79,24 @@ https://github.com/httprb/http/issues
 ## Installation
 
 Add this line to your application's Gemfile:
-
-    gem "http"
+```ruby
+gem "http"
+```
 
 And then execute:
-
-    $ bundle
+```bash
+$ bundle
+```
 
 Or install it yourself as:
-
-    $ gem install http
+```bash
+$ gem install http
+```
 
 Inside of your Ruby program do:
-
-    require "http"
+```ruby
+require "http"
+```
 
 ...to pull it in as a dependency.
 
