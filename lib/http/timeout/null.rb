@@ -60,7 +60,7 @@ module HTTP
         def rescue_readable
           yield
         rescue IO::WaitReadable
-          retry if IO.select([socket], nil, nil, read_timeout)
+          retry if IO.select([@socket], nil, nil, read_timeout)
           raise TimeoutError, "Read timed out after #{read_timeout} seconds"
         end
 
@@ -68,7 +68,7 @@ module HTTP
         def rescue_writable
           yield
         rescue IO::WaitWritable
-          retry if IO.select(nil, [socket], nil, write_timeout)
+          retry if IO.select(nil, [@socket], nil, write_timeout)
           raise TimeoutError, "Write timed out after #{write_timeout} seconds"
         end
       else
@@ -78,7 +78,7 @@ module HTTP
         def rescue_readable
           yield
         rescue IO::WaitReadable
-          retry if socket.to_io.wait_readable(read_timeout)
+          retry if @socket.to_io.wait_readable(read_timeout)
           raise TimeoutError, "Read timed out after #{read_timeout} seconds"
         end
 
@@ -86,7 +86,7 @@ module HTTP
         def rescue_writable
           yield
         rescue IO::WaitWritable
-          retry if socket.to_io.wait_writable(write_timeout)
+          retry if @socket.to_io.wait_writable(write_timeout)
           raise TimeoutError, "Write timed out after #{write_timeout} seconds"
         end
       end

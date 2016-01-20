@@ -39,7 +39,7 @@ module HTTP
         # Read data from the socket
         def readpartial(size)
           rescue_readable do
-            socket.read_nonblock(size)
+            @socket.read_nonblock(size)
           end
         rescue EOFError
           :eof
@@ -48,7 +48,7 @@ module HTTP
         # Write data to the socket
         def write(data)
           rescue_writable do
-            socket.write_nonblock(data)
+            @socket.write_nonblock(data)
           end
         rescue EOFError
           :eof
@@ -62,7 +62,7 @@ module HTTP
             # JRuby may still raise exceptions on SSL sockets even though
             # we explicitly specify `:exception => false`
             result = rescue_readable do
-              socket.read_nonblock(size, :exception => false)
+              @socket.read_nonblock(size, :exception => false)
             end
 
             if result.nil?
@@ -71,7 +71,7 @@ module HTTP
               return result
             end
 
-            unless socket.to_io.wait_readable(read_timeout)
+            unless @socket.to_io.wait_readable(read_timeout)
               fail TimeoutError, "Read timed out after #{read_timeout} seconds"
             end
           end
@@ -83,13 +83,13 @@ module HTTP
             # JRuby may still raise exceptions on SSL sockets even though
             # we explicitly specify `:exception => false`
             result = rescue_writable do
-              socket.write_nonblock(data, :exception => false)
+              @socket.write_nonblock(data, :exception => false)
             end
 
             return result unless result == :wait_writable
 
-            unless socket.to_io.wait_writable(write_timeout)
-              fail TimeoutError, "Read timed out after #{write_timeout} seconds"
+            unless @socket.to_io.wait_writable(write_timeout)
+              fail TimeoutError, "Write timed out after #{write_timeout} seconds"
             end
           end
         end
