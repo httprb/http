@@ -91,6 +91,14 @@ module HTTP
       @state = :clean
     end
 
+    # Allow on-the-fly reconfiguration of timeouts
+    def update_timeout(timeout_opts)
+      # Ensure any future defaults use the updated timeouts
+      @default_options.send(:timeout_options=, timeout_opts)
+      # If have any connections open, make sure they're updated
+      @connection.update_timeout(timeout_opts) if @connection
+    end
+
     private
 
     # Verify our request isn't going to be made against another URI

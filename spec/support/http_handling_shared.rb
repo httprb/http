@@ -3,9 +3,11 @@ RSpec.shared_context "HTTP handling" do
     let(:conn_timeout) { 1 }
     let(:read_timeout) { 1 }
     let(:write_timeout) { 1 }
+    let(:persistent) { nil }
 
     let(:options) do
       {
+        :persistent => persistent,
         :timeout_class => timeout_class,
         :timeout_options => {
           :connect_timeout => conn_timeout,
@@ -23,6 +25,12 @@ RSpec.shared_context "HTTP handling" do
 
       it "works" do
         expect(client.get(server.endpoint).body.to_s).to eq("<!doctype html>")
+      end
+
+      context "#update_timeout" do
+        it "does not error" do
+          expect { client.update_timeout(options[:timeout_options]) }.to_not raise_error
+        end
       end
     end
 
@@ -66,6 +74,31 @@ RSpec.shared_context "HTTP handling" do
           end
         end
       end
+
+      context "#update_timeout" do
+        it "modifies timeouts" do
+          # TODO: investigate sporadic JRuby timeouts on CI
+          skip "flaky environment" if flaky_env?
+
+          client.update_timeout(options[:timeout_options].merge(:read_timeout => 5))
+          expect { client.get("#{server.endpoint}/sleep").body.to_s }.to_not raise_error
+        end
+
+        context "with connection reuse" do
+          let(:read_timeout) { 1 }
+          let(:persistent) { server.endpoint }
+
+          it "modifies timeouts" do
+            # TODO: investigate sporadic JRuby timeouts on CI
+            skip "flaky environment" if flaky_env?
+
+            expect { client.get("#{server.endpoint}/sleep") }.to raise_error(HTTP::TimeoutError)
+
+            client.update_timeout(options[:timeout_options].merge(:read_timeout => 5))
+            expect { client.get("#{server.endpoint}/sleep").body.to_s }.to_not raise_error
+          end
+        end
+      end
     end
 
     context "with a global timeout" do
@@ -101,6 +134,31 @@ RSpec.shared_context "HTTP handling" do
 
           client.get("#{server.endpoint}/sleep").body.to_s
           client.get("#{server.endpoint}/sleep").body.to_s
+        end
+      end
+
+      context "#update_timeout" do
+        it "modifies timeouts" do
+          # TODO: investigate sporadic JRuby timeouts on CI
+          skip "flaky environment" if flaky_env?
+
+          client.update_timeout(options[:timeout_options].merge(:read_timeout => 5))
+          expect { client.get("#{server.endpoint}/sleep").body.to_s }.to_not raise_error
+        end
+
+        context "with connection reuse" do
+          let(:read_timeout) { 1 }
+          let(:persistent) { server.endpoint }
+
+          it "modifies timeouts" do
+            # TODO: investigate sporadic JRuby timeouts on CI
+            skip "flaky environment" if flaky_env?
+
+            expect { client.get("#{server.endpoint}/sleep") }.to raise_error(HTTP::TimeoutError)
+
+            client.update_timeout(options[:timeout_options].merge(:read_timeout => 5))
+            expect { client.get("#{server.endpoint}/sleep").body.to_s }.to_not raise_error
+          end
         end
       end
     end
