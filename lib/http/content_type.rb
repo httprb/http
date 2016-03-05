@@ -20,7 +20,8 @@ module HTTP
       # :nodoc:
       def charset(str)
         md = str.to_s.match CHARSET_RE
-        md && md[1].to_s.strip.gsub(/^"|"$/, "")
+       	md = md && md[1].to_s.strip.gsub(/^"|"$/, "")
+				Encoding.find md rescue nil
       end
     end
   end
