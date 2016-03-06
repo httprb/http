@@ -21,7 +21,7 @@ module HTTP
       def charset(str)
         md = str.to_s.match CHARSET_RE
        	md = md && md[1].to_s.strip.gsub(/^"|"$/, "")
-				Encoding.find md rescue nil
+				md if Encoding.find(md) rescue nil
       end
     end
   end
