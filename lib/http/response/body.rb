@@ -35,11 +35,18 @@ module HTTP
 
         fail StateError, "body is being streamed" unless @streaming.nil?
 
+        # see issue 312
+        begin
+          encoding = Encoding.find @encoding
+        rescue ArgumentError
+          encoding = Encoding::BINARY
+        end
+
         begin
           @streaming = false
-          @contents = "".force_encoding(@encoding)
+          @contents = "".force_encoding(encoding)
           while (chunk = @client.readpartial)
-            @contents << chunk.force_encoding(@encoding)
+            @contents << chunk.force_encoding(encoding)
           end
         rescue
           @contents = nil
