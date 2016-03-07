@@ -38,21 +38,21 @@ Top three reasons:
    http.rb achieves the best performance of any Ruby HTTP library which
    implements the HTTP protocol in Ruby instead of C:
 
-  | HTTP client              | time      |
-  |--------------------------|-----------|
-  | curb (persistent)        | 2.519088  |
-  | em-http-request          | 2.731645  |
-  | Typhoeus                 | 2.851911  |
-  | StreamlyFFI (persistent) | 2.853786  |
-  | http.rb (persistent)     | 2.970702  |
-  | http.rb                  | 3.588964  |
-  | HTTParty                 | 3.931913  |
-  | Net::HTTP                | 3.959342  |
-  | Net::HTTP (persistent)   | 4.043674  |
-  | open-uri                 | 4.479817  |
-  | Excon (persistent)       | 4.618361  |
-  | Excon                    | 4.701262  |
-  | RestClient               | 26.832668 |
+  | HTTP client              | Time   | Implementation        |
+  |--------------------------|--------|-----------------------|
+  | curb (persistent)        | 2.519  | libcurl wrapper       |
+  | em-http-request          | 2.731  | EM + http_parser.rb   |
+  | Typhoeus                 | 2.851  | libcurl wrapper       |
+  | StreamlyFFI (persistent) | 2.853  | libcurl wrapper       |
+  | http.rb (persistent)     | 2.970  | Ruby + http_parser.rb |
+  | http.rb                  | 3.588  | Ruby + http_parser.rb |
+  | HTTParty                 | 3.931  | Net::HTTP wrapper     |
+  | Net::HTTP                | 3.959  | Pure Ruby             |
+  | Net::HTTP (persistent)   | 4.043  | Pure Ruby             |
+  | open-uri                 | 4.479  | Net::HTTP wrapper     |
+  | Excon (persistent)       | 4.618  | Pure Ruby             |
+  | Excon                    | 4.701  | Pure Ruby             |
+  | RestClient               | 26.838 | Net::HTTP wrapper     |
 
 Benchmarks performed using excon's benchmarking tool
 
