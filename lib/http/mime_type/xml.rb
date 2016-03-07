@@ -4,12 +4,10 @@ module HTTP
   module MimeType
     class XML < Adapter
       def decode(str)
-        begin
-          require 'nokogiri'
-				  Nokogiri::XML(str)
-        rescue LoadError
-          raise "Please install nokogiri to parse XML responses"
-        end
+        require "nokogiri"
+        Nokogiri::XML(str)
+      rescue LoadError
+        raise "Please install nokogiri to parse XML responses"
       end
     end
 

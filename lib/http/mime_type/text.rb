@@ -4,7 +4,7 @@ module HTTP
   module MimeType
     class Text < Adapter
       def decode(str)
-				str.to_s
+        str.to_s
       end
     end
 

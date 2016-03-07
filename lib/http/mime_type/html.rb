@@ -4,12 +4,10 @@ module HTTP
   module MimeType
     class HTML < Adapter
       def decode(str)
-        begin
-          require 'nokogiri'
-          Nokogiri::HTML(str)
-        rescue LoadError
-          raise "Please install nokogiri to parse HTML responses"
-        end
+        require "nokogiri"
+        Nokogiri::HTML(str)
+      rescue LoadError
+        raise "Please install nokogiri to parse HTML responses"
       end
     end
 
