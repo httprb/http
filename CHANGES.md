@@ -1,3 +1,15 @@
+## 1.0.3 (2016-03-16)
+
+* [#314](https://github.com/httprb/http/pull/314)
+  Validate charset before forcing encoding.
+  ([@kylekyle])
+
+
+* [#318](https://github.com/httprb/http/pull/318)
+  Remove redundant string allocations upon header names normalization.
+  ([@ixti])
+
+
 ## 1.0.2 (2016-01-15)
 
 * [#295](https://github.com/httprb/http/pull/295):
@@ -464,3 +476,4 @@ end
 [@hundredwatt]: https://github.com/hundredwatt
 [@jwinter]: https://github.com/jwinter
 [@nerdrew]: https://github.com/nerdrew
+[@kylekyle]: https://github.com/kylekyle
