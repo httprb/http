@@ -74,6 +74,17 @@
   ([@tarcieri])
 
 
+## 0.9.9 (2016-03-16)
+
+* *BACKPORT* [#318](https://github.com/httprb/http/pull/318)
+  Remove redundant string allocations upon header names normalization.
+  ([@ixti])
+
+* *BACKPORT* [#295](https://github.com/httprb/http/pull/295):
+  Fix redirect following when used with persistent mode.
+  ([@ixti])
+
+
 ## 0.9.8 (2015-09-29)
 
 * [#260](https://github.com/httprb/http/pull/260):
