@@ -11,11 +11,11 @@ module HTTP
     include Enumerable
 
     # Matches HTTP header names when in "Canonical-Http-Format"
-    CANONICAL_HEADER = /^[A-Z][a-z]*(-[A-Z][a-z]*)*$/
+    CANONICAL_NAME_RE = /^[A-Z][a-z]*(?:-[A-Z][a-z]*)*$/
 
     # Matches valid header field name according to RFC.
     # @see http://tools.ietf.org/html/rfc7230#section-3.2
-    HEADER_NAME_RE = /^[A-Za-z0-9!#\$%&'*+\-.^_`|~]+$/
+    COMPLIANT_NAME_RE = /^[A-Za-z0-9!#\$%&'*+\-.^_`|~]+$/
 
     # Class constructor.
     def initialize
@@ -194,10 +194,11 @@ module HTTP
     #   match {HEADER_NAME_RE}
     # @return [String] canonical HTTP header name
     def normalize_header(name)
-      normalized   = name[CANONICAL_HEADER]
-      normalized ||= name.split(/[\-_]/).map(&:capitalize).join("-")
+      return name if name =~ CANONICAL_NAME_RE
 
-      return normalized if normalized =~ HEADER_NAME_RE
+      normalized = name.split(/[\-_]/).each(&:capitalize!).join("-")
+
+      return normalized if normalized =~ COMPLIANT_NAME_RE
 
       fail InvalidHeaderNameError, "Invalid HTTP header field name: #{name.inspect}"
     end
