@@ -39,7 +39,7 @@ module HTTP
         # Read data from the socket
         def readpartial(size)
           rescue_readable do
-            @socket.read_nonblock(size)
+            socket.read_nonblock(size)
           end
         rescue EOFError
           :eof
@@ -48,7 +48,7 @@ module HTTP
         # Write data to the socket
         def write(data)
           rescue_writable do
-            @socket.write_nonblock(data)
+            socket.write_nonblock(data)
           end
         rescue EOFError
           :eof
@@ -59,14 +59,14 @@ module HTTP
         # Read data from the socket
         def readpartial(size)
           loop do
-            result = @socket.read_nonblock(size, :exception => false)
+            result = socket.read_nonblock(size, :exception => false)
             if result.nil?
               return :eof
             elsif result != :wait_readable
               return result
             end
 
-            unless @socket.to_io.wait_readable(read_timeout)
+            unless IO.select([socket], nil, nil, read_timeout)
               fail TimeoutError, "Read timed out after #{read_timeout} seconds"
             end
           end
@@ -75,11 +75,11 @@ module HTTP
         # Write data to the socket
         def write(data)
           loop do
-            result = @socket.write_nonblock(data, :exception => false)
+            result = socket.write_nonblock(data, :exception => false)
             return result unless result == :wait_writable
 
-            unless @socket.to_io.wait_writable(write_timeout)
-              fail TimeoutError, "Write timed out after #{write_timeout} seconds"
+            unless IO.select(nil, [socket], nil, write_timeout)
+              fail TimeoutError, "Read timed out after #{write_timeout} seconds"
             end
           end
         end
