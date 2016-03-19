@@ -54,7 +54,7 @@ module HTTP
         perform_io { write_nonblock(data) }
       end
 
-      alias_method :<<, :write
+      alias << write
 
       private
 

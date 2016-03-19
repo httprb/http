@@ -48,7 +48,7 @@ module HTTP
       def write(data)
         @socket.write(data)
       end
-      alias_method :<<, :write
+      alias << write
 
       private
 
@@ -56,22 +56,16 @@ module HTTP
       def rescue_readable
         yield
       rescue IO::WaitReadable
-        if IO.select([socket], nil, nil, read_timeout)
-          retry
-        else
-          raise TimeoutError, "Read timed out after #{read_timeout} seconds"
-        end
+        retry if IO.select([socket], nil, nil, read_timeout)
+        raise TimeoutError, "Read timed out after #{read_timeout} seconds"
       end
 
       # Retry writing
       def rescue_writable
         yield
       rescue IO::WaitWritable
-        if IO.select(nil, [socket], nil, write_timeout)
-          retry
-        else
-          raise TimeoutError, "Write timed out after #{write_timeout} seconds"
-        end
+        retry if IO.select(nil, [socket], nil, write_timeout)
+        raise TimeoutError, "Write timed out after #{write_timeout} seconds"
       end
     end
   end
