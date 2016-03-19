@@ -1,9 +1,15 @@
+## 1.0.4 (2016-03-19)
+
+* [#320](https://github.com/httprb/http/pull/320)
+  Fix timeout regression.
+  ([@tarcieri])
+
+
 ## 1.0.3 (2016-03-16)
 
 * [#314](https://github.com/httprb/http/pull/314)
   Validate charset before forcing encoding.
   ([@kylekyle])
-
 
 * [#318](https://github.com/httprb/http/pull/318)
   Remove redundant string allocations upon header names normalization.
