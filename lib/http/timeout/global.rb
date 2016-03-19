@@ -32,13 +32,13 @@ module HTTP
         reset_timer
 
         begin
-          @socket.connect_nonblock
+          socket.connect_nonblock
         rescue IO::WaitReadable
-          IO.select([@socket], nil, nil, time_left)
+          IO.select([socket], nil, nil, time_left)
           log_time
           retry
         rescue IO::WaitWritable
-          IO.select(nil, [@socket], nil, time_left)
+          IO.select(nil, [socket], nil, time_left)
           log_time
           retry
         end
@@ -54,7 +54,7 @@ module HTTP
         perform_io { write_nonblock(data) }
       end
 
-      alias << write
+      alias_method :<<, :write
 
       private
 
@@ -104,32 +104,16 @@ module HTTP
         :eof
       end
 
-      if RUBY_VERSION < "2.0.0"
-        # Wait for a socket to become readable
-        def wait_readable_or_timeout
-          IO.select([@socket], nil, nil, time_left)
-          log_time
-        end
+      # Wait for a socket to become readable
+      def wait_readable_or_timeout
+        IO.select([@socket], nil, nil, time_left)
+        log_time
+      end
 
-        # Wait for a socket to become writable
-        def wait_writable_or_timeout
-          IO.select(nil, [@socket], nil, time_left)
-          log_time
-        end
-      else
-        require "io/wait"
-
-        # Wait for a socket to become readable
-        def wait_readable_or_timeout
-          @socket.to_io.wait_readable(time_left)
-          log_time
-        end
-
-        # Wait for a socket to become writable
-        def wait_writable_or_timeout
-          @socket.to_io.wait_writable(time_left)
-          log_time
-        end
+      # Wait for a socket to become writable
+      def wait_writable_or_timeout
+        IO.select(nil, [@socket], nil, time_left)
+        log_time
       end
 
       # Due to the run/retry nature of nonblocking I/O, it's easier to keep track of time
