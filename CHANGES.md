@@ -1,3 +1,10 @@
+## master (unreleased)
+
+* [#319](https://github.com/httprb/http/pull/319)
+  Drop Ruby 1.9.x support.
+  ([@ixti])
+
+
 ## 1.0.4 (2016-03-19)
 
 * [#320](https://github.com/httprb/http/pull/320)
