@@ -29,7 +29,7 @@ module HTTP
       def connect_ssl
         rescue_readable do
           rescue_writable do
-            socket.connect_nonblock
+            @socket.connect_nonblock
           end
         end
       end
@@ -66,7 +66,7 @@ module HTTP
               return result
             end
 
-            unless @socket.to_io.wait_readable(read_timeout)
+            unless IO.select([@socket], nil, nil, read_timeout)
               fail TimeoutError, "Read timed out after #{read_timeout} seconds"
             end
           end
@@ -78,13 +78,12 @@ module HTTP
             result = @socket.write_nonblock(data, :exception => false)
             return result unless result == :wait_writable
 
-            unless @socket.to_io.wait_writable(write_timeout)
+            unless IO.select(nil, [@socket], nil, write_timeout)
               fail TimeoutError, "Write timed out after #{write_timeout} seconds"
             end
           end
         end
       end
-      # rubocop:enable Metrics/BlockNesting
     end
   end
 end
