@@ -37,8 +37,8 @@ module HTTP
       send_proxy_connect_request(req)
       start_tls(req, options)
       reset_timer
-    rescue SocketError, SystemCallError => e
-      raise ConnectionError, "failed to connect: #{e}"
+    rescue IOError, SocketError, SystemCallError => ex
+      raise ConnectionError, "failed to connect: #{ex}", ex.backtrace
     end
 
     # @see (HTTP::Response::Parser#status_code)
@@ -94,7 +94,7 @@ module HTTP
     def read_headers!
       loop do
         if read_more(BUFFER_SIZE) == :eof
-          fail EOFError unless @parser.headers?
+          fail ConnectionError, "couldn't read response headers" unless @parser.headers?
           break
         elsif @parser.headers?
           break
@@ -102,8 +102,6 @@ module HTTP
       end
 
       set_keep_alive
-    rescue IOError, Errno::ECONNRESET, Errno::EPIPE => e
-      raise ConnectionError, "failed to read headers: #{e}"
     end
 
     # Callback for when we've reached the end of a response
@@ -213,6 +211,8 @@ module HTTP
       elsif value
         @parser << value
       end
+    rescue IOError, SocketError, SystemCallError => ex
+      raise ConnectionError, "error reading from socket: #{ex}", ex.backtrace
     end
   end
 end
