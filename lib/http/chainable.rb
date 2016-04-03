@@ -141,7 +141,7 @@ module HTTP
       return p_client unless block_given?
       yield p_client
     ensure
-      p_client.close
+      p_client.close unless p_client.nil?
     end
 
     # Make a request through an HTTP proxy
