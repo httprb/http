@@ -161,8 +161,9 @@ module HTTP
         headers[Headers::CONTENT_LENGTH] ||= form.content_length
         form.to_s
       when opts.json
-        headers[Headers::CONTENT_TYPE] ||= "application/json"
-        MimeType[:json].encode opts.json
+        body = MimeType[:json].encode opts.json
+        headers[Headers::CONTENT_TYPE] ||= "application/json; charset=#{body.encoding.name}"
+        body
       end
     end
   end
