@@ -11,7 +11,7 @@ module HTTP
     def_delegators :@uri, :host, :normalized_host, :host=
     def_delegators :@uri, :authority, :normalized_authority, :authority=
     def_delegators :@uri, :origin, :origin=
-    def_delegators :@uri, :port, :normalized_port, :port=, :default_port
+    def_delegators :@uri, :normalized_port, :port=
     def_delegators :@uri, :path, :normalized_path, :path=
     def_delegators :@uri, :query, :normalized_query, :query=
     def_delegators :@uri, :request_uri, :request_uri=
@@ -90,6 +90,13 @@ module HTTP
     # @return [Integer] A hash of the URI
     def hash
       @hash ||= to_s.hash * -1
+    end
+
+    # Port number, either as specified or the default if unspecified
+    #
+    # @return [Integer] port number
+    def port
+      @uri.port || @uri.default_port
     end
 
     # @return [True] if URI is HTTP
