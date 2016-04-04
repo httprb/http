@@ -122,7 +122,7 @@ module HTTP
       def log_time
         @time_left -= (Time.now - @started)
         if time_left <= 0
-          fail TimeoutError, "Timed out after using the allocated #{total_timeout} seconds"
+          raise TimeoutError, "Timed out after using the allocated #{total_timeout} seconds"
         end
 
         reset_timer

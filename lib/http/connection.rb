@@ -60,11 +60,8 @@ module HTTP
     # @param [Request] req Request to send to the server
     # @return [nil]
     def send_request(req)
-      if @pending_response
-        fail StateError, "Tried to send a request while one is pending already. Make sure you read off the body."
-      elsif @pending_request
-        fail StateError, "Tried to send a request while a response is pending. Make sure you've fully read the body from the request."
-      end
+      raise StateError, "Tried to send a request while one is pending already. Make sure you read off the body." if @pending_response
+      raise StateError, "Tried to send a request while a response is pending. Make sure you read off the body."  if @pending_request
 
       @pending_request = true
 
@@ -94,7 +91,7 @@ module HTTP
     def read_headers!
       loop do
         if read_more(BUFFER_SIZE) == :eof
-          fail ConnectionError, "couldn't read response headers" unless @parser.headers?
+          raise ConnectionError, "couldn't read response headers" unless @parser.headers?
           break
         elsif @parser.headers?
           break

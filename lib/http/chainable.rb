@@ -93,7 +93,7 @@ module HTTP
               when :null          then HTTP::Timeout::Null
               when :global        then HTTP::Timeout::Global
               when :per_operation then HTTP::Timeout::PerOperation
-              else fail ArgumentError, "Unsupported Timeout class: #{klass}"
+              else raise ArgumentError, "Unsupported Timeout class: #{klass}"
               end
 
       [:read, :write, :connect].each do |k|
@@ -154,7 +154,7 @@ module HTTP
       proxy_hash[:proxy_username] = proxy[2] if proxy[2].is_a?(String)
       proxy_hash[:proxy_password] = proxy[3] if proxy[3].is_a?(String)
 
-      fail(RequestError, "invalid HTTP proxy: #{proxy_hash}") unless [2, 4].include?(proxy_hash.keys.size)
+      raise(RequestError, "invalid HTTP proxy: #{proxy_hash}") unless [2, 4].include?(proxy_hash.keys.size)
 
       branch default_options.with_proxy(proxy_hash)
     end

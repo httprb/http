@@ -63,7 +63,7 @@ module HTTP
         @uri = Addressable::URI.new(options_or_uri)
       when Addressable::URI
         @uri = options_or_uri
-      else fail TypeError, "expected Hash for options, got #{options_or_uri.class}"
+      else raise TypeError, "expected Hash for options, got #{options_or_uri.class}"
       end
     end
 
