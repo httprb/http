@@ -24,7 +24,7 @@ group :test do
   gem "rspec",     "~> 3.0"
   gem "rspec-its"
   gem "yardstick"
-  gem "certificate_authority"
+  gem "certificate_authority", :require => false
 end
 
 group :doc do
