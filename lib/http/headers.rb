@@ -171,7 +171,7 @@ module HTTP
                    when object.respond_to?(:to_hash) then object.to_hash
                    when object.respond_to?(:to_h)    then object.to_h
                    when object.respond_to?(:to_a)    then object.to_a
-                   else fail Error, "Can't coerce #{object.inspect} to Headers"
+                   else raise Error, "Can't coerce #{object.inspect} to Headers"
                    end
         end
 
@@ -197,7 +197,7 @@ module HTTP
 
       return normalized if normalized =~ COMPLIANT_NAME_RE
 
-      fail InvalidHeaderNameError, "Invalid HTTP header field name: #{name.inspect}"
+      raise InvalidHeaderNameError, "Invalid HTTP header field name: #{name.inspect}"
     end
   end
 end

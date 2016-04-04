@@ -77,8 +77,8 @@ module HTTP
       @uri    = normalize_uri(opts.fetch(:uri))
       @scheme = @uri.scheme.to_s.downcase.to_sym if @uri.scheme
 
-      fail(UnsupportedMethodError, "unknown method: #{verb}") unless METHODS.include?(@verb)
-      fail(UnsupportedSchemeError, "unknown scheme: #{scheme}") unless SCHEMES.include?(@scheme)
+      raise(UnsupportedMethodError, "unknown method: #{verb}") unless METHODS.include?(@verb)
+      raise(UnsupportedSchemeError, "unknown scheme: #{scheme}") unless SCHEMES.include?(@scheme)
 
       @proxy   = opts[:proxy] || {}
       @body    = opts[:body]

@@ -51,8 +51,8 @@ module HTTP
       while REDIRECT_CODES.include? @response.status.code
         @visited << "#{@request.verb} #{@request.uri}"
 
-        fail TooManyRedirectsError if too_many_hops?
-        fail EndlessRedirectError  if endless_loop?
+        raise TooManyRedirectsError if too_many_hops?
+        raise EndlessRedirectError  if endless_loop?
 
         @response.flush
 
@@ -80,13 +80,13 @@ module HTTP
     # Redirect policy for follow
     # @return [Request]
     def redirect_to(uri)
-      fail StateError, "no Location header in redirect" unless uri
+      raise StateError, "no Location header in redirect" unless uri
 
       verb = @request.verb
       code = @response.status.code
 
       if UNSAFE_VERBS.include?(verb) && STRICT_SENSITIVE_CODES.include?(code)
-        fail StateError, "can't follow #{@response.status} redirect" if @strict
+        raise StateError, "can't follow #{@response.status} redirect" if @strict
         verb = :get
       end
 

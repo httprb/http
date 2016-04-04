@@ -54,7 +54,7 @@ module HTTP
         if @body.is_a?(String) && !@headers[Headers::CONTENT_LENGTH]
           @request_header << "#{Headers::CONTENT_LENGTH}: #{@body.bytesize}"
         elsif @body.is_a?(Enumerable) && CHUNKED != @headers[Headers::TRANSFER_ENCODING]
-          fail(RequestError, "invalid transfer encoding")
+          raise(RequestError, "invalid transfer encoding")
         end
       end
 
@@ -86,7 +86,7 @@ module HTTP
           end
 
           write(CHUNKED_END)
-        else fail TypeError, "invalid body type: #{@body.class}"
+        else raise TypeError, "invalid body type: #{@body.class}"
         end
       end
 
@@ -102,7 +102,7 @@ module HTTP
 
       def validate_body_type!
         return if VALID_BODY_TYPES.any? { |type| @body.is_a? type }
-        fail RequestError, "body of wrong type: #{@body.class}"
+        raise RequestError, "body of wrong type: #{@body.class}"
       end
     end
   end

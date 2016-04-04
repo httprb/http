@@ -135,7 +135,7 @@ module HTTP
     private
 
     def argument_error!(message)
-      fail(Error, message, caller[1..-1])
+      raise(Error, message, caller[1..-1])
     end
   end
 end

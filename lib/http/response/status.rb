@@ -26,7 +26,7 @@ module HTTP
 
           return new code if code
 
-          fail Error, "Can't coerce #{object.class}(#{object}) to #{self}"
+          raise Error, "Can't coerce #{object.class}(#{object}) to #{self}"
         end
         alias [] coerce
 
@@ -108,7 +108,7 @@ module HTTP
       end
 
       def __setobj__(obj)
-        fail TypeError, "Expected #{obj.inspect} to respond to #to_i" unless obj.respond_to? :to_i
+        raise TypeError, "Expected #{obj.inspect} to respond to #to_i" unless obj.respond_to? :to_i
         @code = obj.to_i
       end
 

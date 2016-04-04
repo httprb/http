@@ -33,7 +33,7 @@ module HTTP
       def to_s
         return @contents if @contents
 
-        fail StateError, "body is being streamed" unless @streaming.nil?
+        raise StateError, "body is being streamed" unless @streaming.nil?
 
         # see issue 312
         begin
@@ -59,7 +59,7 @@ module HTTP
 
       # Assert that the body is actively being streamed
       def stream!
-        fail StateError, "body has already been consumed" if @streaming == false
+        raise StateError, "body has already been consumed" if @streaming == false
         @streaming = true
       end
 
