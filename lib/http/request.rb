@@ -117,7 +117,7 @@ module HTTP
 
     # Is this request using an authenticated proxy?
     def using_authenticated_proxy?
-      proxy && proxy.keys.size == 4
+      proxy && proxy.keys.size >= 4
     end
 
     # Compute and add the Proxy-Authorization header
@@ -154,7 +154,7 @@ module HTTP
       )
 
       connect_headers[Headers::PROXY_AUTHORIZATION] = proxy_authorization_header if using_authenticated_proxy?
-
+      connect_headers.merge!(proxy[:proxy_headers]) if proxy.key?(:proxy_headers)
       connect_headers
     end
 
