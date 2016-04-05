@@ -23,20 +23,25 @@ module HTTP
     # @return [URI, nil]
     attr_reader :uri
 
+    # @return [Hash]
+    attr_reader :proxy_headers
+
     # Inits a new instance
     #
     # @option opts [Integer] :status Status code
     # @option opts [String] :version HTTP version
     # @option opts [Hash] :headers
+    # @option opts [Hash] :proxy_headers
     # @option opts [HTTP::Connection] :connection
     # @option opts [String] :encoding Encoding to use when reading body
     # @option opts [String] :body
     # @option opts [String] :uri
     def initialize(opts)
-      @version  = opts.fetch(:version)
-      @uri      = HTTP::URI.parse(opts.fetch(:uri)) if opts.include? :uri
-      @status   = HTTP::Response::Status.new(opts.fetch(:status))
-      @headers  = HTTP::Headers.coerce(opts[:headers] || {})
+      @version       = opts.fetch(:version)
+      @uri           = HTTP::URI.parse(opts.fetch(:uri)) if opts.include? :uri
+      @status        = HTTP::Response::Status.new(opts.fetch(:status))
+      @headers       = HTTP::Headers.coerce(opts[:headers] || {})
+      @proxy_headers = HTTP::Headers.coerce(opts[:proxy_headers] || {})
 
       if opts.include?(:connection)
         connection = opts.fetch(:connection)
