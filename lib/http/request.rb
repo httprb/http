@@ -106,7 +106,7 @@ module HTTP
 
     # Stream the request to a socket
     def stream(socket)
-      include_proxy_authorization_header if using_authenticated_proxy? && !@uri.https?
+      include_proxy_headers if using_proxy? && !@uri.https?
       Request::Writer.new(socket, body, headers, headline).stream
     end
 
@@ -118,6 +118,11 @@ module HTTP
     # Is this request using an authenticated proxy?
     def using_authenticated_proxy?
       proxy && proxy.keys.size >= 4
+    end
+
+    def include_proxy_headers
+      headers.merge!(proxy[:proxy_headers]) if proxy.key?(:proxy_headers)
+      include_proxy_authorization_header if using_authenticated_proxy?
     end
 
     # Compute and add the Proxy-Authorization header
