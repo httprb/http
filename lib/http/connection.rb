@@ -19,6 +19,9 @@ module HTTP
     # HTTP/1.1
     HTTP_1_1 = "1.1".freeze
 
+    # Returned after HTTP CONNECT (via proxy)
+    attr_reader :proxy_response_headers
+
     # @param [HTTP::Request] req
     # @param [HTTP::Options] options
     # @raise [HTTP::ConnectionError] when failed to connect
@@ -164,6 +167,7 @@ module HTTP
       @pending_response = true
 
       read_headers!
+      @proxy_response_headers = @parser.headers
 
       if @parser.status_code != 200
         @failed_proxy_connect = true
