@@ -41,7 +41,6 @@ RSpec.describe HTTP::Response::Status do
         context 'with informational status code: #{code}' do
           let(:code) { #{code} }
           it { is_expected.to be true }
-          it { is_expected.to be_frozen }
         end
       RUBY
     end
@@ -68,7 +67,6 @@ RSpec.describe HTTP::Response::Status do
         context 'with successful status code: #{code}' do
           let(:code) { #{code} }
           it { is_expected.to be true }
-          it { is_expected.to be_frozen }
         end
       RUBY
     end
@@ -95,7 +93,6 @@ RSpec.describe HTTP::Response::Status do
         context 'with redirection status code: #{code}' do
           let(:code) { #{code} }
           it { is_expected.to be true }
-          it { is_expected.to be_frozen }
         end
       RUBY
     end
@@ -122,7 +119,6 @@ RSpec.describe HTTP::Response::Status do
         context 'with client error status code: #{code}' do
           let(:code) { #{code} }
           it { is_expected.to be true }
-          it { is_expected.to be_frozen }
         end
       RUBY
     end
@@ -149,7 +145,6 @@ RSpec.describe HTTP::Response::Status do
         context 'with server error status code: #{code}' do
           let(:code) { #{code} }
           it { is_expected.to be true }
-          it { is_expected.to be_frozen }
         end
       RUBY
     end
