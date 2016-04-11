@@ -202,6 +202,12 @@ RSpec.describe HTTP::Request do
     context "with proxy" do
       let(:proxy) { {:user => "user", :pass => "pass"} }
       it { is_expected.to eq "GET http://example.com/foo?bar=baz HTTP/1.1" }
+
+      context "and HTTPS uri" do
+        let(:request_uri) { "https://example.com/foo?bar=baz" }
+
+        it { is_expected.to eq "GET /foo?bar=baz HTTP/1.1" }
+      end
     end
   end
 end
