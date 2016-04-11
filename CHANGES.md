@@ -1,5 +1,18 @@
 ## master (unreleased)
 
+* [#333](https://github.com/httprb/http/pull/333)
+  Fix HTTPS request headline when sent via proxy.
+  ([@Connorhd])
+
+* [#331](https://github.com/httprb/http/pull/331)
+  Add `#informational?`, `#success?`, `#redirect?`, `#client_error?` and
+  `#server_error?` helpers to `Response::Status`.
+  ([@mwitek])
+
+* [#330](https://github.com/httprb/http/pull/330)
+  Support custom CONNECT headers (request/response) during HTTPS proxy requests.
+  ([@smudge])
+
 * [#319](https://github.com/httprb/http/pull/319)
   Drop Ruby 1.9.x support.
   ([@ixti])
@@ -501,3 +514,5 @@ end
 [@jwinter]: https://github.com/jwinter
 [@nerdrew]: https://github.com/nerdrew
 [@kylekyle]: https://github.com/kylekyle
+[@smudge]: https://github.com/smudge
+[@mwitek]: https://github.com/mwitek
