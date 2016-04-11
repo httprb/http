@@ -83,6 +83,36 @@ module HTTP
         "#{code} #{reason}".strip
       end
 
+      # Check if status code is informational (1XX)
+      # @return [Boolean]
+      def informational?
+        INFORMATIONAL.keys.include?(code)
+      end
+
+      # Check if status code is successful (2XX)
+      # @return [Boolean]
+      def success?
+        SUCCESSFUL.keys.include?(code)
+      end
+
+      # Check if status code is redirection (3XX)
+      # @return [Boolean]
+      def redirect?
+        REDIRECTION.keys.include?(code)
+      end
+
+      # Check if status code is client error (4XX)
+      # @return [Boolean]
+      def client_error?
+        CLIENT_ERROR.keys.include?(code)
+      end
+
+      # Check if status code is server error (5XX)
+      # @return [Boolean]
+      def server_error?
+        SERVER_ERROR.keys.include?(code)
+      end
+
       # Symbolized {#reason}
       #
       # @return [nil] unless code is well-known (see REASONS)

@@ -34,6 +34,136 @@ RSpec.describe HTTP::Response::Status do
     end
   end
 
+  describe "#informational?" do
+    subject { described_class.new(code).informational? }
+    described_class::INFORMATIONAL.each do |code, _reason|
+      class_eval <<-RUBY
+        context 'with informational status code: #{code}' do
+          let(:code) { #{code} }
+          it { is_expected.to be true }
+        end
+      RUBY
+    end
+
+    context "with non-informational code" do
+      other_codes = described_class::REASONS.reject do |code, _reason|
+        described_class::INFORMATIONAL.keys.include?(code)
+      end
+      other_codes.each do |code, _reason|
+        class_eval <<-RUBY
+          context 'with status code: #{code}' do
+            let(:code) { #{code} }
+            it { is_expected.to be false }
+          end
+        RUBY
+      end
+    end
+  end
+
+  describe "#success?" do
+    subject { described_class.new(code).success? }
+    described_class::SUCCESSFUL.each do |code, _reason|
+      class_eval <<-RUBY
+        context 'with successful status code: #{code}' do
+          let(:code) { #{code} }
+          it { is_expected.to be true }
+        end
+      RUBY
+    end
+
+    context "with non-successful code" do
+      other_codes = described_class::REASONS.reject do |code, _reason|
+        described_class::SUCCESSFUL.keys.include?(code)
+      end
+      other_codes.each do |code, _reason|
+        class_eval <<-RUBY
+          context 'with status code: #{code}' do
+            let(:code) { #{code} }
+            it { is_expected.to be false }
+          end
+        RUBY
+      end
+    end
+  end
+
+  describe "#redirect?" do
+    subject { described_class.new(code).redirect? }
+    described_class::REDIRECTION.each do |code, _reason|
+      class_eval <<-RUBY
+        context 'with redirection status code: #{code}' do
+          let(:code) { #{code} }
+          it { is_expected.to be true }
+        end
+      RUBY
+    end
+
+    context "with non-redirection code" do
+      other_codes = described_class::REASONS.reject do |code, _reason|
+        described_class::REDIRECTION.keys.include?(code)
+      end
+      other_codes.each do |code, _reason|
+        class_eval <<-RUBY
+          context 'with status code: #{code}' do
+            let(:code) { #{code} }
+            it { is_expected.to be false }
+          end
+        RUBY
+      end
+    end
+  end
+
+  describe "#client_error?" do
+    subject { described_class.new(code).client_error? }
+    described_class::CLIENT_ERROR.each do |code, _reason|
+      class_eval <<-RUBY
+        context 'with client error status code: #{code}' do
+          let(:code) { #{code} }
+          it { is_expected.to be true }
+        end
+      RUBY
+    end
+
+    context "with non-client error code" do
+      other_codes = described_class::REASONS.reject do |code, _reason|
+        described_class::CLIENT_ERROR.keys.include?(code)
+      end
+      other_codes.each do |code, _reason|
+        class_eval <<-RUBY
+          context 'with status code: #{code}' do
+            let(:code) { #{code} }
+            it { is_expected.to be false }
+          end
+        RUBY
+      end
+    end
+  end
+
+  describe "#server_error?" do
+    subject { described_class.new(code).server_error? }
+    described_class::SERVER_ERROR.each do |code, _reason|
+      class_eval <<-RUBY
+        context 'with server error status code: #{code}' do
+          let(:code) { #{code} }
+          it { is_expected.to be true }
+        end
+      RUBY
+    end
+
+    context "with non-server error" do
+      other_codes = described_class::REASONS.reject do |code, _reason|
+        described_class::SERVER_ERROR.keys.include?(code)
+      end
+      other_codes.each do |code, _reason|
+        class_eval <<-RUBY
+          context 'with status code: #{code}' do
+            let(:code) { #{code} }
+            it { is_expected.to be false }
+          end
+        RUBY
+      end
+    end
+  end
+
   describe "#to_sym" do
     subject { described_class.new(code).to_sym }
 

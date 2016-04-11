@@ -13,10 +13,13 @@ module HTTP
       #   REASONS[414] # => "Request-URI Too Long"
       #
       # @return [Hash<Fixnum => String>]
-      REASONS = {
+      INFORMATIONAL = {
         100 => "Continue",
         101 => "Switching Protocols",
-        102 => "Processing",
+        102 => "Processing"
+      }.each { |_, v| v.freeze }.freeze
+
+      SUCCESSFUL = {
         200 => "OK",
         201 => "Created",
         202 => "Accepted",
@@ -26,7 +29,10 @@ module HTTP
         206 => "Partial Content",
         207 => "Multi-Status",
         208 => "Already Reported",
-        226 => "IM Used",
+        226 => "IM Used"
+      }.each { |_, v| v.freeze }.freeze
+
+      REDIRECTION = {
         300 => "Multiple Choices",
         301 => "Moved Permanently",
         302 => "Found",
@@ -34,7 +40,10 @@ module HTTP
         304 => "Not Modified",
         305 => "Use Proxy",
         307 => "Temporary Redirect",
-        308 => "Permanent Redirect",
+        308 => "Permanent Redirect"
+      }.each { |_, v| v.freeze }.freeze
+
+      CLIENT_ERROR = {
         400 => "Bad Request",
         401 => "Unauthorized",
         402 => "Payment Required",
@@ -61,7 +70,10 @@ module HTTP
         428 => "Precondition Required",
         429 => "Too Many Requests",
         431 => "Request Header Fields Too Large",
-        451 => "Unavailable For Legal Reasons",
+        451 => "Unavailable For Legal Reasons"
+      }.each { |_, v| v.freeze }.freeze
+
+      SERVER_ERROR = {
         500 => "Internal Server Error",
         501 => "Not Implemented",
         502 => "Bad Gateway",
@@ -74,6 +86,14 @@ module HTTP
         510 => "Not Extended",
         511 => "Network Authentication Required"
       }.each { |_, v| v.freeze }.freeze
+
+      REASONS = [
+        INFORMATIONAL,
+        SUCCESSFUL,
+        REDIRECTION,
+        CLIENT_ERROR,
+        SERVER_ERROR
+      ].inject(&:merge).each { |_, v| v.freeze }.freeze
     end
   end
 end
