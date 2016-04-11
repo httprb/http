@@ -56,10 +56,9 @@ RSpec.describe HTTP::Response::Status do
     it "is not #server_error?" do
       expect(subject).to all satisfy { |status| !status.server_error? }
     end
-
   end
 
-  context "with 2xx codes", :focus do
+  context "with 2xx codes" do
     subject { (200...300).map { |code| described_class.new code } }
 
     it "is not #informational?" do
@@ -83,7 +82,7 @@ RSpec.describe HTTP::Response::Status do
     end
   end
 
-  context "with 3xx codes", :focus do
+  context "with 3xx codes" do
     subject { (300...400).map { |code| described_class.new code } }
 
     it "is not #informational?" do
@@ -107,7 +106,7 @@ RSpec.describe HTTP::Response::Status do
     end
   end
 
-  context "with 4xx codes", :focus do
+  context "with 4xx codes" do
     subject { (400...500).map { |code| described_class.new code } }
 
     it "is not #informational?" do
@@ -131,7 +130,7 @@ RSpec.describe HTTP::Response::Status do
     end
   end
 
-  context "with 5xx codes", :focus do
+  context "with 5xx codes" do
     subject { (500...600).map { |code| described_class.new code } }
 
     it "is not #informational?" do
