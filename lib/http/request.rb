@@ -142,7 +142,7 @@ module HTTP
 
     # Compute HTTP request header for direct or proxy request
     def headline
-      request_uri = using_proxy? ? uri : uri.omit(:scheme, :authority)
+      request_uri = (using_proxy? && !uri.https?) ? uri : uri.omit(:scheme, :authority)
       "#{verb.to_s.upcase} #{request_uri.omit :fragment} HTTP/#{version}"
     end
 
