@@ -34,133 +34,124 @@ RSpec.describe HTTP::Response::Status do
     end
   end
 
-  describe "#informational?" do
-    subject { described_class.new(code).informational? }
-    described_class::INFORMATIONAL.each do |code, _reason|
-      class_eval <<-RUBY
-        context 'with informational status code: #{code}' do
-          let(:code) { #{code} }
-          it { is_expected.to be true }
-        end
-      RUBY
+  context "with 1xx codes" do
+    subject { (100...200).map { |code| described_class.new code } }
+
+    it "is #informational?" do
+      expect(subject).to all satisfy(&:informational?)
     end
 
-    context "with non-informational code" do
-      other_codes = described_class::REASONS.reject do |code, _reason|
-        described_class::INFORMATIONAL.keys.include?(code)
-      end
-      other_codes.each do |code, _reason|
-        class_eval <<-RUBY
-          context 'with status code: #{code}' do
-            let(:code) { #{code} }
-            it { is_expected.to be false }
-          end
-        RUBY
-      end
+    it "is not #success?" do
+      expect(subject).to all satisfy { |status| !status.success? }
+    end
+
+    it "is not #redirect?" do
+      expect(subject).to all satisfy { |status| !status.redirect? }
+    end
+
+    it "is not #client_error?" do
+      expect(subject).to all satisfy { |status| !status.client_error? }
+    end
+
+    it "is not #server_error?" do
+      expect(subject).to all satisfy { |status| !status.server_error? }
+    end
+
+  end
+
+  context "with 2xx codes", :focus do
+    subject { (200...300).map { |code| described_class.new code } }
+
+    it "is not #informational?" do
+      expect(subject).to all satisfy { |status| !status.informational? }
+    end
+
+    it "is #success?" do
+      expect(subject).to all satisfy(&:success?)
+    end
+
+    it "is not #redirect?" do
+      expect(subject).to all satisfy { |status| !status.redirect? }
+    end
+
+    it "is not #client_error?" do
+      expect(subject).to all satisfy { |status| !status.client_error? }
+    end
+
+    it "is not #server_error?" do
+      expect(subject).to all satisfy { |status| !status.server_error? }
     end
   end
 
-  describe "#success?" do
-    subject { described_class.new(code).success? }
-    described_class::SUCCESSFUL.each do |code, _reason|
-      class_eval <<-RUBY
-        context 'with successful status code: #{code}' do
-          let(:code) { #{code} }
-          it { is_expected.to be true }
-        end
-      RUBY
+  context "with 3xx codes", :focus do
+    subject { (300...400).map { |code| described_class.new code } }
+
+    it "is not #informational?" do
+      expect(subject).to all satisfy { |status| !status.informational? }
     end
 
-    context "with non-successful code" do
-      other_codes = described_class::REASONS.reject do |code, _reason|
-        described_class::SUCCESSFUL.keys.include?(code)
-      end
-      other_codes.each do |code, _reason|
-        class_eval <<-RUBY
-          context 'with status code: #{code}' do
-            let(:code) { #{code} }
-            it { is_expected.to be false }
-          end
-        RUBY
-      end
+    it "is not #success?" do
+      expect(subject).to all satisfy { |status| !status.success? }
+    end
+
+    it "is #redirect?" do
+      expect(subject).to all satisfy(&:redirect?)
+    end
+
+    it "is not #client_error?" do
+      expect(subject).to all satisfy { |status| !status.client_error? }
+    end
+
+    it "is not #server_error?" do
+      expect(subject).to all satisfy { |status| !status.server_error? }
     end
   end
 
-  describe "#redirect?" do
-    subject { described_class.new(code).redirect? }
-    described_class::REDIRECTION.each do |code, _reason|
-      class_eval <<-RUBY
-        context 'with redirection status code: #{code}' do
-          let(:code) { #{code} }
-          it { is_expected.to be true }
-        end
-      RUBY
+  context "with 4xx codes", :focus do
+    subject { (400...500).map { |code| described_class.new code } }
+
+    it "is not #informational?" do
+      expect(subject).to all satisfy { |status| !status.informational? }
     end
 
-    context "with non-redirection code" do
-      other_codes = described_class::REASONS.reject do |code, _reason|
-        described_class::REDIRECTION.keys.include?(code)
-      end
-      other_codes.each do |code, _reason|
-        class_eval <<-RUBY
-          context 'with status code: #{code}' do
-            let(:code) { #{code} }
-            it { is_expected.to be false }
-          end
-        RUBY
-      end
+    it "is not #success?" do
+      expect(subject).to all satisfy { |status| !status.success? }
+    end
+
+    it "is not #redirect?" do
+      expect(subject).to all satisfy { |status| !status.redirect? }
+    end
+
+    it "is #client_error?" do
+      expect(subject).to all satisfy(&:client_error?)
+    end
+
+    it "is not #server_error?" do
+      expect(subject).to all satisfy { |status| !status.server_error? }
     end
   end
 
-  describe "#client_error?" do
-    subject { described_class.new(code).client_error? }
-    described_class::CLIENT_ERROR.each do |code, _reason|
-      class_eval <<-RUBY
-        context 'with client error status code: #{code}' do
-          let(:code) { #{code} }
-          it { is_expected.to be true }
-        end
-      RUBY
+  context "with 5xx codes", :focus do
+    subject { (500...600).map { |code| described_class.new code } }
+
+    it "is not #informational?" do
+      expect(subject).to all satisfy { |status| !status.informational? }
     end
 
-    context "with non-client error code" do
-      other_codes = described_class::REASONS.reject do |code, _reason|
-        described_class::CLIENT_ERROR.keys.include?(code)
-      end
-      other_codes.each do |code, _reason|
-        class_eval <<-RUBY
-          context 'with status code: #{code}' do
-            let(:code) { #{code} }
-            it { is_expected.to be false }
-          end
-        RUBY
-      end
-    end
-  end
-
-  describe "#server_error?" do
-    subject { described_class.new(code).server_error? }
-    described_class::SERVER_ERROR.each do |code, _reason|
-      class_eval <<-RUBY
-        context 'with server error status code: #{code}' do
-          let(:code) { #{code} }
-          it { is_expected.to be true }
-        end
-      RUBY
+    it "is not #success?" do
+      expect(subject).to all satisfy { |status| !status.success? }
     end
 
-    context "with non-server error" do
-      other_codes = described_class::REASONS.reject do |code, _reason|
-        described_class::SERVER_ERROR.keys.include?(code)
-      end
-      other_codes.each do |code, _reason|
-        class_eval <<-RUBY
-          context 'with status code: #{code}' do
-            let(:code) { #{code} }
-            it { is_expected.to be false }
-          end
-        RUBY
-      end
+    it "is not #redirect?" do
+      expect(subject).to all satisfy { |status| !status.redirect? }
+    end
+
+    it "is not #client_error?" do
+      expect(subject).to all satisfy { |status| !status.client_error? }
+    end
+
+    it "is #server_error?" do
+      expect(subject).to all satisfy(&:server_error?)
     end
   end
 
