@@ -1,4 +1,4 @@
-## master (unreleased)
+## 2.0.0 (2016-04-23)
 
 * [#333](https://github.com/httprb/http/pull/333)
   Fix HTTPS request headline when sent via proxy.
