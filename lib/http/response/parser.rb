@@ -34,17 +34,12 @@ module HTTP
       end
 
       def on_body(chunk)
-        if @chunk
-          @chunk << chunk
-        else
-          @chunk = chunk
-        end
+        @chunk ||= ''
+        @chunk << chunk
       end
 
       def chunk
-        chunk  = @chunk
-        @chunk = nil
-        chunk
+        remove_instance_variable(:@chunk)
       end
 
       def on_message_complete
