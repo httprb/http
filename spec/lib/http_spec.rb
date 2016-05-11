@@ -64,7 +64,19 @@ RSpec.describe HTTP do
                   response = client.post("#{dummy.endpoint}/echo-body", :body => request_body)
 
                   expect(response.body.to_s).to eq(request_body)
-                  expect(response.headers["Content-Length"].to_i).to eq(request_body.length)
+                  expect(response.headers["Content-Length"].to_i).to eq(request_body.bytesize)
+                end
+
+                context "when bytesize != length" do
+                  let(:characters) { ("A".."Z").to_a.push("“") }
+
+                  it "returns a large body" do
+                    body = {:data => request_body}
+                    response = client.post("#{dummy.endpoint}/echo-body", :json => body)
+
+                    expect(CGI.unescape(response.body.to_s)).to eq(body.to_json)
+                    expect(response.headers["Content-Length"].to_i).to eq(body.to_json.bytesize)
+                  end
                 end
               end
             end

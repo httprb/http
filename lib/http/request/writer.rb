@@ -95,8 +95,8 @@ module HTTP
       def write(data)
         until data.empty?
           length = @socket.write(data)
-          break unless data.length > length
-          data = data[length..-1]
+          break unless data.bytesize > length
+          data = data.byteslice(length..-1)
         end
       end
 
