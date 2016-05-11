@@ -117,34 +117,39 @@ Here's some simple examples to get you started:
 
 ```ruby
 >> HTTP.get("https://github.com").to_s
-=> "<html><head><meta http-equiv=\"content-type\" content=..."
+=> "\n\n\n<!DOCTYPE html>\n<html lang=\"en\" class=\"\">\n  <head prefix=\"o..."
 ```
 
 That's all it takes! To obtain an `HTTP::Response` object instead of the response
-body, all we have to do is omit the #to_s on the end:
+body, all we have to do is omit the `#to_s` on the end:
 
 ```ruby
 >> HTTP.get("https://github.com")
-=> #<HTTP/1.0 200 OK @headers={"Content-Type"=>"text/html; charset=UTF-8", "Date"=>"Fri, ...>
- => #<HTTP::Response/1.1 200 OK @headers={"Content-Type"=>"text/html; ...>
+=> #<HTTP::Response/1.1 200 OK {"Server"=>"GitHub.com", "Date"=>"Tue, 10 May...>
 ```
 
 We can also obtain an `HTTP::Response::Body` object for this response:
 
 ```ruby
 >> HTTP.get("https://github.com").body
- => #<HTTP::Response::Body:814d7aac @streaming=false>
+=> #<HTTP::Response::Body:3ff756862b48 @streaming=false>
 ```
 
-The response body can be streamed with `HTTP::Response::Body#readpartial`:
+The response body can be streamed with `HTTP::Response::Body#readpartial`.
+In practice, you'll want to bind the HTTP::Response::Body to a local variable
+and call `#readpartial` on it repeatedly until it returns `nil`:
 
 ```ruby
->> HTTP.get("https://github.com").body.readpartial
- => "<!doctype html><html "
+>> body = HTTP.get("https://github.com").body
+=> #<HTTP::Response::Body:3ff756862b48 @streaming=false>
+>> body.readpartial
+=> "\n\n\n<!DOCTYPE html>\n<html lang=\"en\" class=\"\">\n  <head prefix=\"o..."
+>> body.readpartial
+=> "\" href=\"/apple-touch-icon-72x72.png\">\n    <link rel=\"apple-touch-ic..."
+# ...
+>> body.readpartial
+=> nil
 ```
-
-In practice you'll want to bind the HTTP::Response::Body to a local variable (e.g.
-"body") and call readpartial on it repeatedly until it returns `nil`.
 
 ## Supported Ruby Versions
 
