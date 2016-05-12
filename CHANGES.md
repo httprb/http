@@ -1,3 +1,11 @@
+## master (unreleased)
+
+* [#341](https://github.com/httprb/http/pull/341)
+  Refactor some string manipulations so they are more performant
+  (up to 3-4x faster) and more concise.
+  ([@tonyta])
+
+
 ## 2.0.0 (2016-04-23)
 
 * [#333](https://github.com/httprb/http/pull/333)
@@ -516,3 +524,4 @@ end
 [@kylekyle]: https://github.com/kylekyle
 [@smudge]: https://github.com/smudge
 [@mwitek]: https://github.com/mwitek
+[@tonyta]: https://github.com/tonyta
