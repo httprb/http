@@ -132,7 +132,7 @@ module HTTP
       SYMBOLS.each do |code, symbol|
         class_eval <<-RUBY, __FILE__, __LINE__
           def #{symbol}?      # def bad_request?
-            #{code} == code   #   400 == code
+            code == #{code}   #   code == 400
           end                 # end
         RUBY
       end

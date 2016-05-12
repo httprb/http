@@ -68,13 +68,13 @@ module HTTP
     # Check if we reached max amount of redirect hops
     # @return [Boolean]
     def too_many_hops?
-      1 <= @max_hops && @max_hops < @visited.count
+      @max_hops > 0 && @visited.count > @max_hops
     end
 
     # Check if we got into an endless loop
     # @return [Boolean]
     def endless_loop?
-      2 <= @visited.count(@visited.last)
+      @visited.count(@visited.last) > 1
     end
 
     # Redirect policy for follow
@@ -90,7 +90,7 @@ module HTTP
         verb = :get
       end
 
-      verb = :get if !SEE_OTHER_ALLOWED_VERBS.include?(verb) && 303 == code
+      verb = :get if !SEE_OTHER_ALLOWED_VERBS.include?(verb) && code == 303
 
       @request.redirect(uri, verb)
     end
