@@ -43,7 +43,7 @@ module HTTP
         # @param [#to_s] str
         # @return [Symbol]
         def symbolize(str)
-          str.to_s.downcase.tr("-", " ").gsub(/[^a-z ]/, "").gsub(/\s+/, "_").to_sym
+          str.to_s.downcase.tr("- ", "_").delete("^a-z_").to_sym
         end
       end
 
