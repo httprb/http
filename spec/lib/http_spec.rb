@@ -7,10 +7,10 @@ require "support/proxy_server"
 
 RSpec.describe HTTP do
   run_server(:dummy) { DummyServer.new }
-  run_server(:dummy_ssl) { DummyServer.new(:ssl => true) }
+  run_server(:dummy_ssl) { DummyServer.new(ssl: true) }
 
   let(:ssl_client) do
-    HTTP::Client.new :ssl_context => SSLHelper.client_context
+    HTTP::Client.new ssl_context: SSLHelper.client_context
   end
 
   context "getting resources" do
@@ -28,14 +28,14 @@ RSpec.describe HTTP do
 
     context "with query string parameters" do
       it "is easy" do
-        response = HTTP.get "#{dummy.endpoint}/params", :params => {:foo => "bar"}
+        response = HTTP.get "#{dummy.endpoint}/params", params: {foo: "bar"}
         expect(response.to_s).to match(/Params!/)
       end
     end
 
     context "with query string parameters in the URI and opts hash" do
       it "includes both" do
-        response = HTTP.get "#{dummy.endpoint}/multiple-params?foo=bar", :params => {:baz => "quux"}
+        response = HTTP.get "#{dummy.endpoint}/multiple-params?foo=bar", params: {baz: "quux"}
         expect(response.to_s).to match(/More Params!/)
       end
     end
@@ -53,7 +53,7 @@ RSpec.describe HTTP do
           [16_000, 16_500, 17_000, 34_000, 68_000].each do |size|
             [0, rand(0..100), rand(100..1000)].each do |fuzzer|
               context "with a #{size} body and #{fuzzer} of fuzzing" do
-                let(:client) { HTTP.timeout(timeout, :read => 2, :write => 2, :connect => 2) }
+                let(:client) { HTTP.timeout(timeout, read: 2, write: 2, connect: 2) }
 
                 let(:characters) { ("A".."Z").to_a }
                 let(:request_body) do
@@ -61,7 +61,7 @@ RSpec.describe HTTP do
                 end
 
                 it "returns a large body" do
-                  response = client.post("#{dummy.endpoint}/echo-body", :body => request_body)
+                  response = client.post("#{dummy.endpoint}/echo-body", body: request_body)
 
                   expect(response.body.to_s).to eq(request_body)
                   expect(response.headers["Content-Length"].to_i).to eq(request_body.bytesize)
@@ -71,8 +71,8 @@ RSpec.describe HTTP do
                   let(:characters) { ("A".."Z").to_a.push("“") }
 
                   it "returns a large body" do
-                    body = {:data => request_body}
-                    response = client.post("#{dummy.endpoint}/echo-body", :json => body)
+                    body = {data: request_body}
+                    response = client.post("#{dummy.endpoint}/echo-body", json: body)
 
                     expect(CGI.unescape(response.body.to_s)).to eq(body.to_json)
                     expect(response.headers["Content-Length"].to_i).to eq(body.to_json.bytesize)
@@ -166,7 +166,7 @@ RSpec.describe HTTP do
 
   context "posting forms to resources" do
     it "is easy" do
-      response = HTTP.post "#{dummy.endpoint}/form", :form => {:example => "testing-form"}
+      response = HTTP.post "#{dummy.endpoint}/form", form: {example: "testing-form"}
       expect(response.to_s).to eq("passed :)")
     end
   end
@@ -209,7 +209,7 @@ RSpec.describe HTTP do
 
   context "posting with an explicit body" do
     it "is easy" do
-      response = HTTP.post "#{dummy.endpoint}/body", :body => "testing-body"
+      response = HTTP.post "#{dummy.endpoint}/body", body: "testing-body"
       expect(response.to_s).to eq("passed :)")
     end
   end
@@ -241,7 +241,7 @@ RSpec.describe HTTP do
     end
 
     it "accepts any #to_s object" do
-      client = HTTP.auth double :to_s => "abc"
+      client = HTTP.auth double to_s: "abc"
       expect(client.default_options.headers[:authorization]).to eq "abc"
     end
   end
@@ -252,15 +252,15 @@ RSpec.describe HTTP do
     end
 
     it "fails when :pass is not given" do
-      expect { HTTP.basic_auth :user => "[USER]" }.to raise_error
+      expect { HTTP.basic_auth user: "[USER]" }.to raise_error
     end
 
     it "fails when :user is not given" do
-      expect { HTTP.basic_auth :pass => "[PASS]" }.to raise_error
+      expect { HTTP.basic_auth pass: "[PASS]" }.to raise_error
     end
 
     it "sets Authorization header with proper BasicAuth value" do
-      client = HTTP.basic_auth :user => "foo", :pass => "bar"
+      client = HTTP.basic_auth user: "foo", pass: "bar"
       expect(client.default_options.headers[:authorization]).
         to match(%r{^Basic [A-Za-z0-9+/]+=*$})
     end
@@ -291,7 +291,7 @@ RSpec.describe HTTP do
 
   describe ".timeout" do
     context "without timeout type" do
-      subject(:client) { HTTP.timeout :read => 123 }
+      subject(:client) { HTTP.timeout read: 123 }
 
       it "sets timeout_class to PerOperation" do
         expect(client.default_options.timeout_class).
@@ -300,12 +300,12 @@ RSpec.describe HTTP do
 
       it "sets given timeout options" do
         expect(client.default_options.timeout_options).
-          to eq :read_timeout => 123
+          to eq read_timeout: 123
       end
     end
 
     context "with :null type" do
-      subject(:client) { HTTP.timeout :null, :read => 123 }
+      subject(:client) { HTTP.timeout :null, read: 123 }
 
       it "sets timeout_class to Null" do
         expect(client.default_options.timeout_class).
@@ -314,7 +314,7 @@ RSpec.describe HTTP do
     end
 
     context "with :per_operation type" do
-      subject(:client) { HTTP.timeout :per_operation, :read => 123 }
+      subject(:client) { HTTP.timeout :per_operation, read: 123 }
 
       it "sets timeout_class to PerOperation" do
         expect(client.default_options.timeout_class).
@@ -323,12 +323,12 @@ RSpec.describe HTTP do
 
       it "sets given timeout options" do
         expect(client.default_options.timeout_options).
-          to eq :read_timeout => 123
+          to eq read_timeout: 123
       end
     end
 
     context "with :global type" do
-      subject(:client) { HTTP.timeout :global, :read => 123 }
+      subject(:client) { HTTP.timeout :global, read: 123 }
 
       it "sets timeout_class to Global" do
         expect(client.default_options.timeout_class).
@@ -337,12 +337,12 @@ RSpec.describe HTTP do
 
       it "sets given timeout options" do
         expect(client.default_options.timeout_options).
-          to eq :read_timeout => 123
+          to eq read_timeout: 123
       end
     end
 
     it "fails with unknown timeout type" do
-      expect { HTTP.timeout(:foobar, :read => 123) }.
+      expect { HTTP.timeout(:foobar, read: 123) }.
         to raise_error(ArgumentError, /foobar/)
     end
   end
@@ -351,7 +351,7 @@ RSpec.describe HTTP do
     let(:endpoint) { "#{dummy.endpoint}/cookies" }
 
     it "passes correct `Cookie` header" do
-      expect(HTTP.cookies(:abc => :def).get(endpoint).to_s).
+      expect(HTTP.cookies(abc: :def).get(endpoint).to_s).
         to eq "abc: def"
     end
 
@@ -364,13 +364,13 @@ RSpec.describe HTTP do
 
     it "properly merges cookies" do
       res     = HTTP.get(endpoint).flush
-      client  = HTTP.cookies(:foo => 123, :bar => 321).cookies(res.cookies)
+      client  = HTTP.cookies(foo: 123, bar: 321).cookies(res.cookies)
 
       expect(client.get(endpoint).to_s).to eq "foo: bar\nbar: 321"
     end
 
     it "properly merges Cookie headers and cookies" do
-      client = HTTP.headers("Cookie" => "foo=bar").cookies(:baz => :moo)
+      client = HTTP.headers("Cookie" => "foo=bar").cookies(baz: :moo)
       expect(client.get(endpoint).to_s).to eq "foo: bar\nbaz: moo"
     end
 
@@ -382,7 +382,7 @@ RSpec.describe HTTP do
 
   describe ".nodelay" do
     before do
-      HTTP.default_options = {:socket_class => socket_spy_class}
+      HTTP.default_options = {socket_class: socket_spy_class}
     end
 
     after do

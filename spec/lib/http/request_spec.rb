@@ -2,15 +2,15 @@
 
 RSpec.describe HTTP::Request do
   let(:proxy)       { {} }
-  let(:headers)     { {:accept => "text/html"} }
+  let(:headers)     { {accept: "text/html"} }
   let(:request_uri) { "http://example.com/foo?bar=baz" }
 
   subject :request do
     HTTP::Request.new(
-      :verb     => :get,
-      :uri      => request_uri,
-      :headers  => headers,
-      :proxy    => proxy
+      verb:     :get,
+      uri:      request_uri,
+      headers:  headers,
+      proxy:    proxy
     )
   end
 
@@ -19,7 +19,7 @@ RSpec.describe HTTP::Request do
   end
 
   it "requires URI to have scheme part" do
-    expect { HTTP::Request.new(:verb => :get, :uri => "example.com/") }.to \
+    expect { HTTP::Request.new(verb: :get, uri: "example.com/") }.to \
       raise_error(HTTP::Request::UnsupportedSchemeError)
   end
 
@@ -67,17 +67,17 @@ RSpec.describe HTTP::Request do
   end
 
   describe "#redirect" do
-    let(:headers)   { {:accept => "text/html"} }
-    let(:proxy)     { {:proxy_username => "douglas", :proxy_password => "adams"} }
+    let(:headers)   { {accept: "text/html"} }
+    let(:proxy)     { {proxy_username: "douglas", proxy_password: "adams"} }
     let(:body)      { "The Ultimate Question" }
 
     let :request do
       HTTP::Request.new(
-        :verb    => :post,
-        :uri     => "http://example.com/",
-        :headers => headers,
-        :proxy   => proxy,
-        :body    => body
+        verb:    :post,
+        uri:     "http://example.com/",
+        headers: headers,
+        proxy:   proxy,
+        body:    body
       )
     end
 
@@ -123,11 +123,11 @@ RSpec.describe HTTP::Request do
       context "with original URI having non-standard port" do
         let :request do
           HTTP::Request.new(
-            :verb    => :post,
-            :uri     => "http://example.com:8080/",
-            :headers => headers,
-            :proxy   => proxy,
-            :body    => body
+            verb:    :post,
+            uri:     "http://example.com:8080/",
+            headers: headers,
+            proxy:   proxy,
+            body:    body
           )
         end
 
@@ -151,11 +151,11 @@ RSpec.describe HTTP::Request do
       context "with original URI having non-standard port" do
         let :request do
           HTTP::Request.new(
-            :verb    => :post,
-            :uri     => "http://example.com:8080/",
-            :headers => headers,
-            :proxy   => proxy,
-            :body    => body
+            verb:    :post,
+            uri:     "http://example.com:8080/",
+            headers: headers,
+            proxy:   proxy,
+            body:    body
           )
         end
 
@@ -200,7 +200,7 @@ RSpec.describe HTTP::Request do
     end
 
     context "with proxy" do
-      let(:proxy) { {:user => "user", :pass => "pass"} }
+      let(:proxy) { {user: "user", pass: "pass"} }
       it { is_expected.to eq "GET http://example.com/foo?bar=baz HTTP/1.1" }
 
       context "and HTTPS uri" do

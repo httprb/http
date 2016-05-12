@@ -59,7 +59,7 @@ module HTTP
         # Read data from the socket
         def readpartial(size)
           loop do
-            result = @socket.read_nonblock(size, :exception => false)
+            result = @socket.read_nonblock(size, exception: false)
 
             return :eof   if result.nil?
             return result if result != :wait_readable
@@ -73,7 +73,7 @@ module HTTP
         # Write data to the socket
         def write(data)
           loop do
-            result = @socket.write_nonblock(data, :exception => false)
+            result = @socket.write_nonblock(data, exception: false)
             return result unless result == :wait_writable
 
             unless IO.select(nil, [@socket], nil, write_timeout)

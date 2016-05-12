@@ -49,10 +49,10 @@ module HTTP
 
     # Default ports of supported schemes
     PORTS = {
-      :http   => 80,
-      :https  => 443,
-      :ws     => 80,
-      :wss    => 443
+      http:   80,
+      https:  443,
+      ws:     80,
+      wss:    443
     }.freeze
 
     # Method is given as a lowercase symbol e.g. :get, :post
@@ -92,12 +92,12 @@ module HTTP
     # Returns new Request with updated uri
     def redirect(uri, verb = @verb)
       req = self.class.new(
-        :verb    => verb,
-        :uri     => @uri.join(uri),
-        :headers => headers,
-        :proxy   => proxy,
-        :body    => body,
-        :version => version
+        verb:    verb,
+        uri:     @uri.join(uri),
+        headers: headers,
+        proxy:   proxy,
+        body:    body,
+        version: version
       )
 
       req[Headers::HOST] = req.uri.host
@@ -195,11 +195,11 @@ module HTTP
       uri = HTTP::URI.parse uri
 
       HTTP::URI.new(
-        :scheme     => uri.normalized_scheme,
-        :authority  => uri.normalized_authority,
-        :path       => uri.normalized_path,
-        :query      => uri.query,
-        :fragment   => uri.normalized_fragment
+        scheme:     uri.normalized_scheme,
+        authority:  uri.normalized_authority,
+        path:       uri.normalized_path,
+        query:      uri.query,
+        fragment:   uri.normalized_fragment
       )
     end
   end

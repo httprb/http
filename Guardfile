@@ -1,6 +1,6 @@
 # More info at https://github.com/guard/guard#readme
 
-guard :rspec, :cmd => "GUARD_RSPEC=1 bundle exec rspec --no-profile" do
+guard :rspec, cmd: "GUARD_RSPEC=1 bundle exec rspec --no-profile" do
   require "guard/rspec/dsl"
   dsl = Guard::RSpec::Dsl.new(self)
 

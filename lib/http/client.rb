@@ -34,11 +34,11 @@ module HTTP
       proxy   = opts.proxy
 
       req = HTTP::Request.new(
-        :verb    => verb,
-        :uri     => uri,
-        :headers => headers,
-        :proxy   => proxy,
-        :body    => body
+        verb:    verb,
+        uri:     uri,
+        headers: headers,
+        proxy:   proxy,
+        body:    body
       )
 
       res = perform(req, opts)
@@ -68,13 +68,13 @@ module HTTP
       end
 
       res = Response.new(
-        :status        => @connection.status_code,
-        :version       => @connection.http_version,
-        :headers       => @connection.headers,
-        :proxy_headers => @connection.proxy_response_headers,
-        :connection    => @connection,
-        :encoding      => options.encoding,
-        :uri           => req.uri
+        status:        @connection.status_code,
+        version:       @connection.http_version,
+        headers:       @connection.headers,
+        proxy_headers: @connection.proxy_response_headers,
+        connection:    @connection,
+        encoding:      options.encoding,
+        uri:           req.uri
       )
 
       @connection.finish_response if req.verb == :head

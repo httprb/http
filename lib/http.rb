@@ -19,7 +19,7 @@ module HTTP
   extend Chainable
 
   class << self
-    # HTTP[:accept => 'text/html'].get(...)
+    # HTTP[accept: 'text/html'].get(...)
     alias [] headers
   end
 end
