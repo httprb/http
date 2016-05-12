@@ -8,11 +8,11 @@ class ProxyServer < WEBrick::HTTPProxyServer
   include ServerConfig
 
   CONFIG = {
-    :BindAddress     => "127.0.0.1",
-    :Port            => 0,
-    :AccessLog       => BlackHole,
-    :Logger          => BlackHole,
-    :RequestCallback => proc { |_, res| res["X-PROXIED"] = true }
+    BindAddress:     "127.0.0.1",
+    Port:            0,
+    AccessLog:       BlackHole,
+    Logger:          BlackHole,
+    RequestCallback: proc { |_, res| res["X-PROXIED"] = true }
   }.freeze
 
   def initialize
@@ -29,7 +29,7 @@ class AuthProxyServer < WEBrick::HTTPProxyServer
     end
   end
 
-  CONFIG = ProxyServer::CONFIG.merge :ProxyAuthProc => AUTHENTICATOR
+  CONFIG = ProxyServer::CONFIG.merge ProxyAuthProc: AUTHENTICATOR
 
   def initialize
     super CONFIG

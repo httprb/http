@@ -69,11 +69,11 @@ module HTTP
         end
       else
         def read_nonblock(size)
-          @socket.read_nonblock(size, :exception => false)
+          @socket.read_nonblock(size, exception: false)
         end
 
         def write_nonblock(data)
-          @socket.write_nonblock(data, :exception => false)
+          @socket.write_nonblock(data, exception: false)
         end
       end
 

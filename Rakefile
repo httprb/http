@@ -4,7 +4,7 @@ require "bundler/gem_tasks"
 require "rspec/core/rake_task"
 RSpec::Core::RakeTask.new
 
-task :test => :spec
+task test: :spec
 
 begin
   require "rubocop/rake_task"
@@ -68,4 +68,4 @@ task :generate_status_codes do
   end
 end
 
-task :default => [:spec, :rubocop, :verify_measurements]
+task default: [:spec, :rubocop, :verify_measurements]

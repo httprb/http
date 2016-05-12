@@ -38,18 +38,18 @@ module HTTP
 
     def initialize(options = {})
       defaults = {
-        :response           => :auto,
-        :proxy              => {},
-        :timeout_class      => self.class.default_timeout_class,
-        :timeout_options    => {},
-        :socket_class       => self.class.default_socket_class,
-        :nodelay            => false,
-        :ssl_socket_class   => self.class.default_ssl_socket_class,
-        :ssl                => {},
-        :keep_alive_timeout => 5,
-        :headers            => {},
-        :cookies            => {},
-        :encoding           => nil
+        response:           :auto,
+        proxy:              {},
+        timeout_class:      self.class.default_timeout_class,
+        timeout_options:    {},
+        socket_class:       self.class.default_socket_class,
+        nodelay:            false,
+        ssl_socket_class:   self.class.default_ssl_socket_class,
+        ssl:                {},
+        keep_alive_timeout: 5,
+        headers:            {},
+        cookies:            {},
+        encoding:           nil
       }
 
       opts_w_defaults = defaults.merge(options)

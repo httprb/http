@@ -5,8 +5,8 @@ gem "rake"
 group :development do
   gem "celluloid-io"
   gem "guard"
-  gem "guard-rspec", :require => false
-  gem "nokogiri", :require => false
+  gem "guard-rspec", require: false
+  gem "nokogiri", require: false
   gem "pry"
 
   platforms :ruby_19, :ruby_20 do
@@ -24,7 +24,7 @@ group :test do
   gem "rspec",     "~> 3.0"
   gem "rspec-its"
   gem "yardstick"
-  gem "certificate_authority", :require => false
+  gem "certificate_authority", require: false
 end
 
 group :doc do

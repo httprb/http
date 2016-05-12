@@ -5,11 +5,11 @@ RSpec.describe HTTP::Response do
 
   subject(:response) do
     HTTP::Response.new(
-      :status  => 200,
-      :version => "1.1",
-      :headers => headers,
-      :body    => body,
-      :uri     => uri
+      status:  200,
+      version: "1.1",
+      headers: headers,
+      body:    body,
+      uri:     uri
     )
   end
 
@@ -96,7 +96,7 @@ RSpec.describe HTTP::Response do
   end
 
   describe "#flush" do
-    let(:body) { double :to_s => "" }
+    let(:body) { double to_s: "" }
 
     it "returns response self-reference" do
       expect(response.flush).to be response
@@ -109,8 +109,8 @@ RSpec.describe HTTP::Response do
   end
 
   describe "#inspect" do
-    let(:headers) { {:content_type => "text/plain"} }
-    let(:body)    { double :to_s => "foobar" }
+    let(:headers) { {content_type: "text/plain"} }
+    let(:body)    { double to_s: "foobar" }
 
     it "returns human-friendly response representation" do
       expect(response.inspect).
