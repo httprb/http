@@ -1,9 +1,13 @@
-## master (unreleased)
+## 2.0.1 (2016-05-12)
 
 * [#341](https://github.com/httprb/http/pull/341)
   Refactor some string manipulations so they are more performant
   (up to 3-4x faster) and more concise.
   ([@tonyta])
+
+* [#339](https://github.com/httprb/http/pull/341)
+  Always use byte methods when writing/slicing the write buffer.
+  ([@zanker])
 
 
 ## 2.0.0 (2016-04-23)
