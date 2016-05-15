@@ -1,18 +1,18 @@
 # frozen_string_literal: true
 RSpec.describe HTTP::Response::Body do
   let(:client)   { double(:sequence_id => 0) }
-  let(:chunks)   { ["Hello, ", "World!"] }
+  let(:chunks)   { [String.new("Hello, "), String.new("World!")] }
 
   before         { allow(client).to receive(:readpartial) { chunks.shift } }
 
-  subject(:body) { described_class.new client, Encoding::UTF_8 }
+  subject(:body) { described_class.new(client, Encoding::UTF_8) }
 
   it "streams bodies from responses" do
-    expect(subject.to_s).to eq "Hello, World!"
+    expect(subject.to_s).to eq("Hello, World!")
   end
 
   context "when body empty" do
-    let(:chunks) { [""] }
+    let(:chunks) { [String.new("")] }
 
     it "returns responds to empty? with true" do
       expect(subject).to be_empty

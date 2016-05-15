@@ -44,8 +44,9 @@ module HTTP
         end
 
         begin
-          @streaming = false
-          @contents = "".force_encoding(encoding)
+          @streaming  = false
+          @contents   = String.new("").force_encoding(encoding)
+
           while (chunk = @client.readpartial)
             @contents << chunk.force_encoding(encoding)
           end
