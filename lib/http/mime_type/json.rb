@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require "json"
 require "http/mime_type/adapter"
 

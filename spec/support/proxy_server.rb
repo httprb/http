@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require "webrick/httpproxy"
 
 require "support/black_hole"

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 RSpec.describe HTTP::Options, "proxy" do
   let(:opts) { HTTP::Options.new }
 

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 RSpec.describe HTTP::Options, "new" do
   it "supports a Options instance" do
     opts = HTTP::Options.new

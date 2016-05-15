@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # AUTO-GENERATED FILE, DO NOT CHANGE IT MANUALLY
 
 require "delegate"

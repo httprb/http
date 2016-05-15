@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 RSpec.describe HTTP::URI do
   let(:example_http_uri_string)  { "http://example.com" }
   let(:example_https_uri_string) { "https://example.com" }

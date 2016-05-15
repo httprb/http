@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 RSpec.describe HTTP::Headers do
   subject(:headers) { described_class.new }
 
