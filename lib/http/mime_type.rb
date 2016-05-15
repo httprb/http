@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module HTTP
   # MIME type encode/decode adapters
   module MimeType

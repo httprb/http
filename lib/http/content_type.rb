@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module HTTP
   ContentType = Struct.new(:mime_type, :charset) do
     MIME_TYPE_RE = %r{^([^/]+/[^;]+)(?:$|;)}

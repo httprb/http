@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module HTTP
   # Generic error
   class Error < StandardError; end

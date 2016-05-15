@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 RSpec.describe HTTP::Response::Body do
   let(:client)   { double(:sequence_id => 0) }
   let(:chunks)   { ["Hello, ", "World!"] }
