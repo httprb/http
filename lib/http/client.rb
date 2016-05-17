@@ -14,6 +14,18 @@ module HTTP
     extend Forwardable
     include Chainable
 
+    def before(&block)
+      @before_hooks << block
+    end
+
+    def around(&block)
+      @around_hooks << block
+    end
+
+    def after(&block)
+      @after_hooks << block
+    end
+
     KEEP_ALIVE         = "Keep-Alive".freeze
     CLOSE              = "close".freeze
 
@@ -23,6 +35,9 @@ module HTTP
       @default_options = HTTP::Options.new(default_options)
       @connection = nil
       @state = :clean
+      @before_hooks = []
+      @around_hooks = []
+      @after_hooks  = []
     end
 
     # Make an HTTP request
@@ -41,7 +56,19 @@ module HTTP
         :body    => body
       )
 
-      res = perform(req, opts)
+      @before_hooks.each { |hook| hook.call(req) }
+
+      if @around_hooks.any?
+        initial = method(:perform)
+        res = @around_hooks.inject(initial) do |result, hook|
+          lambda { |r, o| hook.call r, o, &result }
+        end.call(req, opts)
+      else
+        res = perform(req, opts)
+      end
+
+      @after_hooks.reverse.each { |hook| hook.call(req, opts, res) }
+
       return res unless opts.follow
 
       Redirector.new(opts.follow).perform(req, res) do |request|
