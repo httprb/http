@@ -162,6 +162,13 @@ module HTTP
     end
     alias through via
 
+    # Set a logger.
+    # @param [Object] logger
+    # @option [Hash] options
+    def log(logger, options = {})
+      branch(default_options.with_logger(:logger => logger, :options => options))
+    end
+
     # Make client follow redirects.
     # @param opts
     # @return [HTTP::Client]

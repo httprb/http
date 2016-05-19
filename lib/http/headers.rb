@@ -94,7 +94,18 @@ module HTTP
     #
     # @return [String]
     def inspect
-      "#<#{self.class} #{to_h.inspect}>"
+      "#<#{self.class} #{pretty_print}>"
+    end
+
+    # Returns a printable representation of headers.
+    #
+    # @param [String] separator
+    # @return [String]
+    def pretty_print(separator = ", ")
+      to_h.map do |name, value|
+        value = value.join("; ") if value.respond_to?(:join)
+        "#{name}: #{value}"
+      end.join(separator)
     end
 
     # Returns list of header names.

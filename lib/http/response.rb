@@ -4,6 +4,7 @@ require "forwardable"
 require "http/headers"
 require "http/content_type"
 require "http/mime_type"
+require "http/printer"
 require "http/response/status"
 require "http/uri"
 require "http/cookie_jar"
@@ -14,6 +15,7 @@ module HTTP
     extend Forwardable
 
     include HTTP::Headers::Mixin
+    include HTTP::Printer
 
     # @return [Status]
     attr_reader :status
@@ -130,9 +132,10 @@ module HTTP
       MimeType[as || mime_type].decode to_s
     end
 
-    # Inspect a response
-    def inspect
-      "#<#{self.class}/#{@version} #{code} #{reason} #{headers.to_h.inspect}>"
+    private
+
+    def print_headline
+      "HTTP/#{@version} #{code} #{reason}"
     end
   end
 end
