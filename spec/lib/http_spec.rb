@@ -410,4 +410,45 @@ RSpec.describe HTTP do
       expect(socket_spy_class.setsockopt_calls).to eq([[Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1]])
     end
   end
+
+  describe ".log" do
+    context "when logger is supplied" do
+      let(:logger) { double("logger") }
+      subject { HTTP.log(logger) }
+
+      after do
+        HTTP.default_options = {}
+      end
+
+      it "sets HTTP logger" do
+        expect(subject.default_options.logger).to be_an_instance_of(HTTP::Logger)
+      end
+
+      it "sets given logger in HTTP logger" do
+        http_logger = subject.default_options.logger
+        expect(http_logger.logger).to eql logger
+      end
+
+      context "with options" do
+        let(:options) do
+          {:with => [:headers, :body]}
+        end
+        subject { HTTP.log(logger, options) }
+
+        it "sets given options in HTTP logger" do
+          http_logger = subject.default_options.logger
+          expect(http_logger.print_options).to include(:skip_headers => false)
+          expect(http_logger.print_options).to include(:skip_body => false)
+        end
+      end
+    end
+
+    context "when logger is not supplied" do
+      subject { HTTP }
+
+      it "logger is nil" do
+        expect(subject.default_options.logger).to be_nil
+      end
+    end
+  end
 end

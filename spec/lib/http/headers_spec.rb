@@ -234,10 +234,32 @@ RSpec.describe HTTP::Headers do
   end
 
   describe "#inspect" do
-    before  { headers.set :set_cookie, %w(hoo=ray woo=hoo) }
+    before do
+      headers.set :set_cookie,   %w(hoo=ray woo=hoo)
+      headers.set :content_type, "application/json"
+    end
     subject { headers.inspect }
 
-    it { is_expected.to eq '#<HTTP::Headers {"Set-Cookie"=>["hoo=ray", "woo=hoo"]}>' }
+    it { is_expected.to eq "#<HTTP::Headers Set-Cookie: hoo=ray; woo=hoo, Content-Type: application/json>" }
+  end
+
+  describe "#pretty_print" do
+    before do
+      headers.set :set_cookie,   %w(hoo=ray woo=hoo)
+      headers.set :content_type, "application/json"
+    end
+
+    context "with default separator" do
+      subject { headers.pretty_print }
+
+      it { is_expected.to eq "Set-Cookie: hoo=ray; woo=hoo, Content-Type: application/json" }
+    end
+
+    context "when separator is supplied" do
+      subject { headers.pretty_print(" | ") }
+
+      it { is_expected.to eq "Set-Cookie: hoo=ray; woo=hoo | Content-Type: application/json" }
+    end
   end
 
   describe "#keys" do

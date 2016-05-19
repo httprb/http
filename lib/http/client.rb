@@ -42,6 +42,8 @@ module HTTP
       )
 
       res = perform(req, opts)
+      opts.logger.log(req, res) if opts.logger
+
       return res unless opts.follow
 
       Redirector.new(opts.follow).perform(req, res) do |request|

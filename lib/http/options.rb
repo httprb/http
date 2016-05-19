@@ -50,7 +50,8 @@ module HTTP
         :keep_alive_timeout => 5,
         :headers            => {},
         :cookies            => {},
-        :encoding           => nil
+        :encoding           => nil,
+        :logger             => nil
       }
 
       opts_w_defaults = defaults.merge(options)
@@ -71,6 +72,12 @@ module HTTP
 
     def_option :encoding do |encoding|
       self.encoding = Encoding.find(encoding)
+    end
+
+    def_option :logger do |logger_hash|
+      logger = logger_hash[:logger]
+      options = logger_hash[:options] || {}
+      self.logger = HTTP::Logger.new(logger, options)
     end
 
     %w(
