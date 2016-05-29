@@ -65,6 +65,11 @@ class DummyServer < WEBrick::HTTPServer
       end
     end
 
+    get "/headers" do |req, res|
+      res.status = 200
+      res.body = YAML.dump(req.header)
+    end
+
     get "/params" do |req, res|
       next not_found unless "foo=bar" == req.query_string
 
