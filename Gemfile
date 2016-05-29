@@ -3,21 +3,19 @@ source "https://rubygems.org"
 gem "rake"
 
 group :development do
-  gem "celluloid-io"
-  gem "guard"
   gem "guard-rspec", :require => false
-  gem "nokogiri", :require => false
-  gem "pry"
+  gem "nokogiri",    :require => false
+  gem "pry",         :require => false
 
-  platforms :ruby_19, :ruby_20 do
-    gem "pry-debugger"
-    gem "pry-stack_explorer"
+  platform :ruby_20 do
+    gem "pry-debugger",       :require => false
+    gem "pry-stack_explorer", :require => false
   end
 end
 
 group :test do
   gem "backports"
-  gem "coveralls"
+  gem "coveralls", :require => false
   gem "simplecov", ">= 0.9"
   gem "json",      ">= 1.8.1"
   gem "rubocop",   "=  0.40.0"
