@@ -14,10 +14,7 @@ module HTTP
     extend Forwardable
     include Chainable
 
-    KEEP_ALIVE         = "Keep-Alive".freeze
-    CLOSE              = "close".freeze
-
-    HTTP_OR_HTTPS_RE   = %r{^https?://}i
+    HTTP_OR_HTTPS_RE = %r{^https?://}i
 
     def initialize(default_options = {})
       @default_options = HTTP::Options.new(default_options)
@@ -139,7 +136,7 @@ module HTTP
       headers = opts.headers
 
       # Tell the server to keep the conn open
-      headers[Headers::CONNECTION] = default_options.persistent? ? KEEP_ALIVE : CLOSE
+      headers[Headers::CONNECTION] = default_options.persistent? ? Connection::KEEP_ALIVE : Connection::CLOSE
 
       cookies = opts.cookies.values
 
