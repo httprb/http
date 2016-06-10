@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 require "forwardable"
 
-require "http/client"
 require "http/headers"
 require "http/response/parser"
 
@@ -9,6 +8,10 @@ module HTTP
   # A connection to the HTTP server
   class Connection
     extend Forwardable
+
+    # Allowed values for CONNECTION header
+    KEEP_ALIVE = "Keep-Alive".freeze
+    CLOSE      = "close".freeze
 
     # Attempt to read this much data
     BUFFER_SIZE = 16_384
@@ -193,9 +196,9 @@ module HTTP
       @keep_alive =
         case @parser.http_version
         when HTTP_1_0 # HTTP/1.0 requires opt in for Keep Alive
-          @parser.headers[Headers::CONNECTION] == Client::KEEP_ALIVE
+          @parser.headers[Headers::CONNECTION] == KEEP_ALIVE
         when HTTP_1_1 # HTTP/1.1 is opt-out
-          @parser.headers[Headers::CONNECTION] != Client::CLOSE
+          @parser.headers[Headers::CONNECTION] != CLOSE
         else # Anything else we assume doesn't supportit
           false
         end
