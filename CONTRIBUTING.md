@@ -23,3 +23,4 @@ In any case, specify following info in description of your issue:
 - What actually happened
 - The exception backtrace(s), if any
 - Version of gem or commit ref you are using
+- Version of ruby you are using
