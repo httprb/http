@@ -1,3 +1,10 @@
+## master (unreleased)
+
+* [#353](https://github.com/httprb/http/pull/353)
+  Avoid a dependency cycle between Client and Connection classes.
+  ([@jhbabon])
+
+
 ## 2.0.1 (2016-05-12)
 
 * [#341](https://github.com/httprb/http/pull/341)
@@ -529,3 +536,4 @@ end
 [@smudge]: https://github.com/smudge
 [@mwitek]: https://github.com/mwitek
 [@tonyta]: https://github.com/tonyta
+[@jhbabon]: https://github.com/jhbabon
