@@ -1,4 +1,4 @@
-## master (unreleased)
+## 2.0.2 (2016-06-24)
 
 * [#353](https://github.com/httprb/http/pull/353)
   Avoid a dependency cycle between Client and Connection classes.
