@@ -53,6 +53,8 @@ module HTTP
       def add_body_type_headers
         if @body.is_a?(String) && !@headers[Headers::CONTENT_LENGTH]
           @request_header << "#{Headers::CONTENT_LENGTH}: #{@body.bytesize}"
+        elsif @body.nil? && !@headers[Headers::CONTENT_LENGTH]
+          @request_header << "#{Headers::CONTENT_LENGTH}: 0"
         elsif @body.is_a?(Enumerable) && CHUNKED != @headers[Headers::TRANSFER_ENCODING]
           raise(RequestError, "invalid transfer encoding")
         end

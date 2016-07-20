@@ -69,6 +69,24 @@ RSpec.describe HTTP::Request::Writer do
       end
     end
 
+    context "when body is nil" do
+      let(:body) { nil }
+
+      it "properly sets Content-Length header if needed" do
+        writer.stream
+        expect(io.string).to start_with "#{headerstart}\r\nContent-Length: 0\r\n\r\n"
+      end
+
+      context "when Content-Length explicitly set" do
+        let(:headers) { HTTP::Headers.coerce "Content-Length" => 12 }
+
+        it "keeps given value" do
+          writer.stream
+          expect(io.string).to start_with "#{headerstart}\r\nContent-Length: 12\r\n\r\n"
+        end
+      end
+    end
+
     context "when body is a unicode String" do
       let(:body) { "Привет, мир!" }
 
