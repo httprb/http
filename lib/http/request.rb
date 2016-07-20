@@ -80,7 +80,7 @@ module HTTP
       raise(UnsupportedMethodError, "unknown method: #{verb}") unless METHODS.include?(@verb)
       raise(UnsupportedSchemeError, "unknown scheme: #{scheme}") unless SCHEMES.include?(@scheme)
 
-      @proxy   = opts[:proxy] || {}
+      @proxy   = try_proxy(opts[:proxy])
       @body    = opts[:body]
       @version = opts[:version] || "1.1"
       @headers = HTTP::Headers.coerce(opts[:headers] || {})
@@ -201,6 +201,22 @@ module HTTP
         :query      => uri.query,
         :fragment   => uri.normalized_fragment
       )
+    end
+
+    # @return [Hash] the system proxy options (defaults to {})
+    def try_proxy(proxy_options)
+      return proxy_options unless proxy_options && proxy_options.empty?
+
+      proxy = URI(@uri.to_s).find_proxy
+      return {} unless proxy
+      proxy_options = {
+        proxy_address: proxy.host,
+        proxy_port: proxy.port
+      }
+      # don't set this if they don't exist, as we will break #using_authenticated_proxy?
+      proxy_options[:proxy_username] = proxy.user if proxy.user
+      proxy_options[:proxy_password] = proxy.password if proxy.password
+      proxy_options
     end
   end
 end
