@@ -28,8 +28,8 @@ module HTTP
       end
 
       def connect_ssl
-        rescue_readable do
-          rescue_writable do
+        rescue_readable(@connect_timeout) do
+          rescue_writable(@connect_timeout) do
             @socket.connect_nonblock
           end
         end

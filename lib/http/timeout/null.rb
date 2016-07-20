@@ -55,19 +55,19 @@ module HTTP
       private
 
       # Retry reading
-      def rescue_readable
+      def rescue_readable(tout = read_timeout)
         yield
       rescue IO::WaitReadable
-        retry if @socket.to_io.wait_readable(read_timeout)
-        raise TimeoutError, "Read timed out after #{read_timeout} seconds"
+        retry if @socket.to_io.wait_readable(tout)
+        raise TimeoutError, "Read timed out after #{tout} seconds"
       end
 
       # Retry writing
-      def rescue_writable
+      def rescue_writable(tout = write_timeout)
         yield
       rescue IO::WaitWritable
-        retry if @socket.to_io.wait_writable(write_timeout)
-        raise TimeoutError, "Write timed out after #{write_timeout} seconds"
+        retry if @socket.to_io.wait_writable(tout)
+        raise TimeoutError, "Write timed out after #{tout} seconds"
       end
     end
   end
