@@ -86,6 +86,13 @@ module HTTP
       self
     end
 
+    # Value of the Content-Length header
+    #
+    # @return [Integer]
+    def content_length
+      Integer(headers[Headers::CONTENT_LENGTH]) if headers[Headers::CONTENT_LENGTH]
+    end
+
     # Parsed Content-Type header
     #
     # @return [HTTP::ContentType]
