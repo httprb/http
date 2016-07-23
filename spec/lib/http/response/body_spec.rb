@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 RSpec.describe HTTP::Response::Body do
-  let(:client)   { double(:sequence_id => 0) }
-  let(:chunks)   { [String.new("Hello, "), String.new("World!")] }
+  let(:connection) { double(:sequence_id => 0) }
+  let(:chunks)     { [String.new("Hello, "), String.new("World!")] }
 
-  before         { allow(client).to receive(:readpartial) { chunks.shift } }
+  before           { allow(connection).to receive(:readpartial) { chunks.shift } }
 
-  subject(:body) { described_class.new(client, Encoding::UTF_8) }
+  subject(:body)   { described_class.new(connection, Encoding::UTF_8) }
 
   it "streams bodies from responses" do
     expect(subject.to_s).to eq("Hello, World!")
@@ -21,8 +21,8 @@ RSpec.describe HTTP::Response::Body do
 
   describe "#readpartial" do
     context "with size given" do
-      it "passes value to underlying client" do
-        expect(client).to receive(:readpartial).with(42)
+      it "passes value to underlying connection" do
+        expect(connection).to receive(:readpartial).with(42)
         body.readpartial 42
       end
     end
@@ -32,8 +32,8 @@ RSpec.describe HTTP::Response::Body do
         expect { body.readpartial }.to_not raise_error
       end
 
-      it "calls underlying client readpartial without specific size" do
-        expect(client).to receive(:readpartial).with no_args
+      it "calls underlying connection readpartial without specific size" do
+        expect(connection).to receive(:readpartial).with no_args
         body.readpartial
       end
     end

@@ -157,4 +157,20 @@ RSpec.describe HTTP::Response do
       expect(jar.count { |c| "c" == c.name }).to eq 0
     end
   end
+
+  describe "#connection" do
+    let(:connection) { double }
+
+    subject(:response) do
+      HTTP::Response.new(
+        :version    => "1.1",
+        :status     => 200,
+        :connection => connection
+      )
+    end
+
+    it "returns the connection object used to instantiate the response" do
+      expect(response.connection).to eq connection
+    end
+  end
 end

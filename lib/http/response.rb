@@ -71,6 +71,10 @@ module HTTP
     #   (see HTTP::Response::Body#readpartial)
     def_delegator :body, :readpartial
 
+    # @!method connection
+    #   (see HTTP::Response::Body#connection)
+    def_delegator :body, :connection
+
     # Returns an Array ala Rack: `[status, headers, body]`
     #
     # @return [Array(Fixnum, Hash, String)]
