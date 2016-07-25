@@ -124,7 +124,7 @@ module HTTP
     private
 
     def headline
-      "HTTP/#{@version} #{code} #{reason}"
+      "HTTP/#{@version} #{status}"
     end
   end
 end
