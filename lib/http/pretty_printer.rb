@@ -39,7 +39,7 @@ module HTTP
 
     def append_headers(io, separator)
       headers.group_by { |header| header[0] }.each do |name, values|
-        value = values.map { |item| item.last }.join("; ")
+        value = values.map(&:last).join("; ")
         io << "#{separator}#{name}: #{value}"
       end
     end
