@@ -5,7 +5,7 @@ require "time"
 
 require "http/errors"
 require "http/headers"
-require "http/printer"
+require "http/pretty_printer"
 require "http/request/writer"
 require "http/version"
 require "http/uri"
@@ -15,7 +15,7 @@ module HTTP
     extend Forwardable
 
     include HTTP::Headers::Mixin
-    include HTTP::Printer
+    include HTTP::PrettyPrinter
 
     # The method given was not understood
     class UnsupportedMethodError < RequestError; end
@@ -203,10 +203,6 @@ module HTTP
         :query      => uri.query,
         :fragment   => uri.normalized_fragment
       )
-    end
-
-    def print_headline
-      "#{verb.to_s.upcase} #{uri}"
     end
   end
 end

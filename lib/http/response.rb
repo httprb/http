@@ -4,7 +4,7 @@ require "forwardable"
 require "http/headers"
 require "http/content_type"
 require "http/mime_type"
-require "http/printer"
+require "http/pretty_printer"
 require "http/response/status"
 require "http/uri"
 require "http/cookie_jar"
@@ -15,7 +15,7 @@ module HTTP
     extend Forwardable
 
     include HTTP::Headers::Mixin
-    include HTTP::Printer
+    include HTTP::PrettyPrinter
 
     # @return [Status]
     attr_reader :status
@@ -123,7 +123,7 @@ module HTTP
 
     private
 
-    def print_headline
+    def headline
       "HTTP/#{@version} #{code} #{reason}"
     end
   end

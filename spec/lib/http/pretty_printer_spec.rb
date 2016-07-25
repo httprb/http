@@ -1,8 +1,8 @@
 # frozen_string_literal: true
-RSpec.describe HTTP::Printer do
+RSpec.describe HTTP::PrettyPrinter do
   class FakeRe
     include HTTP::Headers::Mixin
-    include HTTP::Printer
+    include HTTP::PrettyPrinter
 
     attr_accessor :body
 
@@ -12,21 +12,22 @@ RSpec.describe HTTP::Printer do
 
     private
 
-    def print_headline
+    def headline
       "FakeRe headline"
     end
   end
 
   let(:fake) do
     fake = FakeRe.new
-    fake[:my_header] = "My value"
+    fake.headers.set :my_header, "My value"
+    fake.headers.set :set_cookie, %w(hoo=ray woo=hoo)
     fake.body = "Work my body over"
     fake
   end
 
   describe "#inspect" do
     subject { fake.inspect }
-    it { is_expected.to eq "#<FakeRe headline, My-Header: My value>" }
+    it { is_expected.to eq "FakeRe headline\nMy-Header: My value\nSet-Cookie: hoo=ray; woo=hoo" }
   end
 
   describe "#pretty_print" do
@@ -39,13 +40,13 @@ RSpec.describe HTTP::Printer do
     context "with headers" do
       subject { fake.pretty_print(:skip_headers => false) }
 
-      it { is_expected.to eq "FakeRe headline, My-Header: My value" }
+      it { is_expected.to eq "FakeRe headline\nMy-Header: My value\nSet-Cookie: hoo=ray; woo=hoo" }
     end
 
     context "with headers and body" do
       subject { fake.pretty_print(:skip_headers => false, :skip_body => false) }
 
-      it { is_expected.to eq "FakeRe headline, My-Header: My value, Work my body over" }
+      it { is_expected.to eq "FakeRe headline\nMy-Header: My value\nSet-Cookie: hoo=ray; woo=hoo\nWork my body over" }
     end
 
     context "with body, but without headers" do
@@ -55,9 +56,9 @@ RSpec.describe HTTP::Printer do
     end
 
     context "supplying a separator" do
-      subject { fake.pretty_print(:skip_headers => false, :skip_body => false, :separator => "\n") }
+      subject { fake.pretty_print(:skip_headers => false, :skip_body => false, :separator => " | ") }
 
-      it { is_expected.to eq "FakeRe headline\nMy-Header: My value\nWork my body over" }
+      it { is_expected.to eq "FakeRe headline | My-Header: My value | Set-Cookie: hoo=ray; woo=hoo | Work my body over" }
     end
   end
 end
