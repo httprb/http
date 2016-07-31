@@ -23,6 +23,7 @@ group :test do
   gem "rspec-its"
   gem "yardstick"
   gem "certificate_authority", :require => false
+  gem "activemodel", "~> 4", :require => false # Used by certificate_authority
 end
 
 group :doc do
