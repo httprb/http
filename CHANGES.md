@@ -1,5 +1,9 @@
 ## master (unreleased)
 
+* [#365](https://github.com/httprb/http/issues/365)
+  Add `HTTP::Response#content_length`
+  ([@janko-m])
+
 * [#335](https://github.com/httprb/http/issues/335),
   [#360](https://github.com/httprb/http/pull/360)
   Set `Content-Length: 0` header for `nil` bodies.
@@ -546,3 +550,4 @@ end
 [@tonyta]: https://github.com/tonyta
 [@jhbabon]: https://github.com/jhbabon
 [@britishtea]: https://github.com/britishtea
+[@janko-m]: https://github.com/janko-m
