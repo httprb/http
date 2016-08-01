@@ -1,3 +1,11 @@
+## master (unreleased)
+
+* [#335](https://github.com/httprb/http/issues/335),
+  [#360](https://github.com/httprb/http/pull/360)
+  Set `Content-Length: 0` header for `nil` bodies.
+  ([@britishtea])
+
+
 ## 2.0.2 (2016-06-24)
 
 * [#353](https://github.com/httprb/http/pull/353)
@@ -537,3 +545,4 @@ end
 [@mwitek]: https://github.com/mwitek
 [@tonyta]: https://github.com/tonyta
 [@jhbabon]: https://github.com/jhbabon
+[@britishtea]: https://github.com/britishtea
