@@ -44,7 +44,7 @@ RSpec.describe HTTP::Response do
       let(:headers) { {"Content-Length" => "foo"} }
 
       it "raises an error" do
-        expect { subject }.to raise_error(ArgumentError)
+        expect { subject }.to raise_error(HTTP::Error)
       end
     end
   end

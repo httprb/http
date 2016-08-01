@@ -88,9 +88,13 @@ module HTTP
 
     # Value of the Content-Length header
     #
-    # @return [Integer]
+    # @raise [HTTP::Error] if presented Content-Type value is not integer
+    # @return [Integer, nil]
     def content_length
-      Integer(headers[Headers::CONTENT_LENGTH]) if headers[Headers::CONTENT_LENGTH]
+      value = @headers[Headers::CONTENT_LENGTH]
+      Integer(value) if value
+    rescue ArgumentError
+      raise Error, "Invalid value of Content-Type: #{value.inspect}"
     end
 
     # Parsed Content-Type header
@@ -120,7 +124,7 @@ module HTTP
     #
     # @param [#to_s] as Parse as given MIME type
     #   instead of the one determined from headers
-    # @raise [Error] if adapter not found
+    # @raise [HTTP::Error] if adapter not found
     # @return [Object]
     def parse(as = nil)
       MimeType[as || mime_type].decode to_s
