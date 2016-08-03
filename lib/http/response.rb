@@ -86,14 +86,20 @@ module HTTP
       self
     end
 
-    # Value of the Content-Length header
+    # Value of the Content-Length header.
     #
-    # @return [Integer, nil]
+    # @return [nil] if Content-Length was not given, or it's value was invalid
+    #   (not an integer, e.g. empty string or string with non-digits).
+    # @return [Integer] otherwise
     def content_length
       value = @headers[Headers::CONTENT_LENGTH]
-      Integer(value) if value
-    rescue ArgumentError
-      nil
+      return unless value
+
+      begin
+        Integer(value)
+      rescue ArgumentError
+        nil
+      end
     end
 
     # Parsed Content-Type header
