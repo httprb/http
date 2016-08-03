@@ -40,12 +40,9 @@ RSpec.describe HTTP::Response do
       it { is_expected.to eq 5 }
     end
 
-    context "with Content-Length not an integer" do
+    context "with invalid Content-Length" do
       let(:headers) { {"Content-Length" => "foo"} }
-
-      it "raises an error" do
-        expect { subject }.to raise_error(HTTP::Error)
-      end
+      it { is_expected.to be_nil }
     end
   end
 

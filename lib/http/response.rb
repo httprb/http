@@ -88,13 +88,12 @@ module HTTP
 
     # Value of the Content-Length header
     #
-    # @raise [HTTP::Error] if presented Content-Type value is not integer
     # @return [Integer, nil]
     def content_length
       value = @headers[Headers::CONTENT_LENGTH]
       Integer(value) if value
     rescue ArgumentError
-      raise Error, "Invalid value of Content-Type: #{value.inspect}"
+      nil
     end
 
     # Parsed Content-Type header
