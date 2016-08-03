@@ -26,7 +26,7 @@ module HTTP
 
     # Parse the given URI string, returning an HTTP::URI object
     #
-    # @param [HTTP::URI, String, #to_str] :uri to parse
+    # @param [HTTP::URI, String, #to_str] uri to parse
     #
     # @return [HTTP::URI] new URI instance
     def self.parse(uri)
@@ -37,8 +37,8 @@ module HTTP
 
     # Encodes key/value pairs as application/x-www-form-urlencoded
     #
-    # @param [#to_hash, #to_ary] :form_values to encode
-    # @param [TrueClass, FalseClass] :sort should key/value pairs be sorted first?
+    # @param [#to_hash, #to_ary] form_values to encode
+    # @param [TrueClass, FalseClass] sort should key/value pairs be sorted first?
     #
     # @return [String] encoded value
     def self.form_encode(form_values, sort = false)
@@ -47,14 +47,16 @@ module HTTP
 
     # Creates an HTTP::URI instance from the given options
     #
-    # @option [String, #to_str] :scheme URI scheme
-    # @option [String, #to_str] :user for basic authentication
-    # @option [String, #to_str] :password for basic authentication
-    # @option [String, #to_str] :host name component
-    # @option [String, #to_str] :port network port to connect to
-    # @option [String, #to_str] :path component to request
-    # @option [String, #to_str] :query component distinct from path
-    # @option [String, #to_str] :fragment component at the end of the URI
+    # @param [Hash, Addressable::URI] options_or_uri
+    #
+    # @option options_or_uri [String, #to_str] :scheme URI scheme
+    # @option options_or_uri [String, #to_str] :user for basic authentication
+    # @option options_or_uri [String, #to_str] :password for basic authentication
+    # @option options_or_uri [String, #to_str] :host name component
+    # @option options_or_uri [String, #to_str] :port network port to connect to
+    # @option options_or_uri [String, #to_str] :path component to request
+    # @option options_or_uri [String, #to_str] :query component distinct from path
+    # @option options_or_uri [String, #to_str] :fragment component at the end of the URI
     #
     # @return [HTTP::URI] new URI instance
     def initialize(options_or_uri = {})
@@ -63,13 +65,14 @@ module HTTP
         @uri = Addressable::URI.new(options_or_uri)
       when Addressable::URI
         @uri = options_or_uri
-      else raise TypeError, "expected Hash for options, got #{options_or_uri.class}"
+      else
+        raise TypeError, "expected Hash for options, got #{options_or_uri.class}"
       end
     end
 
     # Are these URI objects equal? Normalizes both URIs prior to comparison
     #
-    # @param [Object] :other URI to compare this one with
+    # @param [Object] other URI to compare this one with
     #
     # @return [TrueClass, FalseClass] are the URIs equivalent (after normalization)?
     def ==(other)
@@ -78,7 +81,7 @@ module HTTP
 
     # Are these URI objects equal? Does NOT normalizes both URIs prior to comparison
     #
-    # @param [Object] :other URI to compare this one with
+    # @param [Object] other URI to compare this one with
     #
     # @return [TrueClass, FalseClass] are the URIs equivalent?
     def eql?(other)
