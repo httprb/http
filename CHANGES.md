@@ -1,4 +1,4 @@
-## master (unreleased)
+## 2.0.3 (2016-08-03)
 
 * [#365](https://github.com/httprb/http/issues/365)
   Add `HTTP::Response#content_length`
