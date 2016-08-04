@@ -14,20 +14,30 @@ module HTTP
         @client    = client
         @streaming = nil
         @contents  = nil
-        @encoding  = encoding
+
+        # see issue 312
+        begin
+          @encoding = Encoding.find encoding
+        rescue ArgumentError
+          @encoding = Encoding::BINARY
+        end
       end
 
       # (see HTTP::Client#readpartial)
       def readpartial(*args)
         stream!
-        @client.readpartial(*args)
+        force_encoding @client.readpartial(*args)
       end
 
       # Iterate over the body, allowing it to be enumerable
       def each
+        return to_enum __method__ unless block_given?
+
         while (chunk = readpartial)
           yield chunk
         end
+
+        self
       end
 
       # @return [String] eagerly consume the entire body as a string
@@ -36,19 +46,12 @@ module HTTP
 
         raise StateError, "body is being streamed" unless @streaming.nil?
 
-        # see issue 312
-        begin
-          encoding = Encoding.find @encoding
-        rescue ArgumentError
-          encoding = Encoding::BINARY
-        end
-
         begin
           @streaming  = false
-          @contents   = String.new("").force_encoding(encoding)
+          @contents   = force_encoding(String.new(""))
 
           while (chunk = @client.readpartial)
-            @contents << chunk.force_encoding(encoding)
+            @contents << force_encoding(chunk)
           end
         rescue
           @contents = nil
@@ -68,6 +71,12 @@ module HTTP
       # Easier to interpret string inspect
       def inspect
         "#<#{self.class}:#{object_id.to_s(16)} @streaming=#{!!@streaming}>"
+      end
+
+      private
+
+      def force_encoding(chunk)
+        chunk && chunk.force_encoding(@encoding)
       end
     end
   end
