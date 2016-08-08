@@ -50,7 +50,7 @@ module HTTP
         encoding   = opts[:encoding] || charset || Encoding::BINARY
         stream     = body_stream_for(connection, opts)
 
-        @body = Response::Body.new(stream, encoding)
+        @body = Response::Body.new(stream, :encoding => encoding, :length => content_length)
       else
         @body = opts.fetch(:body)
       end
@@ -98,8 +98,13 @@ module HTTP
     #   (not an integer, e.g. empty string or string with non-digits).
     # @return [Integer] otherwise
     def content_length
+      # http://greenbytes.de/tech/webdav/rfc7230.html#rfc.section.3.3.3
+      # Clause 3: "If a message is received with both a Transfer-Encoding
+      # and a Content-Length header field, the Transfer-Encoding overrides the Content-Length.
+      return nil if @headers.include?(Headers::TRANSFER_ENCODING)
+
       value = @headers[Headers::CONTENT_LENGTH]
-      return unless value
+      return nil unless value
 
       begin
         Integer(value)
@@ -129,6 +134,15 @@ module HTTP
       @cookies ||= headers.each_with_object CookieJar.new do |(k, v), jar|
         jar.parse(v, uri) if k == Headers::SET_COOKIE
       end
+    end
+
+    def chunked?
+      return false unless @headers.include?(Headers::TRANSFER_ENCODING)
+
+      encoding = @headers.get(Headers::TRANSFER_ENCODING)
+
+      # TODO: "chunked" is frozen in the request writer. How about making it accessible?
+      encoding.last == "chunked"
     end
 
     # Parse response body with corresponding MIME type adapter.

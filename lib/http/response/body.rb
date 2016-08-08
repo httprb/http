@@ -15,12 +15,13 @@ module HTTP
       # @return [HTTP::Connection]
       attr_reader :connection
 
-      def initialize(stream, encoding = Encoding::BINARY)
+      def initialize(stream, length: nil, encoding: Encoding::BINARY)
         @stream     = stream
         @connection = stream.is_a?(Inflater) ? stream.connection : stream
         @streaming  = nil
         @contents   = nil
         @encoding   = encoding
+        @length     = length || Float::INFINITY
       end
 
       # (see HTTP::Client#readpartial)
@@ -53,7 +54,10 @@ module HTTP
           @streaming  = false
           @contents   = String.new("").force_encoding(encoding)
 
-          while (chunk = @stream.readpartial)
+          length = @length
+
+          while length > 0 && (chunk = @stream.readpartial)
+            length -= chunk.bytesize
             @contents << chunk.force_encoding(encoding)
           end
         rescue
