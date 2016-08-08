@@ -65,7 +65,7 @@ module HTTP
             return :eof   if result.nil?
             return result if result != :wait_readable
 
-            unless IO.select([@socket], nil, nil, read_timeout)
+            unless @socket.to_io.wait_readable(read_timeout) 
               raise TimeoutError, "Read timed out after #{read_timeout} seconds"
             end
           end
@@ -77,7 +77,7 @@ module HTTP
             result = @socket.write_nonblock(data, :exception => false)
             return result unless result == :wait_writable
 
-            unless IO.select(nil, [@socket], nil, write_timeout)
+            unless @socket.to_io.wait_writable(write_timeout)
               raise TimeoutError, "Write timed out after #{write_timeout} seconds"
             end
           end
