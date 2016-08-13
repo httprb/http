@@ -54,6 +54,10 @@ module HTTP
           @contents   = String.new("").force_encoding(encoding)
 
           while (chunk = @stream.readpartial)
+          length = @length || Float::INFINITY
+
+          while (length > 0 && chunk = @client.readpartial)
+            length -= chunk.bytesize
             @contents << chunk.force_encoding(encoding)
           end
         rescue
