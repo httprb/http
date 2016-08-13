@@ -99,13 +99,18 @@ module HTTP
     #   (not an integer, e.g. empty string or string with non-digits).
     # @return [Integer] otherwise
     def content_length
+      # http://greenbytes.de/tech/webdav/rfc7230.html#rfc.section.3.3.3
+      # Clause 3: "If a message is received with both a Transfer-Encoding
+      # and a Content-Length header field, the Transfer-Encoding overrides the Content-Length.        
+      return nil if headers[Headers::TRANSFER_ENCODING]
+
       value = @headers[Headers::CONTENT_LENGTH]
       return unless value
 
       begin
         Integer(value)
       rescue ArgumentError
-        nil
+        raise(HeaderSyntaxError, 'wrong Content-Length format')
       end
     end
 
@@ -130,22 +135,6 @@ module HTTP
       @cookies ||= headers.each_with_object CookieJar.new do |(k, v), jar|
         jar.parse(v, uri) if k == Headers::SET_COOKIE
       end
-    end
-
-    def content_length
-      @content_length ||= begin
-        # http://greenbytes.de/tech/webdav/rfc7230.html#rfc.section.3.3.3
-        # Clause 3: "If a message is received with both a Transfer-Encoding
-        # and a Content-Length header field, the Transfer-Encoding overrides the Content-Length.        
-        return nil if headers[Headers::TRANSFER_ENCODING]
-
-	clen = headers[Headers::CONTENT_LENGTH]
-	if clen
-          len = clen.slice(/\d+/) ||
-              raise(HeaderSyntaxError, 'wrong Content-Length format')
-          len.to_i
-        end
-      end	
     end
 
     def chunked?

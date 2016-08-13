@@ -28,24 +28,6 @@ RSpec.describe HTTP::Response do
     end
   end
 
-  describe "#content_length" do
-    subject { response.content_length }
-
-    context "without Content-Length header" do
-      it { is_expected.to be_nil }
-    end
-
-    context "with Content-Length: 5" do
-      let(:headers) { {"Content-Length" => "5"} }
-      it { is_expected.to eq 5 }
-    end
-
-    context "with invalid Content-Length" do
-      let(:headers) { {"Content-Length" => "foo"} }
-      it { is_expected.to be_nil }
-    end
-  end
-
   describe "mime_type" do
     subject { response.mime_type }
 
