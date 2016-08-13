@@ -20,4 +20,7 @@ module HTTP
 
   # Header name is invalid
   class InvalidHeaderNameError < Error; end
+
+  # Header value is of unexpected format (similar to Net::HTTPHeaderSyntaxError)
+  class HeaderSyntaxError < Error; end
 end

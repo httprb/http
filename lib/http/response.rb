@@ -132,6 +132,31 @@ module HTTP
       end
     end
 
+    def content_length
+      @content_length ||= begin
+        # http://greenbytes.de/tech/webdav/rfc7230.html#rfc.section.3.3.3
+        # Clause 3: "If a message is received with both a Transfer-Encoding
+        # and a Content-Length header field, the Transfer-Encoding overrides the Content-Length.        
+        return nil if headers[Headers::TRANSFER_ENCODING]
+
+	clen = headers[Headers::CONTENT_LENGTH]
+	if clen
+          len = clen.slice(/\d+/) ||
+              raise(HeaderSyntaxError, 'wrong Content-Length format')
+          len.to_i
+        end
+      end	
+    end
+
+    def chunked?
+      encoding = headers.get(Headers::TRANSFER_ENCODING)
+      case encoding
+        when String then encoding == CHUNKED
+        when Enumerable then encoding.include?("chunked")
+        else false
+      end
+    end
+
     # Parse response body with corresponding MIME type adapter.
     #
     # @param [#to_s] as Parse as given MIME type

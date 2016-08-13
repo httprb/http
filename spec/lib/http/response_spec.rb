@@ -173,4 +173,33 @@ RSpec.describe HTTP::Response do
       expect(response.connection).to eq connection
     end
   end
+ 
+  describe "#content_length" do
+    subject(:length) { response.content_length }
+    context "when set" do
+      let(:headers) { { "Content-Length" => "10" } }
+      it { is_expected.to be(10) }
+      context "and response is set as chunked" do
+        before { allow(response).to receive(:chunked?).and_return(true) }
+        it "ignores the length set" do
+        end
+      end
+      context "but format is invalid" do
+        let(:headers) { { "Content-Length" => "ten" } }
+	it { expect { length }.to raise_error(Http::HeaderSyntaxError) }
+      end
+    end
+    context "when not set" do
+      it { is_expected.to be_nil } 
+    end
+  end
+
+  describe "#chunked?" do
+    subject { response }
+    context "when encoding is set to chunked" do
+      let(:headers) { { "Transfer-Encoding" => "chunked" } }
+      it { is_expected.to be_chunked }
+    end
+    it { is_expected.not_to be_chunked }
+  end
 end
