@@ -12,6 +12,9 @@ group :development do
     gem "pry-debugger",       :require => false
     gem "pry-stack_explorer", :require => false
   end
+  platform :ruby_21, :ruby_22, :ruby_23 do
+    gem "pry-byebug",         :require => false
+  end
 end
 
 group :test do
