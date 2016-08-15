@@ -10,17 +10,22 @@ module HTTP
       include Enumerable
       def_delegator :to_s, :empty?
 
-      def initialize(client, encoding = Encoding::BINARY)
-        @client    = client
-        @streaming = nil
-        @contents  = nil
-        @encoding  = encoding
+      # The connection object used to make the corresponding request.
+      #
+      # @return [HTTP::Connection]
+      attr_reader :connection
+
+      def initialize(connection, encoding = Encoding::BINARY)
+        @connection = connection
+        @streaming  = nil
+        @contents   = nil
+        @encoding   = encoding
       end
 
       # (see HTTP::Client#readpartial)
       def readpartial(*args)
         stream!
-        @client.readpartial(*args)
+        @connection.readpartial(*args)
       end
 
       # Iterate over the body, allowing it to be enumerable
@@ -47,7 +52,7 @@ module HTTP
           @streaming  = false
           @contents   = String.new("").force_encoding(encoding)
 
-          while (chunk = @client.readpartial)
+          while (chunk = @connection.readpartial)
             @contents << chunk.force_encoding(encoding)
           end
         rescue
