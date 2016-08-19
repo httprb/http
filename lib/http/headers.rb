@@ -196,7 +196,7 @@ module HTTP
     # Transforms `name` to canonical HTTP header capitalization
     #
     # @param [String] name
-    # @raise [InvalidHeaderNameError] if normalized name does not
+    # @raise [HeaderError] if normalized name does not
     #   match {HEADER_NAME_RE}
     # @return [String] canonical HTTP header name
     def normalize_header(name)
@@ -206,7 +206,7 @@ module HTTP
 
       return normalized if normalized =~ COMPLIANT_NAME_RE
 
-      raise InvalidHeaderNameError, "Invalid HTTP header field name: #{name.inspect}"
+      raise HeaderError, "Invalid HTTP header field name: #{name.inspect}"
     end
   end
 end

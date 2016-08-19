@@ -18,9 +18,9 @@ module HTTP
   # Generic Timeout error
   class TimeoutError < Error; end
 
-  # Header name is invalid
-  class InvalidHeaderNameError < Error; end
-
   # Header value is of unexpected format (similar to Net::HTTPHeaderSyntaxError)
-  class HeaderSyntaxError < Error; end
+  class HeaderError < Error; end
+
+  # @deprecated will be removed in v3.0.0
+  InvalidHeaderNameError = HeaderError
 end

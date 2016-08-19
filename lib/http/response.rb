@@ -110,7 +110,7 @@ module HTTP
       begin
         Integer(value)
       rescue ArgumentError
-        raise(HeaderSyntaxError, 'wrong Content-Length format')
+        raise(HeaderError, 'wrong Content-Length format')
       end
     end
 

@@ -28,6 +28,24 @@ RSpec.describe HTTP::Response do
     end
   end
 
+  describe "#content_length" do
+    subject { response.content_length }
+
+    context "without Content-Length header" do
+      it { is_expected.to be_nil }
+    end
+
+    context "with Content-Length: 5" do
+      let(:headers) { {"Content-Length" => "5"} }
+      it { is_expected.to eq 5 }
+    end
+
+    context "with invalid Content-Length" do
+      let(:headers) { {"Content-Length" => "foo"} }
+      it { expect { subject }.to raise_error(Http::HeaderError) }
+    end
+  end
+
   describe "mime_type" do
     subject { response.mime_type }
 
@@ -156,26 +174,6 @@ RSpec.describe HTTP::Response do
     end
   end
  
-  describe "#content_length" do
-    subject(:length) { response.content_length }
-    context "when set" do
-      let(:headers) { { "Content-Length" => "10" } }
-      it { is_expected.to be(10) }
-      context "and response is set as chunked" do
-        before { allow(response).to receive(:chunked?).and_return(true) }
-        it "ignores the length set" do
-        end
-      end
-      context "but format is invalid" do
-        let(:headers) { { "Content-Length" => "ten" } }
-	it { expect { length }.to raise_error(Http::HeaderSyntaxError) }
-      end
-    end
-    context "when not set" do
-      it { is_expected.to be_nil } 
-    end
-  end
-
   describe "#chunked?" do
     subject { response }
     context "when encoding is set to chunked" do
