@@ -185,6 +185,26 @@ RSpec.describe HTTP::Headers do
     end
   end
 
+  describe "#include?" do
+    before do
+      headers.add :content_type, "application/json"
+      headers.add :set_cookie,   "hoo=ray"
+      headers.add :set_cookie,   "woo=hoo"
+    end
+
+    it "tells whenever given headers is set or not" do
+      expect(headers.include?("Content-Type")).to be true
+      expect(headers.include?("Set-Cookie")).to be true
+      expect(headers.include?("Accept")).to be false
+    end
+
+    it "normalizes given header name" do
+      expect(headers.include?(:content_type)).to be true
+      expect(headers.include?(:set_cookie)).to be true
+      expect(headers.include?(:accept)).to be false
+    end
+  end
+
   describe "#to_h" do
     before do
       headers.add :content_type, "application/json"
