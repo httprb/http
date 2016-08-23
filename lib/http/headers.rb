@@ -75,6 +75,14 @@ module HTTP
       end
     end
 
+    # Tells whenever header with given `name` is set or not.
+    #
+    # @return [Boolean]
+    def include?(name)
+      name = normalize_header name.to_s
+      @pile.any? { |k, _| k == name }
+    end
+
     # Returns Rack-compatible headers Hash
     #
     # @return [Hash]
