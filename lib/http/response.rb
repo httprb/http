@@ -110,6 +110,7 @@ module HTTP
       begin
         Integer(value)
       rescue ArgumentError
+        nil
       end
     end
 
