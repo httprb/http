@@ -142,7 +142,7 @@ module HTTP
 
       encoding = @headers.get(Headers::TRANSFER_ENCODING)
 
-      encoding.include?("chunked")
+      encoding.last == "chunked"
     end
 
     # Parse response body with corresponding MIME type adapter.
