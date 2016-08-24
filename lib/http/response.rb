@@ -138,12 +138,11 @@ module HTTP
     end
 
     def chunked?
-      encoding = headers.get(Headers::TRANSFER_ENCODING)
-      case encoding
-        when String then encoding == CHUNKED
-        when Enumerable then encoding.include?("chunked")
-        else false
-      end
+      return false unless @headers.include?(Headers::TRANSFER_ENCODING)
+
+      encoding = @headers.get(Headers::TRANSFER_ENCODING)
+
+      encoding.include?("chunked")
     end
 
     # Parse response body with corresponding MIME type adapter.
