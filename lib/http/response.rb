@@ -101,7 +101,7 @@ module HTTP
     def content_length
       # http://greenbytes.de/tech/webdav/rfc7230.html#rfc.section.3.3.3
       # Clause 3: "If a message is received with both a Transfer-Encoding
-      # and a Content-Length header field, the Transfer-Encoding overrides the Content-Length.        
+      # and a Content-Length header field, the Transfer-Encoding overrides the Content-Length.
       return nil if @headers.include?(Headers::TRANSFER_ENCODING)
 
       value = @headers[Headers::CONTENT_LENGTH]

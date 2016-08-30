@@ -173,11 +173,11 @@ RSpec.describe HTTP::Response do
       expect(response.connection).to eq connection
     end
   end
- 
+
   describe "#chunked?" do
     subject { response }
     context "when encoding is set to chunked" do
-      let(:headers) { { "Transfer-Encoding" => "chunked" } }
+      let(:headers) { {"Transfer-Encoding" => "chunked"} }
       it { is_expected.to be_chunked }
     end
     it { is_expected.not_to be_chunked }

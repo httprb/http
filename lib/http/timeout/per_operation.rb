@@ -72,12 +72,12 @@ module HTTP
             # #read_nonblock and #wait_readable, in which #read_nonblock signalizes waiting
             # for reads, and when waiting for x seconds, it returns nil suddenly without completing
             # the x seconds. In a normal case this would be a timeout on wait/read, but it can
-            # also mean that the socket has been closed by the server. Therefore we "mark" the 
+            # also mean that the socket has been closed by the server. Therefore we "mark" the
             # socket for timeout and try to read more bytes. If it returns :eof, it's all good, no
-            # timeout. Else, the first timeout was a proper timeout. 
-            # This hack has to be done because io/wait#wait_readable doesn't provide a value for when 
+            # timeout. Else, the first timeout was a proper timeout.
+            # This hack has to be done because io/wait#wait_readable doesn't provide a value for when
             # the socket is closed by the server, and HTTP::Parser doesn't provide the limit for the chunks.
-            timeout = true unless v = @socket.to_io.wait_readable(read_timeout) 
+            timeout = true unless @socket.to_io.wait_readable(read_timeout)
           end
         end
 
