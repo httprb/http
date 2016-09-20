@@ -5,6 +5,7 @@ require "http/headers"
 require "http/content_type"
 require "http/mime_type"
 require "http/response/status"
+require "http/response/inflater"
 require "http/uri"
 require "http/cookie_jar"
 require "time"
@@ -48,7 +49,9 @@ module HTTP
         connection = opts.fetch(:connection)
         encoding   = opts[:encoding] || charset || Encoding::BINARY
 
-        @body = Response::Body.new(connection, encoding)
+        inflater = inflater_for(connection)
+
+        @body = Response::Body.new(connection, encoding, :inflater => inflater)
       else
         @body = opts.fetch(:body)
       end
@@ -142,6 +145,19 @@ module HTTP
     # Inspect a response
     def inspect
       "#<#{self.class}/#{@version} #{code} #{reason} #{headers.to_h.inspect}>"
+    end
+
+    private
+
+    def inflater_for(connection)
+      case headers[:content_encoding]
+      when "deflate", "gzip", "x-gzip" then
+        headers.delete :content_encoding
+        Inflater.new(connection)
+      when "none", "identity" then
+        headers.delete :content_encoding
+        nil
+      end
     end
   end
 end
