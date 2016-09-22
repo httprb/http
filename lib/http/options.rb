@@ -3,15 +3,23 @@ require "http/headers"
 require "openssl"
 require "socket"
 require "http/uri"
+require "http/feature"
+require "http/features/auto_inflate"
+require "http/features/auto_deflate"
 
 module HTTP
   class Options
     @default_socket_class     = TCPSocket
     @default_ssl_socket_class = OpenSSL::SSL::SSLSocket
     @default_timeout_class    = HTTP::Timeout::Null
+    @available_features       = {
+      :auto_inflate => Features::AutoInflate,
+      :auto_deflate => Features::AutoDeflate
+    }
 
     class << self
       attr_accessor :default_socket_class, :default_ssl_socket_class, :default_timeout_class
+      attr_reader :available_features
 
       def new(options = {})
         return options if options.is_a?(self)
@@ -50,7 +58,8 @@ module HTTP
         :keep_alive_timeout => 5,
         :headers            => {},
         :cookies            => {},
-        :encoding           => nil
+        :encoding           => nil,
+        :features           => {}
       }
 
       opts_w_defaults = defaults.merge(options)
@@ -71,6 +80,38 @@ module HTTP
 
     def_option :encoding do |encoding|
       self.encoding = Encoding.find(encoding)
+    end
+
+    def_option :features do |features|
+      # Normalize features from:
+      #
+      #     [{feature_one: {opt: 'val'}}, :feature_two]
+      #
+      # into:
+      #
+      #     {feature_one: {opt: 'val'}, feature_two: {}}
+      features = features.each_with_object({}) do |feature, h|
+        if feature.is_a?(Hash)
+          h.merge!(feature)
+        else
+          h[feature] = {}
+        end
+      end
+
+      self.features.merge(features)
+    end
+
+    def features=(features)
+      @features = features.each_with_object({}) do |(name, opts_or_feature), h|
+        h[name] = if opts_or_feature.is_a?(Feature)
+                    opts_or_feature
+                  else
+                    unless (feature = self.class.available_features[name])
+                      argument_error! "Unsupported feature: #{name}"
+                    end
+                    feature.new(opts_or_feature)
+                  end
+      end
     end
 
     %w(
@@ -125,6 +166,10 @@ module HTTP
       dupped = super
       yield(dupped) if block_given?
       dupped
+    end
+
+    def feature(name)
+      features[name]
     end
 
     protected

@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+
+require "zlib"
+
 module HTTP
   class Response
     class Inflater

@@ -228,6 +228,14 @@ module HTTP
       branch default_options.with_nodelay(true)
     end
 
+    # Turn on given features. Available features are:
+    # * auto_inflate
+    # * auto_deflate
+    # @param features
+    def use(*features)
+      branch default_options.with_features(features)
+    end
+
     private
 
     # :nodoc:

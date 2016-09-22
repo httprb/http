@@ -68,6 +68,10 @@ module HTTP
     # Currently defined methods are: chunked, compress, deflate, gzip, identity.
     TRANSFER_ENCODING = "Transfer-Encoding".freeze
 
+    # Indicates what additional content codings have been applied to the
+    # entity-body.
+    CONTENT_ENCODING = "Content-Encoding".freeze
+
     # The user agent string of the user agent.
     USER_AGENT = "User-Agent".freeze
 

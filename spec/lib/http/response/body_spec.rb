@@ -5,7 +5,7 @@ RSpec.describe HTTP::Response::Body do
 
   before           { allow(connection).to receive(:readpartial) { chunks.shift } }
 
-  subject(:body)   { described_class.new(connection, Encoding::UTF_8) }
+  subject(:body)   { described_class.new(connection, connection, Encoding::UTF_8) }
 
   it "streams bodies from responses" do
     expect(subject.to_s).to eq("Hello, World!")
@@ -47,7 +47,7 @@ RSpec.describe HTTP::Response::Body do
     end
     subject(:body) do
       inflater = HTTP::Response::Inflater.new(connection)
-      described_class.new(connection, Encoding::UTF_8, :inflater => inflater)
+      described_class.new(connection, inflater, Encoding::UTF_8)
     end
 
     it "decodes body" do

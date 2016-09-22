@@ -71,6 +71,7 @@ module HTTP
         :proxy_headers => @connection.proxy_response_headers,
         :connection    => @connection,
         :encoding      => options.encoding,
+        :auto_inflate  => options.feature(:auto_inflate),
         :uri           => req.uri
       )
 
@@ -150,18 +151,24 @@ module HTTP
 
     # Create the request body object to send
     def make_request_body(opts, headers)
-      case
-      when opts.body
-        opts.body
-      when opts.form
-        form = HTTP::FormData.create opts.form
-        headers[Headers::CONTENT_TYPE]   ||= form.content_type
-        headers[Headers::CONTENT_LENGTH] ||= form.content_length
-        form.to_s
-      when opts.json
-        body = MimeType[:json].encode opts.json
-        headers[Headers::CONTENT_TYPE] ||= "application/json; charset=#{body.encoding.name}"
-        body
+      request_body =
+        case
+        when opts.body
+          opts.body
+        when opts.form
+          form = HTTP::FormData.create opts.form
+          headers[Headers::CONTENT_TYPE]   ||= form.content_type
+          headers[Headers::CONTENT_LENGTH] ||= form.content_length
+          form.to_s
+        when opts.json
+          body = MimeType[:json].encode opts.json
+          headers[Headers::CONTENT_TYPE] ||= "application/json; charset=#{body.encoding.name}"
+          body
+        end
+      if (auto_deflate = opts.feature(:auto_deflate))
+        auto_deflate.deflate(headers, request_body)
+      else
+        request_body
       end
     end
   end

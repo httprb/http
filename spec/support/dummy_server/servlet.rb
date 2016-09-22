@@ -146,5 +146,26 @@ class DummyServer < WEBrick::HTTPServer
       res.status = 200
       res.body   = req.body
     end
+
+    post "/encoded-body" do |req, res|
+      res.status = 200
+
+      res.body = case req["Accept-Encoding"]
+                 when "gzip" then
+                   res["Content-Encoding"] = "gzip"
+                   StringIO.open do |out|
+                     Zlib::GzipWriter.wrap(out) do |gz|
+                       gz.write "#{req.body}-gzipped"
+                       gz.finish
+                     end
+                     out.tap(&:rewind).read
+                   end
+                 when "deflate" then
+                   res["Content-Encoding"] = "deflate"
+                   Zlib::Deflate.deflate("#{req.body}-deflated")
+                 else
+                   "#{req.body}-raw"
+                 end
+    end
   end
 end

@@ -49,9 +49,9 @@ module HTTP
         connection = opts.fetch(:connection)
         encoding   = opts[:encoding] || charset || Encoding::BINARY
 
-        inflater = inflater_for(connection)
+        stream = body_stream_for(connection, opts)
 
-        @body = Response::Body.new(connection, encoding, :inflater => inflater)
+        @body = Response::Body.new(connection, stream, encoding)
       else
         @body = opts.fetch(:body)
       end
@@ -149,14 +149,11 @@ module HTTP
 
     private
 
-    def inflater_for(connection)
-      case headers[:content_encoding]
-      when "deflate", "gzip", "x-gzip" then
-        headers.delete :content_encoding
-        Inflater.new(connection)
-      when "none", "identity" then
-        headers.delete :content_encoding
-        nil
+    def body_stream_for(connection, opts)
+      if opts[:auto_inflate]
+        opts[:auto_inflate].stream_for(connection, self)
+      else
+        connection
       end
     end
   end

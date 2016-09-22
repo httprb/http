@@ -410,4 +410,47 @@ RSpec.describe HTTP do
       expect(socket_spy_class.setsockopt_calls).to eq([[Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1]])
     end
   end
+
+  describe ".use" do
+    it "turns on given feature" do
+      client = HTTP.use :auto_deflate
+      expect(client.default_options.features.keys).to eq [:auto_deflate]
+    end
+
+    context "with :auto_deflate" do
+      it "sends gzipped body" do
+        client   = HTTP.use :auto_deflate
+        body     = "Hello!"
+        response = client.post("#{dummy.endpoint}/echo-body", :body => body)
+        encoded  = response.to_s
+
+        expect(Zlib::GzipReader.new(StringIO.new(encoded)).read).to eq body
+      end
+    end
+
+    context "with :auto_inflate" do
+      it "returns raw body when Content-Encoding type is missing" do
+        client   = HTTP.use :auto_inflate
+        body     = "Hello!"
+        response = client.post("#{dummy.endpoint}/encoded-body", :body => body)
+        expect(response.to_s).to eq("#{body}-raw")
+      end
+
+      it "returns returns decoded body" do
+        client   = HTTP.use(:auto_inflate).headers("Accept-Encoding" => "gzip")
+        body     = "Hello!"
+        response = client.post("#{dummy.endpoint}/encoded-body", :body => body)
+
+        expect(response.to_s).to eq("#{body}-gzipped")
+      end
+
+      it "returns deflated body" do
+        client   = HTTP.use(:auto_inflate).headers("Accept-Encoding" => "deflate")
+        body     = "Hello!"
+        response = client.post("#{dummy.endpoint}/encoded-body", :body => body)
+
+        expect(response.to_s).to eq("#{body}-deflated")
+      end
+    end
+  end
 end
