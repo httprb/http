@@ -1,14 +1,12 @@
 # frozen_string_literal: true
+
 require "http/headers"
-require "openssl"
-require "socket"
 require "http/uri"
 
 module HTTP
   class Options
-    @default_socket_class     = TCPSocket
-    @default_ssl_socket_class = OpenSSL::SSL::SSLSocket
-    @default_timeout_class    = HTTP::Timeout::Null
+    @default_socket_class     = ::Socket
+    @default_ssl_socket_class = ::OpenSSL::SSL::SSLSocket
 
     class << self
       attr_accessor :default_socket_class, :default_ssl_socket_class, :default_timeout_class
@@ -41,7 +39,6 @@ module HTTP
       defaults = {
         :response           => :auto,
         :proxy              => {},
-        :timeout_class      => self.class.default_timeout_class,
         :timeout_options    => {},
         :socket_class       => self.class.default_socket_class,
         :nodelay            => false,

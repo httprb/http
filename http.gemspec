@@ -23,12 +23,13 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = HTTP::VERSION
 
-  gem.required_ruby_version = ">= 2.0"
+  gem.required_ruby_version = ">= 2.2.6"
 
-  gem.add_runtime_dependency "http_parser.rb", "~> 0.6.0"
-  gem.add_runtime_dependency "http-form_data", "~> 1.0.1"
-  gem.add_runtime_dependency "http-cookie",    "~> 1.0"
   gem.add_runtime_dependency "addressable",    "~> 2.3"
+  gem.add_runtime_dependency "http-cookie",    "~> 1.0"
+  gem.add_runtime_dependency "http-form_data", "~> 1.0.1"
+  gem.add_runtime_dependency "http_parser.rb", "~> 0.6.0"
+  gem.add_runtime_dependency "socketry",       ">= 0.5.1"
 
   gem.add_development_dependency "bundler", "~> 1.0"
 end

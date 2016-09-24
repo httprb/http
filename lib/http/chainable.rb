@@ -83,28 +83,9 @@ module HTTP
     #   @option options [Float] :read Read timeout
     #   @option options [Float] :write Write timeout
     #   @option options [Float] :connect Connect timeout
-    def timeout(klass, options = {})
-      if klass.is_a? Hash
-        options = klass
-        klass   = :per_operation
-      end
-
-      klass = case klass.to_sym
-              when :null          then HTTP::Timeout::Null
-              when :global        then HTTP::Timeout::Global
-              when :per_operation then HTTP::Timeout::PerOperation
-              else raise ArgumentError, "Unsupported Timeout class: #{klass}"
-              end
-
-      [:read, :write, :connect].each do |k|
-        next unless options.key? k
-        options["#{k}_timeout".to_sym] = options.delete k
-      end
-
-      branch default_options.merge(
-        :timeout_class => klass,
-        :timeout_options => options
-      )
+    def timeout(_klass, _options = {})
+      warn "HTTP::Options#timeout still needs to be reimplemented"
+      branch(default_options)
     end
 
     # @overload persistent(host)

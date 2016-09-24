@@ -37,13 +37,22 @@ module HTTP
 
       @parser = Response::Parser.new
 
-      @socket = options.timeout_class.new(options.timeout_options)
-      @socket.connect(options.socket_class, req.socket_host, req.socket_port, options.nodelay)
+      if req.uri.https?
+        @socket = Socketry::SSL::Socket.new(
+          :socket_class => options.socket_class,
+          :ssl_context => options.ssl_context || OpenSSL::SSL::SSLContext.new,
+          :ssl_params => options.ssl || {}
+        )
+      else
+        @socket = Socketry::TCP::Socket.new(:socket_class => options.socket_class)
+      end
+
+      @socket.connect(req.socket_host, req.socket_port)
+      @socket.nodelay = options.nodelay if options.nodelay
 
       send_proxy_connect_request(req)
-      start_tls(req, options)
       reset_timer
-    rescue IOError, SocketError, SystemCallError => ex
+    rescue Socketry::Error => ex
       raise ConnectionError, "failed to connect: #{ex}", ex.backtrace
     end
 
@@ -141,22 +150,6 @@ module HTTP
     end
 
     private
-
-    # Sets up SSL context and starts TLS if needed.
-    # @param (see #initialize)
-    # @return [void]
-    def start_tls(req, options)
-      return unless req.uri.https? && !failed_proxy_connect?
-
-      ssl_context = options.ssl_context
-
-      unless ssl_context
-        ssl_context = OpenSSL::SSL::SSLContext.new
-        ssl_context.set_params(options.ssl || {})
-      end
-
-      @socket.start_tls(req.uri.host, options.ssl_socket_class, ssl_context)
-    end
 
     # Open tunnel through proxy
     def send_proxy_connect_request(req)

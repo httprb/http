@@ -45,7 +45,7 @@ module HTTP
       # Send headers needed to connect through proxy
       def connect_through_proxy
         add_headers
-        write(join_headers)
+        @socket.write(join_headers)
       end
 
       # Adds the headers to the header array for the given request body we are working
@@ -77,30 +77,22 @@ module HTTP
         # expecting a third write that never happens.
         case @body
         when NilClass
-          write(headers)
+          @socket.write(headers)
         when String
-          write(headers << @body)
+          @socket.write(headers << @body)
         when Enumerable
-          write(headers)
+          @socket.write(headers)
 
           @body.each do |chunk|
-            write(chunk.bytesize.to_s(16) << CRLF << chunk << CRLF)
+            @socket.write(chunk.bytesize.to_s(16) << CRLF << chunk << CRLF)
           end
 
-          write(CHUNKED_END)
+          @socket.write(CHUNKED_END)
         else raise TypeError, "invalid body type: #{@body.class}"
         end
       end
 
       private
-
-      def write(data)
-        until data.empty?
-          length = @socket.write(data)
-          break unless data.bytesize > length
-          data = data.byteslice(length..-1)
-        end
-      end
 
       def validate_body_type!
         return if VALID_BODY_TYPES.any? { |type| @body.is_a? type }

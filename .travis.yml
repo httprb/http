@@ -8,12 +8,9 @@ env:
     - JRUBY_OPTS="$JRUBY_OPTS --debug"
 
 rvm:
-  - 2.0.0
-  - 2.1
-  - 2.2
-  - 2.3.0
-  - 2.3.1
-  - jruby-9.1.0.0
+  - 2.2.6
+  - 2.3.3
+  - jruby-9.1.6.0
   - jruby-head
   - ruby-head
   - rbx-2
