@@ -2,6 +2,7 @@
 # encoding: UTF-8
 
 class DummyServer < WEBrick::HTTPServer
+  # rubocop:disable Metrics/ClassLength
   class Servlet < WEBrick::HTTPServlet::AbstractServlet
     def self.sockets
       @sockets ||= []

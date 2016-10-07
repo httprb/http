@@ -8,6 +8,7 @@ require "http/features/auto_inflate"
 require "http/features/auto_deflate"
 
 module HTTP
+  # rubocop:disable Metrics/ClassLength
   class Options
     @default_socket_class     = TCPSocket
     @default_ssl_socket_class = OpenSSL::SSL::SSLSocket
