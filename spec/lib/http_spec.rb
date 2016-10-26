@@ -436,7 +436,7 @@ RSpec.describe HTTP do
         expect(response.to_s).to eq("#{body}-raw")
       end
 
-      it "returns returns decoded body" do
+      it "returns decoded body" do
         client   = HTTP.use(:auto_inflate).headers("Accept-Encoding" => "gzip")
         body     = "Hello!"
         response = client.post("#{dummy.endpoint}/encoded-body", :body => body)

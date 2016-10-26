@@ -31,8 +31,8 @@ module HTTP
             Zlib::GzipWriter.wrap(out) do |gz|
               gz.write body
               gz.finish
+              out.tap(&:rewind).read
             end
-            out.tap(&:rewind).read
           end
         when "deflate" then
           Zlib::Deflate.deflate(body)

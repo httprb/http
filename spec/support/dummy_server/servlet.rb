@@ -158,8 +158,8 @@ class DummyServer < WEBrick::HTTPServer
                      Zlib::GzipWriter.wrap(out) do |gz|
                        gz.write "#{req.body}-gzipped"
                        gz.finish
+                       out.tap(&:rewind).read
                      end
-                     out.tap(&:rewind).read
                    end
                  when "deflate" then
                    res["Content-Encoding"] = "deflate"
