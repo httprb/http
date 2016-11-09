@@ -1,3 +1,18 @@
+## 2.1.0 (2016-11-08)
+
+* [#370](https://github.com/httprb/http/issues/370)
+  Add Headers#include?
+  ([@ixti])
+
+* [#364](https://github.com/httprb/http/issues/364)
+  Add HTTP::Response#connection
+  ([@janko-m])
+
+* [#362](https://github.com/httprb/http/issues/362)
+  connect_ssl uses connect_timeout (Closes #359)
+  ([@TiagoCardoso1983])
+
+
 ## 2.0.3 (2016-08-03)
 
 * [#365](https://github.com/httprb/http/issues/365)
