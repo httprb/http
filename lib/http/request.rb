@@ -37,7 +37,7 @@ module HTTP
       # RFC 3744: WebDAV Access Control Protocol
       :acl,
 
-      # draft-dusseault-http-patch: PATCH Method for HTTP
+      # RFC 5789: PATCH Method for HTTP
       :patch,
 
       # draft-reschke-webdav-search: WebDAV Search
