@@ -75,10 +75,12 @@ module HTTP
       branch(options).request verb, uri
     end
 
-    # @overload(options = {})
+    # @overload timeout(options = {})
     #   Syntax sugar for `timeout(:per_operation, options)`
-    # @overload(klass, options = {})
+    # @overload timeout(klass, options = {})
+    #   Adds a timeout to the request.
     #   @param [#to_sym] klass
+    #     either :null, :global, or :per_operation
     #   @param [Hash] options
     #   @option options [Float] :read Read timeout
     #   @option options [Float] :write Write timeout
