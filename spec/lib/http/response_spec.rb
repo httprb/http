@@ -132,8 +132,7 @@ RSpec.describe HTTP::Response do
     let(:body)    { double :to_s => "foobar" }
 
     it "returns human-friendly response representation" do
-      expect(response.inspect).
-        to eq '#<HTTP::Response/1.1 200 OK {"Content-Type"=>"text/plain"}>'
+      expect(response.inspect).to eq "HTTP/1.1 200 OK\nContent-Type: text/plain"
     end
   end
 

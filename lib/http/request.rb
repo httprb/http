@@ -5,6 +5,7 @@ require "time"
 
 require "http/errors"
 require "http/headers"
+require "http/pretty_printer"
 require "http/request/writer"
 require "http/version"
 require "http/uri"
@@ -14,6 +15,7 @@ module HTTP
     extend Forwardable
 
     include HTTP::Headers::Mixin
+    include HTTP::PrettyPrinter
 
     # The method given was not understood
     class UnsupportedMethodError < RequestError; end
