@@ -5,7 +5,7 @@ RSpec.describe HTTP::Response::Body do
 
   before           { allow(connection).to receive(:readpartial) { chunks.shift } }
 
-  subject(:body)   { described_class.new(connection, Encoding::UTF_8) }
+  subject(:body)   { described_class.new(connection, connection, Encoding::UTF_8) }
 
   it "streams bodies from responses" do
     expect(subject.to_s).to eq("Hello, World!")
@@ -35,6 +35,34 @@ RSpec.describe HTTP::Response::Body do
       it "calls underlying connection readpartial without specific size" do
         expect(connection).to receive(:readpartial).with no_args
         body.readpartial
+      end
+    end
+  end
+
+  context "when body is gzipped" do
+    let(:chunks) do
+      body = Zlib::Deflate.deflate("Hi, HTTP here ☺")
+      len  = body.length
+      [String.new(body[0, len / 2]), String.new(body[(len / 2)..-1])]
+    end
+    subject(:body) do
+      inflater = HTTP::Response::Inflater.new(connection)
+      described_class.new(connection, inflater, Encoding::UTF_8)
+    end
+
+    it "decodes body" do
+      expect(subject.to_s).to eq("Hi, HTTP here ☺")
+    end
+
+    describe "#readpartial" do
+      it "streams decoded body" do
+        [
+          "Hi, HTTP ",
+          String.new("here ☺").force_encoding("ASCII-8BIT"),
+          nil
+        ].each do |part|
+          expect(subject.readpartial).to eq(part)
+        end
       end
     end
   end

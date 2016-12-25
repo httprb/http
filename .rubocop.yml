@@ -20,7 +20,7 @@ Metrics/LineLength:
 
 Metrics/MethodLength:
   CountComments: false
-  Max: 22 # TODO: Lower to 15
+  Max: 25 # TODO: Lower to 15
 
 Metrics/ModuleLength:
   CountComments: false

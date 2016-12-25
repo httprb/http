@@ -24,7 +24,8 @@ RSpec.describe HTTP::Options, "merge" do
       :body      => "body-foo",
       :json      => {:foo => "foo"},
       :headers   => {:accept => "json", :foo => "foo"},
-      :proxy     => {}
+      :proxy     => {},
+      :features  => {}
     )
 
     bar = HTTP::Options.new(
@@ -60,7 +61,8 @@ RSpec.describe HTTP::Options, "merge" do
       :ssl_socket_class   => described_class.default_ssl_socket_class,
       :ssl_context        => nil,
       :cookies            => {},
-      :encoding           => nil
+      :encoding           => nil,
+      :features           => {}
     )
   end
 end

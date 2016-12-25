@@ -2,6 +2,7 @@
 # encoding: UTF-8
 
 class DummyServer < WEBrick::HTTPServer
+  # rubocop:disable Metrics/ClassLength
   class Servlet < WEBrick::HTTPServlet::AbstractServlet
     def self.sockets
       @sockets ||= []
@@ -145,6 +146,27 @@ class DummyServer < WEBrick::HTTPServer
     post "/echo-body" do |req, res|
       res.status = 200
       res.body   = req.body
+    end
+
+    post "/encoded-body" do |req, res|
+      res.status = 200
+
+      res.body = case req["Accept-Encoding"]
+                 when "gzip" then
+                   res["Content-Encoding"] = "gzip"
+                   StringIO.open do |out|
+                     Zlib::GzipWriter.wrap(out) do |gz|
+                       gz.write "#{req.body}-gzipped"
+                       gz.finish
+                       out.tap(&:rewind).read
+                     end
+                   end
+                 when "deflate" then
+                   res["Content-Encoding"] = "deflate"
+                   Zlib::Deflate.deflate("#{req.body}-deflated")
+                 else
+                   "#{req.body}-raw"
+                 end
     end
   end
 end

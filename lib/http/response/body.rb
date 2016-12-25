@@ -15,17 +15,18 @@ module HTTP
       # @return [HTTP::Connection]
       attr_reader :connection
 
-      def initialize(connection, encoding = Encoding::BINARY)
+      def initialize(connection, stream, encoding = Encoding::BINARY)
         @connection = connection
         @streaming  = nil
         @contents   = nil
+        @stream     = stream
         @encoding   = encoding
       end
 
       # (see HTTP::Client#readpartial)
       def readpartial(*args)
         stream!
-        @connection.readpartial(*args)
+        @stream.readpartial(*args)
       end
 
       # Iterate over the body, allowing it to be enumerable
@@ -52,7 +53,7 @@ module HTTP
           @streaming  = false
           @contents   = String.new("").force_encoding(encoding)
 
-          while (chunk = @connection.readpartial)
+          while (chunk = @stream.readpartial)
             @contents << chunk.force_encoding(encoding)
           end
         rescue

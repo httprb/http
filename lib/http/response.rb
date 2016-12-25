@@ -5,6 +5,7 @@ require "http/headers"
 require "http/content_type"
 require "http/mime_type"
 require "http/response/status"
+require "http/response/inflater"
 require "http/uri"
 require "http/cookie_jar"
 require "time"
@@ -48,7 +49,9 @@ module HTTP
         connection = opts.fetch(:connection)
         encoding   = opts[:encoding] || charset || Encoding::BINARY
 
-        @body = Response::Body.new(connection, encoding)
+        stream = body_stream_for(connection, opts)
+
+        @body = Response::Body.new(connection, stream, encoding)
       else
         @body = opts.fetch(:body)
       end
@@ -142,6 +145,16 @@ module HTTP
     # Inspect a response
     def inspect
       "#<#{self.class}/#{@version} #{code} #{reason} #{headers.to_h.inspect}>"
+    end
+
+    private
+
+    def body_stream_for(connection, opts)
+      if opts[:auto_inflate]
+        opts[:auto_inflate].stream_for(connection, self)
+      else
+        connection
+      end
     end
   end
 end
