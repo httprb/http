@@ -17,13 +17,18 @@ group :test do
   gem "backports"
   gem "coveralls", :require => false
   gem "simplecov", ">= 0.9"
-  gem "json",      ">= 1.8.1"
   gem "rubocop",   "=  0.40.0"
   gem "rspec",     "~> 3.0"
   gem "rspec-its"
   gem "yardstick"
   gem "certificate_authority", :require => false
-  gem "activemodel", "~> 4", :require => false # Used by certificate_authority
+  if RUBY_VERSION >= "2.4.0"
+    gem "json", "~> 2.0"
+    gem "activemodel", "~> 5", :require => false # Used by certificate_authority
+  else
+    gem "json", ">= 1.8.1"
+    gem "activemodel", "~> 4", :require => false # Used by certificate_authority
+  end
 end
 
 group :doc do
