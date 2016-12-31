@@ -1,4 +1,5 @@
 source "https://rubygems.org"
+ruby RUBY_VERSION
 
 gem "rake"
 
@@ -23,7 +24,7 @@ group :test do
   gem "rspec-its"
   gem "yardstick"
   gem "certificate_authority", :require => false
-  gem "activemodel", "~> 4", :require => false # Used by certificate_authority
+  gem "activemodel",           :require => false # Used by certificate_authority
 end
 
 group :doc do
