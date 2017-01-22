@@ -12,14 +12,21 @@ env:
     - JRUBY_OPTS="$JRUBY_OPTS --debug"
 
 rvm:
-  - jruby-9.1.6.0
   - 2.0.0
   - 2.1
   - 2.2
   - 2.3.0
+  - 2.3.1
+  - 2.3.2
+  - 2.3.3
   - 2.4.0
+  - ruby-head
+  - jruby-9.1.6.0
+  - jruby-9.1.7.0
 
 matrix:
+  allow_failures:
+    - rvm: ruby-head
   fast_finish: true
 
 branches:
