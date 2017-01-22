@@ -2,10 +2,14 @@ language: ruby
 sudo: false
 
 before_install:
-  - gem update --system
-  - gem install bundler
+  - gem update --system 2.6.8
+  - gem --version
+  - gem install bundler --version 1.13.7 --no-rdoc --no-ri
+  - bundle --version
 
-bundler_args: --without development doc
+install: bundle _1.13.7_ install --without development doc
+
+script: bundle _1.13.7_ exec rake
 
 env:
   global:
