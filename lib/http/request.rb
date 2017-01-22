@@ -37,6 +37,9 @@ module HTTP
       # RFC 3744: WebDAV Access Control Protocol
       :acl,
 
+      # RFC 6352: vCard Extensions to WebDAV -- CardDAV
+      :report,
+
       # RFC 5789: PATCH Method for HTTP
       :patch,
 
