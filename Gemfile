@@ -18,7 +18,6 @@ group :test do
   gem "backports"
   gem "coveralls", :require => false
   gem "simplecov", ">= 0.9"
-  gem "json",      ">= 1.8.1"
   gem "rubocop",   "=  0.40.0"
   gem "rspec",     "~> 3.0"
   gem "rspec-its"
