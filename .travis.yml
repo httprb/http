@@ -2,20 +2,25 @@ language: ruby
 sudo: false
 
 before_install:
-  - gem install bundler
+  - gem update --system 2.6.8
+  - gem --version
+  - gem install bundler --version 1.13.7 --no-rdoc --no-ri
+  - bundle --version
 
-bundler_args: --without development doc
+install: bundle _1.13.7_ install --without development doc
+
+script: bundle _1.13.7_ exec rake
 
 env:
   global:
     - JRUBY_OPTS="$JRUBY_OPTS --debug"
 
 rvm:
-  - jruby-9.1.6.0
+  - jruby-9.1.7.0
   - 2.0.0
   - 2.1
   - 2.2
-  - 2.3.0
+  - 2.3.3
   - 2.4.0
 
 matrix:
