@@ -12,9 +12,13 @@ module HTTP
 
       attr_reader :read_timeout, :write_timeout, :connect_timeout
 
-      def initialize(*args)
-        super
+      def initialize(options)
+        super(options)
 
+        update_timeout(options)
+      end
+
+      def update_timeout(options)
         @read_timeout = options.fetch(:read_timeout, READ_TIMEOUT)
         @write_timeout = options.fetch(:write_timeout, WRITE_TIMEOUT)
         @connect_timeout = options.fetch(:connect_timeout, CONNECT_TIMEOUT)

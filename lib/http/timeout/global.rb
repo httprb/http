@@ -9,7 +9,7 @@ module HTTP
     class Global < PerOperation
       attr_reader :time_left, :total_timeout
 
-      def initialize(*args)
+      def update_timeout(*args)
         super
         reset_counter
       end

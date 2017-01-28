@@ -9,10 +9,9 @@ module HTTP
 
       def_delegators :@socket, :close, :closed?
 
-      attr_reader :options, :socket
+      attr_reader :socket
 
-      def initialize(options = {})
-        @options = options
+      def initialize(_options = {})
       end
 
       # Connects to a socket

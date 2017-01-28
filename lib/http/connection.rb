@@ -140,6 +140,12 @@ module HTTP
       !@conn_expires_at || @conn_expires_at < Time.now
     end
 
+    # Modify the timeout on the connection
+    # @return [void]
+    def update_timeout(options)
+      @socket.update_timeout(options)
+    end
+
     private
 
     # Sets up SSL context and starts TLS if needed.
