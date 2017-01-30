@@ -55,7 +55,7 @@ module HTTP
 
           length = @length || Float::INFINITY
 
-          while (length > 0 && chunk = @stream.readpartial)
+          while length > 0 && (chunk = @stream.readpartial)
             length -= chunk.bytesize
             @contents << chunk.force_encoding(encoding)
           end
