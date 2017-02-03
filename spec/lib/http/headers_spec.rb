@@ -31,12 +31,12 @@ RSpec.describe HTTP::Headers do
 
     it "fails with empty header name" do
       expect { headers.set "", "foo bar" }.
-        to raise_error HTTP::InvalidHeaderNameError
+        to raise_error HTTP::HeaderError
     end
 
     it "fails with invalid header name" do
       expect { headers.set "foo bar", "baz" }.
-        to raise_error HTTP::InvalidHeaderNameError
+        to raise_error HTTP::HeaderError
     end
   end
 
@@ -79,12 +79,12 @@ RSpec.describe HTTP::Headers do
 
     it "fails with empty header name" do
       expect { headers.delete "" }.
-        to raise_error HTTP::InvalidHeaderNameError
+        to raise_error HTTP::HeaderError
     end
 
     it "fails with invalid header name" do
       expect { headers.delete "foo bar" }.
-        to raise_error HTTP::InvalidHeaderNameError
+        to raise_error HTTP::HeaderError
     end
   end
 
@@ -113,12 +113,12 @@ RSpec.describe HTTP::Headers do
 
     it "fails with empty header name" do
       expect { headers.add("", "foobar") }.
-        to raise_error HTTP::InvalidHeaderNameError
+        to raise_error HTTP::HeaderError
     end
 
     it "fails with invalid header name" do
       expect { headers.add "foo bar", "baz" }.
-        to raise_error HTTP::InvalidHeaderNameError
+        to raise_error HTTP::HeaderError
     end
   end
 
@@ -141,12 +141,12 @@ RSpec.describe HTTP::Headers do
 
     it "fails with empty header name" do
       expect { headers.get("") }.
-        to raise_error HTTP::InvalidHeaderNameError
+        to raise_error HTTP::HeaderError
     end
 
     it "fails with invalid header name" do
       expect { headers.get("foo bar") }.
-        to raise_error HTTP::InvalidHeaderNameError
+        to raise_error HTTP::HeaderError
     end
   end
 
