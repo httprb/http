@@ -20,5 +20,4 @@ module HTTP
 
   # Header value is of unexpected format (similar to Net::HTTPHeaderSyntaxError)
   class HeaderError < Error; end
-
 end

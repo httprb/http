@@ -5,7 +5,7 @@ RSpec.describe HTTP::Response::Body do
 
   before           { allow(connection).to receive(:readpartial) { chunks.shift } }
 
-  subject(:body)   { described_class.new(connection, connection,:encoding => Encoding::UTF_8) }
+  subject(:body)   { described_class.new(connection, connection, :encoding => Encoding::UTF_8) }
 
   it "streams bodies from responses" do
     expect(subject.to_s).to eq("Hello, World!")
