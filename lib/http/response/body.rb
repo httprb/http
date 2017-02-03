@@ -15,7 +15,7 @@ module HTTP
       # @return [HTTP::Connection]
       attr_reader :connection
 
-      def initialize(connection, stream, :length => nil, :encoding => Encoding::BINARY)
+      def initialize(connection, stream, length: nil, encoding: Encoding::BINARY)
         @connection = connection
         @streaming  = nil
         @contents   = nil
