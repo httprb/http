@@ -1,3 +1,14 @@
+## 2.2.0 (2017-02-03)
+
+* [#375](https://github.com/httprb/http/pull/375)
+  Add support for automatic Gzip/Inflate
+  ([@Bonias])
+
+* [#390](https://github.com/httprb/http/pull/390)
+  Add REPORT to the list of valid HTTP verbs
+  ([@ixti])
+
+
 ## 2.1.0 (2016-11-08)
 
 * [#370](https://github.com/httprb/http/issues/370)
@@ -566,3 +577,4 @@ end
 [@jhbabon]: https://github.com/jhbabon
 [@britishtea]: https://github.com/britishtea
 [@janko-m]: https://github.com/janko-m
+[@Bonias]: https://github.com/Bonias
