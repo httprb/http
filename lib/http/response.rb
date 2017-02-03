@@ -51,7 +51,7 @@ module HTTP
 
         stream = body_stream_for(connection, opts)
 
-        @body = Response::Body.new(connection, stream, encoding)
+        @body = Response::Body.new(connection, stream, encoding: encoding, length: content_length)
       else
         @body = opts.fetch(:body)
       end
