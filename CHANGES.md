@@ -1,3 +1,11 @@
+## master (the future is unwritten)
+
+* [#368](https://github.com/httprb/http/pull/368),
+  [#357](https://github.com/httprb/http/issues/357)
+  Fix timeout issue.
+  ([@HoneyryderChuck])
+
+
 ## 2.2.1 (2017-02-06)
 
 * [#395](https://github.com/httprb/http/issues/395)
@@ -585,3 +593,4 @@ end
 [@britishtea]: https://github.com/britishtea
 [@janko-m]: https://github.com/janko-m
 [@Bonias]: https://github.com/Bonias
+[@HoneyryderChuck]: https://github.com/HoneyryderChuck
