@@ -5,6 +5,8 @@ require "zlib"
 module HTTP
   class Response
     class Inflater
+      attr_reader :connection
+
       def initialize(connection)
         @connection = connection
       end
