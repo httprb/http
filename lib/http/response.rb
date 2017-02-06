@@ -50,7 +50,6 @@ module HTTP
         encoding   = opts[:encoding] || charset || Encoding::BINARY
         stream     = body_stream_for(connection, opts)
 
-
         @body = Response::Body.new(stream, :encoding => encoding, :length => content_length)
       else
         @body = opts.fetch(:body)
