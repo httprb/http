@@ -48,10 +48,10 @@ module HTTP
       if opts.include?(:connection)
         connection = opts.fetch(:connection)
         encoding   = opts[:encoding] || charset || Encoding::BINARY
+        stream     = body_stream_for(connection, opts)
 
-        stream = body_stream_for(connection, opts)
 
-        @body = Response::Body.new(connection, stream, :encoding => encoding, :length => content_length)
+        @body = Response::Body.new(stream, :encoding => encoding, :length => content_length)
       else
         @body = opts.fetch(:body)
       end

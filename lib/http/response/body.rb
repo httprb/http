@@ -15,11 +15,11 @@ module HTTP
       # @return [HTTP::Connection]
       attr_reader :connection
 
-      def initialize(connection, stream, length: nil, encoding: Encoding::BINARY)
-        @connection = connection
+      def initialize(stream, length: nil, encoding: Encoding::BINARY)
+        @stream     = stream
+        @connection = stream.is_a?(Inflater) ? stream.connection : stream
         @streaming  = nil
         @contents   = nil
-        @stream     = stream
         @encoding   = encoding
         @length     = length || Float::INFINITY
       end

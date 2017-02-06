@@ -1,3 +1,10 @@
+## 2.2.1 (2017-02-06)
+
+* [#395](https://github.com/httprb/http/issues/395)
+  Fix regression of API, that broke webmock integration.
+  ([@ixti])
+
+
 ## 2.2.0 (2017-02-03)
 
 * [#375](https://github.com/httprb/http/pull/375)
