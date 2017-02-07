@@ -21,10 +21,16 @@ rvm:
   - 2.1
   - 2.2
   - 2.3.3
-  - 2.4.0
 
+env:
+  - RUBOCOP=false
+
+# Only run RuboCop on the latest Ruby
 matrix:
   fast_finish: true
+  include:
+  - rvm: 2.4.0
+    env: RUBOCOP=true
 
 branches:
   only:
