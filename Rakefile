@@ -6,7 +6,7 @@ RSpec::Core::RakeTask.new
 
 task :test => :spec
 
-run_rubocop = true unless ENV["RUBOCOP"] == false
+run_rubocop = true unless ENV["RUBOCOP"] == "false"
 
 begin
   require "rubocop/rake_task"
@@ -74,4 +74,5 @@ task :generate_status_codes do
   end
 end
 
-task :default => [:spec, :rubocop, :verify_measurements]
+task :default => [:spec, :rubocop]
+Rake::Task[:default].enhance [:verify_measurements] if ENV["METRICS"] == "true"
