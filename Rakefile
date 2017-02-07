@@ -4,22 +4,8 @@ require "bundler/gem_tasks"
 require "rspec/core/rake_task"
 RSpec::Core::RakeTask.new
 
-task :test => :spec
-
-run_rubocop = true unless ENV["RUBOCOP"] == "false"
-
-begin
-  require "rubocop/rake_task"
-rescue LoadError
-  warn "couldn't load RuboCop!"
-  run_rubocop = false
-end
-
-if run_rubocop
-  RuboCop::RakeTask.new
-else
-  task(:rubocop) { $stderr.puts "RuboCop is disabled" }
-end
+require "rubocop/rake_task"
+RuboCop::RakeTask.new
 
 require "yardstick/rake/measurement"
 Yardstick::Rake::Measurement.new do |measurement|
@@ -74,5 +60,8 @@ task :generate_status_codes do
   end
 end
 
-task :default => [:spec, :rubocop]
-Rake::Task[:default].enhance [:verify_measurements] if ENV["METRICS"] == "true"
+task :default => [:spec]
+
+if ENV["CI"].nil? || "true" == ENV["FULL_SUITE"]
+  Rake::Task[:default].enhance([:rubocop, :verify_measurements])
+end
