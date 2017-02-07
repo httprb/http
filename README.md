@@ -6,6 +6,10 @@
 [![Coverage Status](https://coveralls.io/repos/httprb/http/badge.svg?branch=master)](https://coveralls.io/r/httprb/http)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/httprb/http/blob/master/LICENSE.txt)
 
+_NOTE: This is the 2.x **stable** branch.  For the 3.x **development** branch, please see:_
+
+https://github.com/httprb/http/
+
 ## About
 
 HTTP (The Gem! a.k.a. http.rb) is an easy-to-use client library for making requests
