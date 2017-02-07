@@ -11,7 +11,11 @@ install: bundle _1.14.3_ install --without development doc
 
 script: bundle _1.14.3_ exec rake
 
+env: JRUBY_OPTS="$JRUBY_OPTS --debug"
+
 rvm:
+  # Include JRuby first because it takes the longest
+  - jruby-9.1.7.0
   - 2.0.0
   - 2.1
   - 2.2
@@ -21,9 +25,6 @@ rvm:
 matrix:
   fast_finish: true
   include:
-  # Include JRuby first because it takes the longest
-  - rvm: jruby-9.1.7.0
-    env: JRUBY_OPTS="$JRUBY_OPTS --debug"
   # Only run RuboCop and Yardstick metrics on the latest Ruby
   - rvm: 2.4.0
     env: SUITE="rubocop"
