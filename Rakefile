@@ -60,8 +60,12 @@ task :generate_status_codes do
   end
 end
 
-task :default => [:spec]
-
-if ENV["CI"].nil? || "true" == ENV["FULL_SUITE"]
-  Rake::Task[:default].enhance([:rubocop, :verify_measurements])
+if ENV["CI"].nil?
+  task :default => [:spec, :rubocop, :verify_measurements]
+else
+  case ENV["SUITE"]
+  when "rubocop"   then task :default => :rubocop
+  when "yardstick" then task :default => :verify_measurements
+  else                  task :default => :spec
+  end
 end
