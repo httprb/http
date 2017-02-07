@@ -16,6 +16,7 @@ rvm:
   - 2.1
   - 2.2
   - 2.3.3
+  - 2.4.0
 
 matrix:
   fast_finish: true
@@ -25,7 +26,9 @@ matrix:
     env: JRUBY_OPTS="$JRUBY_OPTS --debug"
   # Only run RuboCop and Yardstick metrics on the latest Ruby
   - rvm: 2.4.0
-    env: FULL_SUITE=true
+    env: SUITE="rubocop"
+  - rvm: 2.4.0
+    env: SUITE="yardstick"
 
 branches:
   only:
