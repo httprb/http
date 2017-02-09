@@ -23,7 +23,7 @@ module HTTP
     end
 
     # Make an HTTP request
-    def request(verb, uri, opts = {})
+    def request(verb, uri, opts = {}) # rubocop:disable Style/OptionHash
       opts    = @default_options.merge(opts)
       uri     = make_request_uri(uri, opts)
       headers = make_request_headers(opts)
