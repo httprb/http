@@ -1,5 +1,5 @@
 AllCops:
-  DisplayCopNames: true
+    DisplayCopNames: true
 
 Metrics/BlockNesting:
   Max: 2
@@ -63,6 +63,9 @@ Style/HashSyntax:
 
 Style/Lambda:
   Enabled: false
+
+Style/OptionHash:
+  Enabled: true
 
 Style/SpaceAroundOperators:
   AllowForAlignment: true

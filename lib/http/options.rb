@@ -22,7 +22,7 @@ module HTTP
       attr_accessor :default_socket_class, :default_ssl_socket_class, :default_timeout_class
       attr_reader :available_features
 
-      def new(options = {})
+      def new(options = {}) # rubocop:disable Style/OptionHash
         return options if options.is_a?(self)
         super
       end
@@ -46,7 +46,7 @@ module HTTP
       end
     end
 
-    def initialize(options = {})
+    def initialize(options = {}) # rubocop:disable Style/OptionHash
       defaults = {
         :response           => :auto,
         :proxy              => {},
