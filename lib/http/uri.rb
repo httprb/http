@@ -114,6 +114,11 @@ module HTTP
       HTTPS_SCHEME == scheme
     end
 
+    # @return [Object] duplicated URI
+    def dup
+      self.class.new @uri.dup
+    end
+
     # Convert an HTTP::URI to a String
     #
     # @return [String] URI serialized as a String
