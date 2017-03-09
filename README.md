@@ -194,5 +194,5 @@ dropped.
 
 ## Copyright
 
-Copyright (c) 2011-2016 Tony Arcieri, Erik Michaels-Ober, Alexey V. Zapparov, Zachary Anker.
+Copyright (c) 2011-2017 Tony Arcieri, Alexey V. Zapparov, Erik Michaels-Ober, Zachary Anker.
 See LICENSE.txt for further details.
