@@ -288,6 +288,14 @@ RSpec.describe HTTP do
         end
       end
     end
+
+    context "with timeout specified" do
+      subject(:client) { HTTP.persistent host, :timeout => 100 }
+      it "sets keep_alive_timeout" do
+        options = client.default_options
+        expect(options.keep_alive_timeout).to eq(100)
+      end
+    end
   end
 
   describe ".timeout" do
