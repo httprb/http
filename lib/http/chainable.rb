@@ -109,12 +109,13 @@ module HTTP
       )
     end
 
-    # @overload persistent(host)
+    # @overload persistent(host, timeout: nil)
     #   Flags as persistent
-    #   @param [String] host
-    #   @raise [Request::Error] if Host is invalid
+    #   @param  [String] host
+    #   @option [Integer] timeout Keep alive timeout
+    #   @raise  [Request::Error] if Host is invalid
     #   @return [HTTP::Client] Persistent client
-    # @overload persistent(host, &block)
+    # @overload persistent(host, timeout: nil, &block)
     #   Executes given block with persistent client and automatically closes
     #   connection at the end of execution.
     #
@@ -138,8 +139,10 @@ module HTTP
     #
     #   @yieldparam [HTTP::Client] client Persistent client
     #   @return [Object] result of last expression in the block
-    def persistent(host)
-      p_client = branch default_options.with_persistent host
+    def persistent(host, timeout: nil)
+      opts = {}
+      opts[:keep_alive_timeout] = timeout if timeout
+      p_client = branch default_options.merge(opts).with_persistent host
       return p_client unless block_given?
       yield p_client
     ensure

@@ -1,5 +1,5 @@
+# coding: utf-8
 # frozen_string_literal: true
-# encoding: utf-8
 
 require "json"
 
@@ -286,6 +286,14 @@ RSpec.describe HTTP do
           expect(client).to receive(:close).and_call_original
           client.get("/repos/httprb/http.rb")
         end
+      end
+    end
+
+    context "with timeout specified" do
+      subject(:client) { HTTP.persistent host, :timeout => 100 }
+      it "sets keep_alive_timeout" do
+        options = client.default_options
+        expect(options.keep_alive_timeout).to eq(100)
       end
     end
   end
