@@ -19,6 +19,13 @@ RSpec.describe HTTP::URI do
     expect(https_uri.port).to eq 443
   end
 
+  it "works somehow?" do
+    uri = described_class.parse("https://127.0.0.1:000")
+    puts "=" * 80
+    puts uri.port.inspect
+    puts "=" * 80
+  end
+
   describe "#dup" do
     it "doesn't share internal value between duplicates" do
       duplicated_uri = http_uri.dup
