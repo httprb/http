@@ -147,6 +147,7 @@ module HTTP
     ensure
       p_client.close if p_client
     end
+    alias_method :open, :persistent
 
     # Make a request through an HTTP proxy
     # @param [Array] proxy

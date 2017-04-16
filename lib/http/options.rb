@@ -114,6 +114,7 @@ module HTTP
                   end
       end
     end
+    alias_method :open?, :persistent?
 
     %w(
       proxy params form json body follow response
