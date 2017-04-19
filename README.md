@@ -164,6 +164,7 @@ versions:
 * Ruby 2.1.x
 * Ruby 2.2.x
 * Ruby 2.3.x
+* Ruby 2.4.x
 * JRuby 9.1.x.x
 
 If something doesn't work on one of these versions, it's a bug.
