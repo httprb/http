@@ -6,6 +6,14 @@
   ([@HoneyryderChuck])
 
 
+## 2.2.2 (2017-04-27)
+
+* [#404](https://github.com/httprb/http/issues/404),
+  [#405](https://github.com/httprb/http/pull/405)
+  Make keepalive timeout configurable.
+  ([@nestegg])
+
+
 ## 2.2.1 (2017-02-06)
 
 * [#395](https://github.com/httprb/http/issues/395)
