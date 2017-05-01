@@ -56,6 +56,7 @@ module HTTP
         if @body.is_a?(String)
           @request_header << "#{Headers::CONTENT_LENGTH}: #{@body.bytesize}"
         elsif @body.respond_to?(:read)
+          raise(RequestError, "IO object must respond to #size") unless @body.respond_to?(:size)
           @request_header << "#{Headers::CONTENT_LENGTH}: #{@body.size}"
         elsif @body.nil?
           @request_header << "#{Headers::CONTENT_LENGTH}: 0"

@@ -121,6 +121,11 @@ RSpec.describe HTTP::Request::Writer do
         expect(io.string).to start_with "#{headerstart}\r\nContent-Length: #{1024 * 1024}\r\n\r\n"
       end
 
+      it "raises error when IO object doesn't respond to #size" do
+        body.instance_eval { undef size }
+        expect { writer.stream }.to raise_error(HTTP::RequestError)
+      end
+
       it "writes all data to the socket" do
         writer.stream
         expect(io.string).to end_with("a" * 1024 * 1024)
