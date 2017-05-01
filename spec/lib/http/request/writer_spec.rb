@@ -26,6 +26,14 @@ RSpec.describe HTTP::Request::Writer do
       end
     end
 
+    context "when body is an IO" do
+      let(:body) { StringIO.new("string body") }
+
+      it "does not raise an error" do
+        expect { writer }.not_to raise_error
+      end
+    end
+
     context "when body is an Enumerable" do
       let(:body) { %w(bees cows) }
 
@@ -93,6 +101,29 @@ RSpec.describe HTTP::Request::Writer do
       it "properly calculates Content-Length if needed" do
         writer.stream
         expect(io.string).to start_with "#{headerstart}\r\nContent-Length: 21\r\n\r\n"
+      end
+
+      context "when Content-Length explicitly set" do
+        let(:headers) { HTTP::Headers.coerce "Content-Length" => 12 }
+
+        it "keeps given value" do
+          writer.stream
+          expect(io.string).to start_with "#{headerstart}\r\nContent-Length: 12\r\n\r\n"
+        end
+      end
+    end
+
+    context "when body is an IO" do
+      let(:body) { StringIO.new("a" * 1024 * 1024) }
+
+      it "properly calculates Content-Length if needed" do
+        writer.stream
+        expect(io.string).to start_with "#{headerstart}\r\nContent-Length: #{1024 * 1024}\r\n\r\n"
+      end
+
+      it "writes all data to the socket" do
+        writer.stream
+        expect(io.string).to end_with("a" * 1024 * 1024)
       end
 
       context "when Content-Length explicitly set" do

@@ -51,12 +51,16 @@ module HTTP
       # Adds the headers to the header array for the given request body we are working
       # with
       def add_body_type_headers
-        if @body.is_a?(String) && !@headers[Headers::CONTENT_LENGTH]
-          @request_header << "#{Headers::CONTENT_LENGTH}: #{@body.bytesize}"
-        elsif @body.nil? && !@headers[Headers::CONTENT_LENGTH]
-          @request_header << "#{Headers::CONTENT_LENGTH}: 0"
-        elsif @body.is_a?(Enumerable) && CHUNKED != @headers[Headers::TRANSFER_ENCODING]
-          raise(RequestError, "invalid transfer encoding")
+        unless @headers[Headers::CONTENT_LENGTH]
+          if @body.is_a?(String)
+            @request_header << "#{Headers::CONTENT_LENGTH}: #{@body.bytesize}"
+          elsif @body.respond_to?(:read)
+            @request_header << "#{Headers::CONTENT_LENGTH}: #{@body.size}"
+          elsif @body.nil?
+            @request_header << "#{Headers::CONTENT_LENGTH}: 0"
+          elsif @body.is_a?(Enumerable) && CHUNKED != @headers[Headers::TRANSFER_ENCODING]
+            raise(RequestError, "invalid transfer encoding")
+          end
         end
       end
 
@@ -75,12 +79,17 @@ module HTTP
         # possible in order to play nicely with Nagle's algorithm. Making
         # two writes in a row triggers a pathological case where Nagle is
         # expecting a third write that never happens.
-        case @body
-        when NilClass
+        case
+        when @body.nil?
           write(headers)
-        when String
+        when @body.is_a?(String)
           write(headers << @body)
-        when Enumerable
+        when @body.respond_to?(:read)
+          write(headers)
+
+          buffer = String.new # rubocop:disable Style/EmptyLiteral
+          write(buffer) while @body.read(Connection::BUFFER_SIZE, buffer)
+        when @body.is_a?(Enumerable)
           write(headers)
 
           @body.each do |chunk|
