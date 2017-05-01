@@ -51,16 +51,16 @@ module HTTP
       # Adds the headers to the header array for the given request body we are working
       # with
       def add_body_type_headers
-        unless @headers[Headers::CONTENT_LENGTH]
-          if @body.is_a?(String)
-            @request_header << "#{Headers::CONTENT_LENGTH}: #{@body.bytesize}"
-          elsif @body.respond_to?(:read)
-            @request_header << "#{Headers::CONTENT_LENGTH}: #{@body.size}"
-          elsif @body.nil?
-            @request_header << "#{Headers::CONTENT_LENGTH}: 0"
-          elsif @body.is_a?(Enumerable) && CHUNKED != @headers[Headers::TRANSFER_ENCODING]
-            raise(RequestError, "invalid transfer encoding")
-          end
+        return if @headers[Headers::CONTENT_LENGTH]
+
+        if @body.is_a?(String)
+          @request_header << "#{Headers::CONTENT_LENGTH}: #{@body.bytesize}"
+        elsif @body.respond_to?(:read)
+          @request_header << "#{Headers::CONTENT_LENGTH}: #{@body.size}"
+        elsif @body.nil?
+          @request_header << "#{Headers::CONTENT_LENGTH}: 0"
+        elsif @body.is_a?(Enumerable) && CHUNKED != @headers[Headers::TRANSFER_ENCODING]
+          raise(RequestError, "invalid transfer encoding")
         end
       end
 
