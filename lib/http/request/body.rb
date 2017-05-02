@@ -3,9 +3,6 @@
 module HTTP
   class Request
     class Body
-      # Types valid to be used as body source
-      VALID_BODY_TYPES = [String, NilClass, Enumerable].freeze
-
       # Maximum chunk size used for reading content of an IO
       BUFFER_SIZE = Connection::BUFFER_SIZE
 
@@ -46,7 +43,11 @@ module HTTP
       private
 
       def validate_body_type!
-        return if VALID_BODY_TYPES.any? { |type| @body.is_a? type }
+        return if @body.is_a?(String)
+        return if @body.respond_to?(:read)
+        return if @body.is_a?(Enumerable)
+        return if @body.nil?
+
         raise RequestError, "body of wrong type: #{@body.class}"
       end
     end

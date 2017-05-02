@@ -27,7 +27,7 @@ RSpec.describe HTTP::Request::Writer do
     end
 
     context "when body is an IO" do
-      let(:body) { StringIO.new("string body") }
+      let(:body) { FakeIO.new("IO body") }
 
       it "does not raise an error" do
         expect { writer }.not_to raise_error
@@ -154,6 +154,60 @@ RSpec.describe HTTP::Request::Writer do
     end
 
     context "when body is an IO" do
+      let(:body) { FakeIO.new("a" * 16 * 1024 + "b" * 10 * 1024) }
+
+      it "writes content and sets Content-Length" do
+        writer.stream
+        expect(io.string).to eq [
+          "#{headerstart}\r\n",
+          "Content-Length: #{body.size}\r\n\r\n",
+          body.string,
+        ].join
+      end
+
+      it "raises error when IO object doesn't respond to #size" do
+        body.instance_eval { undef size }
+        expect { writer.stream }.to raise_error(HTTP::RequestError)
+      end
+
+      context "when Transfer-Encoding is chunked" do
+        let(:headers) { HTTP::Headers.coerce "Transfer-Encoding" => "chunked" }
+
+        it "writes encoded content and doesn't require Content-Length" do
+          writer.stream
+          expect(io.string).to eq [
+            "#{headerstart}\r\n",
+            "Transfer-Encoding: chunked\r\n\r\n",
+            "4000\r\n#{"a" * 16 * 1024}\r\n2800\r\n#{"b" * 10 * 1024}\r\n0\r\n\r\n",
+          ].join
+        end
+
+        it "doesn't require body to respond to #size" do
+          body.instance_eval { undef size }
+          writer.stream
+        end
+      end
+
+      context "when Content-Length explicitly set" do
+        let(:headers) { HTTP::Headers.coerce "Content-Length" => 12 }
+
+        it "keeps given value" do
+          writer.stream
+          expect(io.string).to eq [
+            "#{headerstart}\r\n",
+            "Content-Length: 12\r\n\r\n",
+            body.string,
+          ].join
+        end
+
+        it "doesn't require body to respond to #size" do
+          body.instance_eval { undef size }
+          writer.stream
+        end
+      end
+    end
+
+    context "when body is an Enumerable IO" do
       let(:body) { StringIO.new("a" * 16 * 1024 + "b" * 10 * 1024) }
 
       it "writes content and sets Content-Length" do
