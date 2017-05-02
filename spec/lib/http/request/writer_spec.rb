@@ -61,7 +61,7 @@ RSpec.describe HTTP::Request::Writer do
         expect(io.string).to eq [
           "#{headerstart}\r\n",
           "Host: example.org\r\nContent-Length: 7\r\n\r\n",
-          "content",
+          "content"
         ].join
       end
     end
@@ -74,7 +74,7 @@ RSpec.describe HTTP::Request::Writer do
         expect(io.string).to eq [
           "#{headerstart}\r\n",
           "Content-Length: 21\r\n\r\n",
-          "Привет, мир!",
+          "Привет, мир!"
         ].join
       end
 
@@ -86,7 +86,7 @@ RSpec.describe HTTP::Request::Writer do
           expect(io.string).to eq [
             "#{headerstart}\r\n",
             "Transfer-Encoding: chunked\r\n\r\n",
-            "15\r\nПривет, мир!\r\n0\r\n\r\n",
+            "15\r\nПривет, мир!\r\n0\r\n\r\n"
           ].join
         end
       end
@@ -99,7 +99,7 @@ RSpec.describe HTTP::Request::Writer do
           expect(io.string).to eq [
             "#{headerstart}\r\n",
             "Content-Length: 12\r\n\r\n",
-            "Привет, мир!",
+            "Привет, мир!"
           ].join
         end
       end
@@ -114,7 +114,7 @@ RSpec.describe HTTP::Request::Writer do
         expect(io.string).to eq [
           "#{headerstart}\r\n",
           "Content-Length: 8\r\n\r\n",
-          "beescows",
+          "beescows"
         ].join
       end
 
@@ -134,7 +134,7 @@ RSpec.describe HTTP::Request::Writer do
           writer.stream
           expect(io.string).to eq [
             "#{headerstart}\r\n",
-            "Content-Length: 0\r\n\r\n",
+            "Content-Length: 0\r\n\r\n"
           ].join
         end
       end
@@ -147,7 +147,7 @@ RSpec.describe HTTP::Request::Writer do
           expect(io.string).to eq [
             "#{headerstart}\r\n",
             "Transfer-Encoding: chunked\r\n\r\n",
-            "4\r\nbees\r\n4\r\ncows\r\n0\r\n\r\n",
+            "4\r\nbees\r\n4\r\ncows\r\n0\r\n\r\n"
           ].join
         end
       end
@@ -161,7 +161,7 @@ RSpec.describe HTTP::Request::Writer do
         expect(io.string).to eq [
           "#{headerstart}\r\n",
           "Content-Length: #{body.size}\r\n\r\n",
-          body.string,
+          body.string
         ].join
       end
 
@@ -177,7 +177,7 @@ RSpec.describe HTTP::Request::Writer do
           writer.stream
           expect(io.string).to eq [
             "#{headerstart}\r\n",
-            "Content-Length: 0\r\n\r\n",
+            "Content-Length: 0\r\n\r\n"
           ].join
         end
       end
@@ -190,7 +190,7 @@ RSpec.describe HTTP::Request::Writer do
           expect(io.string).to eq [
             "#{headerstart}\r\n",
             "Transfer-Encoding: chunked\r\n\r\n",
-            "4000\r\n#{"a" * 16 * 1024}\r\n2800\r\n#{"b" * 10 * 1024}\r\n0\r\n\r\n",
+            "4000\r\n#{'a' * 16 * 1024}\r\n2800\r\n#{'b' * 10 * 1024}\r\n0\r\n\r\n"
           ].join
         end
 
@@ -208,7 +208,7 @@ RSpec.describe HTTP::Request::Writer do
           expect(io.string).to eq [
             "#{headerstart}\r\n",
             "Content-Length: 12\r\n\r\n",
-            body.string,
+            body.string
           ].join
         end
 
@@ -227,7 +227,7 @@ RSpec.describe HTTP::Request::Writer do
         expect(io.string).to eq [
           "#{headerstart}\r\n",
           "Content-Length: #{body.size}\r\n\r\n",
-          body.string,
+          body.string
         ].join
       end
 
@@ -243,7 +243,7 @@ RSpec.describe HTTP::Request::Writer do
           writer.stream
           expect(io.string).to eq [
             "#{headerstart}\r\n",
-            "Content-Length: 0\r\n\r\n",
+            "Content-Length: 0\r\n\r\n"
           ].join
         end
       end
@@ -256,7 +256,7 @@ RSpec.describe HTTP::Request::Writer do
           expect(io.string).to eq [
             "#{headerstart}\r\n",
             "Transfer-Encoding: chunked\r\n\r\n",
-            "4000\r\n#{"a" * 16 * 1024}\r\n2800\r\n#{"b" * 10 * 1024}\r\n0\r\n\r\n",
+            "4000\r\n#{'a' * 16 * 1024}\r\n2800\r\n#{'b' * 10 * 1024}\r\n0\r\n\r\n"
           ].join
         end
 
@@ -274,7 +274,7 @@ RSpec.describe HTTP::Request::Writer do
           expect(io.string).to eq [
             "#{headerstart}\r\n",
             "Content-Length: 12\r\n\r\n",
-            body.string,
+            body.string
           ].join
         end
 
@@ -292,7 +292,7 @@ RSpec.describe HTTP::Request::Writer do
         writer.stream
         expect(io.string).to eq [
           "#{headerstart}\r\n",
-          "Content-Length: 0\r\n\r\n",
+          "Content-Length: 0\r\n\r\n"
         ].join
       end
 
@@ -304,7 +304,7 @@ RSpec.describe HTTP::Request::Writer do
           expect(io.string).to eq [
             "#{headerstart}\r\n",
             "Transfer-Encoding: chunked\r\n\r\n",
-            "0\r\n\r\n",
+            "0\r\n\r\n"
           ].join
         end
       end
@@ -316,7 +316,7 @@ RSpec.describe HTTP::Request::Writer do
           writer.stream
           expect(io.string).to eq [
             "#{headerstart}\r\n",
-            "Content-Length: 12\r\n\r\n",
+            "Content-Length: 12\r\n\r\n"
           ].join
         end
       end

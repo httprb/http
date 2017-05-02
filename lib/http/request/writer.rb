@@ -47,9 +47,9 @@ module HTTP
       # Adds the headers to the header array for the given request body we are working
       # with
       def add_body_type_headers
-        unless @headers[Headers::CONTENT_LENGTH] || chunked?
-          @request_header << "#{Headers::CONTENT_LENGTH}: #{@body.size}"
-        end
+        return if @headers[Headers::CONTENT_LENGTH] || chunked?
+
+        @request_header << "#{Headers::CONTENT_LENGTH}: #{@body.size}"
       end
 
       # Joins the headers specified in the request into a correctly formatted
