@@ -1,0 +1,54 @@
+# frozen_string_literal: true
+
+module HTTP
+  class Request
+    class Body
+      # Types valid to be used as body source
+      VALID_BODY_TYPES = [String, NilClass, Enumerable].freeze
+
+      # Maximum chunk size used for reading content of an IO
+      BUFFER_SIZE = Connection::BUFFER_SIZE
+
+      def initialize(body)
+        @body = body
+
+        validate_body_type!
+      end
+
+      # Returns size which should be used for the "Content-Length" header.
+      def size
+        if @body.is_a?(String)
+          @body.bytesize
+        elsif @body.respond_to?(:read)
+          raise RequestError, "IO object must respond to #size" unless @body.respond_to?(:size)
+          @body.size
+        elsif @body.nil?
+          0
+        else
+          raise RequestError, "cannot determine size of body: #{@body.inspect}"
+        end
+      end
+
+      # Yields chunks of content to be streamed to the request body.
+      def each
+        return enum_for(__method__) unless block_given?
+
+        if @body.is_a?(String)
+          yield @body
+        elsif @body.respond_to?(:read)
+          chunk = String.new # rubocop:disable Style/EmptyLiteral
+          yield chunk while @body.read(BUFFER_SIZE, chunk)
+        elsif @body.is_a?(Enumerable)
+          @body.each { |chunk| yield chunk }
+        end
+      end
+
+      private
+
+      def validate_body_type!
+        return if VALID_BODY_TYPES.any? { |type| @body.is_a? type }
+        raise RequestError, "body of wrong type: #{@body.class}"
+      end
+    end
+  end
+end

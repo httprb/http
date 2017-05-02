@@ -42,7 +42,7 @@ RSpec.describe HTTP::Request::Writer do
       end
     end
 
-    context "when body is not string, enumerable or nil" do
+    context "when body is of unrecognized type" do
       let(:body) { 123 }
 
       it "raises an error" do
@@ -52,73 +52,117 @@ RSpec.describe HTTP::Request::Writer do
   end
 
   describe "#stream" do
-    context "when body is Enumerable" do
-      let(:body)    { %w(bees cows) }
-      let(:headers) { HTTP::Headers.coerce "Transfer-Encoding" => "chunked" }
+    context "when multiple headers are set" do
+      let(:body) { "content" }
+      let(:headers) { HTTP::Headers.coerce "Host" => "example.org" }
 
-      it "writes a chunked request from an Enumerable correctly" do
+      it "separates headers with carriage return and line feed" do
         writer.stream
-        expect(io.string).to end_with "\r\n4\r\nbees\r\n4\r\ncows\r\n0\r\n\r\n"
-      end
-
-      it "writes Transfer-Encoding header only once" do
-        writer.stream
-        expect(io.string).to start_with "#{headerstart}\r\nTransfer-Encoding: chunked\r\n\r\n"
-      end
-
-      context "when Transfer-Encoding not set" do
-        let(:headers) { HTTP::Headers.new }
-        specify { expect { writer.stream }.to raise_error(HTTP::RequestError) }
-      end
-
-      context "when Transfer-Encoding is not chunked" do
-        let(:headers) { HTTP::Headers.coerce "Transfer-Encoding" => "gzip" }
-        specify { expect { writer.stream }.to raise_error(HTTP::RequestError) }
+        expect(io.string).to eq [
+          "#{headerstart}\r\n",
+          "Host: example.org\r\nContent-Length: 7\r\n\r\n",
+          "content",
+        ].join
       end
     end
 
-    context "when body is nil" do
-      let(:body) { nil }
+    context "when body is a String" do
+      let(:body) { "Привет, мир!" }
 
-      it "properly sets Content-Length header if needed" do
+      it "writes content and sets Content-Length" do
         writer.stream
-        expect(io.string).to start_with "#{headerstart}\r\nContent-Length: 0\r\n\r\n"
+        expect(io.string).to eq [
+          "#{headerstart}\r\n",
+          "Content-Length: 21\r\n\r\n",
+          "Привет, мир!",
+        ].join
+      end
+
+      context "when Transfer-Encoding is chunked" do
+        let(:headers) { HTTP::Headers.coerce "Transfer-Encoding" => "chunked" }
+
+        it "writes encoded content and omits Content-Length" do
+          writer.stream
+          expect(io.string).to eq [
+            "#{headerstart}\r\n",
+            "Transfer-Encoding: chunked\r\n\r\n",
+            "15\r\nПривет, мир!\r\n0\r\n\r\n",
+          ].join
+        end
       end
 
       context "when Content-Length explicitly set" do
         let(:headers) { HTTP::Headers.coerce "Content-Length" => 12 }
 
-        it "keeps given value" do
+        it "keeps Content-Length" do
           writer.stream
-          expect(io.string).to start_with "#{headerstart}\r\nContent-Length: 12\r\n\r\n"
+          expect(io.string).to eq [
+            "#{headerstart}\r\n",
+            "Content-Length: 12\r\n\r\n",
+            "Привет, мир!",
+          ].join
         end
       end
     end
 
-    context "when body is a unicode String" do
-      let(:body) { "Привет, мир!" }
+    context "when body is Enumerable" do
+      let(:body)    { %w(bees cows) }
+      let(:headers) { HTTP::Headers.coerce "Content-Length" => 8 }
 
-      it "properly calculates Content-Length if needed" do
+      it "writes content and sets Content-Length" do
         writer.stream
-        expect(io.string).to start_with "#{headerstart}\r\nContent-Length: 21\r\n\r\n"
+        expect(io.string).to eq [
+          "#{headerstart}\r\n",
+          "Content-Length: 8\r\n\r\n",
+          "beescows",
+        ].join
       end
 
-      context "when Content-Length explicitly set" do
-        let(:headers) { HTTP::Headers.coerce "Content-Length" => 12 }
+      context "when Content-Length is not set" do
+        let(:headers) { HTTP::Headers.new }
 
-        it "keeps given value" do
+        it "raises an error" do
+          expect { writer.stream }.to raise_error(HTTP::RequestError)
+        end
+      end
+
+      context "when Enumerable is empty" do
+        let(:body)    { %w() }
+        let(:headers) { HTTP::Headers.coerce "Content-Length" => 0 }
+
+        it "doesn't write anything" do
           writer.stream
-          expect(io.string).to start_with "#{headerstart}\r\nContent-Length: 12\r\n\r\n"
+          expect(io.string).to eq [
+            "#{headerstart}\r\n",
+            "Content-Length: 0\r\n\r\n",
+          ].join
+        end
+      end
+
+      context "when Transfer-Encoding is chunked" do
+        let(:headers) { HTTP::Headers.coerce "Transfer-Encoding" => "chunked" }
+
+        it "writes encoded content and doesn't require Content-Length" do
+          writer.stream
+          expect(io.string).to eq [
+            "#{headerstart}\r\n",
+            "Transfer-Encoding: chunked\r\n\r\n",
+            "4\r\nbees\r\n4\r\ncows\r\n0\r\n\r\n",
+          ].join
         end
       end
     end
 
     context "when body is an IO" do
-      let(:body) { StringIO.new("a" * 1024 * 1024) }
+      let(:body) { StringIO.new("a" * 16 * 1024 + "b" * 10 * 1024) }
 
-      it "properly calculates Content-Length if needed" do
+      it "writes content and sets Content-Length" do
         writer.stream
-        expect(io.string).to start_with "#{headerstart}\r\nContent-Length: #{1024 * 1024}\r\n\r\n"
+        expect(io.string).to eq [
+          "#{headerstart}\r\n",
+          "Content-Length: #{body.size}\r\n\r\n",
+          body.string,
+        ].join
       end
 
       it "raises error when IO object doesn't respond to #size" do
@@ -126,9 +170,22 @@ RSpec.describe HTTP::Request::Writer do
         expect { writer.stream }.to raise_error(HTTP::RequestError)
       end
 
-      it "writes all data to the socket" do
-        writer.stream
-        expect(io.string).to end_with("a" * 1024 * 1024)
+      context "when Transfer-Encoding is chunked" do
+        let(:headers) { HTTP::Headers.coerce "Transfer-Encoding" => "chunked" }
+
+        it "writes encoded content and doesn't require Content-Length" do
+          writer.stream
+          expect(io.string).to eq [
+            "#{headerstart}\r\n",
+            "Transfer-Encoding: chunked\r\n\r\n",
+            "4000\r\n#{"a" * 16 * 1024}\r\n2800\r\n#{"b" * 10 * 1024}\r\n0\r\n\r\n",
+          ].join
+        end
+
+        it "doesn't require body to respond to #size" do
+          body.instance_eval { undef size }
+          writer.stream
+        end
       end
 
       context "when Content-Length explicitly set" do
@@ -136,7 +193,53 @@ RSpec.describe HTTP::Request::Writer do
 
         it "keeps given value" do
           writer.stream
-          expect(io.string).to start_with "#{headerstart}\r\nContent-Length: 12\r\n\r\n"
+          expect(io.string).to eq [
+            "#{headerstart}\r\n",
+            "Content-Length: 12\r\n\r\n",
+            body.string,
+          ].join
+        end
+
+        it "doesn't require body to respond to #size" do
+          body.instance_eval { undef size }
+          writer.stream
+        end
+      end
+    end
+
+    context "when body is nil" do
+      let(:body) { nil }
+
+      it "writes empty content and sets Content-Length" do
+        writer.stream
+        expect(io.string).to eq [
+          "#{headerstart}\r\n",
+          "Content-Length: 0\r\n\r\n",
+        ].join
+      end
+
+      context "when Transfer-Encoding is chunked" do
+        let(:headers) { HTTP::Headers.coerce "Transfer-Encoding" => "chunked" }
+
+        it "writes empty content and doesn't require Content-Length" do
+          writer.stream
+          expect(io.string).to eq [
+            "#{headerstart}\r\n",
+            "Transfer-Encoding: chunked\r\n\r\n",
+            "0\r\n\r\n",
+          ].join
+        end
+      end
+
+      context "when Content-Length explicitly set" do
+        let(:headers) { HTTP::Headers.coerce "Content-Length" => 12 }
+
+        it "keeps given value" do
+          writer.stream
+          expect(io.string).to eq [
+            "#{headerstart}\r\n",
+            "Content-Length: 12\r\n\r\n",
+          ].join
         end
       end
     end
