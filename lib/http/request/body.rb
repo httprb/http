@@ -33,8 +33,7 @@ module HTTP
         if @body.is_a?(String)
           yield @body
         elsif @body.respond_to?(:read)
-          loop do
-            data = @body.read(BUFFER_SIZE) or break
+          while (data = @body.read(BUFFER_SIZE))
             yield data
           end
         elsif @body.is_a?(Enumerable)
