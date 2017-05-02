@@ -9,7 +9,7 @@ RSpec.describe HTTP::Request::Writer do
 
   subject(:writer)  { described_class.new(io, body, headers, headerstart) }
 
-  describe "#initalize" do
+  describe "#initialize" do
     context "when body is nil" do
       let(:body) { nil }
 
