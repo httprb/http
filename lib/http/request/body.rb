@@ -33,8 +33,10 @@ module HTTP
         if @body.is_a?(String)
           yield @body
         elsif @body.respond_to?(:read)
-          chunk = String.new # rubocop:disable Style/EmptyLiteral
-          yield chunk while @body.read(BUFFER_SIZE, chunk)
+          loop do
+            data = @body.read(BUFFER_SIZE) or break
+            yield data
+          end
         elsif @body.is_a?(Enumerable)
           @body.each { |chunk| yield chunk }
         end

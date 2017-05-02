@@ -170,6 +170,18 @@ RSpec.describe HTTP::Request::Writer do
         expect { writer.stream }.to raise_error(HTTP::RequestError)
       end
 
+      context "when IO is empty" do
+        let(:body) { FakeIO.new("") }
+
+        it "doesn't write anything" do
+          writer.stream
+          expect(io.string).to eq [
+            "#{headerstart}\r\n",
+            "Content-Length: 0\r\n\r\n",
+          ].join
+        end
+      end
+
       context "when Transfer-Encoding is chunked" do
         let(:headers) { HTTP::Headers.coerce "Transfer-Encoding" => "chunked" }
 
@@ -222,6 +234,18 @@ RSpec.describe HTTP::Request::Writer do
       it "raises error when IO object doesn't respond to #size" do
         body.instance_eval { undef size }
         expect { writer.stream }.to raise_error(HTTP::RequestError)
+      end
+
+      context "when IO is empty" do
+        let(:body) { StringIO.new("") }
+
+        it "doesn't write anything" do
+          writer.stream
+          expect(io.string).to eq [
+            "#{headerstart}\r\n",
+            "Content-Length: 0\r\n\r\n",
+          ].join
+        end
       end
 
       context "when Transfer-Encoding is chunked" do
