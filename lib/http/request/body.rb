@@ -13,6 +13,8 @@ module HTTP
       end
 
       # Returns size which should be used for the "Content-Length" header.
+      #
+      # @return [Integer]
       def size
         if @body.is_a?(String)
           @body.bytesize
@@ -27,6 +29,8 @@ module HTTP
       end
 
       # Yields chunks of content to be streamed to the request body.
+      #
+      # @yieldparam [String]
       def each
         return enum_for(__method__) unless block_given?
 
