@@ -94,7 +94,10 @@ module HTTP
 
     # Returns new Request with updated uri
     def redirect(uri, verb = @verb)
-      req = self.class.new(
+      headers = self.headers.dup
+      headers.delete(Headers::HOST)
+
+      self.class.new(
         :verb    => verb,
         :uri     => @uri.join(uri),
         :headers => headers,
@@ -102,9 +105,6 @@ module HTTP
         :body    => body,
         :version => version
       )
-
-      req[Headers::HOST] = req.uri.host
-      req
     end
 
     # Stream the request to a socket
