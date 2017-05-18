@@ -158,6 +158,32 @@ RSpec.describe HTTP::Client do
     end
   end
 
+  describe "passing multipart form data" do
+    it "creates url encoded form data object" do
+      client = HTTP::Client.new
+      allow(client).to receive(:perform)
+
+      expect(HTTP::Request).to receive(:new) do |opts|
+        expect(opts[:body]).to be_a(HTTP::FormData::Urlencoded)
+        expect(opts[:body].to_s).to eq "foo=bar"
+      end
+
+      client.get("http://example.com/", :form => {:foo => "bar"})
+    end
+
+    it "creates multipart form data object" do
+      client = HTTP::Client.new
+      allow(client).to receive(:perform)
+
+      expect(HTTP::Request).to receive(:new) do |opts|
+        expect(opts[:body]).to be_a(HTTP::FormData::Multipart)
+        expect(opts[:body].to_s).to include("content")
+      end
+
+      client.get("http://example.com/", :form => {:foo => HTTP::FormData::Part.new("content")})
+    end
+  end
+
   describe "passing json" do
     it "encodes given object" do
       client = HTTP::Client.new

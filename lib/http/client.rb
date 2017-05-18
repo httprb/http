@@ -157,9 +157,8 @@ module HTTP
           opts.body
         when opts.form
           form = HTTP::FormData.create opts.form
-          headers[Headers::CONTENT_TYPE]   ||= form.content_type
-          headers[Headers::CONTENT_LENGTH] ||= form.content_length
-          form.to_s
+          headers[Headers::CONTENT_TYPE] ||= form.content_type
+          form
         when opts.json
           body = MimeType[:json].encode opts.json
           headers[Headers::CONTENT_TYPE] ||= "application/json; charset=#{body.encoding.name}"
