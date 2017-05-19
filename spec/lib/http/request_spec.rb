@@ -94,6 +94,20 @@ RSpec.describe HTTP::Request do
       expect(redirected["Host"]).to eq "blog.example.com"
     end
 
+    context "with URL with non-standard port given" do
+      subject(:redirected) { request.redirect "http://example.com:8080" }
+
+      its(:uri)     { is_expected.to eq HTTP::URI.parse "http://example.com:8080" }
+
+      its(:verb)    { is_expected.to eq request.verb }
+      its(:body)    { is_expected.to eq request.body }
+      its(:proxy)   { is_expected.to eq request.proxy }
+
+      it "presets new Host header" do
+        expect(redirected["Host"]).to eq "example.com:8080"
+      end
+    end
+
     context "with schema-less absolute URL given" do
       subject(:redirected) { request.redirect "//another.example.com/blog" }
 
