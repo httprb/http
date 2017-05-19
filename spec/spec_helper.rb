@@ -18,6 +18,7 @@ end
 require "http"
 require "rspec/its"
 require "support/capture_warning"
+require "support/fakeio"
 
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 RSpec.configure do |config|

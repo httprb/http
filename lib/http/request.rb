@@ -74,7 +74,7 @@ module HTTP
     # @option opts [HTTP::URI, #to_s] :uri
     # @option opts [Hash] :headers
     # @option opts [Hash] :proxy
-    # @option opts [String] :body
+    # @option opts [String, Enumerable, IO, nil] :body
     def initialize(opts)
       @verb   = opts.fetch(:verb).to_s.downcase.to_sym
       @uri    = normalize_uri(opts.fetch(:uri))
