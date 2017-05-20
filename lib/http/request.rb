@@ -109,7 +109,7 @@ module HTTP
 
     # Stream the request to a socket
     def stream(socket)
-      include_proxy_headers if using_proxy? && !@uri.https?
+      include_proxy_headers if using_proxy?
       Request::Writer.new(socket, body, headers, headline).stream
     end
 
