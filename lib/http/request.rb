@@ -5,6 +5,7 @@ require "time"
 
 require "http/errors"
 require "http/headers"
+require "http/request/body"
 require "http/request/writer"
 require "http/version"
 require "http/uri"
@@ -110,6 +111,7 @@ module HTTP
     # Stream the request to a socket
     def stream(socket)
       include_proxy_headers if using_proxy? && !@uri.https?
+      body = Request::Body.new(body)
       Request::Writer.new(socket, body, headers, headline).stream
     end
 
