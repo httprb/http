@@ -90,10 +90,10 @@ module HTTP
           deflater = Zlib::Deflate.new
 
           @body.each do |chunk|
-            deflater.deflate(chunk) { |data| block.call(data) }
+            block.call deflater.deflate(chunk)
           end
 
-          deflater.finish { |data| block.call(data) }
+          block.call deflater.finish
         ensure
           deflater.close
         end
