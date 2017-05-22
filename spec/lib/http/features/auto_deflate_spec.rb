@@ -25,84 +25,49 @@ RSpec.describe HTTP::Features::AutoDeflate do
     expect(subject.method).to eq("gzip")
   end
 
-  describe "#deflate" do
-    let(:headers) { HTTP::Headers.coerce("Content-Length" => "10") }
+  describe "#deflated_body" do
+    let(:body)          { ["bees", "cows"] }
+    let(:deflated_body) { subject.deflated_body(body) }
 
-    context "when body is nil" do
-      let(:body) { nil }
+    context "when method is gzip" do
+      subject { HTTP::Features::AutoDeflate.new(:method => :gzip) }
 
-      it "returns nil" do
-        expect(subject.deflate(headers, body)).to be_nil
+      it "returns object which yields gzipped content of the given body" do
+        io = StringIO.new(String.new.force_encoding(Encoding::BINARY))
+        gzip = Zlib::GzipWriter.new(io)
+        gzip.write("beescows")
+        gzip.close
+        gzipped = io.string
+
+        expect(deflated_body.each.to_a.join).to eq gzipped
       end
 
-      it "does not remove Content-Length header" do
-        subject.deflate(headers, body)
-        expect(headers["Content-Length"]).to eq "10"
-      end
+      it "caches compressed content when size is called" do
+        io = StringIO.new(String.new.force_encoding(Encoding::BINARY))
+        gzip = Zlib::GzipWriter.new(io)
+        gzip.write("beescows")
+        gzip.close
+        gzipped = io.string
 
-      it "does not set Content-Encoding header" do
-        subject.deflate(headers, body)
-        expect(headers.include?("Content-Encoding")).to eq false
-      end
-    end
-
-    context "when body is not a string" do
-      let(:body) { {} }
-
-      it "returns given body" do
-        expect(subject.deflate(headers, body).object_id).to eq(body.object_id)
-      end
-
-      it "does not remove Content-Length header" do
-        subject.deflate(headers, body)
-        expect(headers["Content-Length"]).to eq "10"
-      end
-
-      it "does not set Content-Encoding header" do
-        subject.deflate(headers, body)
-        expect(headers.include?("Content-Encoding")).to eq false
+        expect(deflated_body.size).to eq gzipped.bytesize
+        expect(deflated_body.each.to_a.join).to eq gzipped
       end
     end
 
-    context "when body is a string" do
-      let(:body) { "Hello HTTP!" }
+    context "when method is deflate" do
+      subject { HTTP::Features::AutoDeflate.new(:method => :deflate) }
 
-      it "encodes body" do
-        encoded = subject.deflate(headers, body)
-        decoded = Zlib::GzipReader.new(StringIO.new(encoded)).read
+      it "returns object which yields deflated content of the given body" do
+        deflated = Zlib::Deflate.deflate("beescows")
 
-        expect(decoded).to eq(body)
+        expect(deflated_body.each.to_a.join).to eq deflated
       end
 
-      it "removes Content-Length header" do
-        subject.deflate(headers, body)
-        expect(headers.include?("Content-Length")).to eq false
-      end
+      it "caches compressed content when size is called" do
+        deflated = Zlib::Deflate.deflate("beescows")
 
-      it "sets Content-Encoding header" do
-        subject.deflate(headers, body)
-        expect(headers["Content-Encoding"]).to eq "gzip"
-      end
-
-      context "as deflate method" do
-        subject { HTTP::Features::AutoDeflate.new(:method => :deflate) }
-
-        it "encodes body" do
-          encoded = subject.deflate(headers, body)
-          decoded = Zlib::Inflate.inflate(encoded)
-
-          expect(decoded).to eq(body)
-        end
-
-        it "removes Content-Length header" do
-          subject.deflate(headers, body)
-          expect(headers.include?("Content-Length")).to eq false
-        end
-
-        it "sets Content-Encoding header" do
-          subject.deflate(headers, body)
-          expect(headers["Content-Encoding"]).to eq "deflate"
-        end
+        expect(deflated_body.size).to eq deflated.bytesize
+        expect(deflated_body.each.to_a.join).to eq deflated
       end
     end
   end

@@ -85,7 +85,7 @@ module HTTP
       raise(UnsupportedSchemeError, "unknown scheme: #{scheme}") unless SCHEMES.include?(@scheme)
 
       @proxy   = opts[:proxy] || {}
-      @body    = opts[:body]
+      @body    = request_body(opts[:body], opts)
       @version = opts[:version] || "1.1"
       @headers = HTTP::Headers.coerce(opts[:headers] || {})
 
@@ -111,7 +111,6 @@ module HTTP
     # Stream the request to a socket
     def stream(socket)
       include_proxy_headers if using_proxy? && !@uri.https?
-      body = Request::Body.new(body)
       Request::Writer.new(socket, body, headers, headline).stream
     end
 
@@ -179,6 +178,13 @@ module HTTP
     end
 
     private
+
+    # Transforms body to an object suitable for streaming.
+    def request_body(body, opts)
+      body = Request::Body.new(body) unless body.is_a?(Request::Body)
+      body = opts[:auto_deflate].deflated_body(body) if opts[:auto_deflate]
+      body
+    end
 
     # @!attribute [r] host
     #   @return [String]
