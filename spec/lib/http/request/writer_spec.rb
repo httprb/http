@@ -63,7 +63,7 @@ RSpec.describe HTTP::Request::Writer do
 
     context "when Transfer-Encoding is chunked" do
       let(:headers) { HTTP::Headers.coerce "Transfer-Encoding" => "chunked" }
-      let(:body)    { HTTP::Request::Body.new(["request", "body"]) }
+      let(:body)    { HTTP::Request::Body.new(%w(request body)) }
 
       it "writes encoded content and omits Content-Length" do
         writer.stream

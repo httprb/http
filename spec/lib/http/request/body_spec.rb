@@ -79,7 +79,7 @@ RSpec.describe HTTP::Request::Body do
     end
 
     context "when body is an Enumerable" do
-      let(:body) { %w[bees cows] }
+      let(:body) { %w(bees cows) }
 
       it "raises a RequestError" do
         expect { subject.size }.to raise_error(HTTP::RequestError)
@@ -100,7 +100,7 @@ RSpec.describe HTTP::Request::Body do
       let(:body) { "content" }
 
       it "yields the string" do
-        expect(subject.each.to_a).to eq ["content"]
+        expect(subject.each.to_a).to eq %w(content)
       end
     end
 
@@ -121,10 +121,10 @@ RSpec.describe HTTP::Request::Body do
     end
 
     context "when body is an Enumerable" do
-      let(:body) { %w[bees cows] }
+      let(:body) { %w(bees cows) }
 
       it "yields elements" do
-        expect(subject.each.to_a).to eq ["bees", "cows"]
+        expect(subject.each.to_a).to eq %w(bees cows)
       end
     end
   end
