@@ -57,7 +57,7 @@ module HTTP
         private
 
         def compress_all!
-          @compressed = Tempfile.new("http-compressed_body", binmode: true)
+          @compressed = Tempfile.new("http-compressed_body", :binmode => true)
           compress { |data| @compressed.write(data) }
           @compressed.rewind
         end

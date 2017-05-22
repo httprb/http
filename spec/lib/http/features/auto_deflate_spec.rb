@@ -26,14 +26,15 @@ RSpec.describe HTTP::Features::AutoDeflate do
   end
 
   describe "#deflated_body" do
-    let(:body)          { ["bees", "cows"] }
+    let(:body)          { %w(bees cows) }
     let(:deflated_body) { subject.deflated_body(body) }
 
     context "when method is gzip" do
       subject { HTTP::Features::AutoDeflate.new(:method => :gzip) }
 
       it "returns object which yields gzipped content of the given body" do
-        io = StringIO.new(String.new.force_encoding(Encoding::BINARY))
+        io = StringIO.new
+        io.set_encoding(Encoding::BINARY)
         gzip = Zlib::GzipWriter.new(io)
         gzip.write("beescows")
         gzip.close
@@ -43,7 +44,8 @@ RSpec.describe HTTP::Features::AutoDeflate do
       end
 
       it "caches compressed content when size is called" do
-        io = StringIO.new(String.new.force_encoding(Encoding::BINARY))
+        io = StringIO.new
+        io.set_encoding(Encoding::BINARY)
         gzip = Zlib::GzipWriter.new(io)
         gzip.write("beescows")
         gzip.close
