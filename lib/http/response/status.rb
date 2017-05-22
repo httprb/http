@@ -44,7 +44,7 @@ module HTTP
         # @param [#to_s] str
         # @return [Symbol]
         def symbolize(str)
-          str.to_s.downcase.tr("-", " ").gsub(/[^a-z ]/, "").gsub(/\s+/, "_").to_sym
+          str.to_s.downcase.tr("- ", "_").delete("^a-z_").to_sym
         end
       end
 
@@ -133,7 +133,7 @@ module HTTP
       SYMBOLS.each do |code, symbol|
         class_eval <<-RUBY, __FILE__, __LINE__
           def #{symbol}?      # def bad_request?
-            #{code} == code   #   400 == code
+            code == #{code}   #   code == 400
           end                 # end
         RUBY
       end
