@@ -429,6 +429,15 @@ RSpec.describe HTTP do
 
         expect(Zlib::GzipReader.new(StringIO.new(encoded)).read).to eq body
       end
+
+      it "sends deflated body" do
+        client   = HTTP.use :auto_deflate => {:method => "deflate"}
+        body     = "Hello!"
+        response = client.post("#{dummy.endpoint}/echo-body", :body => body)
+        encoded  = response.to_s
+
+        expect(Zlib::Inflate.inflate(encoded)).to eq body
+      end
     end
 
     context "with :auto_inflate" do

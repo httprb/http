@@ -223,6 +223,27 @@ RSpec.describe HTTP::Client do
         client.request(:get, "http://example.com/")
       end
     end
+
+    context "when :auto_deflate was specified" do
+      let(:headers) { {"Content-Length" => "12"} }
+      let(:client)  { described_class.new :headers => headers, :features => {:auto_deflate => {}} }
+
+      it "deletes Content-Length header" do
+        expect(client).to receive(:perform) do |req, _|
+          expect(req["Content-Length"]).to eq nil
+        end
+
+        client.request(:get, "http://example.com/")
+      end
+
+      it "sets Content-Encoding header" do
+        expect(client).to receive(:perform) do |req, _|
+          expect(req["Content-Encoding"]).to eq "gzip"
+        end
+
+        client.request(:get, "http://example.com/")
+      end
+    end
   end
 
   include_context "HTTP handling" do
