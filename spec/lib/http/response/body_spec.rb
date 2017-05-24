@@ -37,6 +37,18 @@ RSpec.describe HTTP::Response::Body do
         body.readpartial
       end
     end
+
+    it "returns content in specified encoding" do
+      body = described_class.new(connection)
+      expect(connection).to receive(:readpartial).
+        and_return(String.new("content").force_encoding(Encoding::UTF_8))
+      expect(body.readpartial.encoding).to eq Encoding::BINARY
+
+      body = described_class.new(connection, :encoding => Encoding::UTF_8)
+      expect(connection).to receive(:readpartial).
+        and_return(String.new("content").force_encoding(Encoding::BINARY))
+      expect(body.readpartial.encoding).to eq Encoding::UTF_8
+    end
   end
 
   context "when body is gzipped" do
@@ -58,7 +70,7 @@ RSpec.describe HTTP::Response::Body do
       it "streams decoded body" do
         [
           "Hi, HTTP ",
-          String.new("here ☺").force_encoding("ASCII-8BIT"),
+          "here ☺",
           nil
         ].each do |part|
           expect(subject.readpartial).to eq(part)
