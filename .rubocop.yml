@@ -78,6 +78,3 @@ Style/StringLiterals:
 
 Style/TrivialAccessors:
   Enabled: false
-
-Performance/RedundantBlockCall:
-  Enabled: false

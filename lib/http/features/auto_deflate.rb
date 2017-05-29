@@ -39,22 +39,26 @@ module HTTP
         end
 
         def each(&block)
-          return enum_for(__method__) unless block
+          return to_enum __method__ unless block
 
           if @compressed
-            begin
-              while (data = @compressed.read(Connection::BUFFER_SIZE))
-                block.call(data)
-              end
-            ensure
-              @compressed.close!
-            end
+            compressed_each(&block)
           else
             compress(&block)
           end
+
+          self
         end
 
         private
+
+        def compressed_each
+          while (data = @compressed.read(Connection::BUFFER_SIZE))
+            yield data
+          end
+        ensure
+          @compressed.close!
+        end
 
         def compress_all!
           @compressed = Tempfile.new("http-compressed_body", :binmode => true)
@@ -66,10 +70,7 @@ module HTTP
       class GzippedBody < CompressedBody
         def compress(&block)
           gzip = Zlib::GzipWriter.new(BlockIO.new(block))
-
-          @body.each do |chunk|
-            gzip.write(chunk)
-          end
+          @body.each { |chunk| gzip.write(chunk) }
         ensure
           gzip.finish
         end
@@ -86,14 +87,12 @@ module HTTP
       end
 
       class DeflatedBody < CompressedBody
-        def compress(&block)
+        def compress
           deflater = Zlib::Deflate.new
 
-          @body.each do |chunk|
-            block.call deflater.deflate(chunk)
-          end
+          @body.each { |chunk| yield deflater.deflate(chunk) }
 
-          block.call deflater.finish
+          yield deflater.finish
         ensure
           deflater.close
         end
