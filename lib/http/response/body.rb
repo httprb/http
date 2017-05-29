@@ -20,14 +20,15 @@ module HTTP
         @connection = stream.is_a?(Inflater) ? stream.connection : stream
         @streaming  = nil
         @contents   = nil
-        @encoding   = encoding
+        @encoding   = find_encoding(encoding)
         @length     = length || Float::INFINITY
       end
 
       # (see HTTP::Client#readpartial)
       def readpartial(*args)
         stream!
-        @stream.readpartial(*args)
+        chunk = @stream.readpartial(*args)
+        chunk.force_encoding(@encoding) if chunk
       end
 
       # Iterate over the body, allowing it to be enumerable
@@ -43,22 +44,15 @@ module HTTP
 
         raise StateError, "body is being streamed" unless @streaming.nil?
 
-        # see issue 312
-        begin
-          encoding = Encoding.find @encoding
-        rescue ArgumentError
-          encoding = Encoding::BINARY
-        end
-
         begin
           @streaming  = false
-          @contents   = String.new("").force_encoding(encoding)
+          @contents   = String.new("").force_encoding(@encoding)
 
           length = @length
 
           while length > 0 && (chunk = @stream.readpartial)
             length -= chunk.bytesize
-            @contents << chunk.force_encoding(encoding)
+            @contents << chunk.force_encoding(@encoding)
           end
         rescue
           @contents = nil
@@ -78,6 +72,15 @@ module HTTP
       # Easier to interpret string inspect
       def inspect
         "#<#{self.class}:#{object_id.to_s(16)} @streaming=#{!!@streaming}>"
+      end
+
+      private
+
+      # Retrieve encoding by name. If encoding cannot be found, default to binary.
+      def find_encoding(encoding)
+        Encoding.find encoding
+      rescue ArgumentError
+        Encoding::BINARY
       end
     end
   end
