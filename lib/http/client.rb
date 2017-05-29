@@ -31,11 +31,12 @@ module HTTP
       proxy   = opts.proxy
 
       req = HTTP::Request.new(
-        :verb    => verb,
-        :uri     => uri,
-        :headers => headers,
-        :proxy   => proxy,
-        :body    => body
+        :verb         => verb,
+        :uri          => uri,
+        :headers      => headers,
+        :proxy        => proxy,
+        :body         => body,
+        :auto_deflate => opts.feature(:auto_deflate)
       )
 
       res = perform(req, opts)
@@ -146,28 +147,30 @@ module HTTP
         headers[Headers::COOKIE] = cookies
       end
 
+      if (auto_deflate = opts.feature(:auto_deflate))
+        # We need to delete Content-Length header. It will be set automatically
+        # by HTTP::Request::Writer
+        headers.delete(Headers::CONTENT_LENGTH)
+
+        headers[Headers::CONTENT_ENCODING] = auto_deflate.method
+      end
+
       headers
     end
 
     # Create the request body object to send
     def make_request_body(opts, headers)
-      request_body =
-        case
-        when opts.body
-          opts.body
-        when opts.form
-          form = HTTP::FormData.create opts.form
-          headers[Headers::CONTENT_TYPE] ||= form.content_type
-          form
-        when opts.json
-          body = MimeType[:json].encode opts.json
-          headers[Headers::CONTENT_TYPE] ||= "application/json; charset=#{body.encoding.name}"
-          body
-        end
-      if (auto_deflate = opts.feature(:auto_deflate))
-        auto_deflate.deflate(headers, request_body)
-      else
-        request_body
+      case
+      when opts.body
+        opts.body
+      when opts.form
+        form = HTTP::FormData.create opts.form
+        headers[Headers::CONTENT_TYPE] ||= form.content_type
+        form
+      when opts.json
+        body = MimeType[:json].encode opts.json
+        headers[Headers::CONTENT_TYPE] ||= "application/json; charset=#{body.encoding.name}"
+        body
       end
     end
   end

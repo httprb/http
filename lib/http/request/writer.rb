@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 require "http/headers"
-require "http/request/body"
 
 module HTTP
   class Request
@@ -18,7 +17,7 @@ module HTTP
       CHUNKED_END = "#{ZERO}#{CRLF}#{CRLF}".freeze
 
       def initialize(socket, body, headers, headline)
-        @body           = Body.new(body)
+        @body           = body
         @socket         = socket
         @headers        = headers
         @request_header = [headline]
