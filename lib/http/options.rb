@@ -55,7 +55,7 @@ module HTTP
         :socket_class       => self.class.default_socket_class,
         :nodelay            => false,
         :ssl_socket_class   => self.class.default_ssl_socket_class,
-        :ssl                => {},
+        :ssl                => { :ciphers => 'HIGH:!SSLv2:!aNULL:!eNULL:!3DES' },
         :keep_alive_timeout => 5,
         :headers            => {},
         :cookies            => {},
