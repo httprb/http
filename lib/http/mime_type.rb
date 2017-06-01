@@ -75,3 +75,6 @@ end
 
 # built-in mime types
 require "http/mime_type/json"
+require "http/mime_type/text"
+require "http/mime_type/xml"
+require "http/mime_type/html"
