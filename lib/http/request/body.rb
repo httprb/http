@@ -32,15 +32,14 @@ module HTTP
       #
       # @yieldparam [String]
       def each
-        return enum_for(__method__) unless block_given?
-
         if @body.is_a?(String)
           yield @body
         elsif @body.respond_to?(:read)
           read_method = @body.respond_to?(:readpartial) ? :readpartial : :read
+          buffer      = String.new
 
           begin
-            while (data = @body.send(read_method, CHUNK_SIZE))
+            while (data = @body.send(read_method, CHUNK_SIZE, buffer))
               yield data
             end
           rescue EOFError

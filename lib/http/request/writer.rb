@@ -61,24 +61,19 @@ module HTTP
 
       def send_request
         headers = join_headers
-        chunks = @body.each
-
         # It's important to send the request in a single write call when
         # possible in order to play nicely with Nagle's algorithm. Making
         # two writes in a row triggers a pathological case where Nagle is
         # expecting a third write that never happens.
-        begin
-          first_chunk = encode_chunk(chunks.next)
-          write(headers << first_chunk)
-        rescue StopIteration
-          write(headers)
+        data = headers
+
+        @body.each do |chunk|
+          data << encode_chunk(chunk)
+          write(data)
+          data.clear
         end
 
-        # Kernel#loop automatically rescues StopIteration
-        loop do
-          data = encode_chunk(chunks.next)
-          write(data)
-        end
+        write(data) unless data.empty?
 
         write(CHUNKED_END) if chunked?
       end
