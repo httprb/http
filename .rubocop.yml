@@ -78,9 +78,3 @@ Style/StringLiterals:
 
 Style/TrivialAccessors:
   Enabled: false
-
-Lint/HandleExceptions:
-  Enabled: false
-
-Style/EmptyLiteral:
-  Enabled: false
