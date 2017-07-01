@@ -3,9 +3,6 @@
 module HTTP
   class Request
     class Body
-      # Maximum chunk size used for reading content of an IO
-      CHUNK_SIZE = Connection::BUFFER_SIZE
-
       def initialize(body)
         @body = body
 
@@ -35,16 +32,7 @@ module HTTP
         if @body.is_a?(String)
           yield @body
         elsif @body.respond_to?(:read)
-          read_method = @body.respond_to?(:readpartial) ? :readpartial : :read
-          buffer      = String.new
-
-          begin
-            while (data = @body.send(read_method, CHUNK_SIZE, buffer))
-              yield data
-            end
-          rescue EOFError
-            # done reading
-          end
+          IO.copy_stream(@body, BlockIO.new(Proc.new))
         elsif @body.is_a?(Enumerable)
           @body.each { |chunk| yield chunk }
         end
@@ -59,6 +47,17 @@ module HTTP
         return if @body.nil?
 
         raise RequestError, "body of wrong type: #{@body.class}"
+      end
+
+      class BlockIO
+        def initialize(block)
+          @block = block
+        end
+
+        def write(data)
+          @block.call(data)
+          data.bytesize
+        end
       end
     end
   end
