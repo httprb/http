@@ -4,7 +4,7 @@ module HTTP
   class Request
     class Body
       # Maximum chunk size used for reading content of an IO
-      BUFFER_SIZE = Connection::BUFFER_SIZE
+      CHUNK_SIZE = Connection::BUFFER_SIZE
 
       def initialize(body)
         @body = body
@@ -37,8 +37,14 @@ module HTTP
         if @body.is_a?(String)
           yield @body
         elsif @body.respond_to?(:read)
-          while (data = @body.read(BUFFER_SIZE))
-            yield data
+          read_method = @body.respond_to?(:readpartial) ? :readpartial : :read
+
+          begin
+            while (data = @body.send(read_method, CHUNK_SIZE))
+              yield data
+            end
+          rescue EOFError
+            # done reading
           end
         elsif @body.is_a?(Enumerable)
           @body.each { |chunk| yield chunk }
