@@ -34,7 +34,7 @@ module HTTP
         elsif @body.respond_to?(:read)
           IO.copy_stream(@body, BlockIO.new(block))
         elsif @body.is_a?(Enumerable)
-          @body.each { |chunk| yield chunk }
+          @body.each(&block)
         end
       end
 
