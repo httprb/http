@@ -29,8 +29,6 @@ module HTTP
       #
       # @yieldparam [String]
       def each(&block)
-        return enum_for(__method__) unless block_given?
-
         if @body.is_a?(String)
           yield @body
         elsif @body.respond_to?(:read)
