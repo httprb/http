@@ -32,7 +32,7 @@ module HTTP
         if @body.is_a?(String)
           yield @body
         elsif @body.respond_to?(:read)
-          IO.copy_stream(@body, BlockIO.new(block))
+          IO.copy_stream(@body, ProcIO.new(block))
         elsif @body.is_a?(Enumerable)
           @body.each(&block)
         end
@@ -49,7 +49,10 @@ module HTTP
         raise RequestError, "body of wrong type: #{@body.class}"
       end
 
-      class BlockIO
+      # This class provides a "writable IO" wrapper around a proc object, with
+      # #write simply calling the proc, which we can pass in as the
+      # "destination IO" in IO.copy_stream.
+      class ProcIO
         def initialize(block)
           @block = block
         end
