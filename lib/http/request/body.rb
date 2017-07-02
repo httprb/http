@@ -28,11 +28,11 @@ module HTTP
       # Yields chunks of content to be streamed to the request body.
       #
       # @yieldparam [String]
-      def each
+      def each(&block)
         if @body.is_a?(String)
           yield @body
         elsif @body.respond_to?(:read)
-          IO.copy_stream(@body, BlockIO.new(Proc.new))
+          IO.copy_stream(@body, BlockIO.new(block))
         elsif @body.is_a?(Enumerable)
           @body.each { |chunk| yield chunk }
         end
