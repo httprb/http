@@ -88,17 +88,11 @@ RSpec.describe HTTP::Request::Body do
   end
 
   describe "#each" do
-    def chunks
-      chunks = []
-      subject.each { |chunk| chunks << chunk.dup }
-      chunks
-    end
-
     context "when body is nil" do
       let(:body) { nil }
 
       it "yields nothing" do
-        expect(chunks).to eq []
+        expect(subject.each.to_a).to eq []
       end
     end
 
@@ -106,7 +100,7 @@ RSpec.describe HTTP::Request::Body do
       let(:body) { "content" }
 
       it "yields the string" do
-        expect(chunks).to eq %w(content)
+        expect(subject.each.to_a).to eq %w(content)
       end
     end
 
@@ -114,7 +108,7 @@ RSpec.describe HTTP::Request::Body do
       let(:body) { FakeIO.new("a" * 16 * 1024 + "b" * 10 * 1024) }
 
       it "yields chunks of content" do
-        expect(chunks).to eq ["a" * 16 * 1024, "b" * 10 * 1024]
+        expect(subject.each.inject("", :+)).to eq "a" * 16 * 1024 + "b" * 10 * 1024
       end
     end
 
@@ -122,7 +116,7 @@ RSpec.describe HTTP::Request::Body do
       let(:body) { StringIO.new("a" * 16 * 1024 + "b" * 10 * 1024) }
 
       it "yields chunks of content" do
-        expect(chunks).to eq ["a" * 16 * 1024, "b" * 10 * 1024]
+        expect(subject.each.inject("", :+)).to eq "a" * 16 * 1024 + "b" * 10 * 1024
       end
     end
 
@@ -130,7 +124,7 @@ RSpec.describe HTTP::Request::Body do
       let(:body) { %w(bees cows) }
 
       it "yields elements" do
-        expect(chunks).to eq %w(bees cows)
+        expect(subject.each.to_a).to eq %w(bees cows)
       end
     end
   end
