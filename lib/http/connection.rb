@@ -211,6 +211,7 @@ module HTTP
 
       value = @socket.readpartial(size)
       if value == :eof
+        @parser << ""
         :eof
       elsif value
         @parser << value

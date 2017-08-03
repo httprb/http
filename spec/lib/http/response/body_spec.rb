@@ -3,9 +3,12 @@ RSpec.describe HTTP::Response::Body do
   let(:connection) { double(:sequence_id => 0) }
   let(:chunks)     { [String.new("Hello, "), String.new("World!")] }
 
-  before           { allow(connection).to receive(:readpartial) { chunks.shift } }
+  before do
+    allow(connection).to receive(:readpartial) { chunks.shift }
+    allow(connection).to receive(:body_completed?) { chunks.empty? }
+  end
 
-  subject(:body)   { described_class.new(connection, :encoding => Encoding::UTF_8) }
+  subject(:body) { described_class.new(connection, :encoding => Encoding::UTF_8) }
 
   it "streams bodies from responses" do
     expect(subject.to_s).to eq("Hello, World!")

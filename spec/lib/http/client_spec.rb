@@ -327,7 +327,7 @@ RSpec.describe HTTP::Client do
 
         allow(socket_spy).to receive(:close) { nil }
         allow(socket_spy).to receive(:closed?) { true }
-        allow(socket_spy).to receive(:readpartial) { chunks[0] }
+        allow(socket_spy).to receive(:readpartial) { chunks.shift || :eof }
         allow(socket_spy).to receive(:write) { chunks[0].length }
 
         allow(TCPSocket).to receive(:open) { socket_spy }
@@ -336,6 +336,59 @@ RSpec.describe HTTP::Client do
       it "properly reads body" do
         body = client.get(dummy.endpoint).to_s
         expect(body).to eq "<!doctype html>"
+      end
+    end
+
+    context "when uses chunked transfer encoding" do
+      let(:chunks) do
+        [
+          <<-RESPONSE.gsub(/^\s*\| */, "").gsub(/\n/, "\r\n") << body
+          | HTTP/1.1 200 OK
+          | Content-Type: application/json
+          | Transfer-Encoding: chunked
+          | Connection: close
+          |
+          RESPONSE
+        ]
+      end
+      let(:body) do
+        <<-BODY.gsub(/^\s*\| */, "").gsub(/\n/, "\r\n")
+        | 9
+        | {"state":
+        | 5
+        | "ok"}
+        | 0
+        |
+        BODY
+      end
+
+      before do
+        socket_spy = double
+
+        allow(socket_spy).to receive(:close) { nil }
+        allow(socket_spy).to receive(:closed?) { true }
+        allow(socket_spy).to receive(:readpartial) { chunks.shift || :eof }
+        allow(socket_spy).to receive(:write) { chunks[0].length }
+
+        allow(TCPSocket).to receive(:open) { socket_spy }
+      end
+
+      it "properly reads body" do
+        body = client.get(dummy.endpoint).to_s
+        expect(body).to eq '{"state":"ok"}'
+      end
+
+      context "with broken body (too early closed connection)" do
+        let(:body) do
+          <<-BODY.gsub(/^\s*\| */, "").gsub(/\n/, "\r\n")
+          | 9
+          | {"state":
+          BODY
+        end
+
+        it "raises HTTP::ConnectionError" do
+          expect { client.get(dummy.endpoint).to_s }.to raise_error(HTTP::ConnectionError)
+        end
       end
     end
   end
