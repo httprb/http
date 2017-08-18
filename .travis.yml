@@ -4,20 +4,20 @@ sudo: false
 cache: bundler
 
 before_install:
-  - gem update --system 2.6.10
+  - gem update --system
   - gem --version
-  - gem install bundler --version 1.14.3 --no-rdoc --no-ri
+  - gem install bundler --no-rdoc --no-ri
   - bundle --version
 
-install: bundle _1.14.3_ install --without development doc
+install: bundle install --without development doc
 
-script: bundle _1.14.3_ exec rake
+script: bundle exec rake
 
 env: JRUBY_OPTS="$JRUBY_OPTS --debug"
 
 rvm:
   # Include JRuby first because it takes the longest
-  - jruby-9.1.7.0
+  - jruby-9.1.12.0
   - 2.0.0
   - 2.1
   - 2.2
