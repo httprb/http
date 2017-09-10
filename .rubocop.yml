@@ -55,7 +55,7 @@ Metrics/ParameterLists:
 
 ## Performance #################################################################
 
-# XXX: requires ruby 2.3+
+# XXX: requires ruby 2.4+
 Performance/RegexpMatch:
   Enabled: false
 
