@@ -18,8 +18,6 @@ env: JRUBY_OPTS="$JRUBY_OPTS --debug"
 rvm:
   # Include JRuby first because it takes the longest
   - jruby-9.1.13.0
-  - 2.0.0
-  - 2.1
   - 2.2
   - 2.3.4
   - 2.4.1
