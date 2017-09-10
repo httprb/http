@@ -1,4 +1,20 @@
-## master (the future is unwritten)
+## 3.0.0.pre
+
+* Drop support of Ruby `2.0` and Ruby `2.1`.
+  ([@ixti])
+
+* [#410](https://github.com/httprb/http/pull/410)
+  Infer `Host` header upon redirects.
+  ([@janko-m])
+
+* [#409](https://github.com/httprb/http/pull/409)
+  Enables request body streaming on any IO object.
+  ([@janko-m])
+
+* [#413](https://github.com/httprb/http/issues/413),
+  [#414](https://github.com/httprb/http/pull/414)
+  Fix encoding of body chunks.
+  ([@janko-m])
 
 * [#368](https://github.com/httprb/http/pull/368),
   [#357](https://github.com/httprb/http/issues/357)
