@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 RSpec.describe HTTP::Headers::Mixin do
   let :dummy_class do
     Class.new do

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require "addressable/uri"
 
 module HTTP
@@ -19,10 +20,10 @@ module HTTP
     def_delegators :@uri, :omit, :join, :normalize
 
     # @private
-    HTTP_SCHEME = "http".freeze
+    HTTP_SCHEME = "http"
 
     # @private
-    HTTPS_SCHEME = "https".freeze
+    HTTPS_SCHEME = "https"
 
     # Parse the given URI string, returning an HTTP::URI object
     #

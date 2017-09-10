@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 RSpec.describe HTTP::Request::Body do
   let(:body) { "" }
   subject    { HTTP::Request::Body.new(body) }
@@ -29,7 +30,7 @@ RSpec.describe HTTP::Request::Body do
     end
 
     context "when body is an Enumerable" do
-      let(:body) { %w(bees cows) }
+      let(:body) { %w[bees cows] }
 
       it "does not raise an error" do
         expect { subject }.not_to raise_error
@@ -79,7 +80,7 @@ RSpec.describe HTTP::Request::Body do
     end
 
     context "when body is an Enumerable" do
-      let(:body) { %w(bees cows) }
+      let(:body) { %w[bees cows] }
 
       it "raises a RequestError" do
         expect { subject.size }.to raise_error(HTTP::RequestError)
@@ -106,7 +107,7 @@ RSpec.describe HTTP::Request::Body do
       let(:body) { "content" }
 
       it "yields the string" do
-        expect(chunks).to eq %w(content)
+        expect(chunks).to eq %w[content]
       end
     end
 
@@ -127,10 +128,10 @@ RSpec.describe HTTP::Request::Body do
     end
 
     context "when body is an Enumerable" do
-      let(:body) { %w(bees cows) }
+      let(:body) { %w[bees cows] }
 
       it "yields elements" do
-        expect(chunks).to eq %w(bees cows)
+        expect(chunks).to eq %w[bees cows]
       end
     end
   end

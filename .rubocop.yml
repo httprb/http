@@ -1,5 +1,25 @@
 AllCops:
-    DisplayCopNames: true
+  DisplayCopNames: true
+
+## Layout ######################################################################
+
+Layout/DotPosition:
+  EnforcedStyle: trailing
+
+Layout/SpaceAroundOperators:
+  AllowForAlignment: true
+
+Layout/SpaceInsideHashLiteralBraces:
+  EnforcedStyle: no_space
+
+## Metrics #####################################################################
+
+Metrics/AbcSize:
+  Enabled: false
+
+Metrics/BlockLength:
+  Exclude:
+    - spec/**/*
 
 Metrics/BlockNesting:
   Max: 2
@@ -8,19 +28,22 @@ Metrics/ClassLength:
   CountComments: false
   Max: 125
 
+# TODO: Lower to 6
+Metrics/CyclomaticComplexity:
+  Max: 8
+
 Metrics/PerceivedComplexity:
   Max: 8
 
-Metrics/CyclomaticComplexity:
-  Max: 8 # TODO: Lower to 6
-
+# TODO: Lower to 80
 Metrics/LineLength:
   AllowURI: true
-  Max: 143 # TODO: Lower to 80
+  Max: 143
 
+# TODO: Lower to 15
 Metrics/MethodLength:
   CountComments: false
-  Max: 25 # TODO: Lower to 15
+  Max: 25
 
 Metrics/ModuleLength:
   CountComments: false
@@ -30,8 +53,13 @@ Metrics/ParameterLists:
   Max: 5
   CountKeywordArgs: true
 
-Metrics/AbcSize:
+## Performance #################################################################
+
+# XXX: requires ruby 2.3+
+Performance/RegexpMatch:
   Enabled: false
+
+## Style #######################################################################
 
 Style/CollectionMethods:
   PreferredMethods:
@@ -42,9 +70,6 @@ Style/CollectionMethods:
 
 Style/Documentation:
   Enabled: false
-
-Style/DotPosition:
-  EnforcedStyle: trailing
 
 Style/DoubleNegation:
   Enabled: false
@@ -58,6 +83,10 @@ Style/Encoding:
 Style/EmptyCaseCondition:
   Enabled: false
 
+# XXX: Lots of times it suggests making code terrible to read.
+Style/GuardClause:
+  Enabled: false
+
 Style/HashSyntax:
   EnforcedStyle: hash_rockets
 
@@ -67,14 +96,15 @@ Style/Lambda:
 Style/OptionHash:
   Enabled: true
 
-Style/SpaceAroundOperators:
-  AllowForAlignment: true
-
-Style/SpaceInsideHashLiteralBraces:
-  EnforcedStyle: no_space
+# XXX: requires ruby 2.3+
+Style/SafeNavigation:
+  Enabled: false
 
 Style/StringLiterals:
   EnforcedStyle: double_quotes
 
 Style/TrivialAccessors:
+  Enabled: false
+
+Style/YodaCondition:
   Enabled: false

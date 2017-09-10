@@ -1,20 +1,21 @@
 # frozen_string_literal: true
+
 require "http/headers"
 
 module HTTP
   class Request
     class Writer
       # CRLF is the universal HTTP delimiter
-      CRLF = "\r\n".freeze
+      CRLF = "\r\n"
 
       # Chunked data termintaor.
-      ZERO = "0".freeze
+      ZERO = "0"
 
       # Chunked transfer encoding
-      CHUNKED = "chunked".freeze
+      CHUNKED = "chunked"
 
       # End of a chunked transfer
-      CHUNKED_END = "#{ZERO}#{CRLF}#{CRLF}".freeze
+      CHUNKED_END = "#{ZERO}#{CRLF}#{CRLF}"
 
       def initialize(socket, body, headers, headline)
         @body           = body

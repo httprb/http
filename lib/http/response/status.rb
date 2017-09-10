@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require "delegate"
 
 require "http/response/status/reasons"

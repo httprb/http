@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 RSpec.describe HTTP::Response do
   let(:body)          { "Hello world!" }
   let(:uri)           { "http://example.com/" }

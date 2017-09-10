@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+
+# rubocop:disable Metrics/ClassLength, Style/RedundantSelf
+
 require "http/headers"
 require "openssl"
 require "socket"
@@ -8,7 +11,6 @@ require "http/features/auto_inflate"
 require "http/features/auto_deflate"
 
 module HTTP
-  # rubocop:disable Metrics/ClassLength
   class Options
     @default_socket_class     = TCPSocket
     @default_ssl_socket_class = OpenSSL::SSL::SSLSocket
@@ -115,21 +117,22 @@ module HTTP
       end
     end
 
-    %w(
+    %w[
       proxy params form json body follow response
       socket_class nodelay ssl_socket_class ssl_context ssl
       persistent keep_alive_timeout timeout_class timeout_options
-    ).each do |method_name|
+    ].each do |method_name|
       def_option method_name
     end
 
     def follow=(value)
-      @follow = case
-                when !value                    then nil
-                when true == value             then {}
-                when value.respond_to?(:fetch) then value
-                else argument_error! "Unsupported follow options: #{value}"
-                end
+      @follow =
+        case
+        when !value                    then nil
+        when true == value             then {}
+        when value.respond_to?(:fetch) then value
+        else argument_error! "Unsupported follow options: #{value}"
+        end
     end
 
     def persistent=(value)
@@ -182,7 +185,7 @@ module HTTP
     private
 
     def argument_error!(message)
-      raise(Error, message, caller[1..-1])
+      raise(Error, message, caller(1..-1))
     end
   end
 end

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 RSpec.describe HTTP::Redirector do
   def simple_response(status, body = "", headers = {})
     HTTP::Response.new(

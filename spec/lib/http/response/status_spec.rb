@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 RSpec.describe HTTP::Response::Status do
   describe ".new" do
     it "fails if given value does not respond to #to_i" do
@@ -13,7 +14,7 @@ RSpec.describe HTTP::Response::Status do
   describe "#code" do
     subject { described_class.new("200.0").code }
     it { is_expected.to eq 200 }
-    it { is_expected.to be_a Fixnum }
+    it { is_expected.to be_a Integer }
   end
 
   describe "#reason" do
@@ -39,23 +40,23 @@ RSpec.describe HTTP::Response::Status do
     subject { (100...200).map { |code| described_class.new code } }
 
     it "is #informational?" do
-      expect(subject).to all satisfy(&:informational?)
+      expect(subject).to all(satisfy(&:informational?))
     end
 
     it "is not #success?" do
-      expect(subject).to all satisfy { |status| !status.success? }
+      expect(subject).to all(satisfy { |status| !status.success? })
     end
 
     it "is not #redirect?" do
-      expect(subject).to all satisfy { |status| !status.redirect? }
+      expect(subject).to all(satisfy { |status| !status.redirect? })
     end
 
     it "is not #client_error?" do
-      expect(subject).to all satisfy { |status| !status.client_error? }
+      expect(subject).to all(satisfy { |status| !status.client_error? })
     end
 
     it "is not #server_error?" do
-      expect(subject).to all satisfy { |status| !status.server_error? }
+      expect(subject).to all(satisfy { |status| !status.server_error? })
     end
   end
 
@@ -63,23 +64,23 @@ RSpec.describe HTTP::Response::Status do
     subject { (200...300).map { |code| described_class.new code } }
 
     it "is not #informational?" do
-      expect(subject).to all satisfy { |status| !status.informational? }
+      expect(subject).to all(satisfy { |status| !status.informational? })
     end
 
     it "is #success?" do
-      expect(subject).to all satisfy(&:success?)
+      expect(subject).to all(satisfy(&:success?))
     end
 
     it "is not #redirect?" do
-      expect(subject).to all satisfy { |status| !status.redirect? }
+      expect(subject).to all(satisfy { |status| !status.redirect? })
     end
 
     it "is not #client_error?" do
-      expect(subject).to all satisfy { |status| !status.client_error? }
+      expect(subject).to all(satisfy { |status| !status.client_error? })
     end
 
     it "is not #server_error?" do
-      expect(subject).to all satisfy { |status| !status.server_error? }
+      expect(subject).to all(satisfy { |status| !status.server_error? })
     end
   end
 
@@ -87,23 +88,23 @@ RSpec.describe HTTP::Response::Status do
     subject { (300...400).map { |code| described_class.new code } }
 
     it "is not #informational?" do
-      expect(subject).to all satisfy { |status| !status.informational? }
+      expect(subject).to all(satisfy { |status| !status.informational? })
     end
 
     it "is not #success?" do
-      expect(subject).to all satisfy { |status| !status.success? }
+      expect(subject).to all(satisfy { |status| !status.success? })
     end
 
     it "is #redirect?" do
-      expect(subject).to all satisfy(&:redirect?)
+      expect(subject).to all(satisfy(&:redirect?))
     end
 
     it "is not #client_error?" do
-      expect(subject).to all satisfy { |status| !status.client_error? }
+      expect(subject).to all(satisfy { |status| !status.client_error? })
     end
 
     it "is not #server_error?" do
-      expect(subject).to all satisfy { |status| !status.server_error? }
+      expect(subject).to all(satisfy { |status| !status.server_error? })
     end
   end
 
@@ -111,23 +112,23 @@ RSpec.describe HTTP::Response::Status do
     subject { (400...500).map { |code| described_class.new code } }
 
     it "is not #informational?" do
-      expect(subject).to all satisfy { |status| !status.informational? }
+      expect(subject).to all(satisfy { |status| !status.informational? })
     end
 
     it "is not #success?" do
-      expect(subject).to all satisfy { |status| !status.success? }
+      expect(subject).to all(satisfy { |status| !status.success? })
     end
 
     it "is not #redirect?" do
-      expect(subject).to all satisfy { |status| !status.redirect? }
+      expect(subject).to all(satisfy { |status| !status.redirect? })
     end
 
     it "is #client_error?" do
-      expect(subject).to all satisfy(&:client_error?)
+      expect(subject).to all(satisfy(&:client_error?))
     end
 
     it "is not #server_error?" do
-      expect(subject).to all satisfy { |status| !status.server_error? }
+      expect(subject).to all(satisfy { |status| !status.server_error? })
     end
   end
 
@@ -135,23 +136,23 @@ RSpec.describe HTTP::Response::Status do
     subject { (500...600).map { |code| described_class.new code } }
 
     it "is not #informational?" do
-      expect(subject).to all satisfy { |status| !status.informational? }
+      expect(subject).to all(satisfy { |status| !status.informational? })
     end
 
     it "is not #success?" do
-      expect(subject).to all satisfy { |status| !status.success? }
+      expect(subject).to all(satisfy { |status| !status.success? })
     end
 
     it "is not #redirect?" do
-      expect(subject).to all satisfy { |status| !status.redirect? }
+      expect(subject).to all(satisfy { |status| !status.redirect? })
     end
 
     it "is not #client_error?" do
-      expect(subject).to all satisfy { |status| !status.client_error? }
+      expect(subject).to all(satisfy { |status| !status.client_error? })
     end
 
     it "is #server_error?" do
-      expect(subject).to all satisfy(&:server_error?)
+      expect(subject).to all(satisfy(&:server_error?))
     end
   end
 

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require "base64"
 
 require "http/headers"
@@ -98,7 +99,7 @@ module HTTP
               else raise ArgumentError, "Unsupported Timeout class: #{klass}"
               end
 
-      [:read, :write, :connect].each do |k|
+      %i[read write connect].each do |k|
         next unless options.key? k
         options["#{k}_timeout".to_sym] = options.delete k
       end

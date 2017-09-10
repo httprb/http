@@ -111,7 +111,7 @@ RSpec.describe HTTP::Client do
 
     it "accepts params within the provided URL" do
       expect(HTTP::Request).to receive(:new) do |opts|
-        expect(CGI.parse(opts[:uri].query)).to eq("foo" => %w(bar))
+        expect(CGI.parse(opts[:uri].query)).to eq("foo" => %w[bar])
       end
 
       client.get("http://example.com/?foo=bar")
@@ -119,7 +119,7 @@ RSpec.describe HTTP::Client do
 
     it "combines GET params from the URI with the passed in params" do
       expect(HTTP::Request).to receive(:new) do |opts|
-        expect(CGI.parse(opts[:uri].query)).to eq("foo" => %w(bar), "baz" => %w(quux))
+        expect(CGI.parse(opts[:uri].query)).to eq("foo" => %w[bar], "baz" => %w[quux])
       end
 
       client.get("http://example.com/?foo=bar", :params => {:baz => "quux"})
@@ -143,7 +143,7 @@ RSpec.describe HTTP::Client do
 
     it "does not corrupts index-less arrays" do
       expect(HTTP::Request).to receive(:new) do |opts|
-        expect(CGI.parse(opts[:uri].query)).to eq "a[]" => %w(b c), "d" => %w(e)
+        expect(CGI.parse(opts[:uri].query)).to eq "a[]" => %w[b c], "d" => %w[e]
       end
 
       client.get("http://example.com/?a[]=b&a[]=c", :params => {:d => "e"})

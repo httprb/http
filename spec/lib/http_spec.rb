@@ -49,7 +49,7 @@ RSpec.describe HTTP do
     end
 
     context "with a large request body" do
-      %w(global null per_operation).each do |timeout|
+      %w[global null per_operation].each do |timeout|
         context "with a #{timeout} timeout" do
           [16_000, 16_500, 17_000, 34_000, 68_000].each do |size|
             [0, rand(0..100), rand(100..1000)].each do |fuzzer|

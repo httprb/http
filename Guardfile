@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # More info at https://github.com/guard/guard#readme
 
 guard :rspec, :cmd => "GUARD_RSPEC=1 bundle exec rspec --no-profile" do

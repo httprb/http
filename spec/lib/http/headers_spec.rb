@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 RSpec.describe HTTP::Headers do
   subject(:headers) { described_class.new }
 
@@ -25,8 +26,8 @@ RSpec.describe HTTP::Headers do
 
     it "allows set multiple values" do
       headers.set :set_cookie, "hoo=ray"
-      headers.set :set_cookie, %w(hoo=ray woo=hoo)
-      expect(headers["Set-Cookie"]).to eq %w(hoo=ray woo=hoo)
+      headers.set :set_cookie, %w[hoo=ray woo=hoo]
+      expect(headers["Set-Cookie"]).to eq %w[hoo=ray woo=hoo]
     end
 
     it "fails with empty header name" do
@@ -59,8 +60,8 @@ RSpec.describe HTTP::Headers do
 
     it "allows set multiple values" do
       headers[:set_cookie] = "hoo=ray"
-      headers[:set_cookie] = %w(hoo=ray woo=hoo)
-      expect(headers["Set-Cookie"]).to eq %w(hoo=ray woo=hoo)
+      headers[:set_cookie] = %w[hoo=ray woo=hoo]
+      expect(headers["Set-Cookie"]).to eq %w[hoo=ray woo=hoo]
     end
   end
 
@@ -102,13 +103,13 @@ RSpec.describe HTTP::Headers do
     it "appends new value if header exists" do
       headers.add :set_cookie, "hoo=ray"
       headers.add :set_cookie, "woo=hoo"
-      expect(headers["Set-Cookie"]).to eq %w(hoo=ray woo=hoo)
+      expect(headers["Set-Cookie"]).to eq %w[hoo=ray woo=hoo]
     end
 
     it "allows append multiple values" do
       headers.add :set_cookie, "hoo=ray"
-      headers.add :set_cookie, %w(woo=hoo yup=pie)
-      expect(headers["Set-Cookie"]).to eq %w(hoo=ray woo=hoo yup=pie)
+      headers.add :set_cookie, %w[woo=hoo yup=pie]
+      expect(headers["Set-Cookie"]).to eq %w[hoo=ray woo=hoo yup=pie]
     end
 
     it "fails with empty header name" do
@@ -126,11 +127,11 @@ RSpec.describe HTTP::Headers do
     before { headers.set("Content-Type", "application/json") }
 
     it "returns array of associated values" do
-      expect(headers.get("Content-Type")).to eq %w(application/json)
+      expect(headers.get("Content-Type")).to eq %w[application/json]
     end
 
     it "normalizes header name" do
-      expect(headers.get(:content_type)).to eq %w(application/json)
+      expect(headers.get(:content_type)).to eq %w[application/json]
     end
 
     context "when header does not exists" do
@@ -180,7 +181,7 @@ RSpec.describe HTTP::Headers do
       end
 
       it "returns array of associated values" do
-        expect(headers[:set_cookie]).to eq %w(hoo=ray woo=hoo)
+        expect(headers[:set_cookie]).to eq %w[hoo=ray woo=hoo]
       end
     end
   end
@@ -217,7 +218,7 @@ RSpec.describe HTTP::Headers do
     end
 
     it "returns Hash with normalized keys" do
-      expect(headers.to_h.keys).to match_array %w(Content-Type Set-Cookie)
+      expect(headers.to_h.keys).to match_array %w[Content-Type Set-Cookie]
     end
 
     context "for a header with single value" do
@@ -228,7 +229,7 @@ RSpec.describe HTTP::Headers do
 
     context "for a header with multiple values" do
       it "provides an array of values" do
-        expect(headers.to_h["Set-Cookie"]).to eq %w(hoo=ray woo=hoo)
+        expect(headers.to_h["Set-Cookie"]).to eq %w[hoo=ray woo=hoo]
       end
     end
   end
@@ -246,15 +247,15 @@ RSpec.describe HTTP::Headers do
 
     it "returns Array of key/value pairs with normalized keys" do
       expect(headers.to_a).to eq [
-        %w(Content-Type application/json),
-        %w(Set-Cookie hoo=ray),
-        %w(Set-Cookie woo=hoo)
+        %w[Content-Type application/json],
+        %w[Set-Cookie hoo=ray],
+        %w[Set-Cookie woo=hoo]
       ]
     end
   end
 
   describe "#inspect" do
-    before  { headers.set :set_cookie, %w(hoo=ray woo=hoo) }
+    before  { headers.set :set_cookie, %w[hoo=ray woo=hoo] }
     subject { headers.inspect }
 
     it { is_expected.to eq '#<HTTP::Headers {"Set-Cookie"=>["hoo=ray", "woo=hoo"]}>' }
@@ -289,9 +290,9 @@ RSpec.describe HTTP::Headers do
 
     it "yields headers in the same order they were added" do
       expect { |b| headers.each(&b) }.to yield_successive_args(
-        %w(Set-Cookie hoo=ray),
-        %w(Content-Type application/json),
-        %w(Set-Cookie woo=hoo)
+        %w[Set-Cookie hoo=ray],
+        %w[Content-Type application/json],
+        %w[Set-Cookie woo=hoo]
       )
     end
 
@@ -351,7 +352,7 @@ RSpec.describe HTTP::Headers do
 
     it "allows comparison with Array of key/value pairs" do
       left.add :accept, "text/plain"
-      expect(left).to eq [%w(Accept text/plain)]
+      expect(left).to eq [%w[Accept text/plain]]
     end
 
     it "sensitive to headers order" do
@@ -402,7 +403,7 @@ RSpec.describe HTTP::Headers do
     before do
       headers.set :host, "example.com"
       headers.set :accept, "application/json"
-      headers.merge! :accept => "plain/text", :cookie => %w(hoo=ray woo=hoo)
+      headers.merge! :accept => "plain/text", :cookie => %w[hoo=ray woo=hoo]
     end
 
     it "leaves headers not presented in other as is" do
@@ -414,7 +415,7 @@ RSpec.describe HTTP::Headers do
     end
 
     it "appends other headers, not presented in base" do
-      expect(headers[:cookie]).to eq %w(hoo=ray woo=hoo)
+      expect(headers[:cookie]).to eq %w[hoo=ray woo=hoo]
     end
   end
 
@@ -425,7 +426,7 @@ RSpec.describe HTTP::Headers do
     end
 
     subject(:merged) do
-      headers.merge :accept => "plain/text", :cookie => %w(hoo=ray woo=hoo)
+      headers.merge :accept => "plain/text", :cookie => %w[hoo=ray woo=hoo]
     end
 
     it { is_expected.to be_a described_class }
@@ -444,7 +445,7 @@ RSpec.describe HTTP::Headers do
     end
 
     it "appends other headers, not presented in base" do
-      expect(merged[:cookie]).to eq %w(hoo=ray woo=hoo)
+      expect(merged[:cookie]).to eq %w[hoo=ray woo=hoo]
     end
   end
 
@@ -462,7 +463,7 @@ RSpec.describe HTTP::Headers do
     end
 
     it "accepts any object that respond to #to_a" do
-      hashie = double :to_a => [%w(accept json)]
+      hashie = double :to_a => [%w[accept json]]
       expect(described_class.coerce(hashie)["accept"]).to eq "json"
     end
 
@@ -477,8 +478,8 @@ RSpec.describe HTTP::Headers do
         expect(described_class.coerce(headers).to_a).
           to match_array(
             [
-              %w(Set-Cookie hoo=ray),
-              %w(Set-Cookie woo=hoo)
+              %w[Set-Cookie hoo=ray],
+              %w[Set-Cookie woo=hoo]
             ]
           )
       end

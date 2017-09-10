@@ -1,4 +1,5 @@
-#!/usr/bin/env rake
+# frozen_string_literal: true
+
 require "bundler/gem_tasks"
 
 require "rspec/core/rake_task"
@@ -28,7 +29,7 @@ task :generate_status_codes do
     code = e.xpath("xmlns:value").text.to_s
     desc = e.xpath("xmlns:description").text.to_s
 
-    next a if "Unassigned" == desc || "(Unused)" == desc
+    next a if %w[Unassigned (Unused)].include?(desc)
 
     a << "#{code} => #{desc.inspect}"
   end
@@ -61,7 +62,7 @@ task :generate_status_codes do
 end
 
 if ENV["CI"].nil?
-  task :default => [:spec, :rubocop, :verify_measurements]
+  task :default => %i[spec rubocop verify_measurements]
 else
   case ENV["SUITE"]
   when "rubocop"   then task :default => :rubocop

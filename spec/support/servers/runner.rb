@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module ServerRunner
   def run_server(name)
     let! name do

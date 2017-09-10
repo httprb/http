@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 RSpec.describe HTTP::Features::AutoDeflate do
   subject { HTTP::Features::AutoDeflate.new }
 
@@ -26,7 +27,7 @@ RSpec.describe HTTP::Features::AutoDeflate do
   end
 
   describe "#deflated_body" do
-    let(:body)          { %w(bees cows) }
+    let(:body)          { %w[bees cows] }
     let(:deflated_body) { subject.deflated_body(body) }
 
     context "when method is gzip" do

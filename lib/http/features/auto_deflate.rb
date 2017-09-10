@@ -13,7 +13,7 @@ module HTTP
 
         @method = @opts.key?(:method) ? @opts[:method].to_s : "gzip"
 
-        raise Error, "Only gzip and deflate methods are supported" unless %w(gzip deflate).include?(@method)
+        raise Error, "Only gzip and deflate methods are supported" unless %w[gzip deflate].include?(@method)
       end
 
       def deflated_body(body)

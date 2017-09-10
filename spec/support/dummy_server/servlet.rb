@@ -17,7 +17,7 @@ class DummyServer < WEBrick::HTTPServer
       @handlers ||= {}
     end
 
-    %w(get post head).each do |method|
+    %w[get post head].each do |method|
       class_eval <<-RUBY, __FILE__, __LINE__
         def self.#{method}(path, &block)
           handlers["#{method}:\#{path}"] = block

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 RSpec.shared_context "HTTP handling" do
   describe "timeouts" do
     let(:conn_timeout) { 1 }

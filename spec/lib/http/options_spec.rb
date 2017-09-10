@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 RSpec.describe HTTP::Options do
   subject { described_class.new(:response => :body) }
 

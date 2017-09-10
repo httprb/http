@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require "json"
 require "http/mime_type/adapter"
 
@@ -14,7 +15,7 @@ module HTTP
 
       # Decodes JSON
       def decode(str)
-        ::JSON.load str
+        ::JSON.parse str
       end
     end
 

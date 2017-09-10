@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require "forwardable"
 
 require "http/headers"
@@ -10,17 +11,17 @@ module HTTP
     extend Forwardable
 
     # Allowed values for CONNECTION header
-    KEEP_ALIVE = "Keep-Alive".freeze
-    CLOSE      = "close".freeze
+    KEEP_ALIVE = "Keep-Alive"
+    CLOSE      = "close"
 
     # Attempt to read this much data
     BUFFER_SIZE = 16_384
 
     # HTTP/1.0
-    HTTP_1_0 = "1.0".freeze
+    HTTP_1_0 = "1.0"
 
     # HTTP/1.1
-    HTTP_1_1 = "1.1".freeze
+    HTTP_1_1 = "1.1"
 
     # Returned after HTTP CONNECT (via proxy)
     attr_reader :proxy_response_headers

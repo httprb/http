@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require "forwardable"
 require "base64"
 require "time"
@@ -23,7 +24,7 @@ module HTTP
     class UnsupportedSchemeError < RequestError; end
 
     # Default User-Agent header value
-    USER_AGENT = "http.rb/#{HTTP::VERSION}".freeze
+    USER_AGENT = "http.rb/#{HTTP::VERSION}"
 
     METHODS = [
       # RFC 2616: Hypertext Transfer Protocol -- HTTP/1.1
@@ -49,7 +50,7 @@ module HTTP
     ].freeze
 
     # Allowed schemes
-    SCHEMES = [:http, :https, :ws, :wss].freeze
+    SCHEMES = %i[http https ws wss].freeze
 
     # Default ports of supported schemes
     PORTS = {
@@ -146,8 +147,14 @@ module HTTP
 
     # Compute HTTP request header for direct or proxy request
     def headline
-      request_uri = (using_proxy? && !uri.https?) ? uri : uri.omit(:scheme, :authority)
-      "#{verb.to_s.upcase} #{request_uri.omit :fragment} HTTP/#{version}"
+      request_uri =
+        if using_proxy? && !uri.https?
+          uri.omit(:fragment)
+        else
+          uri.omit(:scheme, :authority, :fragment)
+        end
+
+      "#{verb.to_s.upcase} #{request_uri} HTTP/#{version}"
     end
 
     # Compute HTTP request header SSL proxy connection

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require "set"
 
 require "http/headers"
@@ -20,10 +21,10 @@ module HTTP
 
     # Insecure http verbs, which should trigger StateError in strict mode
     # upon {STRICT_SENSITIVE_CODES}
-    UNSAFE_VERBS = [:put, :delete, :post].to_set.freeze
+    UNSAFE_VERBS = %i[put delete post].to_set.freeze
 
     # Verbs which will remain unchanged upon See Other response.
-    SEE_OTHER_ALLOWED_VERBS = [:get, :head].to_set.freeze
+    SEE_OTHER_ALLOWED_VERBS = %i[get head].to_set.freeze
 
     # @!attribute [r] strict
     #   Returns redirector policy.

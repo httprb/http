@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 RSpec.describe HTTP::Features::AutoInflate do
   subject { HTTP::Features::AutoInflate.new }
   let(:connection) { double }

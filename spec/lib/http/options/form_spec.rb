@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 RSpec.describe HTTP::Options, "form" do
   let(:opts) { HTTP::Options.new }
 
