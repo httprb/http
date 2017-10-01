@@ -14,4 +14,11 @@ RSpec.describe "Regression testing" do
       expect { HTTP.get(google_uri).to_s }.not_to raise_error
     end
   end
+
+  describe "#422" do
+    it "reads body when 200 OK response contains Upgrade header" do
+      res = HTTP.get("https://httpbin.org/response-headers?Upgrade=h2,h2c")
+      expect(res.parse(:json)).to include("Upgrade" => "h2,h2c")
+    end
+  end
 end
