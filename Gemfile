@@ -5,8 +5,6 @@ ruby RUBY_VERSION
 
 gem "rake"
 
-gem "http_parser.rb", :git => "https://github.com/ixti/http_parser.rb.git"
-
 group :development do
   gem "guard-rspec", :require => false
   gem "nokogiri",    :require => false
