@@ -1,4 +1,4 @@
-## 3.0.0.pre
+## 3.0.0 (2017-10-01)
 
 * Drop support of Ruby `2.0` and Ruby `2.1`.
   ([@ixti])
