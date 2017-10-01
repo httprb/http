@@ -6,9 +6,9 @@
 [![Coverage Status](https://coveralls.io/repos/httprb/http/badge.svg?branch=master)](https://coveralls.io/r/httprb/http)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/httprb/http/blob/master/LICENSE.txt)
 
-_NOTE: This is the 3.x **development** branch.  For the 2.x **stable** branch, please see:_
+_NOTE: This is the 4.x **development** branch.  For the 3.x **stable** branch, please see:_
 
-https://github.com/httprb/http/tree/2-x-stable
+https://github.com/httprb/http/tree/3-x-stable
 
 ## About
 
