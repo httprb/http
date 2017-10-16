@@ -100,6 +100,8 @@ module HTTP
           break unless data.bytesize > length
           data = data.byteslice(length..-1)
         end
+      rescue IOError, SocketError, SystemCallError => ex
+        raise ConnectionError, "error writing to socket: #{ex}", ex.backtrace
       end
     end
   end
