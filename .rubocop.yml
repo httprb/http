@@ -1,5 +1,4 @@
 AllCops:
-  TargetRubyVersion: 2.4
   DisplayCopNames: true
 
 ## Layout ######################################################################
