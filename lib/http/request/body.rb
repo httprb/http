@@ -3,25 +3,27 @@
 module HTTP
   class Request
     class Body
-      def initialize(body)
-        @body = body
+      attr_reader :source
 
-        validate_body_type!
+      def initialize(source)
+        @source = source
+
+        validate_source_type!
       end
 
       # Returns size which should be used for the "Content-Length" header.
       #
       # @return [Integer]
       def size
-        if @body.is_a?(String)
-          @body.bytesize
-        elsif @body.respond_to?(:read)
-          raise RequestError, "IO object must respond to #size" unless @body.respond_to?(:size)
-          @body.size
-        elsif @body.nil?
+        if @source.is_a?(String)
+          @source.bytesize
+        elsif @source.respond_to?(:read)
+          raise RequestError, "IO object must respond to #size" unless @source.respond_to?(:size)
+          @source.size
+        elsif @source.nil?
           0
         else
-          raise RequestError, "cannot determine size of body: #{@body.inspect}"
+          raise RequestError, "cannot determine size of body: #{@source.inspect}"
         end
       end
 
@@ -29,24 +31,24 @@ module HTTP
       #
       # @yieldparam [String]
       def each(&block)
-        if @body.is_a?(String)
-          yield @body
-        elsif @body.respond_to?(:read)
-          IO.copy_stream(@body, ProcIO.new(block))
-        elsif @body.is_a?(Enumerable)
-          @body.each(&block)
+        if @source.is_a?(String)
+          yield @source
+        elsif @source.respond_to?(:read)
+          IO.copy_stream(@source, ProcIO.new(block))
+        elsif @source.is_a?(Enumerable)
+          @source.each(&block)
         end
       end
 
       private
 
-      def validate_body_type!
-        return if @body.is_a?(String)
-        return if @body.respond_to?(:read)
-        return if @body.is_a?(Enumerable)
-        return if @body.nil?
+      def validate_source_type!
+        return if @source.is_a?(String)
+        return if @source.respond_to?(:read)
+        return if @source.is_a?(Enumerable)
+        return if @source.nil?
 
-        raise RequestError, "body of wrong type: #{@body.class}"
+        raise RequestError, "body of wrong type: #{@source.class}"
       end
 
       # This class provides a "writable IO" wrapper around a proc object, with

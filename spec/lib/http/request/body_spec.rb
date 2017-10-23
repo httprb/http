@@ -46,6 +46,12 @@ RSpec.describe HTTP::Request::Body do
     end
   end
 
+  describe "#source" do
+    it "returns the original object" do
+      expect(subject.source).to eq ""
+    end
+  end
+
   describe "#size" do
     context "when body is nil" do
       let(:body) { nil }
