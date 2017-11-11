@@ -40,6 +40,11 @@ module HTTP
         end
       end
 
+      # Request bodies are equivalent when they have the same source.
+      def ==(other)
+        self.class == other.class && self.source == other.source # rubocop:disable Style/RedundantSelf
+      end
+
       private
 
       def validate_source_type!
