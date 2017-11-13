@@ -46,6 +46,12 @@ RSpec.describe HTTP::Request::Body do
     end
   end
 
+  describe "#source" do
+    it "returns the original object" do
+      expect(subject.source).to eq ""
+    end
+  end
+
   describe "#size" do
     context "when body is nil" do
       let(:body) { nil }
@@ -132,6 +138,35 @@ RSpec.describe HTTP::Request::Body do
 
       it "yields elements" do
         expect(chunks).to eq %w[bees cows]
+      end
+    end
+  end
+
+  describe "#==" do
+    context "when sources are equivalent" do
+      let(:body1) { HTTP::Request::Body.new("content") }
+      let(:body2) { HTTP::Request::Body.new("content") }
+
+      it "returns true" do
+        expect(body1).to eq body2
+      end
+    end
+
+    context "when sources are not equivalent" do
+      let(:body1) { HTTP::Request::Body.new("content") }
+      let(:body2) { HTTP::Request::Body.new(nil) }
+
+      it "returns false" do
+        expect(body1).not_to eq body2
+      end
+    end
+
+    context "when objects are not of the same class" do
+      let(:body1) { HTTP::Request::Body.new("content") }
+      let(:body2) { "content" }
+
+      it "returns false" do
+        expect(body1).not_to eq body2
       end
     end
   end
