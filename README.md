@@ -64,6 +64,12 @@ DISCLAIMER: Most benchmarks you find in READMEs are crap,
 including this one. These are out-of-date. If you care about
 performance, benchmark for yourself for your own use cases!
 
+## How do I pronounce the name of this gem?
+
+httprb can be pronounced as "hot potato rub", following the
+[universally accepted convention](https://twitter.com/isntitvacant/status/926573678497734657)
+for pronouncing HTTP-related terminology.
+
 ## Help and Discussion
 
 If you need help or just want to talk about the http.rb,
