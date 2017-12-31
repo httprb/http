@@ -77,29 +77,24 @@ module HTTP
     end
 
     # @overload timeout(options = {})
-    #   Syntax sugar for `timeout(:per_operation, options)`
-    # @overload timeout(klass, options = {})
-    #   Adds a timeout to the request.
-    #   @param [#to_sym] klass
-    #     either :null, :global, or :per_operation
+    #   Adds per operation timeouts to the request
     #   @param [Hash] options
     #   @option options [Float] :read Read timeout
     #   @option options [Float] :write Write timeout
     #   @option options [Float] :connect Connect timeout
-    def timeout(klass, options = {}) # rubocop:disable Style/OptionHash
-      if klass.is_a? Hash
-        options = klass
-        klass   = :per_operation
-      end
+    # @overload timeout(global_timeout)
+    #   Adds a global timeout to the full request
+    #   @param [Numeric] global_timeout
+    def timeout(options)
+      klass, options = case options
+                       when Numeric then [HTTP::Timeout::Global, {:global => options}]
+                       when Hash    then [HTTP::Timeout::PerOperation, options]
+                       when :null   then [HTTP::Timeout::Null, {}]
+                       else raise ArgumentError, "Use `.timeout(global_timeout_in_seconds)` or `.timeout(connect: x, write: y, read: z)`."
 
-      klass = case klass.to_sym
-              when :null          then HTTP::Timeout::Null
-              when :global        then HTTP::Timeout::Global
-              when :per_operation then HTTP::Timeout::PerOperation
-              else raise ArgumentError, "Unsupported Timeout class: #{klass}"
-              end
+                       end
 
-      %i[read write connect].each do |k|
+      %i[global read write connect].each do |k|
         next unless options.key? k
         options["#{k}_timeout".to_sym] = options.delete k
       end
