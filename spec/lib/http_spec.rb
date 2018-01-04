@@ -249,15 +249,15 @@ RSpec.describe HTTP do
 
   describe ".basic_auth" do
     it "fails when options is not a Hash" do
-      expect { HTTP.basic_auth "[FOOBAR]" }.to raise_error
+      expect { HTTP.basic_auth "[FOOBAR]" }.to raise_error(NoMethodError)
     end
 
     it "fails when :pass is not given" do
-      expect { HTTP.basic_auth :user => "[USER]" }.to raise_error
+      expect { HTTP.basic_auth :user => "[USER]" }.to raise_error(KeyError)
     end
 
     it "fails when :user is not given" do
-      expect { HTTP.basic_auth :pass => "[PASS]" }.to raise_error
+      expect { HTTP.basic_auth :pass => "[PASS]" }.to raise_error(KeyError)
     end
 
     it "sets Authorization header with proper BasicAuth value" do
