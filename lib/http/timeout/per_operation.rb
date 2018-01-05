@@ -11,8 +11,6 @@ module HTTP
       WRITE_TIMEOUT = 0.25
       READ_TIMEOUT = 0.25
 
-      attr_reader :read_timeout, :write_timeout, :connect_timeout
-
       def initialize(*args)
         super
 
@@ -22,7 +20,7 @@ module HTTP
       end
 
       def connect(socket_class, host, port, nodelay = false)
-        ::Timeout.timeout(connect_timeout, TimeoutError) do
+        ::Timeout.timeout(@connect_timeout, TimeoutError) do
           @socket = socket_class.open(host, port)
           @socket.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1) if nodelay
         end
@@ -67,7 +65,7 @@ module HTTP
             return :eof   if result.nil?
             return result if result != :wait_readable
 
-            raise TimeoutError, "Read timed out after #{read_timeout} seconds" if timeout
+            raise TimeoutError, "Read timed out after #{@read_timeout} seconds" if timeout
             # marking the socket for timeout. Why is this not being raised immediately?
             # it seems there is some race-condition on the network level between calling
             # #read_nonblock and #wait_readable, in which #read_nonblock signalizes waiting
@@ -78,7 +76,7 @@ module HTTP
             # timeout. Else, the first timeout was a proper timeout.
             # This hack has to be done because io/wait#wait_readable doesn't provide a value for when
             # the socket is closed by the server, and HTTP::Parser doesn't provide the limit for the chunks.
-            timeout = true unless @socket.to_io.wait_readable(read_timeout)
+            timeout = true unless @socket.to_io.wait_readable(@read_timeout)
           end
         end
 
@@ -89,9 +87,9 @@ module HTTP
             result = @socket.write_nonblock(data, :exception => false)
             return result unless result == :wait_writable
 
-            raise TimeoutError, "Write timed out after #{write_timeout} seconds" if timeout
+            raise TimeoutError, "Write timed out after #{@write_timeout} seconds" if timeout
 
-            timeout = true unless @socket.to_io.wait_writable(write_timeout)
+            timeout = true unless @socket.to_io.wait_writable(@write_timeout)
           end
         end
 

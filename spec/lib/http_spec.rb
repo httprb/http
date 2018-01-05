@@ -49,12 +49,12 @@ RSpec.describe HTTP do
     end
 
     context "with a large request body" do
-      %w[global null per_operation].each do |timeout|
-        context "with a #{timeout} timeout" do
+      [:null, 6, {:read => 2, :write => 2, :connect => 2}].each do |timeout|
+        context "with `.timeout(#{timeout.inspect})`" do
           [16_000, 16_500, 17_000, 34_000, 68_000].each do |size|
             [0, rand(0..100), rand(100..1000)].each do |fuzzer|
               context "with a #{size} body and #{fuzzer} of fuzzing" do
-                let(:client) { HTTP.timeout(timeout, :read => 2, :write => 2, :connect => 2) }
+                let(:client) { HTTP.timeout(timeout) }
 
                 let(:characters) { ("A".."Z").to_a }
                 let(:request_body) do
@@ -249,15 +249,15 @@ RSpec.describe HTTP do
 
   describe ".basic_auth" do
     it "fails when options is not a Hash" do
-      expect { HTTP.basic_auth "[FOOBAR]" }.to raise_error
+      expect { HTTP.basic_auth "[FOOBAR]" }.to raise_error(NoMethodError)
     end
 
     it "fails when :pass is not given" do
-      expect { HTTP.basic_auth :user => "[USER]" }.to raise_error
+      expect { HTTP.basic_auth :user => "[USER]" }.to raise_error(KeyError)
     end
 
     it "fails when :user is not given" do
-      expect { HTTP.basic_auth :pass => "[PASS]" }.to raise_error
+      expect { HTTP.basic_auth :pass => "[PASS]" }.to raise_error(KeyError)
     end
 
     it "sets Authorization header with proper BasicAuth value" do
@@ -299,7 +299,16 @@ RSpec.describe HTTP do
   end
 
   describe ".timeout" do
-    context "without timeout type" do
+    context "specifying a null timeout" do
+      subject(:client) { HTTP.timeout :null }
+
+      it "sets timeout_class to Null" do
+        expect(client.default_options.timeout_class).
+          to be HTTP::Timeout::Null
+      end
+    end
+
+    context "specifying per operation timeouts" do
       subject(:client) { HTTP.timeout :read => 123 }
 
       it "sets timeout_class to PerOperation" do
@@ -313,46 +322,18 @@ RSpec.describe HTTP do
       end
     end
 
-    context "with :null type" do
-      subject(:client) { HTTP.timeout :null, :read => 123 }
-
-      it "sets timeout_class to Null" do
-        expect(client.default_options.timeout_class).
-          to be HTTP::Timeout::Null
-      end
-    end
-
-    context "with :per_operation type" do
-      subject(:client) { HTTP.timeout :per_operation, :read => 123 }
-
-      it "sets timeout_class to PerOperation" do
-        expect(client.default_options.timeout_class).
-          to be HTTP::Timeout::PerOperation
-      end
-
-      it "sets given timeout options" do
-        expect(client.default_options.timeout_options).
-          to eq :read_timeout => 123
-      end
-    end
-
-    context "with :global type" do
-      subject(:client) { HTTP.timeout :global, :read => 123 }
+    context "specifying a global timeout" do
+      subject(:client) { HTTP.timeout 123 }
 
       it "sets timeout_class to Global" do
         expect(client.default_options.timeout_class).
           to be HTTP::Timeout::Global
       end
 
-      it "sets given timeout options" do
+      it "sets given timeout option" do
         expect(client.default_options.timeout_options).
-          to eq :read_timeout => 123
+          to eq :global_timeout => 123
       end
-    end
-
-    it "fails with unknown timeout type" do
-      expect { HTTP.timeout(:foobar, :read => 123) }.
-        to raise_error(ArgumentError, /foobar/)
     end
   end
 

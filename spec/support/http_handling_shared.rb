@@ -1,14 +1,20 @@
 # frozen_string_literal: true
 
 RSpec.shared_context "HTTP handling" do
-  describe "timeouts" do
-    let(:conn_timeout) { 1 }
-    let(:read_timeout) { 1 }
-    let(:write_timeout) { 1 }
+  context "without timeouts" do
+    let(:options) { {:timeout_class => HTTP::Timeout::Null, :timeout_options => {}} }
+
+    it "works" do
+      expect(client.get(server.endpoint).body.to_s).to eq("<!doctype html>")
+    end
+  end
+
+  context "with a per operation timeout" do
+    let(:response) { client.get(server.endpoint).body.to_s }
 
     let(:options) do
       {
-        :timeout_class => timeout_class,
+        :timeout_class => HTTP::Timeout::PerOperation,
         :timeout_options => {
           :connect_timeout => conn_timeout,
           :read_timeout => read_timeout,
@@ -16,87 +22,77 @@ RSpec.shared_context "HTTP handling" do
         }
       }
     end
+    let(:conn_timeout) { 1 }
+    let(:read_timeout) { 1 }
+    let(:write_timeout) { 1 }
 
-    context "without timeouts" do
-      let(:timeout_class) { HTTP::Timeout::Null }
-      let(:conn_timeout) { 0 }
-      let(:read_timeout) { 0 }
-      let(:write_timeout) { 0 }
-
-      it "works" do
-        expect(client.get(server.endpoint).body.to_s).to eq("<!doctype html>")
-      end
+    it "works" do
+      expect(response).to eq("<!doctype html>")
     end
 
-    context "with a per operation timeout" do
-      let(:timeout_class) { HTTP::Timeout::PerOperation }
+    context "connection" do
+      context "of 1" do
+        let(:conn_timeout) { 1 }
 
-      let(:response) { client.get(server.endpoint).body.to_s }
-
-      it "works" do
-        expect(response).to eq("<!doctype html>")
-      end
-
-      context "connection" do
-        context "of 1" do
-          let(:conn_timeout) { 1 }
-
-          it "does not time out" do
-            expect { response }.to_not raise_error
-          end
-        end
-      end
-
-      context "read" do
-        context "of 0" do
-          let(:read_timeout) { 0 }
-
-          it "times out", :flaky do
-            expect { response }.to raise_error(HTTP::TimeoutError, /Read/i)
-          end
-        end
-
-        context "of 2.5" do
-          let(:read_timeout) { 2.5 }
-
-          it "does not time out", :flaky do
-            expect { client.get("#{server.endpoint}/sleep").body.to_s }.to_not raise_error
-          end
+        it "does not time out" do
+          expect { response }.to_not raise_error
         end
       end
     end
 
-    context "with a global timeout" do
-      let(:timeout_class) { HTTP::Timeout::Global }
+    context "read" do
+      context "of 0" do
+        let(:read_timeout) { 0 }
 
-      let(:conn_timeout) { 0 }
-      let(:read_timeout) { 1 }
-      let(:write_timeout) { 0 }
-
-      let(:response) { client.get(server.endpoint).body.to_s }
-
-      it "errors if connecting takes too long" do
-        expect(TCPSocket).to receive(:open) do
-          sleep 1.25
+        it "times out", :flaky do
+          expect { response }.to raise_error(HTTP::TimeoutError, /Read/i)
         end
-
-        expect { response }.to raise_error(HTTP::TimeoutError, /execution/)
       end
 
-      it "errors if reading takes too long" do
-        expect { client.get("#{server.endpoint}/sleep").body.to_s }.
-          to raise_error(HTTP::TimeoutError, /Timed out/)
-      end
-
-      context "it resets state when reusing connections" do
-        let(:extra_options) { {:persistent => server.endpoint} }
-
+      context "of 2.5" do
         let(:read_timeout) { 2.5 }
 
-        it "does not timeout", :flaky do
-          client.get("#{server.endpoint}/sleep").body.to_s
-          client.get("#{server.endpoint}/sleep").body.to_s
+        it "does not time out", :flaky do
+          expect { client.get("#{server.endpoint}/sleep").body.to_s }.to_not raise_error
         end
+      end
+    end
+  end
+
+  context "with a global timeout" do
+    let(:options) do
+      {
+        :timeout_class => HTTP::Timeout::Global,
+        :timeout_options => {
+          :global_timeout => global_timeout
+        }
+      }
+    end
+    let(:global_timeout) { 1 }
+
+    let(:response) { client.get(server.endpoint).body.to_s }
+
+    it "errors if connecting takes too long" do
+      expect(TCPSocket).to receive(:open) do
+        sleep 1.25
+      end
+
+      expect { response }.to raise_error(HTTP::TimeoutError, /execution/)
+    end
+
+    it "errors if reading takes too long" do
+      expect { client.get("#{server.endpoint}/sleep").body.to_s }.
+        to raise_error(HTTP::TimeoutError, /Timed out/)
+    end
+
+    context "it resets state when reusing connections" do
+      let(:extra_options) { {:persistent => server.endpoint} }
+
+      let(:global_timeout) { 2.5 }
+
+      it "does not timeout", :flaky do
+        client.get("#{server.endpoint}/sleep").body.to_s
+        client.get("#{server.endpoint}/sleep").body.to_s
       end
     end
   end
