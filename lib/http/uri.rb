@@ -15,6 +15,7 @@ module HTTP
     def_delegators :@uri, :normalized_port, :port=
     def_delegators :@uri, :path, :normalized_path, :path=
     def_delegators :@uri, :query, :normalized_query, :query=
+    def_delegators :@uri, :query_values, :query_values=
     def_delegators :@uri, :request_uri, :request_uri=
     def_delegators :@uri, :fragment, :normalized_fragment, :fragment=
     def_delegators :@uri, :omit, :join, :normalize
