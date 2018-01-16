@@ -156,6 +156,14 @@ RSpec.describe HTTP::Client do
 
       client.get("http://example.com/", :params => {:t => "1970-01-01T00:00:00Z"})
     end
+
+    it 'does not convert newlines into \r\n before encoding string values' do
+      expect(HTTP::Request).to receive(:new) do |opts|
+        expect(opts[:uri].query).to eq "foo=bar%0Abaz"
+      end
+
+      client.get("http://example.com/", :params => {:foo => "bar\nbaz"})
+    end
   end
 
   describe "passing multipart form data" do

@@ -123,7 +123,7 @@ module HTTP
       uri = HTTP::URI.parse uri
 
       if opts.params && !opts.params.empty?
-        uri.query = [uri.query, HTTP::URI.form_encode(opts.params)].compact.join("&")
+        uri.query_values = uri.query_values(Array).to_a.concat(opts.params.to_a)
       end
 
       # Some proxies (seen on WEBRick) fail if URL has
