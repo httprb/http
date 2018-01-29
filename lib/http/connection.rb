@@ -35,6 +35,7 @@ module HTTP
       @pending_request      = false
       @pending_response     = false
       @failed_proxy_connect = false
+      @buffer               = "".b
 
       @parser = Response::Parser.new
 
@@ -210,7 +211,7 @@ module HTTP
     def read_more(size)
       return if @parser.finished?
 
-      value = @socket.readpartial(size)
+      value = @socket.readpartial(size, @buffer)
       if value == :eof
         @parser << ""
         :eof
