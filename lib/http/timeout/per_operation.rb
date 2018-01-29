@@ -37,9 +37,9 @@ module HTTP
       # NIO with exceptions
       if RUBY_VERSION < "2.1.0"
         # Read data from the socket
-        def readpartial(size)
+        def readpartial(size, buffer = nil)
           rescue_readable do
-            @socket.read_nonblock(size)
+            @socket.read_nonblock(size, buffer)
           end
         rescue EOFError
           :eof
@@ -57,10 +57,10 @@ module HTTP
       # NIO without exceptions
       else
         # Read data from the socket
-        def readpartial(size)
+        def readpartial(size, buffer = nil)
           timeout = false
           loop do
-            result = @socket.read_nonblock(size, :exception => false)
+            result = @socket.read_nonblock(size, buffer, :exception => false)
 
             return :eof   if result.nil?
             return result if result != :wait_readable
