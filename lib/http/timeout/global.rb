@@ -48,8 +48,8 @@ module HTTP
       end
 
       # Read from the socket
-      def readpartial(size)
-        perform_io { read_nonblock(size) }
+      def readpartial(size, buffer = nil)
+        perform_io { read_nonblock(size, buffer) }
       end
 
       # Write to the socket
@@ -62,16 +62,16 @@ module HTTP
       private
 
       if RUBY_VERSION < "2.1.0"
-        def read_nonblock(size)
-          @socket.read_nonblock(size)
+        def read_nonblock(size, buffer = nil)
+          @socket.read_nonblock(size, buffer)
         end
 
         def write_nonblock(data)
           @socket.write_nonblock(data)
         end
       else
-        def read_nonblock(size)
-          @socket.read_nonblock(size, :exception => false)
+        def read_nonblock(size, buffer = nil)
+          @socket.read_nonblock(size, buffer, :exception => false)
         end
 
         def write_nonblock(data)

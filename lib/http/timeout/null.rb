@@ -41,8 +41,8 @@ module HTTP
       end
 
       # Read from the socket
-      def readpartial(size)
-        @socket.readpartial(size)
+      def readpartial(size, buffer = nil)
+        @socket.readpartial(size, buffer)
       rescue EOFError
         :eof
       end
