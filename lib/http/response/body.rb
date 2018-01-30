@@ -50,6 +50,7 @@ module HTTP
 
           while (chunk = @stream.readpartial)
             @contents << chunk.force_encoding(@encoding)
+            chunk.clear # deallocate string
           end
         rescue
           @contents = nil
