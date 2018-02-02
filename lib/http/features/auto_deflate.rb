@@ -22,8 +22,6 @@ module HTTP
           GzippedBody.new(body)
         when "deflate"
           DeflatedBody.new(body)
-        else
-          raise ArgumentError, "Unsupported deflate method: #{method}"
         end
       end
 
