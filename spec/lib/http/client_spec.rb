@@ -284,6 +284,14 @@ RSpec.describe HTTP::Client do
         to raise_error(OpenSSL::SSL::SSLError, /does not match/)
     end
 
+    it "dumps out pre-master keys" do
+      file = Tempfile.new('ssl-keys')
+      response = client.get(dummy_ssl.endpoint, ssl_keys_dump_file: file.path)
+      file.rewind
+      expect(file.read).to match(/RSA Session-ID:.* Master-Key:.*/)
+      file.unlink
+    end
+
     context "with SSL options instead of a context" do
       let(:client) do
         described_class.new options.merge :ssl => SSLHelper.client_params
