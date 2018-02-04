@@ -3,7 +3,7 @@
 module HTTP
   class Response
     class Parser
-      attr_reader :headers
+      attr_reader :headers, :chunk
 
       def initialize
         @parser = HTTP::Parser.new(self)
@@ -43,9 +43,17 @@ module HTTP
         end
       end
 
-      def chunk
-        chunk  = @chunk
-        @chunk = nil
+      def get_chunk(size)
+        return if @chunk.nil?
+
+        if @chunk.bytesize <= size
+          chunk  = @chunk
+          @chunk = nil
+        else
+          chunk = @chunk.byteslice(0, size)
+          @chunk[0, size] = ""
+        end
+
         chunk
       end
 
