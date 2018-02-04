@@ -450,8 +450,5 @@ RSpec.describe HTTP do
   it "unifies socket errors into HTTP::ConnectionError" do
     expect { HTTP.get "http://thishostshouldnotexists.com" }.
       to raise_error HTTP::ConnectionError
-
-    expect { HTTP.get "http://127.0.0.1:000" }.
-      to raise_error HTTP::ConnectionError
   end
 end
