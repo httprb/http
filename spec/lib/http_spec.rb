@@ -188,7 +188,7 @@ RSpec.describe HTTP do
 
     context "with encoding option" do
       it "respects option" do
-        response = HTTP.get "#{dummy.endpoint}/iso-8859-1", "encoding" => Encoding::BINARY
+        response = HTTP.get "#{dummy.endpoint}/iso-8859-1", :encoding => Encoding::BINARY
         expect(response.to_s.encoding).to eq(Encoding::BINARY)
       end
     end
@@ -196,7 +196,7 @@ RSpec.describe HTTP do
 
   context "passing a string encoding type" do
     it "finds encoding" do
-      response = HTTP.get dummy.endpoint, "encoding" => "ascii"
+      response = HTTP.get dummy.endpoint, :encoding => "ascii"
       expect(response.to_s.encoding).to eq(Encoding::ASCII)
     end
   end
