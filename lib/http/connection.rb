@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# rubocop:disable Metrics/ClassLength
+
 require "forwardable"
 
 require "http/headers"
@@ -73,13 +75,12 @@ module HTTP
       master_key = ""
       begin
         @socket.socket.session.to_text.each_line do |line|
-          if match = line.match(/Session-ID\s*: (?<session_id>.*)/)
-            session_id = match[:session_id]
-          end
-          if match = line.match(/Master-Key\s*: (?<master_key>.*)/)
-            master_key = match[:master_key]
-          end
+          match = line.match(/Session-ID\s*: (?<session_id>.*)/)
+          session_id = match[:session_id] if match
+          match = line.match(/Master-Key\s*: (?<master_key>.*)/)
+          master_key = match[:master_key] if match
         end
+
         File.open(path, "a") do |file|
           file.write("RSA Session-ID:#{session_id} Master-Key:#{master_key}\n")
         end
