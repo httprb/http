@@ -53,7 +53,7 @@ RSpec.describe HTTP::Options, "merge" do
       :persistent         => "https://www.googe.com",
       :keep_alive_timeout => 10,
       :ssl                => {:foo => "bar"},
-      :headers            => HTTP::Headers.new.merge!({"Foo" => "foo", "Accept" => "xml", "Bar" => "bar"}),
+      :headers            => HTTP::Headers.new.merge!("Foo" => "foo", "Accept" => "xml", "Bar" => "bar"),
       :proxy              => {:proxy_address => "127.0.0.1", :proxy_port => 8080},
       :follow             => nil,
       :socket_class       => described_class.default_socket_class,

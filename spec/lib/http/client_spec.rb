@@ -285,8 +285,8 @@ RSpec.describe HTTP::Client do
     end
 
     it "dumps out pre-master keys" do
-      file = Tempfile.new('ssl-keys')
-      response = client.get(dummy_ssl.endpoint, ssl_keys_dump_file: file.path)
+      file = Tempfile.new("ssl-keys")
+      client.get(dummy_ssl.endpoint, :ssl_keys_dump_file => file.path)
       file.rewind
       expect(file.read).to match(/RSA Session-ID:.* Master-Key:.*/)
       file.unlink
