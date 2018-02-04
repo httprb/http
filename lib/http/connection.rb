@@ -63,6 +63,31 @@ module HTTP
       @failed_proxy_connect
     end
 
+    # Dumps the SSL context keys to the file specified (for wireshark etc)
+    #
+    # @param [String] path the path to the key dump destination
+    #
+    # @return [Nil]
+    def dump_ssl_context!(path)
+      session_id = ""
+      master_key = ""
+      begin
+        @socket.socket.session.to_text.each_line do |line|
+          if match = line.match(/Session-ID\s*: (?<session_id>.*)/)
+            session_id = match[:session_id]
+          end
+          if match = line.match(/Master-Key\s*: (?<master_key>.*)/)
+            master_key = match[:master_key]
+          end
+        end
+        File.open(path, "a") do |file|
+          file.write("RSA Session-ID:#{session_id} Master-Key:#{master_key}\n")
+        end
+      rescue StandardError => ex
+        raise Error, "Unable to dump SSL premaster keys: #{ex.message}"
+      end
+    end
+
     # Send a request to the server
     #
     # @param [Request] req Request to send to the server

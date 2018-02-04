@@ -65,7 +65,7 @@ module HTTP
         @connection.send_request(req)
         @connection.read_headers!
       end
-
+      
       res = Response.new(
         :status        => @connection.status_code,
         :version       => @connection.http_version,
@@ -79,6 +79,8 @@ module HTTP
 
       @connection.finish_response if req.verb == :head
       @state = :clean
+      
+      @connection.dump_ssl_context!(options.ssl_keys_dump_file) if options.dump_keys?
 
       res
     rescue
