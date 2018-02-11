@@ -49,38 +49,17 @@ RSpec.describe HTTP do
     end
 
     context "with a large request body" do
+      let(:request_body) { "“" * 1_000_000 } # use multi-byte character
+
       [:null, 6, {:read => 2, :write => 2, :connect => 2}].each do |timeout|
         context "with `.timeout(#{timeout.inspect})`" do
-          [16_000, 16_500, 17_000, 34_000, 68_000].each do |size|
-            [0, rand(0..100), rand(100..1000)].each do |fuzzer|
-              context "with a #{size} body and #{fuzzer} of fuzzing" do
-                let(:client) { HTTP.timeout(timeout) }
+          let(:client) { HTTP.timeout(timeout) }
 
-                let(:characters) { ("A".."Z").to_a }
-                let(:request_body) do
-                  Array.new(size + fuzzer) { |i| characters[i % characters.length] }.join
-                end
+          it "writes the whole body" do
+            response = client.post "#{dummy.endpoint}/echo-body", :body => request_body
 
-                it "returns a large body" do
-                  response = client.post("#{dummy.endpoint}/echo-body", :body => request_body)
-
-                  expect(response.body.to_s).to eq(request_body)
-                  expect(response.headers["Content-Length"].to_i).to eq(request_body.bytesize)
-                end
-
-                context "when bytesize != length" do
-                  let(:characters) { ("A".."Z").to_a.push("“") }
-
-                  it "returns a large body" do
-                    body = {:data => request_body}
-                    response = client.post("#{dummy.endpoint}/echo-body", :json => body)
-
-                    expect(CGI.unescape(response.body.to_s)).to eq(body.to_json)
-                    expect(response.headers["Content-Length"].to_i).to eq(body.to_json.bytesize)
-                  end
-                end
-              end
-            end
+            expect(response.body.to_s).to eq(request_body.b)
+            expect(response.headers["Content-Length"].to_i).to eq request_body.bytesize
           end
         end
       end
