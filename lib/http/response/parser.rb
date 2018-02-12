@@ -43,7 +43,7 @@ module HTTP
         end
       end
 
-      def get_chunk(size)
+      def read(size)
         return if @chunk.nil?
 
         if @chunk.bytesize <= size
