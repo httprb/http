@@ -26,7 +26,7 @@ module HTTP
     # Make an HTTP request
     def request(verb, uri, opts = {}) # rubocop:disable Style/OptionHash
       opts = @default_options.merge(opts)
-      req = prepare_request(verb, uri, opts)
+      req = build_request(verb, uri, opts)
       res = perform(req, opts)
       return res unless opts.follow
 
@@ -36,7 +36,7 @@ module HTTP
     end
 
     # Prepare an HTTP request
-    def prepare_request(verb, uri, opts = {}) # rubocop:disable Style/OptionHash
+    def build_request(verb, uri, opts = {}) # rubocop:disable Style/OptionHash
       opts    = @default_options.merge(opts)
       uri     = make_request_uri(uri, opts)
       headers = make_request_headers(opts)

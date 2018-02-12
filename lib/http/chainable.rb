@@ -81,8 +81,8 @@ module HTTP
     # @param verb
     # @param uri
     # @option options [Hash]
-    def prepare_request(verb, uri, options = {}) # rubocop:disable Style/OptionHash
-      branch(options).prepare_request verb, uri
+    def build_request(verb, uri, options = {}) # rubocop:disable Style/OptionHash
+      branch(options).build_request verb, uri
     end
 
     # @overload timeout(options = {})
