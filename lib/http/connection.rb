@@ -86,7 +86,7 @@ module HTTP
     def readpartial(size = BUFFER_SIZE)
       return unless @pending_response
 
-      chunk = @parser.get_chunk(size)
+      chunk = @parser.read(size)
       return chunk if chunk
 
       finished = (read_more(size) == :eof) || @parser.finished?
