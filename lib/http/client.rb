@@ -25,13 +25,25 @@ module HTTP
 
     # Make an HTTP request
     def request(verb, uri, opts = {}) # rubocop:disable Style/OptionHash
+      opts = @default_options.merge(opts)
+      req = prepare_request(verb, uri, opts)
+      res = perform(req, opts)
+      return res unless opts.follow
+
+      Redirector.new(opts.follow).perform(req, res) do |request|
+        perform(request, opts)
+      end
+    end
+
+    # Prepare an HTTP request
+    def prepare_request(verb, uri, opts = {}) # rubocop:disable Style/OptionHash
       opts    = @default_options.merge(opts)
       uri     = make_request_uri(uri, opts)
       headers = make_request_headers(opts)
       body    = make_request_body(opts, headers)
       proxy   = opts.proxy
 
-      req = HTTP::Request.new(
+      HTTP::Request.new(
         :verb         => verb,
         :uri          => uri,
         :headers      => headers,
@@ -39,13 +51,6 @@ module HTTP
         :body         => body,
         :auto_deflate => opts.feature(:auto_deflate)
       )
-
-      res = perform(req, opts)
-      return res unless opts.follow
-
-      Redirector.new(opts.follow).perform(req, res) do |request|
-        perform(request, opts)
-      end
     end
 
     # @!method persistent?
