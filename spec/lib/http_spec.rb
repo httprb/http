@@ -430,7 +430,7 @@ RSpec.describe HTTP do
     expect { HTTP.get "http://thishostshouldnotexists.com" }.
       to raise_error HTTP::ConnectionError
 
-    expect { HTTP.get "http://127.0.0.1:000" }.
+    expect { HTTP.get "http://127.0.0.1:111" }.
       to raise_error HTTP::ConnectionError
   end
 end
