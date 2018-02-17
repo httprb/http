@@ -25,7 +25,7 @@ task :generate_status_codes do
 
   url = "http://www.iana.org/assignments/http-status-codes/http-status-codes.xml"
   xml = Nokogiri::XML HTTP.get url
-  arr = xml.xpath("//xmlns:record").reduce [] do |a, e|
+  arr = xml.xpath("//xmlns:record").reduce([]) do |a, e|
     code = e.xpath("xmlns:value").text.to_s
     desc = e.xpath("xmlns:description").text.to_s
 

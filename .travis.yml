@@ -19,16 +19,17 @@ rvm:
   # Include JRuby first because it takes the longest
   - jruby-9.1.13.0
   - 2.2
-  - 2.3.4
-  - 2.4.1
+  - 2.3
+  - 2.4
+  - 2.5
 
 matrix:
   fast_finish: true
   include:
   # Only run RuboCop and Yardstick metrics on the latest Ruby
-  - rvm: 2.4.1
+  - rvm: 2.5
     env: SUITE="rubocop"
-  - rvm: 2.4.1
+  - rvm: 2.5
     env: SUITE="yardstick"
 
 branches:
