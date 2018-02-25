@@ -41,6 +41,12 @@ RSpec.describe HTTP do
       end
     end
 
+    context "with two leading slashes in path" do
+      it "is allowed" do
+        expect { HTTP.get "#{dummy.endpoint}//" }.not_to raise_error
+      end
+    end
+
     context "with headers" do
       it "is easy" do
         response = HTTP.accept("application/json").get dummy.endpoint

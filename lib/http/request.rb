@@ -151,7 +151,7 @@ module HTTP
         if using_proxy? && !uri.https?
           uri.omit(:fragment)
         else
-          uri.omit(:scheme, :authority, :fragment)
+          uri.request_uri
         end
 
       "#{verb.to_s.upcase} #{request_uri} HTTP/#{version}"
