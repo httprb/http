@@ -3,7 +3,7 @@
 module HTTP
   class Response
     class Parser
-      attr_reader :headers, :chunk
+      attr_reader :headers
 
       def initialize
         @parser = HTTP::Parser.new(self)
