@@ -89,7 +89,7 @@ module HTTP
       return chunk if chunk
 
       finished = (read_more(size) == :eof) || @parser.finished?
-      chunk    = @parser.chunk
+      chunk    = @parser.read(size)
       finish_response if finished
 
       chunk.to_s
