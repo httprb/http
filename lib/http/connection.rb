@@ -7,7 +7,7 @@ require "http/response/parser"
 
 module HTTP
   # A connection to the HTTP server
-  class Connection
+  class Connection # rubocop: disable Metrics/ClassLength
     extend Forwardable
 
     # Allowed values for CONNECTION header
