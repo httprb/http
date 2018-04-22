@@ -1,3 +1,24 @@
+## 3.1.0 (2018-04-22)
+
+This version backports some of the fixes and improvements made to development
+version of the HTTP gem:
+
+* Fix for `#readpartial` to respect max length argument.
+  ([@janko-m], [@marshall-lee])
+
+* Fix for `HTTP::Request#headline` to allow two leading slashes in path.
+  ([@scarfacedeb])
+
+* Fix query string building for string with newlines.
+  ([@mikegee])
+
+* Deallocate temporary strings in `Response::Body#to_s`.
+  ([@janko-m])
+
+* Add `Request::Body#source`.
+  ([@janko-m])
+
+
 ## 3.0.0 (2017-10-01)
 
 * Drop support of Ruby `2.0` and Ruby `2.1`.
@@ -618,3 +639,6 @@ end
 [@janko-m]: https://github.com/janko-m
 [@Bonias]: https://github.com/Bonias
 [@HoneyryderChuck]: https://github.com/HoneyryderChuck
+[@marshall-lee]: https://github.com/marshall-lee
+[@scarfacedeb]: https://github.com/scarfacedeb
+[@mikegee]: https://github.com/mikegee
