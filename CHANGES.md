@@ -1,3 +1,62 @@
+## future is unwritten
+
+* [#436](https://github.com/httprb/http/pull/436)
+  Raise ConnectionError when writing to socket fails.
+  ([@janko-m])
+
+* [#438](https://github.com/httprb/http/pull/438)
+  Expose `HTTP::Request::Body#source`.
+  ([@janko-m])
+
+* [#446](https://github.com/httprb/http/pull/446)
+  Simplify setting a timeout.
+  ([@mikegee])
+
+* [#451](https://github.com/httprb/http/pull/451)
+  Reduce memory usage when reading response body.
+  ([@janko-m])
+
+* [#462](https://github.com/httprb/http/pull/462)
+  Fix HTTP::Request#headline to allow two leading slashes in path.
+  ([@scarfacedeb])
+
+* [#454](https://github.com/httprb/http/pull/454)
+  [#464](https://github.com/httprb/http/pull/464)
+  [#384](https://github.com/httprb/http/issues/384)
+  Fix #readpartial not respecting max length argument.
+  ([@janko-m], [@marshall-lee])
+
+
+
+## 3.2.0 (2018-04-22)
+
+This version backports one change we missed to backport in previous release:
+
+* Reduce memory usage when reading response body
+  ([@janko-m])
+
+
+## 3.1.0 (2018-04-22)
+
+This version backports some of the fixes and improvements made to development
+version of the HTTP gem:
+
+* Fix for `#readpartial` to respect max length argument.
+  ([@janko-m], [@marshall-lee])
+
+* Fix for `HTTP::Request#headline` to allow two leading slashes in path.
+  ([@scarfacedeb])
+
+* Fix query string building for string with newlines.
+  ([@mikegee])
+
+* Deallocate temporary strings in `Response::Body#to_s`.
+  ([@janko-m])
+
+* Add `Request::Body#source`.
+  ([@janko-m])
+
+
 ## 3.0.0 (2017-10-01)
 
 * Drop support of Ruby `2.0` and Ruby `2.1`.
