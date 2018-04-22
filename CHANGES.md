@@ -1,3 +1,11 @@
+## 3.2.0 (2018-04-22)
+
+This vresion backports one change we missed to backport in previous release:
+
+* Reduce memory usage when reading response body
+  ([@janko-m])
+
+
 ## 3.1.0 (2018-04-22)
 
 This version backports some of the fixes and improvements made to development
