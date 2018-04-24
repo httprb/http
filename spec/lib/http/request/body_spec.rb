@@ -126,10 +126,26 @@ RSpec.describe HTTP::Request::Body do
     end
 
     context "when body is an Enumerable IO" do
-      let(:body) { StringIO.new("a" * 16 * 1024 + "b" * 10 * 1024) }
+      let(:data) { "a" * 16 * 1024 + "b" * 10 * 1024 }
+      let(:body) { StringIO.new data }
 
       it "yields chunks of content" do
-        expect(chunks.inject("", :+)).to eq "a" * 16 * 1024 + "b" * 10 * 1024
+        expect(chunks.inject("", :+)).to eq data
+      end
+
+      it "allows to enumerate multiple times" do
+        results = []
+
+        2.times do
+          result = ""
+          subject.each { |chunk| result += chunk }
+          results << result
+        end
+
+        aggregate_failures do
+          expect(results.count).to eq 2
+          expect(results).to all eq data
+        end
       end
     end
 
