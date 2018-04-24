@@ -1,5 +1,9 @@
 ## future is unwritten
 
+* [#468](https://github.com/httprb/http/pull/468)
+  Rewind `HTTP::Request::Body#source` once `#each` is complete.
+  ([@ixti])
+
 * [#467](https://github.com/httprb/http/pull/467)
   Drop Ruby 2.2 support.
   ([@ixti])
@@ -29,6 +33,13 @@
   [#384](https://github.com/httprb/http/issues/384)
   Fix #readpartial not respecting max length argument.
   ([@janko-m], [@marshall-lee])
+
+
+## 3.2.1 (2018-04-24)
+
+* [#468](https://github.com/httprb/http/pull/468)
+  Rewind `HTTP::Request::Body#source` once `#each` is complete.
+  ([@ixti])
 
 
 ## 3.2.0 (2018-04-22)
