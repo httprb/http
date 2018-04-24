@@ -1,3 +1,10 @@
+## 3.2.1 (2018-04-24)
+
+* [#468](https://github.com/httprb/http/pull/468)
+  Rewind `HTTP::Request::Body#source` once `#each` is complete.
+  ([@ixti])
+
+
 ## 3.2.0 (2018-04-22)
 
 This vresion backports one change we missed to backport in previous release:
