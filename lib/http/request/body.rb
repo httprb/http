@@ -35,6 +35,7 @@ module HTTP
           yield @source
         elsif @source.respond_to?(:read)
           IO.copy_stream(@source, ProcIO.new(block))
+          @source.rewind if @source.respond_to?(:rewind)
         elsif @source.is_a?(Enumerable)
           @source.each(&block)
         end
