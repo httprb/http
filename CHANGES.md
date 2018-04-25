@@ -1,3 +1,13 @@
+## 3.3.0 (2018-04-25)
+
+This version backports some of the fixes and improvements made to development
+version of the HTTP gem:
+
+* [#458](https://github.com/httprb/http/pull/458)
+  Extract HTTP::Client#build_request method.
+  ([@tycoon])
+
+
 ## 3.2.1 (2018-04-24)
 
 * [#468](https://github.com/httprb/http/pull/468)
@@ -7,7 +17,7 @@
 
 ## 3.2.0 (2018-04-22)
 
-This vresion backports one change we missed to backport in previous release:
+This version backports one change we missed to backport in previous release:
 
 * Reduce memory usage when reading response body
   ([@janko-m])
@@ -657,3 +667,4 @@ end
 [@marshall-lee]: https://github.com/marshall-lee
 [@scarfacedeb]: https://github.com/scarfacedeb
 [@mikegee]: https://github.com/mikegee
+[@tycoon]: https://github.com/tycooon
