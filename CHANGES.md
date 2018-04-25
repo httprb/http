@@ -24,6 +24,10 @@
   Reduce memory usage when reading response body.
   ([@janko-m])
 
+* [#458](https://github.com/httprb/http/pull/458)
+  Extract HTTP::Client#build_request method.
+  ([@tycoon])
+
 * [#462](https://github.com/httprb/http/pull/462)
   Fix HTTP::Request#headline to allow two leading slashes in path.
   ([@scarfacedeb])
@@ -33,6 +37,16 @@
   [#384](https://github.com/httprb/http/issues/384)
   Fix #readpartial not respecting max length argument.
   ([@janko-m], [@marshall-lee])
+
+
+## 3.3.0 (2018-04-25)
+
+This version backports some of the fixes and improvements made to development
+version of the HTTP gem:
+
+* [#458](https://github.com/httprb/http/pull/458)
+  Extract HTTP::Client#build_request method.
+  ([@tycoon])
 
 
 ## 3.2.1 (2018-04-24)
@@ -691,3 +705,7 @@ end
 [@janko-m]: https://github.com/janko-m
 [@Bonias]: https://github.com/Bonias
 [@HoneyryderChuck]: https://github.com/HoneyryderChuck
+[@marshall-lee]: https://github.com/marshall-lee
+[@scarfacedeb]: https://github.com/scarfacedeb
+[@mikegee]: https://github.com/mikegee
+[@tycoon]: https://github.com/tycooon
