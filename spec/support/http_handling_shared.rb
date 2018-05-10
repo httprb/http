@@ -22,9 +22,9 @@ RSpec.shared_context "HTTP handling" do
         }
       }
     end
-    let(:conn_timeout) { 1 }
-    let(:read_timeout) { 1 }
-    let(:write_timeout) { 1 }
+    let(:conn_timeout) { 2 }
+    let(:read_timeout) { 3 }
+    let(:write_timeout) { 2 }
 
     it "works" do
       expect(response).to eq("<!doctype html>")
@@ -41,11 +41,13 @@ RSpec.shared_context "HTTP handling" do
     end
 
     context "read" do
+      let(:response) { client.get("#{server.endpoint}/sleep").body.to_s }
+
       context "of 0" do
         let(:read_timeout) { 0 }
 
-        it "times out", :flaky do
-          expect { response }.to raise_error(HTTP::TimeoutError, /Read/i)
+        it "times out" do
+          expect { response }.to raise_error(HTTP::ReadTimeoutError, /^Read/i)
         end
       end
 
@@ -53,7 +55,30 @@ RSpec.shared_context "HTTP handling" do
         let(:read_timeout) { 2.5 }
 
         it "does not time out", :flaky do
-          expect { client.get("#{server.endpoint}/sleep").body.to_s }.to_not raise_error
+          expect { response }.to_not raise_error
+        end
+      end
+    end
+
+    context "write" do
+      let(:body) { "“" * 500_000 } # use multi-byte character
+      let(:response) do
+        client.post("#{server.endpoint}/sleep", :body => body).body.to_s
+      end
+
+      context "of 0" do
+        let(:write_timeout) { 0 }
+
+        it "times out", :flaky do
+          expect { response }.to raise_error(HTTP::WriteTimeoutError, /^Write/i)
+        end
+      end
+
+      context "of 2.5" do
+        let(:write_timeout) { 2.5 }
+
+        it "does not time out", :flaky do
+          expect { response }.to_not raise_error
         end
       end
     end
@@ -77,12 +102,12 @@ RSpec.shared_context "HTTP handling" do
         sleep 1.25
       end
 
-      expect { response }.to raise_error(HTTP::TimeoutError, /execution/)
+      expect { response }.to raise_error(HTTP::ConnectTimeoutError, /execution/)
     end
 
     it "errors if reading takes too long" do
       expect { client.get("#{server.endpoint}/sleep").body.to_s }.
-        to raise_error(HTTP::TimeoutError, /Timed out/)
+        to raise_error(HTTP::ReadTimeoutError, /Timed out/)
     end
 
     context "it resets state when reusing connections" do

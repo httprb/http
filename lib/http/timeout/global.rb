@@ -21,12 +21,12 @@ module HTTP
 
       def connect(socket_class, host, port, nodelay = false)
         reset_timer
-        ::Timeout.timeout(@time_left, TimeoutError) do
+        ::Timeout.timeout(@time_left, ConnectTimeoutError) do
           @socket = socket_class.open(host, port)
           @socket.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1) if nodelay
         end
 
-        log_time
+        log_time(ConnectTimeoutError)
       end
 
       def connect_ssl
@@ -36,11 +36,11 @@ module HTTP
           @socket.connect_nonblock
         rescue IO::WaitReadable
           IO.select([@socket], nil, nil, @time_left)
-          log_time
+          log_time(ConnectTimeoutError)
           retry
         rescue IO::WaitWritable
           IO.select(nil, [@socket], nil, @time_left)
-          log_time
+          log_time(ConnectTimeoutError)
           retry
         end
       end
@@ -104,13 +104,13 @@ module HTTP
       # Wait for a socket to become readable
       def wait_readable_or_timeout
         @socket.to_io.wait_readable(@time_left)
-        log_time
+        log_time(ReadTimeoutError)
       end
 
       # Wait for a socket to become writable
       def wait_writable_or_timeout
         @socket.to_io.wait_writable(@time_left)
-        log_time
+        log_time(WriteTimeoutError)
       end
 
       # Due to the run/retry nature of nonblocking I/O, it's easier to keep track of time
@@ -119,10 +119,10 @@ module HTTP
         @started = Time.now
       end
 
-      def log_time
+      def log_time(klass)
         @time_left -= (Time.now - @started)
         if @time_left <= 0
-          raise TimeoutError, "Timed out after using the allocated #{@timeout} seconds"
+          raise klass, "Timed out after using the allocated #{@timeout} seconds"
         end
 
         reset_timer

@@ -19,6 +19,15 @@ module HTTP
   # Generic Timeout error
   class TimeoutError < Error; end
 
+  # A timeout error that occurred on connect
+  class ConnectTimeoutError < TimeoutError; end
+
+  # A timeout error that occurred while reading the response
+  class ReadTimeoutError < TimeoutError; end
+
+  # A timeout error that occurred while writing the request
+  class WriteTimeoutError < TimeoutError; end
+
   # Header value is of unexpected format (similar to Net::HTTPHeaderSyntaxError)
   class HeaderError < Error; end
 end

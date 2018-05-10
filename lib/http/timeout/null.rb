@@ -56,19 +56,29 @@ module HTTP
       private
 
       # Retry reading
-      def rescue_readable(timeout = read_timeout)
+      def rescue_readable(klass, timeout = read_timeout)
         yield
       rescue IO::WaitReadable
         retry if @socket.to_io.wait_readable(timeout)
-        raise TimeoutError, "Read timed out after #{timeout} seconds"
+        raise klass, "#{error_name_for_class(klass)} timed out after #{timeout} seconds"
       end
 
       # Retry writing
-      def rescue_writable(timeout = write_timeout)
+      def rescue_writable(klass, timeout = write_timeout)
         yield
       rescue IO::WaitWritable
         retry if @socket.to_io.wait_writable(timeout)
-        raise TimeoutError, "Write timed out after #{timeout} seconds"
+        raise klass, "#{error_name_for_class(klass)} timed out after #{timeout} seconds"
+      end
+
+      TIMEOUT_ERRORS = {
+        ConnectTimeoutError => "Connect",
+        ReadTimeoutError => "Read",
+        WriteTimeoutError => "Write",
+      }.freeze
+
+      def error_name_for_class(klass)
+        TIMEOUT_ERRORS[klass] || raise("Unknown timeout error type: #{klass}")
       end
     end
   end
