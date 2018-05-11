@@ -6,7 +6,6 @@ RSpec.describe HTTP::Response::Body do
 
   before do
     allow(connection).to receive(:readpartial) { chunks.shift }
-    allow(connection).to receive(:body_completed?) { chunks.empty? }
   end
 
   subject(:body) { described_class.new(connection, :encoding => Encoding::UTF_8) }
@@ -39,6 +38,29 @@ RSpec.describe HTTP::Response::Body do
       it "calls underlying connection readpartial without specific size" do
         expect(connection).to receive(:readpartial).with no_args
         body.readpartial
+      end
+    end
+
+    context "with size and output buffer given" do
+      it "fills the output buffer" do
+        expect(connection).to receive(:readpartial).with(3).and_return(String.new("foo"))
+        outbuf = String.new
+        chunk = body.readpartial 3, outbuf
+        expect(outbuf).to eq "foo"
+        expect(chunk).to equal outbuf
+      end
+
+      it "returns nil when there is no more content" do
+        outbuf = String.new
+        expect(body.readpartial(7, outbuf)).to eq "Hello, "
+        expect(body.readpartial(6, outbuf)).to eq "World!"
+        expect { body.readpartial(1, outbuf) }.to raise_error(EOFError)
+      end
+
+      it "supports IO.copy_stream" do
+        stringio = StringIO.new
+        IO.copy_stream(body, stringio)
+        expect(stringio.string).to eq "Hello, World!"
       end
     end
 

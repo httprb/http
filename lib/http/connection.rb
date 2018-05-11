@@ -86,6 +86,7 @@ module HTTP
     def readpartial(size = BUFFER_SIZE)
       return unless @pending_response
 
+      # return chunk of body that was retrieved when reading response headers
       chunk = @parser.read(size)
       return chunk if chunk
 
@@ -93,7 +94,7 @@ module HTTP
       chunk    = @parser.read(size)
       finish_response if finished
 
-      chunk.to_s
+      chunk
     end
 
     # Reads data from socket up until headers are loaded
