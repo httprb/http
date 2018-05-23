@@ -35,12 +35,16 @@ module HTTP
 
       protected
 
-      def def_option(name, &interpreter)
+      def def_option(name, reader_only: false, &interpreter)
         defined_options << name.to_sym
         interpreter ||= lambda { |v| v }
 
-        attr_accessor name
-        protected :"#{name}="
+        if reader_only
+          attr_reader name
+        else
+          attr_accessor name
+          protected :"#{name}="
+        end
 
         define_method(:"with_#{name}") do |value|
           dup { |opts| opts.send(:"#{name}=", instance_exec(value, &interpreter)) }
@@ -85,7 +89,7 @@ module HTTP
       self.encoding = Encoding.find(encoding)
     end
 
-    def_option :features do |features|
+    def_option :features, :reader_only => true do |features|
       # Normalize features from:
       #
       #     [{feature_one: {opt: 'val'}}, :feature_two]
@@ -118,12 +122,14 @@ module HTTP
     end
 
     %w[
-      proxy params form json body follow response
+      proxy params form json body response
       socket_class nodelay ssl_socket_class ssl_context ssl
-      persistent keep_alive_timeout timeout_class timeout_options
+      keep_alive_timeout timeout_class timeout_options
     ].each do |method_name|
       def_option method_name
     end
+
+    def_option :follow, :reader_only => true
 
     def follow=(value)
       @follow =
@@ -134,6 +140,8 @@ module HTTP
         else argument_error! "Unsupported follow options: #{value}"
         end
     end
+
+    def_option :persistent, :reader_only => true
 
     def persistent=(value)
       @persistent = value ? HTTP::URI.parse(value).origin : nil
