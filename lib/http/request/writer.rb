@@ -100,6 +100,8 @@ module HTTP
           break unless data.bytesize > length
           data = data.byteslice(length..-1)
         end
+      rescue Errno::EPIPE
+        # server doesn't need any more data
       rescue IOError, SocketError, SystemCallError => ex
         raise ConnectionError, "error writing to socket: #{ex}", ex.backtrace
       end
