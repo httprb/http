@@ -76,6 +76,8 @@ module HTTP
         write(data) unless data.empty?
 
         write(CHUNKED_END) if chunked?
+      rescue Errno::EPIPE
+        # server doesn't need any more data
       end
 
       # Returns the chunk encoded for to the specified "Transfer-Encoding" header.
@@ -101,7 +103,7 @@ module HTTP
           data = data.byteslice(length..-1)
         end
       rescue Errno::EPIPE
-        # server doesn't need any more data
+        raise # re-raise Errno::EPIPE
       rescue IOError, SocketError, SystemCallError => ex
         raise ConnectionError, "error writing to socket: #{ex}", ex.backtrace
       end
