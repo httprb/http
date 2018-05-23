@@ -13,11 +13,6 @@ Layout/SpaceAroundOperators:
 Layout/SpaceInsideHashLiteralBraces:
   EnforcedStyle: no_space
 
-## Lint ########################################################################
-
-Lint/HandleExceptions:
-  Enabled: false
-
 ## Metrics #####################################################################
 
 Metrics/AbcSize:

@@ -60,24 +60,32 @@ module HTTP
         @request_header.join(CRLF) + CRLF * 2
       end
 
+      # Writes HTTP request data into the socket.
       def send_request
-        # It's important to send the request in a single write call when
-        # possible in order to play nicely with Nagle's algorithm. Making
-        # two writes in a row triggers a pathological case where Nagle is
-        # expecting a third write that never happens.
+        each_chunk { |chunk| write chunk }
+      rescue Errno::EPIPE
+        # server doesn't need any more data
+        nil
+      end
+
+      # Yields chunks of request data that should be sent to the socket.
+      #
+      # It's important to send the request in a single write call when possible
+      # in order to play nicely with Nagle's algorithm. Making two writes in a
+      # row triggers a pathological case where Nagle is expecting a third write
+      # that never happens.
+      def each_chunk
         data = join_headers
 
         @body.each do |chunk|
           data << encode_chunk(chunk)
-          write(data)
+          yield data
           data.clear
         end
 
-        write(data) unless data.empty?
+        yield data unless data.empty?
 
-        write(CHUNKED_END) if chunked?
-      rescue Errno::EPIPE
-        # server doesn't need any more data
+        yield CHUNKED_END if chunked?
       end
 
       # Returns the chunk encoded for to the specified "Transfer-Encoding" header.
@@ -103,7 +111,7 @@ module HTTP
           data = data.byteslice(length..-1)
         end
       rescue Errno::EPIPE
-        raise # re-raise Errno::EPIPE
+        raise
       rescue IOError, SocketError, SystemCallError => ex
         raise ConnectionError, "error writing to socket: #{ex}", ex.backtrace
       end
