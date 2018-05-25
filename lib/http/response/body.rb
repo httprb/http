@@ -24,11 +24,21 @@ module HTTP
         @encoding   = find_encoding(encoding)
       end
 
-      # (see HTTP::Client#readpartial)
-      def readpartial(*args)
+      # (see HTTP::Connection#readpartial)
+      def readpartial(length = nil, outbuf = nil)
         stream!
-        chunk = @stream.readpartial(*args)
+        chunk = @stream.readpartial(*length)
         chunk.force_encoding(@encoding) if chunk
+
+        if outbuf
+          outbuf.clear.force_encoding(@encoding)
+          raise EOFError if chunk.nil? # IO.copy_stream expects this to be raised
+          outbuf << chunk
+          chunk.clear
+          outbuf
+        else
+          chunk
+        end
       end
 
       # Iterate over the body, allowing it to be enumerable
