@@ -252,6 +252,17 @@ RSpec.describe HTTP do
     end
   end
 
+  context "with URL including basic auth" do
+    it "applies basic auth" do
+      uri = HTTP::URI.parse(dummy.endpoint)
+      uri.user     = "john"
+      uri.password = "secret"
+
+      headers = JSON.parse(HTTP.get("#{uri}/headers").to_s)
+      expect(headers["Authorization"]).to match(%r{^Basic [A-Za-z0-9+/]+=*$})
+    end
+  end
+
   describe ".persistent" do
     let(:host) { "https://api.github.com" }
 

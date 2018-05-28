@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 # encoding: UTF-8
 
+require "json"
+
 class DummyServer < WEBrick::HTTPServer
   # rubocop:disable Metrics/ClassLength
   class Servlet < WEBrick::HTTPServlet::AbstractServlet
@@ -125,6 +127,16 @@ class DummyServer < WEBrick::HTTPServer
     head "/" do |_req, res|
       res.status          = 200
       res["Content-Type"] = "text/html"
+    end
+
+    get "/headers" do |_req, res|
+      headers = _req.header.inject({}) do |hash, (name, values)|
+        header_name = name.split("-").map(&:capitalize).join("-")
+        hash.merge! header_name => values.first
+      end
+
+      res.status = 200
+      res.body = JSON.dump(headers)
     end
 
     get "/bytes" do |_req, res|
