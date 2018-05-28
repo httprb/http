@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "forwardable"
+require "base64"
 
 require "http/form_data"
 require "http/options"
@@ -39,7 +40,7 @@ module HTTP
     def build_request(verb, uri, opts = {}) # rubocop:disable Style/OptionHash
       opts    = @default_options.merge(opts)
       uri     = make_request_uri(uri, opts)
-      headers = make_request_headers(opts)
+      headers = make_request_headers(uri, opts)
       body    = make_request_body(opts, headers)
       proxy   = opts.proxy
 
@@ -140,11 +141,15 @@ module HTTP
     end
 
     # Creates request headers with cookies (if any) merged in
-    def make_request_headers(opts)
+    def make_request_headers(uri, opts)
       headers = opts.headers
 
       # Tell the server to keep the conn open
       headers[Headers::CONNECTION] = default_options.persistent? ? Connection::KEEP_ALIVE : Connection::CLOSE
+
+      if uri.user || uri.password
+        headers[Headers::AUTHORIZATION] = "Basic " + Base64.strict_encode64("#{uri.user}:#{uri.password}")
+      end
 
       cookies = opts.cookies.values
 
