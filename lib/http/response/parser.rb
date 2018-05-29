@@ -49,11 +49,14 @@ module HTTP
 
       def on_header_field(_, field)
         @header_field = field
+        @header_value = nil
       end
 
       def on_header_value(_, value)
-        @headers.add(@header_field, value) if @header_field
-        @header_field = nil
+        return @header_value << value if @header_value
+
+        @header_value = value
+        @headers.add(@header_field, @header_value)
       end
 
       def on_body(_, chunk)
@@ -84,6 +87,7 @@ module HTTP
         @headers_complete = false
         @message_complete = false
         @header_field     = nil
+        @header_value     = nil
         @headers          = HTTP::Headers.new
         @chunk            = nil
       end
