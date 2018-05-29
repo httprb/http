@@ -1,41 +1,62 @@
 # frozen_string_literal: true
 
+require "http-parser"
+
 module HTTP
   class Response
     class Parser
       attr_reader :headers
 
       def initialize
-        @parser = HTTP::Parser.new(self)
-        reset
+        @instance = HttpParser::Parser.new_instance { |i| i.type = :response }
+        @parser   = HttpParser::Parser.new(self)
+
+        reset!
       end
 
       def add(data)
-        @parser << data
+        @parser.parse(@instance, data)
       end
       alias << add
 
       def headers?
-        !!@headers
+        @headers_complete
+      end
+
+      def finished?
+        @message_complete
       end
 
       def http_version
-        @parser.http_version.join(".")
+        @instance.http_version
       end
 
       def status_code
-        @parser.status_code
+        @instance.http_status
       end
 
       #
       # HTTP::Parser callbacks
       #
 
-      def on_headers_complete(headers)
-        @headers = headers
+      def on_headers_complete(_)
+        @headers_complete = true
       end
 
-      def on_body(chunk)
+      def on_message_complete(_)
+        @message_complete = true
+      end
+
+      def on_header_field(_, field)
+        @header_field = field
+      end
+
+      def on_header_value(_, value)
+        @headers.add(@header_field, value) if @header_field
+        @header_field = nil
+      end
+
+      def on_body(_, chunk)
         if @chunk
           @chunk << chunk
         else
@@ -57,21 +78,16 @@ module HTTP
         chunk
       end
 
-      def on_message_complete
-        @finished = true
-      end
+      def reset!
+        @instance.reset!
 
-      def reset
-        @parser.reset!
-
-        @finished = false
-        @headers  = nil
-        @chunk    = nil
+        @headers_complete = false
+        @message_complete = false
+        @header_field     = nil
+        @headers          = HTTP::Headers.new
+        @chunk            = nil
       end
-
-      def finished?
-        @finished
-      end
+      alias reset reset!
     end
   end
 end
