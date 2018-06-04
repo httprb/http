@@ -6,6 +6,8 @@
 [![Coverage Status](https://coveralls.io/repos/httprb/http/badge.svg?branch=master)](https://coveralls.io/r/httprb/http)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/httprb/http/blob/master/LICENSE.txt)
 
+[Documentation]
+
 _NOTE: This is the 4.x **development** branch.  For the 3.x **stable** branch, please see:_
 
 https://github.com/httprb/http/tree/3-x-stable
@@ -107,13 +109,15 @@ require "http"
 
 ## Documentation
 
-[Please see the http.rb wiki](https://github.com/httprb/http/wiki)
+[Please see the http.rb wiki][documentation]
 for more detailed documentation and usage notes.
 
 The following API documentation is also available:
 
 * [YARD API documentation](http://www.rubydoc.info/gems/http/frames)
 * [Chainable module (all chainable methods)](http://www.rubydoc.info/gems/http/HTTP/Chainable)
+
+[documentation]: https://github.com/httprb/http/wiki
 
 ### Basic Usage
 
