@@ -43,14 +43,17 @@ module HTTP
       body    = make_request_body(opts, headers)
       proxy   = opts.proxy
 
-      HTTP::Request.new(
+      req = HTTP::Request.new(
         :verb         => verb,
         :uri          => uri,
         :headers      => headers,
         :proxy        => proxy,
-        :body         => body,
-        :auto_deflate => opts.feature(:auto_deflate)
+        :body         => body
       )
+
+      opts.features.inject(req) do |request, (_name, feature)|
+        feature.wrap_request(request)
+      end
     end
 
     # @!method persistent?
@@ -78,9 +81,12 @@ module HTTP
         :proxy_headers => @connection.proxy_response_headers,
         :connection    => @connection,
         :encoding      => options.encoding,
-        :auto_inflate  => options.feature(:auto_inflate),
         :uri           => req.uri
       )
+
+      res = options.features.inject(res) do |response, (_name, feature)|
+        feature.wrap_response(response)
+      end
 
       @connection.finish_response if req.verb == :head
       @state = :clean

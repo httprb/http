@@ -16,6 +16,19 @@ module HTTP
         raise Error, "Only gzip and deflate methods are supported" unless %w[gzip deflate].include?(@method)
       end
 
+      def wrap_request(request)
+        return request unless method
+
+        Request.new(
+          :version => request.version,
+          :verb => request.verb,
+          :uri => request.uri,
+          :headers => request.headers,
+          :proxy => request.proxy,
+          :body => deflated_body(request.body)
+        )
+      end
+
       def deflated_body(body)
         case method
         when "gzip"
@@ -34,6 +47,11 @@ module HTTP
         def size
           compress_all! unless @compressed
           @compressed.size
+        end
+
+        def read(*a)
+          compress_all! unless @compressed
+          @compressed.read(*a)
         end
 
         def each(&block)

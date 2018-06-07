@@ -87,7 +87,6 @@ module HTTP
 
       @proxy   = opts[:proxy] || {}
       @body    = Request::Body.new(opts[:body])
-      @deflate = opts[:auto_deflate]
       @version = opts[:version] || "1.1"
       @headers = HTTP::Headers.coerce(opts[:headers] || {})
 
@@ -106,7 +105,6 @@ module HTTP
         :headers      => headers,
         :proxy        => proxy,
         :body         => body.source,
-        :auto_deflate => @deflate,
         :version      => version
       )
     end
@@ -114,7 +112,6 @@ module HTTP
     # Stream the request to a socket
     def stream(socket)
       include_proxy_headers if using_proxy? && !@uri.https?
-      body = @deflate ? @deflate.deflated_body(self.body) : self.body
       Request::Writer.new(socket, body, headers, headline).stream
     end
 

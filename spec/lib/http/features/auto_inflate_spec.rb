@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe HTTP::Features::AutoInflate do
-  subject { HTTP::Features::AutoInflate.new }
+  subject(:feature) { HTTP::Features::AutoInflate.new }
   let(:connection) { double }
   let(:headers) { {} }
   let(:response) do
@@ -13,56 +13,52 @@ RSpec.describe HTTP::Features::AutoInflate do
     )
   end
 
-  describe "stream_for" do
+  describe "wrap_response" do
+    subject(:result) { feature.wrap_response(response) }
+
     context "when there is no Content-Encoding header" do
-      it "returns connection" do
-        stream = subject.stream_for(connection, response)
-        expect(stream).to eq(connection)
+      it "returns original request" do
+        expect(result).to be response
       end
     end
 
     context "for identity Content-Encoding header" do
-      let(:headers) { {:content_encoding => "not-supported"} }
+      let(:headers) { {:content_encoding => "identity"} }
 
-      it "returns connection" do
-        stream = subject.stream_for(connection, response)
-        expect(stream).to eq(connection)
+      it "returns original request" do
+        expect(result).to be response
       end
     end
 
     context "for unknown Content-Encoding header" do
       let(:headers) { {:content_encoding => "not-supported"} }
 
-      it "returns connection" do
-        stream = subject.stream_for(connection, response)
-        expect(stream).to eq(connection)
+      it "returns original request" do
+        expect(result).to be response
       end
     end
 
     context "for deflate Content-Encoding header" do
       let(:headers) { {:content_encoding => "deflate"} }
 
-      it "returns HTTP::Response::Inflater instance - connection wrapper" do
-        stream = subject.stream_for(connection, response)
-        expect(stream).to be_instance_of HTTP::Response::Inflater
+      it "returns a HTTP::Response wrapping the inflated response body" do
+        expect(result.body).to be_instance_of HTTP::Response::Body
       end
     end
 
     context "for gzip Content-Encoding header" do
       let(:headers) { {:content_encoding => "gzip"} }
 
-      it "returns HTTP::Response::Inflater instance - connection wrapper" do
-        stream = subject.stream_for(connection, response)
-        expect(stream).to be_instance_of HTTP::Response::Inflater
+      it "returns a HTTP::Response wrapping the inflated response body" do
+        expect(result.body).to be_instance_of HTTP::Response::Body
       end
     end
 
     context "for x-gzip Content-Encoding header" do
       let(:headers) { {:content_encoding => "x-gzip"} }
 
-      it "returns HTTP::Response::Inflater instance - connection wrapper" do
-        stream = subject.stream_for(connection, response)
-        expect(stream).to be_instance_of HTTP::Response::Inflater
+      it "returns a HTTP::Response wrapping the inflated response body" do
+        expect(result.body).to be_instance_of HTTP::Response::Body
       end
     end
   end

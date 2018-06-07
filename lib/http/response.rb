@@ -20,6 +20,9 @@ module HTTP
     # @return [Status]
     attr_reader :status
 
+    # @return [String]
+    attr_reader :version
+
     # @return [Body]
     attr_reader :body
 
@@ -46,14 +49,13 @@ module HTTP
       @headers       = HTTP::Headers.coerce(opts[:headers] || {})
       @proxy_headers = HTTP::Headers.coerce(opts[:proxy_headers] || {})
 
-      if opts.include?(:connection)
+      if opts.include?(:body)
+        @body = opts.fetch(:body)
+      else
         connection = opts.fetch(:connection)
         encoding   = opts[:encoding] || charset || Encoding::BINARY
-        stream     = body_stream_for(connection, opts)
 
-        @body = Response::Body.new(stream, :encoding => encoding)
-      else
-        @body = opts.fetch(:body)
+        @body = Response::Body.new(connection, :encoding => encoding)
       end
     end
 
@@ -159,16 +161,6 @@ module HTTP
     # Inspect a response
     def inspect
       "#<#{self.class}/#{@version} #{code} #{reason} #{headers.to_h.inspect}>"
-    end
-
-    private
-
-    def body_stream_for(connection, opts)
-      if opts[:auto_inflate]
-        opts[:auto_inflate].stream_for(connection, self)
-      else
-        connection
-      end
     end
   end
 end
