@@ -86,7 +86,7 @@ module HTTP
       raise(UnsupportedSchemeError, "unknown scheme: #{scheme}") unless SCHEMES.include?(@scheme)
 
       @proxy   = opts[:proxy] || {}
-      @body    = Request::Body.new(opts[:body])
+      @body    = (body = opts[:body]).is_a?(Request::Body) ? body : Request::Body.new(body)
       @version = opts[:version] || "1.1"
       @headers = HTTP::Headers.coerce(opts[:headers] || {})
 

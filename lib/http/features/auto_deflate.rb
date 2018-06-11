@@ -3,6 +3,8 @@
 require "zlib"
 require "tempfile"
 
+require "http/request/body"
+
 module HTTP
   module Features
     class AutoDeflate < Feature
@@ -38,20 +40,15 @@ module HTTP
         end
       end
 
-      class CompressedBody
-        def initialize(body)
-          @body       = body
+      class CompressedBody < HTTP::Request::Body
+        def initialize(uncompressed_body)
+          @body       = uncompressed_body
           @compressed = nil
         end
 
         def size
           compress_all! unless @compressed
           @compressed.size
-        end
-
-        def read(*a)
-          compress_all! unless @compressed
-          @compressed.read(*a)
         end
 
         def each(&block)
