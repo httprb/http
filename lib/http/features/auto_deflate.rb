@@ -3,6 +3,8 @@
 require "zlib"
 require "tempfile"
 
+require "http/request/body"
+
 module HTTP
   module Features
     class AutoDeflate < Feature
@@ -16,6 +18,19 @@ module HTTP
         raise Error, "Only gzip and deflate methods are supported" unless %w[gzip deflate].include?(@method)
       end
 
+      def wrap_request(request)
+        return request unless method
+
+        Request.new(
+          :version => request.version,
+          :verb => request.verb,
+          :uri => request.uri,
+          :headers => request.headers,
+          :proxy => request.proxy,
+          :body => deflated_body(request.body)
+        )
+      end
+
       def deflated_body(body)
         case method
         when "gzip"
@@ -25,9 +40,9 @@ module HTTP
         end
       end
 
-      class CompressedBody
-        def initialize(body)
-          @body       = body
+      class CompressedBody < HTTP::Request::Body
+        def initialize(uncompressed_body)
+          @body       = uncompressed_body
           @compressed = nil
         end
 

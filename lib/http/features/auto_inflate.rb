@@ -3,12 +3,20 @@
 module HTTP
   module Features
     class AutoInflate < Feature
-      def stream_for(connection, response)
-        if %w[deflate gzip x-gzip].include?(response.headers[:content_encoding])
-          Response::Inflater.new(connection)
-        else
-          connection
-        end
+      def wrap_response(response)
+        return response unless %w[deflate gzip x-gzip].include?(response.headers[:content_encoding])
+        Response.new(
+          :status => response.status,
+          :version => response.version,
+          :headers => response.headers,
+          :proxy_headers => response.proxy_headers,
+          :connection => response.connection,
+          :body => stream_for(response.connection)
+        )
+      end
+
+      def stream_for(connection)
+        Response::Body.new(Response::Inflater.new(connection))
       end
     end
   end
