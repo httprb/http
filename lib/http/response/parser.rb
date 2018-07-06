@@ -15,7 +15,8 @@ module HTTP
       end
 
       def add(data)
-        @parser.parse(@state, data)
+        error = @parser.parse(@state, data)
+        raise IOError, "Could not parse data" if error
       end
       alias << add
 
