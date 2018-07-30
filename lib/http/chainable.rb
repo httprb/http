@@ -153,6 +153,10 @@ module HTTP
       p_client.close if p_client
     end
 
+    def to(host)
+      branch default_options.with_origin(host)
+    end
+
     # Make a request through an HTTP proxy
     # @param [Array] proxy
     # @raise [Request::Error] if HTTP proxy is invalid

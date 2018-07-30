@@ -283,6 +283,18 @@ RSpec.describe HTTP do
     end
   end
 
+  describe ".to" do
+    subject(:client) { HTTP.to dummy.endpoint }
+
+    it { is_expected.to be_an HTTP::Client }
+    it { is_expected.to_not be_persistent }
+
+    it "accepts just a path as uri" do
+      response = client.post("/echo-body", body: "a body")
+      expect(response.to_s).to eq("a body")
+    end
+  end
+
   describe ".timeout" do
     context "specifying a null timeout" do
       subject(:client) { HTTP.timeout :null }

@@ -50,6 +50,7 @@ RSpec.describe HTTP::Options, "merge" do
       :form               => {:bar => "bar"},
       :body               => "body-bar",
       :json               => {:bar => "bar"},
+      :origin             => "https://www.googe.com",
       :persistent         => "https://www.googe.com",
       :keep_alive_timeout => 10,
       :ssl                => {:foo => "bar"},

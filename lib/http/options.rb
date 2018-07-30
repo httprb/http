@@ -141,10 +141,16 @@ module HTTP
         end
     end
 
+    def_option :origin, :reader_only => true
+
+    def origin=(value)
+      @origin = value ? HTTP::URI.parse(value).origin : nil
+    end
+
     def_option :persistent, :reader_only => true
 
     def persistent=(value)
-      @persistent = value ? HTTP::URI.parse(value).origin : nil
+      @persistent = self.origin = value
     end
 
     def persistent?
