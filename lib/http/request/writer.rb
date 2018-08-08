@@ -65,7 +65,7 @@ module HTTP
         # possible in order to play nicely with Nagle's algorithm. Making
         # two writes in a row triggers a pathological case where Nagle is
         # expecting a third write that never happens.
-        data = join_headers
+        data = join_headers.force_encoding("BINARY")
 
         @body.each do |chunk|
           data << encode_chunk(chunk)
