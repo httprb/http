@@ -1,36 +1,34 @@
 # frozen_string_literal: true
 
-# rubocop:disable Metrics/ClassLength, Style/RedundantSelf
+# rubocop:disable Metrics/ClassLength
 
 require "http/headers"
 require "openssl"
 require "socket"
 require "http/uri"
-require "http/feature"
-require "http/features/auto_inflate"
-require "http/features/auto_deflate"
 
 module HTTP
   class Options
     @default_socket_class     = TCPSocket
     @default_ssl_socket_class = OpenSSL::SSL::SSLSocket
     @default_timeout_class    = HTTP::Timeout::Null
-    @available_features       = {
-      :auto_inflate => Features::AutoInflate,
-      :auto_deflate => Features::AutoDeflate
-    }
+    @available_features       = {}
 
     class << self
       attr_accessor :default_socket_class, :default_ssl_socket_class, :default_timeout_class
       attr_reader :available_features
 
-      def new(options = {}) # rubocop:disable Style/OptionHash
+      def new(options = {})
         return options if options.is_a?(self)
         super
       end
 
       def defined_options
         @defined_options ||= []
+      end
+
+      def register_feature(name, impl)
+        @available_features[name] = impl
       end
 
       protected
@@ -197,3 +195,8 @@ module HTTP
     end
   end
 end
+
+require "http/feature"
+require "http/features/auto_inflate"
+require "http/features/auto_deflate"
+require "http/features/logging"

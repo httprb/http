@@ -40,6 +40,8 @@ module HTTP
         end
       end
 
+      HTTP::Options.register_feature(:auto_deflate, self)
+
       class CompressedBody < HTTP::Request::Body
         def initialize(uncompressed_body)
           @body       = uncompressed_body
