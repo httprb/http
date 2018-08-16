@@ -18,6 +18,8 @@ module HTTP
       def stream_for(connection)
         Response::Body.new(Response::Inflater.new(connection))
       end
+
+      HTTP::Options.register_feature(:auto_inflate, self)
     end
   end
 end
