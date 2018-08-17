@@ -4,6 +4,7 @@ require "forwardable"
 
 require "http/form_data"
 require "http/options"
+require "http/feature"
 require "http/headers"
 require "http/connection"
 require "http/redirector"
