@@ -18,7 +18,7 @@ module HTTP
       attr_accessor :default_socket_class, :default_ssl_socket_class, :default_timeout_class
       attr_reader :available_features
 
-      def new(options = {})
+      def new(options = {}) # rubocop:disable Style/OptionHash
         return options if options.is_a?(self)
         super
       end
@@ -72,12 +72,12 @@ module HTTP
       opts_w_defaults.each { |(k, v)| self[k] = v }
     end
 
-    def_option :headers do |headers|
-      self.headers.merge(headers)
+    def_option :headers do |new_headers|
+      headers.merge(new_headers)
     end
 
-    def_option :cookies do |cookies|
-      cookies.each_with_object self.cookies.dup do |(k, v), jar|
+    def_option :cookies do |new_cookies|
+      new_cookies.each_with_object cookies.dup do |(k, v), jar|
         cookie = k.is_a?(Cookie) ? k : Cookie.new(k.to_s, v.to_s)
         jar[cookie.name] = cookie.cookie_value
       end
@@ -87,7 +87,7 @@ module HTTP
       self.encoding = Encoding.find(encoding)
     end
 
-    def_option :features, :reader_only => true do |features|
+    def_option :features, :reader_only => true do |new_features|
       # Normalize features from:
       #
       #     [{feature_one: {opt: 'val'}}, :feature_two]
@@ -95,7 +95,7 @@ module HTTP
       # into:
       #
       #     {feature_one: {opt: 'val'}, feature_two: {}}
-      features = features.each_with_object({}) do |feature, h|
+      normalized_features = new_features.each_with_object({}) do |feature, h|
         if feature.is_a?(Hash)
           h.merge!(feature)
         else
@@ -103,7 +103,7 @@ module HTTP
         end
       end
 
-      self.features.merge(features)
+      features.merge(normalized_features)
     end
 
     def features=(features)
@@ -195,4 +195,3 @@ module HTTP
     end
   end
 end
-
