@@ -15,3 +15,8 @@ module HTTP
     end
   end
 end
+
+require "http/features/auto_inflate"
+require "http/features/auto_deflate"
+require "http/features/logging"
+require "http/features/instrumentation"
