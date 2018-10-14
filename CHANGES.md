@@ -1,4 +1,4 @@
-## future is unwritten
+## 4.0.0 (2018-10-15)
 
 * [#468](https://github.com/httprb/http/pull/468)
   Rewind `HTTP::Request::Body#source` once `#each` is complete.
