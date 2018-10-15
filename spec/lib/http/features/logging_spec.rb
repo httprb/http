@@ -1,34 +1,42 @@
 # frozen_string_literal: true
 
+require "logger"
+
 RSpec.describe HTTP::Features::Logging do
-  subject(:feature) { HTTP::Features::Logging.new(:logger => logger) }
-  let(:logger) { TestLogger.new }
+  subject(:feature) do
+    logger = Logger.new(logdev)
+    logger.formatter = ->(severity, _, _, message) do
+      format("** %s **\n%s\n", severity, message)
+    end
+
+    described_class.new(:logger => logger)
+  end
+
+  let(:logdev) { StringIO.new }
 
   describe "logging the request" do
     let(:request) do
       HTTP::Request.new(
-        :verb => :post,
-        :uri => "https://example.com/",
-        :headers => {:accept => "application/json"},
-        :body => '{"hello": "world!"}'
+        :verb     => :post,
+        :uri      => "https://example.com/",
+        :headers  => {:accept => "application/json"},
+        :body     => '{"hello": "world!"}'
       )
     end
 
     it "should log the request" do
       feature.wrap_request(request)
 
-      expect(logger.output).to eq(
-        [
-          "> POST https://example.com/",
-          <<~REQ.strip
-            Accept: application/json
-            Host: example.com
-            User-Agent: http.rb/4.0.0.dev
+      expect(logdev.string).to eq <<~OUTPUT
+        ** INFO **
+        > POST https://example.com/
+        ** DEBUG **
+        Accept: application/json
+        Host: example.com
+        User-Agent: http.rb/#{HTTP::VERSION}
 
-            {"hello": "world!"}
-          REQ
-        ]
-      )
+        {"hello": "world!"}
+      OUTPUT
     end
   end
 
@@ -36,39 +44,24 @@ RSpec.describe HTTP::Features::Logging do
     let(:response) do
       HTTP::Response.new(
         :version => "1.1",
-        :uri => "https://example.com",
-        :status => 200,
+        :uri     => "https://example.com",
+        :status  => 200,
         :headers => {:content_type => "application/json"},
-        :body => '{"success": true}'
+        :body    => '{"success": true}'
       )
     end
 
     it "should log the response" do
       feature.wrap_response(response)
 
-      expect(logger.output).to eq(
-        [
-          "< 200 OK",
-          <<~REQ.strip
-            Content-Type: application/json
+      expect(logdev.string).to eq <<~OUTPUT
+        ** INFO **
+        < 200 OK
+        ** DEBUG **
+        Content-Type: application/json
 
-            {"success": true}
-          REQ
-        ]
-      )
-    end
-  end
-
-  class TestLogger
-    attr_reader :output
-    def initialize
-      @output = []
-    end
-
-    %w[fatal error warn info debug].each do |level|
-      define_method(level.to_sym) do |*args, &block|
-        @output << (block ? block.call : args)
-      end
+        {"success": true}
+      OUTPUT
     end
   end
 end
