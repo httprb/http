@@ -1,5 +1,15 @@
 ## 4.0.0 (2018-10-15)
 
+* [#482](https://github.com/httprb/http/pull/482)
+  [#499](https://github.com/httprb/http/pull/499)
+  Introduce new features injection API with 2 new feaures: instrumentation
+  (compatible with ActiveSupport::Notification) and logging.
+  ([@paul])
+
+* [#473](https://github.com/httprb/http/pull/473)
+  Handle early responses.
+  ([@janko-m])
+
 * [#468](https://github.com/httprb/http/pull/468)
   Rewind `HTTP::Request::Body#source` once `#each` is complete.
   ([@ixti])
@@ -709,3 +719,4 @@ end
 [@scarfacedeb]: https://github.com/scarfacedeb
 [@mikegee]: https://github.com/mikegee
 [@tycoon]: https://github.com/tycooon
+[@paul]: https://github.com/paul
