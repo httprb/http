@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "logger"
+
 module HTTP
   module Features
     # Log requests and responses. Request verb and uri, and Response status are
@@ -11,7 +13,7 @@ module HTTP
     class Logging < Feature
       attr_reader :logger
 
-      def initialize(logger: NullLogger.new)
+      def initialize(logger: Logger.new(nil))
         @logger = logger
       end
 
@@ -35,18 +37,6 @@ module HTTP
           headers + "\n\n" + body
         end
         response
-      end
-
-      class NullLogger
-        %w[fatal error warn info debug].each do |level|
-          define_method(level.to_sym) do |*_args|
-            nil
-          end
-
-          define_method(:"#{level}?") do
-            true
-          end
-        end
       end
 
       HTTP::Options.register_feature(:logging, self)
