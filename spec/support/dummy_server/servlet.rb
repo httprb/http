@@ -27,6 +27,8 @@ class DummyServer < WEBrick::HTTPServer
           handler = self.class.handlers["#{method}:\#{req.path}"]
           return instance_exec(req, res, &handler) if handler
           not_found(req, res)
+        rescue
+          puts "Error in \#{self.class.name}: \#{$!}", *$!.backtrace
         end
       RUBY
     end
