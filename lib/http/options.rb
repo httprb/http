@@ -64,7 +64,8 @@ module HTTP
         :headers            => {},
         :cookies            => {},
         :encoding           => nil,
-        :features           => {}
+        :features           => {},
+        :uri                => nil
       }
 
       opts_w_defaults = defaults.merge(options)
@@ -139,14 +140,20 @@ module HTTP
         end
     end
 
-    def_option :persistent, :reader_only => true
+    def_option :uri, :reader_only => true
 
-    def persistent=(value)
-      @persistent = value ? HTTP::URI.parse(value).origin : nil
+    def uri=(value)
+      @uri = value ? HTTP::URI.parse(value) : nil
     end
+
+    def_option :persistent, :reader_only => true
 
     def persistent?
       !persistent.nil?
+    end
+
+    def persistent=(value)
+      @persistent = value ? HTTP::URI.parse(value).origin : nil
     end
 
     def merge(other)

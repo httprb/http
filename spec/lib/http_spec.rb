@@ -252,6 +252,22 @@ RSpec.describe HTTP do
     end
   end
 
+  describe ".uri" do
+    let(:base_uri) { "#{dummy.endpoint}/base/" }
+
+    subject(:client) { HTTP.uri(base_uri) }
+
+    it "uses the uri as a base during requests" do
+      response = client.get("foo")
+      expect(response.status.ok?)
+      expect(response.body.to_s).to eq("Foo")
+
+      response = client.get("bar")
+      expect(response.status.ok?)
+      expect(response.body.to_s).to eq("Bar")
+    end
+  end
+
   describe ".persistent" do
     let(:host) { "https://api.github.com" }
 

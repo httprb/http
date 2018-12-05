@@ -245,6 +245,12 @@ module HTTP
       branch default_options.with_features(features)
     end
 
+    # Join base uri to all request uris
+    # @param uri
+    def uri(uri)
+      branch default_options.with_uri(uri)
+    end
+
     private
 
     # :nodoc:

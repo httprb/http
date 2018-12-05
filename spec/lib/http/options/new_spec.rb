@@ -26,5 +26,10 @@ RSpec.describe HTTP::Options, "new" do
       opts = HTTP::Options.new(:form => {:foo => 42})
       expect(opts.form).to eq(:foo => 42)
     end
+
+    it "coerces :uri correctly" do
+      opts = HTTP::Options.new(:uri => "https://example.com")
+      expect(opts.uri).to eq(HTTP::URI.parse("https://example.com"))
+    end
   end
 end

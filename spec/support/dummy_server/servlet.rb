@@ -170,5 +170,15 @@ class DummyServer < WEBrick::HTTPServer
                    "#{req.body}-raw"
                  end
     end
+
+    get "/base/foo" do |_req, res|
+      res.status = 200
+      res.body = "Foo"
+    end
+
+    get "/base/bar" do |_req, res|
+      res.status = 200
+      res.body = "Bar"
+    end
   end
 end

@@ -25,7 +25,8 @@ RSpec.describe HTTP::Options, "merge" do
       :json      => {:foo => "foo"},
       :headers   => {:accept => "json", :foo => "foo"},
       :proxy     => {},
-      :features  => {}
+      :features  => {},
+      :uri       => HTTP::URI.parse("https://foo.com")
     )
 
     bar = HTTP::Options.new(
@@ -39,7 +40,8 @@ RSpec.describe HTTP::Options, "merge" do
       :headers            => {:accept => "xml", :bar => "bar"},
       :timeout_options    => {:foo => :bar},
       :ssl        => {:foo => "bar"},
-      :proxy      => {:proxy_address => "127.0.0.1", :proxy_port => 8080}
+      :proxy      => {:proxy_address => "127.0.0.1", :proxy_port => 8080},
+      :uri        => HTTP::URI.parse("https://bar.com")
     )
 
     expect(foo.merge(bar).to_hash).to eq(
@@ -62,7 +64,8 @@ RSpec.describe HTTP::Options, "merge" do
       :ssl_context        => nil,
       :cookies            => {},
       :encoding           => nil,
-      :features           => {}
+      :features           => {},
+      :uri                => HTTP::URI.parse("https://bar.com")
     )
   end
 end

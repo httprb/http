@@ -128,6 +128,8 @@ module HTTP
     def make_request_uri(uri, opts)
       uri = uri.to_s
 
+      uri = default_options.uri.join(uri).to_s if default_options.uri
+
       if default_options.persistent? && uri !~ HTTP_OR_HTTPS_RE
         uri = "#{default_options.persistent}#{uri}"
       end
