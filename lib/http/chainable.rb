@@ -70,19 +70,15 @@ module HTTP
     end
 
     # Make an HTTP request with the given verb
-    # @param verb
-    # @param uri
-    # @option options [Hash]
-    def request(verb, uri, options = {}) # rubocop:disable Style/OptionHash
-      branch(options).request verb, uri
+    # @param (see Client#request)
+    def request(*args)
+      branch(default_options).request(*args)
     end
 
     # Prepare an HTTP request with the given verb
-    # @param verb
-    # @param uri
-    # @option options [Hash]
-    def build_request(verb, uri, options = {}) # rubocop:disable Style/OptionHash
-      branch(options).build_request verb, uri
+    # @param (see Client#build_request)
+    def build_request(*args)
+      branch(default_options).build_request(*args)
     end
 
     # @overload timeout(options = {})
