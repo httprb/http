@@ -75,6 +75,41 @@ RSpec.describe HTTP::Redirector do
       expect(res.to_s).to eq "foo"
     end
 
+    context "redirect to cross-site" do
+      it "sensitive headers are not forwarded" do
+        req = HTTP::Request.new :verb => :get,
+                                :uri => "http://example.com",
+                                :headers => {"Authorization" => "Basic xxx",
+                                             "Cookie" => "key=value"}
+        res = redirect_response 300, "http://trap.example.jp"
+
+        redirector.perform(req, res) do |prev_req, _|
+          has_sensitive_headers = prev_req.headers.find do |h|
+            h.first == "Authorization" || h.first == "Cookie"
+          end
+          expect(has_sensitive_headers).to be_falsey
+          simple_response 200
+        end
+      end
+    end
+
+    context "redirect to same-site" do
+      it "sensitive headers are not forwarded" do
+        req = HTTP::Request.new :verb => :get,
+                                :uri => "http://example.com",
+                                :headers => {"Authorization" => "Basic xxx",
+                                             "Cookie" => "key=value"}
+        res = redirect_response 300, "http://example.com/redirect"
+
+        redirector.perform(req, res) do |prev_req, _|
+          has_authorization_header = prev_req.headers.find { |h| h.first == "Authorization" }
+          has_cookie_header = prev_req.headers.find { |h| h.first == "Cookie" }
+          expect(has_authorization_header && has_cookie_header).to be_truthy
+          simple_response 200
+        end
+      end
+    end
+
     context "following 300 redirect" do
       context "with strict mode" do
         let(:options) { {:strict => true} }

@@ -95,13 +95,19 @@ module HTTP
     end
 
     # Returns new Request with updated uri
-    def redirect(uri, verb = @verb)
+    def redirect(uri, verb = @verb, orig_uri = nil)
       headers = self.headers.dup
       headers.delete(Headers::HOST)
 
+      uri = @uri.join(uri)
+      if !orig_uri.nil? && (uri.host != orig_uri.host)
+        headers.delete(Headers::AUTHORIZATION)
+        headers.delete(Headers::COOKIE)
+      end
+
       self.class.new(
         :verb         => verb,
-        :uri          => @uri.join(uri),
+        :uri          => uri,
         :headers      => headers,
         :proxy        => proxy,
         :body         => body.source,

@@ -58,7 +58,7 @@ module HTTP
 
         @response.flush
 
-        @request  = redirect_to @response.headers[Headers::LOCATION]
+        @request  = redirect_to @response.headers[Headers::LOCATION], @request
         @response = yield @request
       end
 
@@ -81,7 +81,7 @@ module HTTP
 
     # Redirect policy for follow
     # @return [Request]
-    def redirect_to(uri)
+    def redirect_to(uri, orig_uri)
       raise StateError, "no Location header in redirect" unless uri
 
       verb = @request.verb
@@ -94,7 +94,7 @@ module HTTP
 
       verb = :get if !SEE_OTHER_ALLOWED_VERBS.include?(verb) && 303 == code
 
-      @request.redirect(uri, verb)
+      @request.redirect(uri, verb, orig_uri)
     end
   end
 end
