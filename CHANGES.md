@@ -1,3 +1,10 @@
+## future is unwritten (master)
+
+* [#489](https://github.com/httprb/http/pull/489)
+  Fix HTTP parser.
+  ([@ixti], [@fxposter])
+
+
 ## 4.0.0 (2018-10-15)
 
 * [#482](https://github.com/httprb/http/pull/482)
@@ -720,3 +727,4 @@ end
 [@mikegee]: https://github.com/mikegee
 [@tycoon]: https://github.com/tycooon
 [@paul]: https://github.com/paul
+[@fxposter]: https://github.com/fxposter
