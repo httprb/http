@@ -8,9 +8,9 @@
 
 [Documentation]
 
-_NOTE: This is the 4.x **development** branch.  For the 3.x **stable** branch, please see:_
+_NOTE: This is the 5.x **development** branch.  For the 4.x **stable** branch, please see:_
 
-https://github.com/httprb/http/tree/3-x-stable
+https://github.com/httprb/http/tree/4-x-stable
 
 ## About
 
