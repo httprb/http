@@ -1,14 +1,14 @@
 # ![http.rb](https://raw.github.com/httprb/http.rb/master/logo.png)
 
 [![Gem Version](https://badge.fury.io/rb/http.svg)](https://rubygems.org/gems/http)
-[![Build Status](https://secure.travis-ci.org/httprb/http.svg?branch=master)](https://travis-ci.org/httprb/http)
-[![Code Climate](https://codeclimate.com/github/httprb/http.svg?branch=master)](https://codeclimate.com/github/httprb/http)
-[![Coverage Status](https://coveralls.io/repos/httprb/http/badge.svg?branch=master)](https://coveralls.io/r/httprb/http)
+[![Build Status](https://secure.travis-ci.org/httprb/http.svg?branch=4-x-stable)](https://travis-ci.org/httprb/http)
+[![Code Climate](https://codeclimate.com/github/httprb/http.svg?branch=4-x-stable)](https://codeclimate.com/github/httprb/http)
+[![Coverage Status](https://coveralls.io/repos/httprb/http/badge.svg?branch=4-x-stable)](https://coveralls.io/r/httprb/http)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/httprb/http/blob/master/LICENSE.txt)
 
 [Documentation]
 
-_NOTE: This is the 4.x **development** branch.  For the 3.x **stable** branch, please see:_
+_NOTE: This is the 4.x **stable** branch.  For the 3.x **stable** branch, please see:_
 
 https://github.com/httprb/http/tree/3-x-stable
 
