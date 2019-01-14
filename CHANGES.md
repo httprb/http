@@ -1,3 +1,10 @@
+## 4.0.1 (2019-01-14)
+
+* [#515](https://github.com/httprb/http/pull/515)
+  Fix `#build_request` and `#request` to respect default options.
+  ([@RickCSong])
+
+
 ## 4.0.0 (2018-10-15)
 
 * [#482](https://github.com/httprb/http/pull/482)
@@ -720,3 +727,4 @@ end
 [@mikegee]: https://github.com/mikegee
 [@tycoon]: https://github.com/tycooon
 [@paul]: https://github.com/paul
+[@RickCSong]: https://github.com/RickCSong
