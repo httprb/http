@@ -9,10 +9,16 @@ module HTTP
     # Be sure to specify the instrumenter when enabling the feature:
     #
     #    HTTP
-    #      .use(instrumentation: {instrumenter: ActiveSupport::Notifications})
+    #      .use(instrumentation: {instrumenter: ActiveSupport::Notifications.instrumenter})
     #      .get("https://example.com/")
     #
-    class Instrumentation
+    # Emits two events on every request:
+    #
+    #  * `start_request.http` before the request is made, so you can log the reqest being started
+    #  * `request.http` after the response is recieved, and contains `start`
+    #    and `finish` so the duration of the request can be calculated.
+    #
+    class Instrumentation < Feature
       attr_reader :instrumenter, :name
 
       def initialize(instrumenter: NullInstrumenter.new, namespace: "http")
@@ -21,7 +27,9 @@ module HTTP
       end
 
       def wrap_request(request)
-        instrumenter.instrument("start_#{name}", :request => request)
+        # Emit a separate "start" event, so a logger can print the request
+        # being run without waiting for a response
+        instrumenter.instrument("start_#{name}", :request => request) {}
         instrumenter.start(name, :request => request)
         request
       end

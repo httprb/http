@@ -5,6 +5,13 @@
   ([@ixti], [@fxposter])
 
 
+## 4.0.2 (2019-01-15)
+
+* [#506](https://github.com/httprb/http/pull/506)
+  Fix instrumentation feature.
+  ([@paul])
+
+
 ## 4.0.1 (2019-01-14)
 
 * [#515](https://github.com/httprb/http/pull/515)
