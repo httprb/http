@@ -1,2 +1,2 @@
---markup-provider=redcarpet
+--markup-provider=kramdown
 --markup=markdown
