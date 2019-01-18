@@ -225,4 +225,10 @@ RSpec.describe HTTP::Request do
       end
     end
   end
+
+  describe "#inspect" do
+    subject { request.inspect }
+
+    it { is_expected.to eq "#<HTTP::Request/1.1 GET #{request_uri}>" }
+  end
 end

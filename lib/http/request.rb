@@ -184,6 +184,18 @@ module HTTP
       using_proxy? ? proxy[:proxy_port] : port
     end
 
+    # Human-readable representation of base request info.
+    #
+    # @example
+    #
+    #     req.inspect
+    #     # => #<HTTP::Request/1.1 GET https://example.com>
+    #
+    # @return [String]
+    def inspect
+      "#<#{self.class}/#{@version} #{verb.to_s.upcase} #{uri}>"
+    end
+
     private
 
     # @!attribute [r] host
