@@ -2,8 +2,10 @@
 
 RSpec.describe HTTP::Features::AutoInflate do
   subject(:feature) { HTTP::Features::AutoInflate.new }
+
   let(:connection) { double }
-  let(:headers) { {} }
+  let(:headers)    { {} }
+
   let(:response) do
     HTTP::Response.new(
       :version    => "1.1",
@@ -13,7 +15,7 @@ RSpec.describe HTTP::Features::AutoInflate do
     )
   end
 
-  describe "wrap_response" do
+  describe "#wrap_response" do
     subject(:result) { feature.wrap_response(response) }
 
     context "when there is no Content-Encoding header" do
@@ -59,6 +61,24 @@ RSpec.describe HTTP::Features::AutoInflate do
 
       it "returns a HTTP::Response wrapping the inflated response body" do
         expect(result.body).to be_instance_of HTTP::Response::Body
+      end
+    end
+
+    # TODO(ixti): We should refactor API to either make uri non-optional,
+    #   or add reference to request into response object (better).
+    context "when response has uri" do
+      let(:response) do
+        HTTP::Response.new(
+          :version    => "1.1",
+          :status     => 200,
+          :headers    => {:content_encoding => "gzip"},
+          :connection => connection,
+          :uri        => "https://example.com"
+        )
+      end
+
+      it "preserves uri in wrapped response" do
+        expect(result.uri).to eq HTTP::URI.parse("https://example.com")
       end
     end
   end
