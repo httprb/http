@@ -5,6 +5,15 @@
   ([@ixti], [@fxposter])
 
 
+## 4.0.3 (2019-01-18)
+
+* Fix missing URL in response wrapped by auto inflate.
+  ([@ixti])
+
+* Provide `HTTP::Request#inspect` method for debugging purposes.
+  ([@ixti])
+
+
 ## 4.0.2 (2019-01-15)
 
 * [#506](https://github.com/httprb/http/pull/506)

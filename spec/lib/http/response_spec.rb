@@ -129,13 +129,12 @@ RSpec.describe HTTP::Response do
   end
 
   describe "#inspect" do
+    subject { response.inspect }
+
     let(:headers) { {:content_type => "text/plain"} }
     let(:body)    { double :to_s => "foobar" }
 
-    it "returns human-friendly response representation" do
-      expect(response.inspect).
-        to eq '#<HTTP::Response/1.1 200 OK {"Content-Type"=>"text/plain"}>'
-    end
+    it { is_expected.to eq '#<HTTP::Response/1.1 200 OK {"Content-Type"=>"text/plain"}>' }
   end
 
   describe "#cookies" do
