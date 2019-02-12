@@ -35,9 +35,11 @@ RSpec.describe HTTP::Headers do
         to raise_error HTTP::HeaderError
     end
 
-    it "fails with invalid header name" do
-      expect { headers.set "foo bar", "baz" }.
-        to raise_error HTTP::HeaderError
+    ["foo bar", "foo bar: ok\nfoo", "evil-header: evil-value\nfoo"].each do |name|
+      it "fails with invalid header name (#{name.inspect})" do
+        expect { headers.set name, "baz" }.
+          to raise_error HTTP::HeaderError
+      end
     end
   end
 
@@ -83,9 +85,11 @@ RSpec.describe HTTP::Headers do
         to raise_error HTTP::HeaderError
     end
 
-    it "fails with invalid header name" do
-      expect { headers.delete "foo bar" }.
-        to raise_error HTTP::HeaderError
+    ["foo bar", "foo bar: ok\nfoo"].each do |name|
+      it "fails with invalid header name (#{name.inspect})" do
+        expect { headers.delete name }.
+          to raise_error HTTP::HeaderError
+      end
     end
   end
 
@@ -117,9 +121,11 @@ RSpec.describe HTTP::Headers do
         to raise_error HTTP::HeaderError
     end
 
-    it "fails with invalid header name" do
-      expect { headers.add "foo bar", "baz" }.
-        to raise_error HTTP::HeaderError
+    ["foo bar", "foo bar: ok\nfoo"].each do |name|
+      it "fails with invalid header name (#{name.inspect})" do
+        expect { headers.add name, "baz" }.
+          to raise_error HTTP::HeaderError
+      end
     end
   end
 
@@ -145,9 +151,11 @@ RSpec.describe HTTP::Headers do
         to raise_error HTTP::HeaderError
     end
 
-    it "fails with invalid header name" do
-      expect { headers.get("foo bar") }.
-        to raise_error HTTP::HeaderError
+    ["foo bar", "foo bar: ok\nfoo"].each do |name|
+      it "fails with invalid header name (#{name.inspect})" do
+        expect { headers.get name }.
+          to raise_error HTTP::HeaderError
+      end
     end
   end
 
