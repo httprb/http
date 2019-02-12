@@ -20,6 +20,11 @@ module HTTP
 
       def wrap_request(request)
         return request unless method
+        return request if request.body.size.zero?
+
+        # We need to delete Content-Length header. It will be set automatically by HTTP::Request::Writer
+        request.headers.delete(Headers::CONTENT_LENGTH)
+        request.headers[Headers::CONTENT_ENCODING] = method
 
         Request.new(
           :version => request.version,
