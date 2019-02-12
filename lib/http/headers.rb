@@ -50,7 +50,7 @@ module HTTP
     # @return [void]
     def add(name, value)
       name = normalize_header name.to_s
-      Array(value).each { |v| @pile << [name, v.to_s] }
+      Array(value).each { |v| @pile << [name, validate_value(v)] }
     end
 
     # Returns list of header values if any.
@@ -208,6 +208,17 @@ module HTTP
       return normalized if normalized =~ COMPLIANT_NAME_RE
 
       raise HeaderError, "Invalid HTTP header field name: #{name.inspect}"
+    end
+
+    # Ensures there is no new line character in the header value
+    #
+    # @param [String] value
+    # @raise [HeaderError] if value includes new line character
+    # @return [String] stringified header value
+    def validate_value(value)
+      v = value.to_s
+      return v unless v.include?("\n")
+      raise HeaderError, "Invalid HTTP header field value: #{v.inspect}"
     end
   end
 end

@@ -41,6 +41,11 @@ RSpec.describe HTTP::Headers do
           to raise_error HTTP::HeaderError
       end
     end
+
+    it "fails with invalid header value" do
+      expect { headers.set "foo", "bar\nEvil-Header: evil-value" }.
+        to raise_error HTTP::HeaderError
+    end
   end
 
   describe "#[]=" do
@@ -126,6 +131,11 @@ RSpec.describe HTTP::Headers do
         expect { headers.add name, "baz" }.
           to raise_error HTTP::HeaderError
       end
+    end
+
+    it "fails with invalid header value" do
+      expect { headers.add "foo", "bar\nEvil-Header: evil-value" }.
+        to raise_error HTTP::HeaderError
     end
   end
 
