@@ -234,7 +234,7 @@ RSpec.describe HTTP::Client do
 
     context "when :auto_deflate was specified" do
       let(:headers) { {"Content-Length" => "12"} }
-      let(:client)  { described_class.new :headers => headers, :features => {:auto_deflate => {}} }
+      let(:client)  { described_class.new :headers => headers, :features => {:auto_deflate => {}}, :body => "foo" }
 
       it "deletes Content-Length header" do
         expect(client).to receive(:perform) do |req, _|
@@ -250,6 +250,18 @@ RSpec.describe HTTP::Client do
         end
 
         client.request(:get, "http://example.com/")
+      end
+
+      context "and there is no body" do
+        let(:client) { described_class.new :headers => headers, :features => {:auto_deflate => {}} }
+
+        it "doesn't set Content-Encoding header" do
+          expect(client).to receive(:perform) do |req, _|
+            expect(req.headers).not_to include "Content-Encoding"
+          end
+
+          client.request(:get, "http://example.com/")
+        end
       end
     end
   end
