@@ -1,3 +1,10 @@
+## 4.0.4 (2019-02-12)
+
+* Backport [#506](https://github.com/httprb/http/pull/506) from master.
+  Skip auto-deflate when there is no body.
+  ([@Bonias])
+
+
 ## 4.0.3 (2019-01-18)
 
 * Fix missing URL in response wrapped by auto inflate.
