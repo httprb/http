@@ -160,14 +160,6 @@ module HTTP
         headers[Headers::COOKIE] = cookies
       end
 
-      if (auto_deflate = opts.feature(:auto_deflate))
-        # We need to delete Content-Length header. It will be set automatically
-        # by HTTP::Request::Writer
-        headers.delete(Headers::CONTENT_LENGTH)
-
-        headers[Headers::CONTENT_ENCODING] = auto_deflate.method
-      end
-
       headers
     end
 
