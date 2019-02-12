@@ -1,8 +1,21 @@
 ## future is unwritten (master)
 
+* [#506](https://github.com/httprb/http/pull/506)
+  [#521](https://github.com/httprb/http/issues/521)
+  Skip auto-deflate when there is no body.
+  ([@Bonias])
+
+
 * [#489](https://github.com/httprb/http/pull/489)
   Fix HTTP parser.
   ([@ixti], [@fxposter])
+
+
+## 4.0.4 (2019-02-12)
+
+* Backport [#506](https://github.com/httprb/http/pull/506) from master.
+  Skip auto-deflate when there is no body.
+  ([@Bonias])
 
 
 ## 4.0.3 (2019-01-18)
