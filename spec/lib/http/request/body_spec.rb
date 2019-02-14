@@ -125,6 +125,22 @@ RSpec.describe HTTP::Request::Body do
       end
     end
 
+    context "when body is a pipe" do
+      let(:ios)  { IO.pipe }
+      let(:body) { ios[0] }
+
+      before do
+        Thread.new(ios[1]) do |io|
+          16_384.times { io << "abcdef" }
+          io.close
+        end
+      end
+
+      it "yields chunks of content" do
+        expect(chunks.inject("", :+)).to eq("abcdef" * 16_384)
+      end
+    end
+
     context "when body is an Enumerable IO" do
       let(:data) { "a" * 16 * 1024 + "b" * 10 * 1024 }
       let(:body) { StringIO.new data }
