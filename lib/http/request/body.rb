@@ -35,10 +35,12 @@ module HTTP
           yield @source
         elsif @source.respond_to?(:read)
           IO.copy_stream(@source, ProcIO.new(block))
-          @source.rewind if @source.respond_to?(:rewind)
+          rewind(@source)
         elsif @source.is_a?(Enumerable)
           @source.each(&block)
         end
+
+        self
       end
 
       # Request bodies are equivalent when they have the same source.
@@ -47,6 +49,28 @@ module HTTP
       end
 
       private
+
+      def rewind(io)
+        io.rewind if io.respond_to? :rewind
+      rescue Errno::ESPIPE, Errno::EPIPE
+        # Pipe IOs respond to `:rewind` but fail when you call it.
+        #
+        # Calling `IO#rewind` on a pipe, fails with *ESPIPE* on MRI,
+        # but *EPIPE* on jRuby.
+        #
+        # - **ESPIPE** -- "Illegal seek."
+        #   Invalid seek operation (such as on a pipe).
+        #
+        # - **EPIPE** -- "Broken pipe."
+        #   There is no process reading from the other end of a pipe. Every
+        #   library function that returns this error code also generates
+        #   a SIGPIPE signal; this signal terminates the program if not handled
+        #   or blocked. Thus, your program will never actually see EPIPE unless
+        #   it has handled or blocked SIGPIPE.
+        #
+        # See: https://www.gnu.org/software/libc/manual/html_node/Error-Codes.html
+        nil
+      end
 
       def validate_source_type!
         return if @source.is_a?(String)
