@@ -1,14 +1,28 @@
 ## future is unwritten (master)
 
+* [#532](https://github.com/httprb/http/pull/532)
+  Fix pipes support in request bodies.
+  ([@ixti])
+
+* [#530](https://github.com/httprb/http/pull/530)
+  Improve header fields name/value validation.
+  ([@Bonias])
+
 * [#506](https://github.com/httprb/http/pull/506)
   [#521](https://github.com/httprb/http/issues/521)
   Skip auto-deflate when there is no body.
   ([@Bonias])
 
-
 * [#489](https://github.com/httprb/http/pull/489)
   Fix HTTP parser.
   ([@ixti], [@fxposter])
+
+
+## 4.0.5 (2019-02-15)
+
+* Backport [#532](https://github.com/httprb/http/pull/532) from master.
+  Fix pipes support in request bodies.
+  ([@ixti])
 
 
 ## 4.0.4 (2019-02-12)
