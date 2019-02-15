@@ -129,15 +129,21 @@ RSpec.describe HTTP::Request::Body do
       let(:ios)  { IO.pipe }
       let(:body) { ios[0] }
 
-      before do
-        Thread.new(ios[1]) do |io|
-          16_384.times { io << "abcdef" }
+      around do |example|
+        writer = Thread.new(ios[1]) do |io|
+          io << "abcdef"
           io.close
+        end
+
+        begin
+          example.run
+        ensure
+          writer.join
         end
       end
 
       it "yields chunks of content" do
-        expect(chunks.inject("", :+)).to eq("abcdef" * 16_384)
+        expect(chunks.inject("", :+)).to eq("abcdef")
       end
     end
 
