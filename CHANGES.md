@@ -1,3 +1,10 @@
+## 4.0.5 (2019-02-15)
+
+* Backport [#532](https://github.com/httprb/http/pull/532) from master.
+  Fix pipes support in request bodies.
+  ([@ixti])
+
+
 ## 4.0.4 (2019-02-12)
 
 * Backport [#506](https://github.com/httprb/http/pull/506) from master.
