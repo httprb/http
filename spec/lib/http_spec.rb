@@ -430,6 +430,38 @@ RSpec.describe HTTP do
         expect(response.to_s).to eq("#{body}-deflated")
       end
     end
+
+    context "with :uri_normalizer" do
+      class CustomUriNormalizer
+        def normalize_uri(uri)
+          uri = HTTP::URI.parse uri
+          HTTP::URI.new(
+            :scheme     => uri.normalized_scheme,
+            :authority  => uri.normalized_authority,
+            :path       => "uri_normalizer/custom",
+            :query      => uri.query,
+            :fragment   => uri.normalized_fragment
+          )
+        end
+      end
+
+      it "Use the defaul Uri normalizer when user does not use uri normalizer" do
+        response = HTTP.get HTTP::URI.parse "#{dummy.endpoint}/uri_normalizer/%EF%BC%A1%EF%BC%A2%EF%BC%A3"
+        expect(response.to_s).to eq("default normalizer")
+      end
+
+      it "Use the custom Uri Normalizer method" do
+        client = HTTP.use(:uri_normalizer => {:custom_uri_normalizer => CustomUriNormalizer.new})
+        response = client.get("#{dummy.endpoint}/uri_normalizer/%EF%BC%A1%EF%BC%A2%EF%BC%A3")
+        expect(response.to_s).to eq("custom normalizer")
+      end
+
+      it "Use the default Uri normalizer when user does not specify custom uri normalizer" do
+        client = HTTP.use :uri_normalizer
+        response = client.get("#{dummy.endpoint}/uri_normalizer/%EF%BC%A1%EF%BC%A2%EF%BC%A3")
+        expect(response.to_s).to eq("default normalizer")
+      end
+    end
   end
 
   it "unifies socket errors into HTTP::ConnectionError" do

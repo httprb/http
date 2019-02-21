@@ -32,7 +32,8 @@ module HTTP
           :uri => request.uri,
           :headers => request.headers,
           :proxy => request.proxy,
-          :body => deflated_body(request.body)
+          :body => deflated_body(request.body),
+          :uri_normalizer => request.uri_normalizer
         )
       end
 
