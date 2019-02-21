@@ -26,6 +26,19 @@ module HTTP
     # @private
     HTTPS_SCHEME = "https"
 
+    # @private
+    NORMALIZER = lambda do |uri|
+      uri = HTTP::URI.parse uri
+
+      HTTP::URI.new(
+        :scheme     => uri.normalized_scheme,
+        :authority  => uri.normalized_authority,
+        :path       => uri.normalized_path,
+        :query      => uri.query,
+        :fragment   => uri.normalized_fragment
+      )
+    end
+
     # Parse the given URI string, returning an HTTP::URI object
     #
     # @param [HTTP::URI, String, #to_str] uri to parse

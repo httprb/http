@@ -18,6 +18,13 @@
   ([@ixti], [@fxposter])
 
 
+## 4.1.0 (2019-03-11)
+
+* [#533](https://github.com/httprb/http/pull/533)
+  Add URI normalizer feature that allows to swap default URI normalizer.
+  ([@mamoonraja])
+
+
 ## 4.0.5 (2019-02-15)
 
 * Backport [#532](https://github.com/httprb/http/pull/532) from master.
@@ -779,3 +786,4 @@ end
 [@paul]: https://github.com/paul
 [@RickCSong]: https://github.com/RickCSong
 [@fxposter]: https://github.com/fxposter
+[@mamoonraja]: https://github.com/mamoonraja

@@ -66,6 +66,8 @@ module HTTP
     # Scheme is normalized to be a lowercase symbol e.g. :http, :https
     attr_reader :scheme
 
+    attr_reader :uri_normalizer
+
     # "Request URI" as per RFC 2616
     # http://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html
     attr_reader :uri
@@ -73,25 +75,25 @@ module HTTP
 
     # @option opts [String] :version
     # @option opts [#to_s] :verb HTTP request method
+    # @option opts [#call] :uri_normalizer (HTTP::URI::NORMALIZER)
     # @option opts [HTTP::URI, #to_s] :uri
     # @option opts [Hash] :headers
     # @option opts [Hash] :proxy
     # @option opts [String, Enumerable, IO, nil] :body
     def initialize(opts)
-      @verb   = opts.fetch(:verb).to_s.downcase.to_sym
-      @uri    = normalize_uri(opts.fetch(:uri))
+      @verb           = opts.fetch(:verb).to_s.downcase.to_sym
+      @uri_normalizer = opts[:uri_normalizer] || HTTP::URI::NORMALIZER
+
+      @uri    = @uri_normalizer.call(opts.fetch(:uri))
       @scheme = @uri.scheme.to_s.downcase.to_sym if @uri.scheme
 
       raise(UnsupportedMethodError, "unknown method: #{verb}") unless METHODS.include?(@verb)
       raise(UnsupportedSchemeError, "unknown scheme: #{scheme}") unless SCHEMES.include?(@scheme)
 
       @proxy   = opts[:proxy] || {}
-      @body    = (body = opts[:body]).is_a?(Request::Body) ? body : Request::Body.new(body)
       @version = opts[:version] || "1.1"
-      @headers = HTTP::Headers.coerce(opts[:headers] || {})
-
-      @headers[Headers::HOST]        ||= default_host_header_value
-      @headers[Headers::USER_AGENT]  ||= USER_AGENT
+      @headers = prepare_headers(opts[:headers])
+      @body    = prepare_body(opts[:body])
     end
 
     # Returns new Request with updated uri
@@ -100,12 +102,13 @@ module HTTP
       headers.delete(Headers::HOST)
 
       self.class.new(
-        :verb         => verb,
-        :uri          => @uri.join(uri),
-        :headers      => headers,
-        :proxy        => proxy,
-        :body         => body.source,
-        :version      => version
+        :verb           => verb,
+        :uri            => @uri.join(uri),
+        :headers        => headers,
+        :proxy          => proxy,
+        :body           => body.source,
+        :version        => version,
+        :uri_normalizer => uri_normalizer
       )
     end
 
@@ -213,17 +216,17 @@ module HTTP
       PORTS[@scheme] != port ? "#{host}:#{port}" : host
     end
 
-    # @return [HTTP::URI] URI with all componentes but query being normalized.
-    def normalize_uri(uri)
-      uri = HTTP::URI.parse uri
+    def prepare_body(body)
+      body.is_a?(Request::Body) ? body : Request::Body.new(body)
+    end
 
-      HTTP::URI.new(
-        :scheme     => uri.normalized_scheme,
-        :authority  => uri.normalized_authority,
-        :path       => uri.normalized_path,
-        :query      => uri.query,
-        :fragment   => uri.normalized_fragment
-      )
+    def prepare_headers(headers)
+      headers = HTTP::Headers.coerce(headers || {})
+
+      headers[Headers::HOST]        ||= default_host_header_value
+      headers[Headers::USER_AGENT]  ||= USER_AGENT
+
+      headers
     end
   end
 end
