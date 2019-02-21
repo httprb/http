@@ -31,10 +31,10 @@ Metrics/ClassLength:
 
 # TODO: Lower to 6
 Metrics/CyclomaticComplexity:
-  Max: 8
+  Max: 9
 
 Metrics/PerceivedComplexity:
-  Max: 8
+  Max: 9
 
 # TODO: Lower to 80
 Metrics/LineLength:

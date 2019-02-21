@@ -148,6 +148,11 @@ class DummyServer < WEBrick::HTTPServer
       res.body   = req.body
     end
 
+    get "/hello world" do |_req, res|
+      res.status = 200
+      res.body   = "hello world"
+    end
+
     post "/encoded-body" do |req, res|
       res.status = 200
 

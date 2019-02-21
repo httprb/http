@@ -43,13 +43,15 @@ module HTTP
       headers = make_request_headers(opts)
       body    = make_request_body(opts, headers)
       proxy   = opts.proxy
+      normalize_uri = opts.features[:normalize_uri]&.method(:normalize_uri)
 
       req = HTTP::Request.new(
         :verb         => verb,
         :uri          => uri,
         :headers      => headers,
         :proxy        => proxy,
-        :body         => body
+        :body         => body,
+        :normalize_uri => normalize_uri
       )
 
       opts.features.inject(req) do |request, (_name, feature)|

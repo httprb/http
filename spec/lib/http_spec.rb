@@ -430,6 +430,26 @@ RSpec.describe HTTP do
         expect(response.to_s).to eq("#{body}-deflated")
       end
     end
+
+    context "with :normalize_uri" do
+      it "normalizes URI" do
+        response = HTTP.get "#{dummy.endpoint}/hello world"
+        expect(response.to_s).to eq("hello world")
+      end
+
+      it "uses the custom URI Normalizer method" do
+        client = HTTP.use(:normalize_uri => {:normalizer => :itself.to_proc})
+        response = client.get("#{dummy.endpoint}/hello world")
+        expect(response.status).to eq(400)
+      end
+
+      it "uses the default URI normalizer" do
+        client = HTTP.use :normalize_uri
+        expect(HTTP::URI::NORMALIZER).to receive(:call).and_call_original
+        response = client.get("#{dummy.endpoint}/hello world")
+        expect(response.to_s).to eq("hello world")
+      end
+    end
   end
 
   it "unifies socket errors into HTTP::ConnectionError" do
