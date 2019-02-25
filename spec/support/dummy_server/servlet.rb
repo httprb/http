@@ -148,14 +148,9 @@ class DummyServer < WEBrick::HTTPServer
       res.body   = req.body
     end
 
-    get "/uri_normalizer/ABC" do |_req, res|
+    get "/hello world" do |_req, res|
       res.status = 200
-      res.body   = "default normalizer"
-    end
-
-    get "/uri_normalizer/custom" do |_req, res|
-      res.status = 200
-      res.body   = "custom normalizer"
+      res.body   = "hello world"
     end
 
     post "/encoded-body" do |req, res|

@@ -82,7 +82,7 @@ module HTTP
     # @option opts [String, Enumerable, IO, nil] :body
     def initialize(opts)
       @verb   = opts.fetch(:verb).to_s.downcase.to_sym
-      @uri_normalizer = opts[:uri_normalizer] ? opts.fetch(:uri_normalizer) : self.class.method(:normalize_uri)
+      @uri_normalizer = opts[:normalize_uri] ? opts.fetch(:normalize_uri) : HTTP::URI::NORMALIZER
       @uri = @uri_normalizer.call(opts.fetch(:uri))
       @scheme = @uri.scheme.to_s.downcase.to_sym if @uri.scheme
 
@@ -198,19 +198,6 @@ module HTTP
     # @return [String]
     def inspect
       "#<#{self.class}/#{@version} #{verb.to_s.upcase} #{uri}>"
-    end
-
-    # @return [HTTP::URI] URI with all components but query being normalized.
-    def self.normalize_uri(uri)
-      uri = HTTP::URI.parse uri
-
-      HTTP::URI.new(
-        :scheme     => uri.normalized_scheme,
-        :authority  => uri.normalized_authority,
-        :path       => uri.normalized_path,
-        :query      => uri.query,
-        :fragment   => uri.normalized_fragment
-      )
     end
 
     private
