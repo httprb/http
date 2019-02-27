@@ -66,7 +66,7 @@ module HTTP
     # Scheme is normalized to be a lowercase symbol e.g. :http, :https
     attr_reader :scheme
 
-    attr_reader :uri_normalizer
+    attr_reader :normalize_uri
 
     # "Request URI" as per RFC 2616
     # http://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html
@@ -75,15 +75,15 @@ module HTTP
 
     # @option opts [String] :version
     # @option opts [#to_s] :verb HTTP request method
-    # @option opts [#to_s] :uri_normalizer uri normalizer
+    # @option opts [#to_s] :normalize_uri
     # @option opts [HTTP::URI, #to_s] :uri
     # @option opts [Hash] :headers
     # @option opts [Hash] :proxy
     # @option opts [String, Enumerable, IO, nil] :body
     def initialize(opts)
       @verb   = opts.fetch(:verb).to_s.downcase.to_sym
-      @uri_normalizer = opts[:normalize_uri] ? opts.fetch(:normalize_uri) : HTTP::URI::NORMALIZER
-      @uri = @uri_normalizer.call(opts.fetch(:uri))
+      normalizer = opts.fetch(:normalize_uri, nil) || HTTP::URI::NORMALIZER
+      @uri = normalizer.call(opts.fetch(:uri))
       @scheme = @uri.scheme.to_s.downcase.to_sym if @uri.scheme
 
       raise(UnsupportedMethodError, "unknown method: #{verb}") unless METHODS.include?(@verb)

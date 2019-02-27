@@ -432,25 +432,20 @@ RSpec.describe HTTP do
     end
 
     context "with :normalize_uri" do
-      module Normalizer
-        def self.call(uri)
-          uri
-        end
-      end
-
-      it "Use the defaul Uri normalizer when user does not use uri normalizer" do
+      it "normalizes URI" do
         response = HTTP.get "#{dummy.endpoint}/hello world"
         expect(response.to_s).to eq("hello world")
       end
 
-      it "Use the custom Uri Normalizer method" do
-        client = HTTP.use(:normalize_uri => {:normalizer => Normalizer})
+      it "uses the custom URI Normalizer method" do
+        client = HTTP.use(:normalize_uri => {:normalizer => :itself.to_proc})
         response = client.get("#{dummy.endpoint}/hello world")
         expect(response.status).to eq(400)
       end
 
-      it "Use the default Uri normalizer when user does not specify custom uri normalizer" do
+      it "uses the default URI normalizer" do
         client = HTTP.use :normalize_uri
+        expect(HTTP::URI::NORMALIZER).to receive(:call).and_call_original
         response = client.get("#{dummy.endpoint}/hello world")
         expect(response.to_s).to eq("hello world")
       end
