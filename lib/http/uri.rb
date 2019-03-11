@@ -26,8 +26,10 @@ module HTTP
     # @private
     HTTPS_SCHEME = "https"
 
+    # @private
     NORMALIZER = lambda do |uri|
       uri = HTTP::URI.parse uri
+
       HTTP::URI.new(
         :scheme     => uri.normalized_scheme,
         :authority  => uri.normalized_authority,
