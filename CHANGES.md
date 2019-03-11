@@ -1,3 +1,10 @@
+## 4.1.0 (2019-03-11)
+
+* [#533](https://github.com/httprb/http/pull/533)
+  Add URI normalizer feature that allows to swap default URI normalizer.
+  ([@mamoonraja])
+
+
 ## 4.0.5 (2019-02-15)
 
 * Backport [#532](https://github.com/httprb/http/pull/532) from master.
@@ -758,3 +765,4 @@ end
 [@tycoon]: https://github.com/tycooon
 [@paul]: https://github.com/paul
 [@RickCSong]: https://github.com/RickCSong
+[@mamoonraja]: https://github.com/mamoonraja
