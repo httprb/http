@@ -5,6 +5,9 @@ module HTTP
     # Content-Types that are acceptable for the response.
     ACCEPT = "Accept"
 
+    # Content-codings that are acceptable in the response.
+    ACCEPT_ENCODING = "Accept-Encoding"
+
     # The age the object has been in a proxy cache in seconds.
     AGE = "Age"
 

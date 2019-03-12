@@ -33,4 +33,11 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency "addressable",    "~> 2.3"
 
   gem.add_development_dependency "bundler", "~> 2.0"
+
+  gem.metadata = {
+    "source_code_uri" => "https://github.com/httprb/http",
+    "wiki_uri"        => "https://github.com/httprb/http/wiki",
+    "bug_tracker_uri" => "https://github.com/httprb/http/issues",
+    "changelog_uri"   => "https://github.com/httprb/http/blob/v#{HTTP::VERSION}/CHANGES.md"
+  }
 end
