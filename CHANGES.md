@@ -1,3 +1,9 @@
+## 4.1.1 (2019-03-12)
+
+* Add `HTTP::Headers::ACCEPT_ENCODING` constant.
+  ([@ixti])
+
+
 ## 4.1.0 (2019-03-11)
 
 * [#533](https://github.com/httprb/http/pull/533)
