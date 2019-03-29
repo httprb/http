@@ -168,7 +168,7 @@ module HTTP
     alias through via
 
     # Make client follow redirects.
-    # @param opts
+    # @param options
     # @return [HTTP::Client]
     # @see Redirector#initialize
     def follow(options = {}) # rubocop:disable Style/OptionHash
