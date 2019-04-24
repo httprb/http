@@ -28,7 +28,8 @@ RSpec.describe HTTP::Features::Instrumentation do
         :uri     => "https://example.com",
         :status  => 200,
         :headers => {:content_type => "application/json"},
-        :body    => '{"success": true}'
+        :body    => '{"success": true}',
+        :request => HTTP::Request.new(:verb => :get, :uri => "https://example.com")
       )
     end
 

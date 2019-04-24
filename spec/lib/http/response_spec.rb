@@ -11,7 +11,8 @@ RSpec.describe HTTP::Response do
       :version => "1.1",
       :headers => headers,
       :body    => body,
-      :uri     => uri
+      :uri     => uri,
+      :request => HTTP::Request.new(:verb => :get, :uri => "http://example.com")
     )
   end
 
@@ -152,7 +153,8 @@ RSpec.describe HTTP::Response do
       HTTP::Response.new(
         :version    => "1.1",
         :status     => 200,
-        :connection => connection
+        :connection => connection,
+        :request    => HTTP::Request.new(:verb => :get, :uri => "http://example.com")
       )
     end
 

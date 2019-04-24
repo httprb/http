@@ -82,7 +82,8 @@ module HTTP
         :proxy_headers => @connection.proxy_response_headers,
         :connection    => @connection,
         :encoding      => options.encoding,
-        :uri           => req.uri
+        :uri           => req.uri,
+        :request       => req
       )
 
       res = options.features.inject(res) do |response, (_name, feature)|

@@ -6,7 +6,8 @@ RSpec.describe HTTP::Redirector do
       :status  => status,
       :version => "1.1",
       :headers => headers,
-      :body    => body
+      :body    => body,
+      :request => HTTP::Request.new(:verb => :get, :uri => "http://example.com")
     )
   end
 

@@ -31,7 +31,8 @@ RSpec.describe HTTP::Client do
       :status  => status,
       :version => "1.1",
       :headers => {"Location" => location},
-      :body    => ""
+      :body    => "",
+      :request => HTTP::Request.new(:verb => :get, :uri => "http://example.com")
     )
   end
 
@@ -39,7 +40,8 @@ RSpec.describe HTTP::Client do
     HTTP::Response.new(
       :status  => status,
       :version => "1.1",
-      :body    => body
+      :body    => body,
+      :request => HTTP::Request.new(:verb => :get, :uri => "http://example.com")
     )
   end
 
@@ -314,6 +316,14 @@ RSpec.describe HTTP::Client do
     it "calls finish_response once body was fully flushed" do
       expect_any_instance_of(HTTP::Connection).to receive(:finish_response).and_call_original
       client.get(dummy.endpoint).to_s
+    end
+
+    it "provides access to the Request from the Response" do
+      unique_value = "20190424"
+      response = client.headers("X-Value" => unique_value).get(dummy.endpoint)
+
+      expect(response.request).to be_a(HTTP::Request)
+      expect(response.request.headers["X-Value"]).to eq(unique_value)
     end
 
     context "with HEAD request" do
