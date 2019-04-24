@@ -47,11 +47,11 @@ module HTTP
     # @option opts [String] :uri
     def initialize(opts)
       @version       = opts.fetch(:version)
-      @uri           = HTTP::URI.parse(opts.fetch(:uri)) if opts.include? :uri
+      @request       = opts.fetch(:request)
+      @uri           = HTTP::URI.parse(opts[:uri] || @request.uri)
       @status        = HTTP::Response::Status.new(opts.fetch(:status))
       @headers       = HTTP::Headers.coerce(opts[:headers] || {})
       @proxy_headers = HTTP::Headers.coerce(opts[:proxy_headers] || {})
-      @request       = opts.fetch(:request)
 
       if opts.include?(:body)
         @body = opts.fetch(:body)

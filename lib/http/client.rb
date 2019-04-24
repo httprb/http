@@ -82,7 +82,6 @@ module HTTP
         :proxy_headers => @connection.proxy_response_headers,
         :connection    => @connection,
         :encoding      => options.encoding,
-        :uri           => req.uri,
         :request       => req
       )
 
