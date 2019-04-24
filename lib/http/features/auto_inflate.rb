@@ -17,7 +17,8 @@ module HTTP
           :headers       => response.headers,
           :proxy_headers => response.proxy_headers,
           :connection    => response.connection,
-          :body          => stream_for(response.connection)
+          :body          => stream_for(response.connection),
+          :request       => response.request
         }
 
         options[:uri] = response.uri if response.uri

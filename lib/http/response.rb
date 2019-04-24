@@ -29,6 +29,9 @@ module HTTP
     # @return [URI, nil]
     attr_reader :uri
 
+    # @return [Request]
+    attr_reader :request
+
     # @return [Hash]
     attr_reader :proxy_headers
 
@@ -48,6 +51,7 @@ module HTTP
       @status        = HTTP::Response::Status.new(opts.fetch(:status))
       @headers       = HTTP::Headers.coerce(opts[:headers] || {})
       @proxy_headers = HTTP::Headers.coerce(opts[:proxy_headers] || {})
+      @request       = opts.fetch(:request)
 
       if opts.include?(:body)
         @body = opts.fetch(:body)
