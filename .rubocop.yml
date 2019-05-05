@@ -61,6 +61,9 @@ Metrics/ParameterLists:
 Performance/RegexpMatch:
   Enabled: false
 
+Performance/UnfreezeString:
+  Enabled: false
+
 ## Style #######################################################################
 
 Style/CollectionMethods:
@@ -110,3 +113,6 @@ Style/TrivialAccessors:
 
 Style/YodaCondition:
   Enabled: false
+
+Style/FormatStringToken:
+  EnforcedStyle: unannotated
