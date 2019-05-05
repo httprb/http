@@ -26,7 +26,7 @@ RSpec.describe HTTP::Response::Status do
     end
 
     described_class::REASONS.each do |code, reason|
-      class_eval <<-RUBY
+      class_eval <<-RUBY, __FILE__, __LINE__ + 1
         context 'with well-known code: #{code}' do
           let(:code) { #{code} }
           it { is_expected.to eq #{reason.inspect} }
@@ -165,7 +165,7 @@ RSpec.describe HTTP::Response::Status do
     end
 
     described_class::SYMBOLS.each do |code, symbol|
-      class_eval <<-RUBY
+      class_eval <<-RUBY, __FILE__, __LINE__ + 1
         context 'with well-known code: #{code}' do
           let(:code) { #{code} }
           it { is_expected.to be #{symbol.inspect} }
@@ -193,7 +193,7 @@ RSpec.describe HTTP::Response::Status do
   end
 
   described_class::SYMBOLS.each do |code, symbol|
-    class_eval <<-RUBY
+    class_eval <<-RUBY, __FILE__, __LINE__ + 1
       describe '##{symbol}?' do
         subject { status.#{symbol}? }
 

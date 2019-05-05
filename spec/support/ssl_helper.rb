@@ -90,7 +90,7 @@ module SSLHelper
     end
 
     %w[server client].each do |side|
-      class_eval <<-RUBY, __FILE__, __LINE__
+      class_eval <<-RUBY, __FILE__, __LINE__ + 1
         def #{side}_cert
           @#{side}_cert ||= ChildCertificate.new ca
         end

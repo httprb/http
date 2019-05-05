@@ -15,7 +15,7 @@ module HTTP
       end
 
       %w[encode decode].each do |operation|
-        class_eval <<-RUBY, __FILE__, __LINE__
+        class_eval <<-RUBY, __FILE__, __LINE__ + 1
           def #{operation}(*)
             fail Error, "\#{self.class} does not supports ##{operation}"
           end
