@@ -2,8 +2,7 @@
 # frozen_string_literal: true
 
 class DummyServer < WEBrick::HTTPServer
-  # rubocop:disable Metrics/ClassLength
-  class Servlet < WEBrick::HTTPServlet::AbstractServlet
+  class Servlet < WEBrick::HTTPServlet::AbstractServlet # rubocop:disable Metrics/ClassLength
     def self.sockets
       @sockets ||= []
     end

@@ -2,11 +2,9 @@
 
 module BlackHole
   class << self
-    # rubocop:disable Style/MethodMissingSuper
-    def method_missing(*)
+    def method_missing(*) # rubocop:disable Style/MethodMissingSuper
       self
     end
-    # rubocop:enable Style/MethodMissingSuper
 
     def respond_to_missing?(*)
       true
