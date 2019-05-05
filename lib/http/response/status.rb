@@ -141,6 +141,7 @@ module HTTP
 
       def __setobj__(obj)
         raise TypeError, "Expected #{obj.inspect} to respond to #to_i" unless obj.respond_to? :to_i
+
         @code = obj.to_i
       end
 

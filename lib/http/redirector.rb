@@ -89,6 +89,7 @@ module HTTP
 
       if UNSAFE_VERBS.include?(verb) && STRICT_SENSITIVE_CODES.include?(code)
         raise StateError, "can't follow #{@response.status} redirect" if @strict
+
         verb = :get
       end
 

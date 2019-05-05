@@ -52,7 +52,7 @@ module HTTP
             @contents << chunk.force_encoding(@encoding)
             chunk.clear # deallocate string
           end
-        rescue
+        rescue StandardError
           @contents = nil
           raise
         end
@@ -64,6 +64,7 @@ module HTTP
       # Assert that the body is actively being streamed
       def stream!
         raise StateError, "body has already been consumed" if @streaming == false
+
         @streaming = true
       end
 

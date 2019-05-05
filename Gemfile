@@ -28,7 +28,7 @@ group :test do
   gem "rspec", "~> 3.0"
   gem "rspec-its"
 
-  gem "rubocop", "= 0.49.1"
+  gem "rubocop", "= 0.59.2"
 
   gem "yardstick"
 end

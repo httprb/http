@@ -1,5 +1,5 @@
-# frozen_string_literal: true
 # coding: utf-8
+# frozen_string_literal: true
 
 RSpec.describe HTTP::Request::Writer do
   let(:io)          { StringIO.new }

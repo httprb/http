@@ -108,6 +108,7 @@ module HTTP
         until data.empty?
           length = @socket.write(data)
           break unless data.bytesize > length
+
           data = data.byteslice(length..-1)
         end
       rescue Errno::EPIPE

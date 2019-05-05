@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-lib = File.expand_path("../lib", __FILE__)
+lib = File.expand_path("lib", __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require "http/version"
 
@@ -27,10 +27,10 @@ Gem::Specification.new do |gem|
 
   gem.required_ruby_version = ">= 2.3"
 
-  gem.add_runtime_dependency "http-parser",    "~> 1.2.0"
-  gem.add_runtime_dependency "http-form_data", "~> 2.0"
-  gem.add_runtime_dependency "http-cookie",    "~> 1.0"
   gem.add_runtime_dependency "addressable",    "~> 2.3"
+  gem.add_runtime_dependency "http-cookie",    "~> 1.0"
+  gem.add_runtime_dependency "http-form_data", "~> 2.0"
+  gem.add_runtime_dependency "http-parser",    "~> 1.2.0"
 
   gem.add_development_dependency "bundler", "~> 2.0"
 

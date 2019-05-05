@@ -10,6 +10,7 @@ module HTTP
       # Encodes object to JSON
       def encode(obj)
         return obj.to_json if obj.respond_to?(:to_json)
+
         ::JSON.dump obj
       end
 

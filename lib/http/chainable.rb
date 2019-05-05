@@ -101,6 +101,7 @@ module HTTP
 
       %i[global read write connect].each do |k|
         next unless options.key? k
+
         options["#{k}_timeout".to_sym] = options.delete k
       end
 
@@ -144,6 +145,7 @@ module HTTP
       options  = {:keep_alive_timeout => timeout}
       p_client = branch default_options.merge(options).with_persistent host
       return p_client unless block_given?
+
       yield p_client
     ensure
       p_client.close if p_client

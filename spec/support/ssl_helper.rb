@@ -5,7 +5,7 @@ require "pathname"
 require "certificate_authority"
 
 module SSLHelper
-  CERTS_PATH = Pathname.new File.expand_path("../../../tmp/certs", __FILE__)
+  CERTS_PATH = Pathname.new File.expand_path("../../tmp/certs", __dir__)
 
   class RootCertificate < ::CertificateAuthority::Certificate
     EXTENSIONS = {"keyUsage" => {"usage" => %w[critical keyCertSign]}}.freeze

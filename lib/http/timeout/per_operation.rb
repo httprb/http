@@ -66,6 +66,7 @@ module HTTP
             return result if result != :wait_readable
 
             raise TimeoutError, "Read timed out after #{@read_timeout} seconds" if timeout
+
             # marking the socket for timeout. Why is this not being raised immediately?
             # it seems there is some race-condition on the network level between calling
             # #read_nonblock and #wait_readable, in which #read_nonblock signalizes waiting

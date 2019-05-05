@@ -118,6 +118,7 @@ module HTTP
     # @return [Boolean]
     def ==(other)
       return false unless other.respond_to? :to_a
+
       @pile == other.to_a
     end
 
@@ -127,6 +128,7 @@ module HTTP
     # @return [Headers] self-reference
     def each
       return to_enum(__method__) unless block_given?
+
       @pile.each { |arr| yield(arr) }
       self
     end
@@ -218,6 +220,7 @@ module HTTP
     def validate_value(value)
       v = value.to_s
       return v unless v.include?("\n")
+
       raise HeaderError, "Invalid HTTP header field value: #{v.inspect}"
     end
   end

@@ -18,8 +18,9 @@ module HTTP
       attr_accessor :default_socket_class, :default_ssl_socket_class, :default_timeout_class
       attr_reader :available_features
 
-      def new(options = {}) # rubocop:disable Style/OptionHash
+      def new(options = {})
         return options if options.is_a?(self)
+
         super
       end
 
