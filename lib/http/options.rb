@@ -17,9 +17,7 @@ module HTTP
       attr_reader :available_features
 
       def new(options = {})
-        return options if options.is_a?(self)
-
-        super
+        options.is_a?(self) ? options : super
       end
 
       def defined_options
