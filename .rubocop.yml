@@ -116,3 +116,6 @@ Style/YodaCondition:
 
 Style/FormatStringToken:
   EnforcedStyle: unannotated
+
+Style/RescueStandardError:
+  EnforcedStyle: implicit

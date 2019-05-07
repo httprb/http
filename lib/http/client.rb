@@ -93,7 +93,7 @@ module HTTP
       @state = :clean
 
       res
-    rescue StandardError
+    rescue
       close
       raise
     end

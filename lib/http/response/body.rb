@@ -52,7 +52,7 @@ module HTTP
             @contents << chunk.force_encoding(@encoding)
             chunk.clear # deallocate string
           end
-        rescue StandardError
+        rescue
           @contents = nil
           raise
         end
