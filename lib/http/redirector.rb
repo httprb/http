@@ -36,12 +36,19 @@ module HTTP
     #   @return [Fixnum]
     attr_reader :max_hops
 
+    # @!attribute [r] max_hops
+    #   Returns maximum repeats.
+    #   @return [Fixnum]
+    attr_reader :max_repeats
+
     # @param [Hash] opts
     # @option opts [Boolean] :strict (true) redirector hops policy
     # @option opts [#to_i] :max_hops (5) maximum allowed amount of hops
+    # @option opts [#to_i] :max_repeats if set, stop after a limit of repeats
     def initialize(opts = {}) # rubocop:disable Style/OptionHash
-      @strict   = opts.fetch(:strict, true)
-      @max_hops = opts.fetch(:max_hops, 5).to_i
+      @strict = opts.fetch(:strict, true)
+      @max_repeats = opts.fetch(:max_repeats, 0).to_i
+      @max_hops = [opts.fetch(:max_hops, 5).to_i, @max_repeats].max
     end
 
     # Follows redirects until non-redirect response found
@@ -55,6 +62,7 @@ module HTTP
 
         raise TooManyRedirectsError if too_many_hops?
         raise EndlessRedirectError  if endless_loop?
+        break if max_repeats?
 
         @response.flush
 
@@ -76,7 +84,13 @@ module HTTP
     # Check if we got into an endless loop
     # @return [Boolean]
     def endless_loop?
-      2 <= @visited.count(@visited.last)
+      [2, @max_repeats].max <= @visited.count(@visited.last)
+    end
+
+    # Check if we have a max repeats limit
+    # @return [Boolean]
+    def max_repeats?
+      1 <= @max_repeats && @max_repeats <= @visited.count
     end
 
     # Redirect policy for follow
