@@ -28,7 +28,8 @@ group :test do
   gem "rspec", "~> 3.0"
   gem "rspec-its"
 
-  gem "rubocop", "= 0.59.2"
+  gem "rubocop", "= 0.68.1"
+  gem "rubocop-performance"
 
   gem "yardstick"
 end

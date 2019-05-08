@@ -2,8 +2,8 @@
 
 module HTTP
   ContentType = Struct.new(:mime_type, :charset) do
-    MIME_TYPE_RE = %r{^([^/]+/[^;]+)(?:$|;)}
-    CHARSET_RE   = /;\s*charset=([^;]+)/i
+    MIME_TYPE_RE = %r{^([^/]+/[^;]+)(?:$|;)}.freeze
+    CHARSET_RE   = /;\s*charset=([^;]+)/i.freeze
 
     class << self
       # Parse string and return ContentType struct

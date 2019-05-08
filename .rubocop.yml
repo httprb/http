@@ -1,3 +1,5 @@
+require: rubocop-performance
+
 AllCops:
   TargetRubyVersion: 2.3
   DisplayCopNames: true
@@ -12,6 +14,11 @@ Layout/SpaceAroundOperators:
 
 Layout/SpaceInsideHashLiteralBraces:
   EnforcedStyle: no_space
+
+Layout/AlignHash:
+  Enabled: false
+  EnforcedColonStyle: table
+  EnforcedHashRocketStyle: table
 
 ## Metrics #####################################################################
 

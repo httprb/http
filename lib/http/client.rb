@@ -16,7 +16,7 @@ module HTTP
     extend Forwardable
     include Chainable
 
-    HTTP_OR_HTTPS_RE = %r{^https?://}i
+    HTTP_OR_HTTPS_RE = %r{^https?://}i.freeze
 
     def initialize(default_options = {})
       @default_options = HTTP::Options.new(default_options)
