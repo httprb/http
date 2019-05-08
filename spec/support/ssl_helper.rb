@@ -5,7 +5,7 @@ require "pathname"
 require "certificate_authority"
 
 module SSLHelper
-  CERTS_PATH = Pathname.new File.expand_path("../../../tmp/certs", __FILE__)
+  CERTS_PATH = Pathname.new File.expand_path("../../tmp/certs", __dir__)
 
   class RootCertificate < ::CertificateAuthority::Certificate
     EXTENSIONS = {"keyUsage" => {"usage" => %w[critical keyCertSign]}}.freeze
@@ -90,7 +90,7 @@ module SSLHelper
     end
 
     %w[server client].each do |side|
-      class_eval <<-RUBY, __FILE__, __LINE__
+      class_eval <<-RUBY, __FILE__, __LINE__ + 1
         def #{side}_cert
           @#{side}_cert ||= ChildCertificate.new ca
         end

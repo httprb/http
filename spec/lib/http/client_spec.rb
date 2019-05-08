@@ -1,5 +1,5 @@
-# frozen_string_literal: true
 # coding: utf-8
+# frozen_string_literal: true
 
 require "support/http_handling_shared"
 require "support/dummy_server"

@@ -19,6 +19,7 @@ module HTTP
           @source.bytesize
         elsif @source.respond_to?(:read)
           raise RequestError, "IO object must respond to #size" unless @source.respond_to?(:size)
+
           @source.size
         elsif @source.nil?
           0

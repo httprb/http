@@ -132,7 +132,7 @@ module HTTP
       end
 
       SYMBOLS.each do |code, symbol|
-        class_eval <<-RUBY, __FILE__, __LINE__
+        class_eval <<-RUBY, __FILE__, __LINE__ + 1
           def #{symbol}?      # def bad_request?
             #{code} == code   #   400 == code
           end                 # end
@@ -141,6 +141,7 @@ module HTTP
 
       def __setobj__(obj)
         raise TypeError, "Expected #{obj.inspect} to respond to #to_i" unless obj.respond_to? :to_i
+
         @code = obj.to_i
       end
 

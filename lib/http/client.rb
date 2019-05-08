@@ -128,15 +128,11 @@ module HTTP
     def make_request_uri(uri, opts)
       uri = uri.to_s
 
-      if default_options.persistent? && uri !~ HTTP_OR_HTTPS_RE
-        uri = "#{default_options.persistent}#{uri}"
-      end
+      uri = "#{default_options.persistent}#{uri}" if default_options.persistent? && uri !~ HTTP_OR_HTTPS_RE
 
       uri = HTTP::URI.parse uri
 
-      if opts.params && !opts.params.empty?
-        uri.query_values = uri.query_values(Array).to_a.concat(opts.params.to_a)
-      end
+      uri.query_values = uri.query_values(Array).to_a.concat(opts.params.to_a) if opts.params && !opts.params.empty?
 
       # Some proxies (seen on WEBRick) fail if URL has
       # empty path (e.g. `http://example.com`) while it's RFC-complaint:
