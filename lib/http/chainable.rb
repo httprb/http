@@ -106,7 +106,7 @@ module HTTP
       end
 
       branch default_options.merge(
-        :timeout_class => klass,
+        :timeout_class   => klass,
         :timeout_options => options
       )
     end

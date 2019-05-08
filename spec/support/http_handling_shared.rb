@@ -14,11 +14,11 @@ RSpec.shared_context "HTTP handling" do
 
     let(:options) do
       {
-        :timeout_class => HTTP::Timeout::PerOperation,
+        :timeout_class   => HTTP::Timeout::PerOperation,
         :timeout_options => {
           :connect_timeout => conn_timeout,
-          :read_timeout => read_timeout,
-          :write_timeout => write_timeout
+          :read_timeout    => read_timeout,
+          :write_timeout   => write_timeout
         }
       }
     end
@@ -62,7 +62,7 @@ RSpec.shared_context "HTTP handling" do
   context "with a global timeout" do
     let(:options) do
       {
-        :timeout_class => HTTP::Timeout::Global,
+        :timeout_class   => HTTP::Timeout::Global,
         :timeout_options => {
           :global_timeout => global_timeout
         }

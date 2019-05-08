@@ -17,10 +17,10 @@ RSpec.describe HTTP::Features::Logging do
   describe "logging the request" do
     let(:request) do
       HTTP::Request.new(
-        :verb     => :post,
-        :uri      => "https://example.com/",
-        :headers  => {:accept => "application/json"},
-        :body     => '{"hello": "world!"}'
+        :verb    => :post,
+        :uri     => "https://example.com/",
+        :headers => {:accept => "application/json"},
+        :body    => '{"hello": "world!"}'
       )
     end
 

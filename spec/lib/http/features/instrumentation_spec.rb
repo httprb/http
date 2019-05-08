@@ -7,10 +7,10 @@ RSpec.describe HTTP::Features::Instrumentation do
   describe "logging the request" do
     let(:request) do
       HTTP::Request.new(
-        :verb => :post,
-        :uri => "https://example.com/",
+        :verb    => :post,
+        :uri     => "https://example.com/",
         :headers => {:accept => "application/json"},
-        :body => '{"hello": "world!"}'
+        :body    => '{"hello": "world!"}'
       )
     end
 
@@ -25,10 +25,10 @@ RSpec.describe HTTP::Features::Instrumentation do
     let(:response) do
       HTTP::Response.new(
         :version => "1.1",
-        :uri => "https://example.com",
-        :status => 200,
+        :uri     => "https://example.com",
+        :status  => 200,
         :headers => {:content_type => "application/json"},
-        :body => '{"success": true}'
+        :body    => '{"success": true}'
       )
     end
 

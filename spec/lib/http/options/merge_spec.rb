@@ -18,28 +18,28 @@ RSpec.describe HTTP::Options, "merge" do
     # FIXME: yuck :(
 
     foo = HTTP::Options.new(
-      :response  => :body,
-      :params    => {:baz => "bar"},
-      :form      => {:foo => "foo"},
-      :body      => "body-foo",
-      :json      => {:foo => "foo"},
-      :headers   => {:accept => "json", :foo => "foo"},
-      :proxy     => {},
-      :features  => {}
+      :response => :body,
+      :params   => {:baz => "bar"},
+      :form     => {:foo => "foo"},
+      :body     => "body-foo",
+      :json     => {:foo => "foo"},
+      :headers  => {:accept => "json", :foo => "foo"},
+      :proxy    => {},
+      :features => {}
     )
 
     bar = HTTP::Options.new(
-      :response   => :parsed_body,
-      :persistent => "https://www.googe.com",
-      :params     => {:plop => "plip"},
-      :form       => {:bar => "bar"},
-      :body       => "body-bar",
-      :json       => {:bar => "bar"},
+      :response           => :parsed_body,
+      :persistent         => "https://www.googe.com",
+      :params             => {:plop => "plip"},
+      :form               => {:bar => "bar"},
+      :body               => "body-bar",
+      :json               => {:bar => "bar"},
       :keep_alive_timeout => 10,
       :headers            => {:accept => "xml", :bar => "bar"},
       :timeout_options    => {:foo => :bar},
-      :ssl        => {:foo => "bar"},
-      :proxy      => {:proxy_address => "127.0.0.1", :proxy_port => 8080}
+      :ssl                => {:foo => "bar"},
+      :proxy              => {:proxy_address => "127.0.0.1", :proxy_port => 8080}
     )
 
     expect(foo.merge(bar).to_hash).to eq(
