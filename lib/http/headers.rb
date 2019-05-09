@@ -13,11 +13,11 @@ module HTTP
     include Enumerable
 
     # Matches HTTP header names when in "Canonical-Http-Format"
-    CANONICAL_NAME_RE = /\A[A-Z][a-z]*(?:-[A-Z][a-z]*)*\z/
+    CANONICAL_NAME_RE = /\A[A-Z][a-z]*(?:-[A-Z][a-z]*)*\z/.freeze
 
     # Matches valid header field name according to RFC.
     # @see http://tools.ietf.org/html/rfc7230#section-3.2
-    COMPLIANT_NAME_RE = /\A[A-Za-z0-9!#\$%&'*+\-.^_`|~]+\z/
+    COMPLIANT_NAME_RE = /\A[A-Za-z0-9!#\$%&'*+\-.^_`|~]+\z/.freeze
 
     # Class constructor.
     def initialize

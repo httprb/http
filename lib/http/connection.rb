@@ -45,8 +45,8 @@ module HTTP
       send_proxy_connect_request(req)
       start_tls(req, options)
       reset_timer
-    rescue IOError, SocketError, SystemCallError => ex
-      raise ConnectionError, "failed to connect: #{ex}", ex.backtrace
+    rescue IOError, SocketError, SystemCallError => e
+      raise ConnectionError, "failed to connect: #{e}", e.backtrace
     end
 
     # @see (HTTP::Response::Parser#status_code)
@@ -216,8 +216,8 @@ module HTTP
       elsif value
         @parser << value
       end
-    rescue IOError, SocketError, SystemCallError => ex
-      raise ConnectionError, "error reading from socket: #{ex}", ex.backtrace
+    rescue IOError, SocketError, SystemCallError => e
+      raise ConnectionError, "error reading from socket: #{e}", e.backtrace
     end
   end
 end

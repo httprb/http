@@ -83,8 +83,8 @@ module SSLHelper
 
     def client_params
       {
-        :key => client_cert.key,
-        :cert => client_cert.cert,
+        :key     => client_cert.key,
+        :cert    => client_cert.cert,
         :ca_file => ca.file
       }
     end

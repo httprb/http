@@ -27,12 +27,12 @@ module HTTP
         request.headers[Headers::CONTENT_ENCODING] = method
 
         Request.new(
-          :version => request.version,
-          :verb => request.verb,
-          :uri => request.uri,
-          :headers => request.headers,
-          :proxy => request.proxy,
-          :body => deflated_body(request.body),
+          :version        => request.version,
+          :verb           => request.verb,
+          :uri            => request.uri,
+          :headers        => request.headers,
+          :proxy          => request.proxy,
+          :body           => deflated_body(request.body),
           :uri_normalizer => request.uri_normalizer
         )
       end

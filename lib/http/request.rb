@@ -54,10 +54,10 @@ module HTTP
 
     # Default ports of supported schemes
     PORTS = {
-      :http   => 80,
-      :https  => 443,
-      :ws     => 80,
-      :wss    => 443
+      :http  => 80,
+      :https => 443,
+      :ws    => 80,
+      :wss   => 443
     }.freeze
 
     # Method is given as a lowercase symbol e.g. :get, :post
@@ -168,8 +168,8 @@ module HTTP
     # Headers to send with proxy connect request
     def proxy_connect_headers
       connect_headers = HTTP::Headers.coerce(
-        Headers::HOST        => headers[Headers::HOST],
-        Headers::USER_AGENT  => headers[Headers::USER_AGENT]
+        Headers::HOST       => headers[Headers::HOST],
+        Headers::USER_AGENT => headers[Headers::USER_AGENT]
       )
 
       connect_headers[Headers::PROXY_AUTHORIZATION] = proxy_authorization_header if using_authenticated_proxy?

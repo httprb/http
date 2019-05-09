@@ -113,8 +113,8 @@ module HTTP
         end
       rescue Errno::EPIPE
         raise
-      rescue IOError, SocketError, SystemCallError => ex
-        raise ConnectionError, "error writing to socket: #{ex}", ex.backtrace
+      rescue IOError, SocketError, SystemCallError => e
+        raise ConnectionError, "error writing to socket: #{e}", e.backtrace
       end
     end
   end

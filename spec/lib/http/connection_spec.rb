@@ -3,9 +3,9 @@
 RSpec.describe HTTP::Connection do
   let(:req) do
     HTTP::Request.new(
-      :verb     => :get,
-      :uri      => "http://example.com/",
-      :headers  => {}
+      :verb    => :get,
+      :uri     => "http://example.com/",
+      :headers => {}
     )
   end
   let(:socket) { double(:connect => nil) }

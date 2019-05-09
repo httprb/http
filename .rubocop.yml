@@ -1,8 +1,14 @@
+require: rubocop-performance
+
 AllCops:
   TargetRubyVersion: 2.3
   DisplayCopNames: true
 
 ## Layout ######################################################################
+
+Layout/AlignHash:
+  EnforcedColonStyle: table
+  EnforcedHashRocketStyle: table
 
 Layout/DotPosition:
   EnforcedStyle: trailing
