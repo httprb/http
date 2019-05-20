@@ -13,6 +13,8 @@ module HTTP
     def wrap_response(response)
       response
     end
+
+    def on_error(request, error); end
   end
 end
 

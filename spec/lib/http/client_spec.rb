@@ -266,6 +266,61 @@ RSpec.describe HTTP::Client do
         end
       end
     end
+
+    context "Feature" do
+      let(:feature_class) do
+        Class.new(HTTP::Feature) do
+          attr_reader :captured_request, :captured_response, :captured_error
+
+          def wrap_request(request)
+            @captured_request = request
+          end
+
+          def wrap_response(response)
+            @captured_response = response
+          end
+
+          def on_error(request, error)
+            @captured_request = request
+            @captured_error = error
+          end
+        end
+      end
+      it "is given a chance to wrap the Request" do
+        feature_instance = feature_class.new
+
+        response = client.use(:test_feature => feature_instance).
+                   request(:get, dummy.endpoint)
+
+        expect(response.code).to eq(200)
+        expect(feature_instance.captured_request.verb).to eq(:get)
+        expect(feature_instance.captured_request.uri.to_s).to eq(dummy.endpoint + "/")
+      end
+
+      it "is given a chance to wrap the Response" do
+        feature_instance = feature_class.new
+
+        response = client.use(:test_feature => feature_instance).
+                   request(:get, dummy.endpoint)
+
+        expect(feature_instance.captured_response).to eq(response)
+      end
+
+      it "is given a chance to handle an error" do
+        sleep_url = "#{dummy.endpoint}/sleep"
+        feature_instance = feature_class.new
+
+        expect do
+          client.use(:test_feature => feature_instance).
+            timeout(0.2).
+            request(:post, sleep_url)
+        end.to raise_error(HTTP::TimeoutError)
+
+        expect(feature_instance.captured_error).to be_a(HTTP::TimeoutError)
+        expect(feature_instance.captured_request.verb).to eq(:post)
+        expect(feature_instance.captured_request.uri.to_s).to eq(sleep_url)
+      end
+    end
   end
 
   include_context "HTTP handling" do
