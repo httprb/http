@@ -70,20 +70,18 @@ module HTTP
 
       @connection ||= HTTP::Connection.new(req, options)
 
-      unless @connection.failed_proxy_connect?
-        @connection.send_request(req)
-        @connection.read_headers!
+      begin
+        unless @connection.failed_proxy_connect?
+          @connection.send_request(req)
+          @connection.read_headers!
+        end
+      rescue Error => e
+        options.features.each_value do |feature|
+          feature.on_error(req, e)
+        end
+        raise
       end
-
-      res = Response.new(
-        :status        => @connection.status_code,
-        :version       => @connection.http_version,
-        :headers       => @connection.headers,
-        :proxy_headers => @connection.proxy_response_headers,
-        :connection    => @connection,
-        :encoding      => options.encoding,
-        :request       => req
-      )
+      res = build_response(req, options)
 
       res = options.features.inject(res) do |response, (_name, feature)|
         feature.wrap_response(response)
@@ -105,6 +103,18 @@ module HTTP
     end
 
     private
+
+    def build_response(req, options)
+      Response.new(
+        :status        => @connection.status_code,
+        :version       => @connection.http_version,
+        :headers       => @connection.headers,
+        :proxy_headers => @connection.proxy_response_headers,
+        :connection    => @connection,
+        :encoding      => options.encoding,
+        :request       => req
+      )
+    end
 
     # Verify our request isn't going to be made against another URI
     def verify_connection!(uri)
