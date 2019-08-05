@@ -19,7 +19,9 @@ Gem::Specification.new do |gem|
   gem.licenses      = ["MIT"]
 
   gem.executables   = `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) }
-  gem.files         = `git ls-files`.split("\n")
+  gem.files         = Dir["lib/**/*.rb"] +
+                      %w[http.gemspec README.md CHANGES.md LICENSE.txt]
+
   gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   gem.name          = "http"
   gem.require_paths = ["lib"]
