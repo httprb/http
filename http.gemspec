@@ -18,11 +18,14 @@ Gem::Specification.new do |gem|
   gem.homepage      = "https://github.com/httprb/http"
   gem.licenses      = ["MIT"]
 
-  gem.executables   = `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) }
-  gem.files         = Dir["lib/**/*.rb"] +
-                      %w[http.gemspec README.md CHANGES.md LICENSE.txt]
+  Dir.chdir(__dir__) do
+    git_files = `git ls-files -z`.split("\x0")
 
-  gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
+    gem.files = git_files.grep(%r{^lib/}) +
+                %w[http.gemspec README.md CHANGES.md LICENSE.txt]
+    gem.test_files = git_files.grep(%r{^spec/})
+  end
+
   gem.name          = "http"
   gem.require_paths = ["lib"]
   gem.version       = HTTP::VERSION
