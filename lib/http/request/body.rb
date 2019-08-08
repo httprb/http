@@ -24,7 +24,7 @@ module HTTP
         elsif @source.nil?
           0
         else
-          raise RequestError, "cannot determine size of body: #{@source.inspect}"
+          raise RequestError, "cannot determine size of body: #{@source.inspect}, please set body size with `Content-Length` header explicitly"
         end
       end
 
