@@ -17,6 +17,11 @@
   Fix HTTP parser.
   ([@ixti], [@fxposter])
 
+* [#546](https://github.com/httprb/http/pull/546)
+  **BREAKING CHANGE**
+  Provide initiating `HTTP::Request` object on `HTTP::Response`.
+  ([@joshuaflanagan])
+
 
 ## 4.1.1 (2019-03-12)
 
@@ -793,3 +798,4 @@ end
 [@RickCSong]: https://github.com/RickCSong
 [@fxposter]: https://github.com/fxposter
 [@mamoonraja]: https://github.com/mamoonraja
+[@joshuaflanagan]: https://github.com/joshuaflanagan
