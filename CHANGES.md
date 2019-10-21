@@ -1,3 +1,10 @@
+## 4.2.0 (WIP)
+
+* [#489](https://github.com/httprb/http/pull/489)
+  Fix HTTP parser.
+  ([@ixti], [@fxposter])
+
+
 ## 4.1.1 (2019-03-12)
 
 * Add `HTTP::Headers::ACCEPT_ENCODING` constant.
@@ -771,4 +778,5 @@ end
 [@tycoon]: https://github.com/tycooon
 [@paul]: https://github.com/paul
 [@RickCSong]: https://github.com/RickCSong
+[@fxposter]: https://github.com/fxposter
 [@mamoonraja]: https://github.com/mamoonraja

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "http/parser"
-
 require "http/errors"
 require "http/timeout/null"
 require "http/timeout/per_operation"

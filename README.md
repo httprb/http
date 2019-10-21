@@ -4,7 +4,7 @@
 [![Build Status](https://secure.travis-ci.org/httprb/http.svg?branch=4-x-stable)](https://travis-ci.org/httprb/http)
 [![Code Climate](https://codeclimate.com/github/httprb/http.svg?branch=4-x-stable)](https://codeclimate.com/github/httprb/http)
 [![Coverage Status](https://coveralls.io/repos/httprb/http/badge.svg?branch=4-x-stable)](https://coveralls.io/r/httprb/http)
-[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/httprb/http/blob/master/LICENSE.txt)
+[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/httprb/http/blob/4-x-stable/LICENSE.txt)
 
 [Documentation]
 
@@ -167,7 +167,8 @@ versions:
 * Ruby 2.3.x
 * Ruby 2.4.x
 * Ruby 2.5.x
-* JRuby 9.1.x.x
+* Ruby 2.6.x
+* JRuby 9.2.x.x
 
 If something doesn't work on one of these versions, it's a bug.
 
@@ -197,5 +198,5 @@ dropped.
 
 ## Copyright
 
-Copyright (c) 2011-2018 Tony Arcieri, Alexey V. Zapparov, Erik Michaels-Ober, Zachary Anker.
+Copyright (c) 2011-2019 Tony Arcieri, Alexey V. Zapparov, Erik Michaels-Ober, Zachary Anker.
 See LICENSE.txt for further details.
