@@ -10,7 +10,8 @@ RSpec.describe HTTP::Client do
 
   StubbedClient = Class.new(HTTP::Client) do
     def perform(request, options)
-      stubs.fetch(request.uri) { super(request, options) }
+      stubbed = stubs[request.uri]
+      stubbed ? stubbed.call(request) : super(request, options)
     end
 
     def stubs
@@ -27,22 +28,26 @@ RSpec.describe HTTP::Client do
   end
 
   def redirect_response(location, status = 302)
-    HTTP::Response.new(
-      :status  => status,
-      :version => "1.1",
-      :headers => {"Location" => location},
-      :body    => "",
-      :request => HTTP::Request.new(:verb => :get, :uri => "http://example.com")
-    )
+    lambda do |request|
+      HTTP::Response.new(
+        :status  => status,
+        :version => "1.1",
+        :headers => {"Location" => location},
+        :body    => "",
+        :request => request
+      )
+    end
   end
 
   def simple_response(body, status = 200)
-    HTTP::Response.new(
-      :status  => status,
-      :version => "1.1",
-      :body    => body,
-      :request => HTTP::Request.new(:verb => :get, :uri => "http://example.com")
-    )
+    lambda do |request|
+      HTTP::Response.new(
+        :status  => status,
+        :version => "1.1",
+        :body    => body,
+        :request => request
+      )
+    end
   end
 
   describe "following redirects" do
