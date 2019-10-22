@@ -27,6 +27,13 @@
   ([@ixti])
 
 
+## 4.2.0 (2019-10-22)
+
+* Backport [#489](https://github.com/httprb/http/pull/489)
+  Fix HTTP parser.
+  ([@ixti], [@fxposter])
+
+
 ## 4.1.1 (2019-03-12)
 
 * Add `HTTP::Headers::ACCEPT_ENCODING` constant.
