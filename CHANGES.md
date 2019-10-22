@@ -1,6 +1,6 @@
-## 4.2.0 (WIP)
+## 4.2.0 (2019-10-22)
 
-* [#489](https://github.com/httprb/http/pull/489)
+* Backport [#489](https://github.com/httprb/http/pull/489)
   Fix HTTP parser.
   ([@ixti], [@fxposter])
 
