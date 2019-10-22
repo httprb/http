@@ -22,6 +22,10 @@
   Provide initiating `HTTP::Request` object on `HTTP::Response`.
   ([@joshuaflanagan])
 
+* [#571](https://github.com/httprb/http/pull/571)
+  Drop Ruby 2.3.x support.
+  ([@ixti])
+
 
 ## 4.1.1 (2019-03-12)
 
