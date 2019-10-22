@@ -164,7 +164,6 @@ and call `#readpartial` on it repeatedly until it returns `nil`:
 This library aims to support and is [tested against][travis] the following Ruby
 versions:
 
-* Ruby 2.3.x
 * Ruby 2.4.x
 * Ruby 2.5.x
 * Ruby 2.6.x
