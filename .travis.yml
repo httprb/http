@@ -34,3 +34,4 @@ matrix:
 branches:
   only:
     - master
+    - 4-x-stable
