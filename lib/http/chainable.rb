@@ -238,6 +238,9 @@ module HTTP
     # Turn on given features. Available features are:
     # * auto_inflate
     # * auto_deflate
+    # * instrumentation
+    # * logging
+    # * normalize_uri
     # @param features
     def use(*features)
       branch default_options.with_features(features)
