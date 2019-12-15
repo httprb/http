@@ -307,6 +307,15 @@ RSpec.describe HTTP do
       end
     end
 
+    context "specifying per operation timeouts as frozen hash" do
+      let(:frozen_options) { {:read => 123}.freeze }
+      subject(:client) { HTTP.timeout(frozen_options) }
+
+      it "does not raise an error" do
+        expect { client }.not_to raise_error
+      end
+    end
+
     context "specifying a global timeout" do
       subject(:client) { HTTP.timeout 123 }
 
