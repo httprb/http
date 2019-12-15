@@ -13,7 +13,7 @@ RSpec.describe HTTP::Headers do
       expect(headers["Accept"]).to eq "application/json"
     end
 
-    it "normalizes header name" do
+    it "allows retrieval via normalized header name" do
       headers.set :content_type, "application/json"
       expect(headers["Content-Type"]).to eq "application/json"
     end
@@ -54,7 +54,7 @@ RSpec.describe HTTP::Headers do
       expect(headers["Accept"]).to eq "application/json"
     end
 
-    it "normalizes header name" do
+    it "allows retrieval via normalized header name" do
       headers[:content_type] = "application/json"
       expect(headers["Content-Type"]).to eq "application/json"
     end
@@ -80,7 +80,7 @@ RSpec.describe HTTP::Headers do
       expect(headers["Content-Type"]).to be_nil
     end
 
-    it "normalizes header name" do
+    it "removes header that matches normalized version of specified name" do
       headers.delete :content_type
       expect(headers["Content-Type"]).to be_nil
     end
@@ -104,13 +104,13 @@ RSpec.describe HTTP::Headers do
       expect(headers["Accept"]).to eq "application/json"
     end
 
-    it "normalizes header name" do
+    it "allows retrieval via normalized header name" do
       headers.add :content_type, "application/json"
       expect(headers["Content-Type"]).to eq "application/json"
     end
 
     it "appends new value if header exists" do
-      headers.add :set_cookie, "hoo=ray"
+      headers.add "Set-Cookie", "hoo=ray"
       headers.add :set_cookie, "woo=hoo"
       expect(headers["Set-Cookie"]).to eq %w[hoo=ray woo=hoo]
     end
@@ -135,6 +135,11 @@ RSpec.describe HTTP::Headers do
 
     it "fails with invalid header value" do
       expect { headers.add "foo", "bar\nEvil-Header: evil-value" }.
+        to raise_error HTTP::HeaderError
+    end
+
+    it "fails when header name is not a String or Symbol" do
+      expect { headers.add 2, "foo" }.
         to raise_error HTTP::HeaderError
     end
   end
@@ -314,6 +319,17 @@ RSpec.describe HTTP::Headers do
       )
     end
 
+    it "yields header keys specified as symbols in normalized form" do
+      keys = headers.each.map(&:first)
+      expect(keys).to eq(["Set-Cookie", "Content-Type", "Set-Cookie"])
+    end
+
+    it "yields headers specified as strings without conversion" do
+      headers.add "X_kEy", "value"
+      keys = headers.each.map(&:first)
+      expect(keys).to eq(["Set-Cookie", "Content-Type", "Set-Cookie", "X_kEy"])
+    end
+
     it "returns self instance if block given" do
       expect(headers.each { |*| }).to be headers
     end
@@ -490,14 +506,15 @@ RSpec.describe HTTP::Headers do
     end
 
     context "with duplicate header keys (mixed case)" do
-      let(:headers) { {"Set-Cookie" => "hoo=ray", "set-cookie" => "woo=hoo"} }
+      let(:headers) { {"Set-Cookie" => "hoo=ray", "set_cookie" => "woo=hoo", :set_cookie => "ta=da"} }
 
       it "adds all headers" do
         expect(described_class.coerce(headers).to_a).
           to match_array(
             [
               %w[Set-Cookie hoo=ray],
-              %w[Set-Cookie woo=hoo]
+              %w[set_cookie woo=hoo],
+              %w[Set-Cookie ta=da]
             ]
           )
       end

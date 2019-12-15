@@ -22,6 +22,18 @@ RSpec.describe HTTP::Request::Writer do
       end
     end
 
+    context "when headers are specified as strings with mixed case" do
+      let(:headers) { HTTP::Headers.coerce "content-Type" => "text", "X_MAX" => "200" }
+
+      it "writes the headers with the same casing" do
+        writer.stream
+        expect(io.string).to eq [
+          "#{headerstart}\r\n",
+          "content-Type: text\r\nX_MAX: 200\r\nContent-Length: 0\r\n\r\n"
+        ].join
+      end
+    end
+
     context "when body is nonempty" do
       let(:body) { HTTP::Request::Body.new("content") }
 

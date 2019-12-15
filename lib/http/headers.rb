@@ -21,6 +21,10 @@ module HTTP
 
     # Class constructor.
     def initialize
+      # The @pile stores each header value using a three element array:
+      #  0 - the normalized header key, used for lookup
+      #  1 - the header key as it will be sent with a request
+      #  2 - the value
       @pile = []
     end
 
@@ -45,12 +49,31 @@ module HTTP
 
     # Appends header.
     #
-    # @param [#to_s] name header name
+    # @param [String, Symbol] name header name. When specified as a string, the
+    #   name is sent as-is. When specified as a symbol, the name is converted
+    #   to a string of capitalized words separated by a dash. Word boundaries
+    #   are determined by an underscore (`_`) or a dash (`-`).
+    #   Ex: `:content_type` is sent as `"Content-Type"`, and `"auth_key"` (string)
+    #   is sent as `"auth_key"`.
     # @param [Array<#to_s>, #to_s] value header value(s) to be appended
     # @return [void]
     def add(name, value)
-      name = normalize_header name.to_s
-      Array(value).each { |v| @pile << [name, validate_value(v)] }
+      lookup_name = normalize_header(name.to_s)
+      wire_name = case name
+                  when String
+                    name
+                  when Symbol
+                    lookup_name
+                  else
+                    raise HTTP::HeaderError, "HTTP header must be a String or Symbol: #{name.inspect}"
+                  end
+      Array(value).each do |v|
+        @pile << [
+          lookup_name,
+          wire_name,
+          validate_value(v)
+        ]
+      end
     end
 
     # Returns list of header values if any.
@@ -58,7 +81,7 @@ module HTTP
     # @return [Array<String>]
     def get(name)
       name = normalize_header name.to_s
-      @pile.select { |k, _| k == name }.map { |_, v| v }
+      @pile.select { |k, _| k == name }.map { |_, _, v| v }
     end
 
     # Smart version of {#get}.
@@ -96,7 +119,7 @@ module HTTP
     #
     # @return [Array<[String, String]>]
     def to_a
-      @pile.map { |pair| pair.map(&:dup) }
+      @pile.map { |item| item[1..2] }
     end
 
     # Returns human-readable representation of `self` instance.
@@ -110,7 +133,7 @@ module HTTP
     #
     # @return [Array<String>]
     def keys
-      @pile.map { |k, _| k }.uniq
+      @pile.map { |_, k, _| k }.uniq
     end
 
     # Compares headers to another Headers or Array of key/value pairs
@@ -119,7 +142,7 @@ module HTTP
     def ==(other)
       return false unless other.respond_to? :to_a
 
-      @pile == other.to_a
+      to_a == other.to_a
     end
 
     # Calls the given block once for each key/value pair in headers container.
@@ -129,7 +152,7 @@ module HTTP
     def each
       return to_enum(__method__) unless block_given?
 
-      @pile.each { |arr| yield(arr) }
+      @pile.each { |item| yield(item[1..2]) }
       self
     end
 
@@ -152,7 +175,7 @@ module HTTP
     # @api private
     def initialize_copy(orig)
       super
-      @pile = to_a
+      @pile = @pile.map(&:dup)
     end
 
     # Merges `other` headers into `self`.
