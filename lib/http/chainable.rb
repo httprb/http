@@ -93,7 +93,7 @@ module HTTP
     def timeout(options)
       klass, options = case options
                        when Numeric then [HTTP::Timeout::Global, {:global => options}]
-                       when Hash    then [HTTP::Timeout::PerOperation, options]
+                       when Hash    then [HTTP::Timeout::PerOperation, options.dup]
                        when :null   then [HTTP::Timeout::Null, {}]
                        else raise ArgumentError, "Use `.timeout(global_timeout_in_seconds)` or `.timeout(connect: x, write: y, read: z)`."
 
