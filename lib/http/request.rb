@@ -8,6 +8,7 @@ require "http/errors"
 require "http/headers"
 require "http/request/body"
 require "http/request/writer"
+require "http/request/proxy"
 require "http/version"
 require "http/uri"
 
@@ -90,7 +91,7 @@ module HTTP
       raise(UnsupportedMethodError, "unknown method: #{verb}") unless METHODS.include?(@verb)
       raise(UnsupportedSchemeError, "unknown scheme: #{scheme}") unless SCHEMES.include?(@scheme)
 
-      @proxy   = opts[:proxy] || {}
+      @proxy   = prepare_proxy(opts[:proxy])
       @version = opts[:version] || "1.1"
       @headers = prepare_headers(opts[:headers])
       @body    = prepare_body(opts[:body])
@@ -120,16 +121,16 @@ module HTTP
 
     # Is this request using a proxy?
     def using_proxy?
-      proxy && proxy.keys.size >= 2
+      proxy.available?
     end
 
     # Is this request using an authenticated proxy?
     def using_authenticated_proxy?
-      proxy && proxy.keys.size >= 4
+      proxy.authenticated?
     end
 
     def include_proxy_headers
-      headers.merge!(proxy[:proxy_headers]) if proxy.key?(:proxy_headers)
+      headers.merge!(proxy.headers) if proxy.include_headers?
       include_proxy_authorization_header if using_authenticated_proxy?
     end
 
@@ -139,7 +140,7 @@ module HTTP
     end
 
     def proxy_authorization_header
-      digest = Base64.strict_encode64("#{proxy[:proxy_username]}:#{proxy[:proxy_password]}")
+      digest = Base64.strict_encode64("#{proxy.username}:#{proxy.password}")
       "Basic #{digest}"
     end
 
@@ -173,18 +174,18 @@ module HTTP
       )
 
       connect_headers[Headers::PROXY_AUTHORIZATION] = proxy_authorization_header if using_authenticated_proxy?
-      connect_headers.merge!(proxy[:proxy_headers]) if proxy.key?(:proxy_headers)
+      connect_headers.merge!(proxy.headers) if proxy.include_headers?
       connect_headers
     end
 
     # Host for tcp socket
     def socket_host
-      using_proxy? ? proxy[:proxy_address] : host
+      using_proxy? ? proxy.address : host
     end
 
     # Port for tcp socket
     def socket_port
-      using_proxy? ? proxy[:proxy_port] : port
+      using_proxy? ? proxy.port : port
     end
 
     # Human-readable representation of base request info.
@@ -227,6 +228,10 @@ module HTTP
       headers[Headers::USER_AGENT]  ||= USER_AGENT
 
       headers
+    end
+
+    def prepare_proxy(proxy)
+      proxy.is_a?(Request::Proxy) ? proxy : Request::Proxy.new(proxy, uri)
     end
   end
 end
