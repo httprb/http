@@ -3,8 +3,24 @@
 module HTTP
   class Request
     class Proxy
-      def initialize(proxy_params, request_uri)
-        @proxy = proxy_params || find_proxy(request_uri)
+      # Try to find proxy attributes set via ENV variables matching against request_uri
+      # @see ::URI::Generic#find_proxy
+      # @param [HTTP::URI] request_uri
+      # @return [HTTP::Request::Proxy]
+      def self.auto_detect(request_uri)
+        system_proxy = ::URI.parse(request_uri.to_s).find_proxy
+
+        proxy = {}
+        proxy[:proxy_username] = system_proxy.user if system_proxy&.user
+        proxy[:proxy_password] = system_proxy.password if system_proxy&.password
+        proxy[:proxy_address] = system_proxy.host if system_proxy&.host
+        proxy[:proxy_port] = system_proxy.port if system_proxy&.port
+
+        new(proxy)
+      end
+
+      def initialize(proxy_params)
+        @proxy = proxy_params || {}
       end
 
       # @return [Boolean] Is there any proxy configuration available?
@@ -45,24 +61,6 @@ module HTTP
       # @return [Hash, nil] Additional headers
       def headers
         @proxy[:proxy_headers]
-      end
-
-      private
-
-      def find_proxy(request_uri)
-        system_proxy = find_system_proxy(request_uri)
-
-        proxy = {}
-        proxy[:proxy_username] = system_proxy.user if system_proxy&.user
-        proxy[:proxy_password] = system_proxy.password if system_proxy&.password
-        proxy[:proxy_address] = system_proxy.host if system_proxy&.host
-        proxy[:proxy_port] = system_proxy.port if system_proxy&.port
-
-        proxy
-      end
-
-      def find_system_proxy(request_uri)
-        ::URI.parse(request_uri.to_s).find_proxy
       end
     end
   end

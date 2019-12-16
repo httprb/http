@@ -169,6 +169,11 @@ module HTTP
     end
     alias through via
 
+    # Use system defined proxy via ENV variables unless a valid proxy is present
+    def with_system_proxy
+      branch default_options.with_proxy(:proxy_auto_detect => true)
+    end
+
     # Make client follow redirects.
     # @param options
     # @return [HTTP::Client]

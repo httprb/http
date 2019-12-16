@@ -17,4 +17,9 @@ RSpec.describe HTTP::Options, "proxy" do
     opts2 = opts.with_proxy(:proxy_address => "127.0.0.1", :proxy_port => 8080, :proxy_username => "username", :proxy_password => "password")
     expect(opts2.proxy).to eq(:proxy_address => "127.0.0.1", :proxy_port => 8080, :proxy_username => "username", :proxy_password => "password")
   end
+
+  it "accepts proxy auto_detection flag" do
+    opts2 = opts.with_proxy(:proxy_auto_detect => true)
+    expect(opts2.proxy).to eq(:proxy_auto_detect => true)
+  end
 end

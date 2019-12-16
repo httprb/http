@@ -230,8 +230,14 @@ module HTTP
       headers
     end
 
-    def prepare_proxy(proxy)
-      proxy.is_a?(Request::Proxy) ? proxy : Request::Proxy.new(proxy, uri)
+    def prepare_proxy(object)
+      return object if object.is_a?(Request::Proxy)
+
+      proxy = Request::Proxy.new(object)
+      return proxy if proxy.available?
+      return Request::Proxy.auto_detect(uri) if object&.fetch(:proxy_auto_detect, false)
+
+      proxy
     end
   end
 end
