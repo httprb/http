@@ -6,7 +6,7 @@ cache: bundler
 before_install:
   - gem update --system
   - gem --version
-  - gem install bundler
+  - gem install bundler --no-document
   - bundle --version
 
 install: bundle install --without development doc
@@ -22,14 +22,15 @@ rvm:
   - 2.4
   - 2.5
   - 2.6
+  - 2.7
 
 matrix:
   fast_finish: true
   include:
   # Only run RuboCop and Yardstick metrics on the latest Ruby
-  - rvm: 2.6
+  - rvm: 2.7
     env: SUITE="rubocop"
-  - rvm: 2.6
+  - rvm: 2.7
     env: SUITE="yardstick"
 
 branches:
