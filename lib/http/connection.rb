@@ -93,7 +93,7 @@ module HTTP
       chunk    = @parser.read(size)
       finish_response if finished
 
-      chunk.to_s
+      chunk || "".b
     end
 
     # Reads data from socket up until headers are loaded

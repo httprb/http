@@ -10,7 +10,7 @@ module HTTP
     class AutoDeflate < Feature
       attr_reader :method
 
-      def initialize(*)
+      def initialize(**)
         super
 
         @method = @opts.key?(:method) ? @opts[:method].to_s : "gzip"
