@@ -1,3 +1,10 @@
+## 4.3.0 (2020-01-09)
+
+* Backport [#581](https://github.com/httprb/http/pull/581)
+  Add Ruby-2.7 compatibility.
+  ([@ixti], [@janko])
+
+
 ## 4.2.0 (2019-10-22)
 
 * Backport [#489](https://github.com/httprb/http/pull/489)
