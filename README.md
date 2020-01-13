@@ -18,13 +18,14 @@ HTTP (The Gem! a.k.a. http.rb) is an easy-to-use client library for making reque
 from Ruby. It uses a simple method chaining system for building requests, similar to
 Python's [Requests].
 
-Under the hood, http.rb uses [http_parser.rb], a fast HTTP parsing native
-extension based on the Node.js parser and a Java port thereof. This library
+Under the hood, via [Ruby FFI bindings][http-parser-ffi], http.rb uses the Node.js
+[http-parser], a fast HTTP parsing native extension. This library
 isn't just yet another wrapper around Net::HTTP. It implements the HTTP protocol
 natively and outsources the parsing to native extensions.
 
 [requests]: http://docs.python-requests.org/en/latest/
-[http_parser.rb]: https://github.com/tmm1/http_parser.rb
+[http-parser]: https://github.com/nodejs/http-parser
+[http-parser-ffi]: https://github.com/cotag/http-parser
 
 
 ## Another Ruby HTTP library? Why should I care?
