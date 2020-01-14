@@ -75,6 +75,19 @@ RSpec.describe HTTP::Redirector do
       expect(res.to_s).to eq "foo"
     end
 
+    it "concatenates multiple Location headers" do
+      req     = HTTP::Request.new :verb => :head, :uri => "http://example.com"
+      headers = HTTP::Headers.new
+
+      %w[http://example.com /123].each { |loc| headers.add("Location", loc) }
+
+      res = redirector.perform(req, simple_response(301, "", headers)) do |redirect|
+        simple_response(200, redirect.uri.to_s)
+      end
+
+      expect(res.to_s).to eq "http://example.com/123"
+    end
+
     context "following 300 redirect" do
       context "with strict mode" do
         let(:options) { {:strict => true} }

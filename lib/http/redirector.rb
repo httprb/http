@@ -58,7 +58,8 @@ module HTTP
 
         @response.flush
 
-        @request  = redirect_to @response.headers[Headers::LOCATION]
+        # XXX(ixti): using `Array#inject` to return `nil` if no Location header.
+        @request  = redirect_to(@response.headers.get(Headers::LOCATION).inject(:+))
         @response = yield @request
       end
 
