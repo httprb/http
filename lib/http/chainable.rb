@@ -6,42 +6,48 @@ require "http/headers"
 
 module HTTP
   module Chainable
-    # Request a get sans response body
+    # Request a get sans response body.
+    # See Client#request.
     # @param uri
     # @option options [Hash]
     def head(uri, options = {}) # rubocop:disable Style/OptionHash
       request :head, uri, options
     end
 
-    # Get a resource
+    # Get a resource.
+    # See Client#request.
     # @param uri
     # @option options [Hash]
     def get(uri, options = {}) # rubocop:disable Style/OptionHash
       request :get, uri, options
     end
 
-    # Post to a resource
+    # Post to a resource.
+    # See Client#request.
     # @param uri
     # @option options [Hash]
     def post(uri, options = {}) # rubocop:disable Style/OptionHash
       request :post, uri, options
     end
 
-    # Put to a resource
+    # Put to a resource.
+    # See Client#request.
     # @param uri
     # @option options [Hash]
     def put(uri, options = {}) # rubocop:disable Style/OptionHash
       request :put, uri, options
     end
 
-    # Delete a resource
+    # Delete a resource.
+    # See Client#request.
     # @param uri
     # @option options [Hash]
     def delete(uri, options = {}) # rubocop:disable Style/OptionHash
       request :delete, uri, options
     end
 
-    # Echo the request back to the client
+    # Echo the request back to the client.
+    # See Client#request.
     # @param uri
     # @option options [Hash]
     def trace(uri, options = {}) # rubocop:disable Style/OptionHash
@@ -62,15 +68,16 @@ module HTTP
       request :connect, uri, options
     end
 
-    # Apply partial modifications to a resource
+    # Apply partial modifications to a resource.
+    # See Client#request.
     # @param uri
     # @option options [Hash]
     def patch(uri, options = {}) # rubocop:disable Style/OptionHash
       request :patch, uri, options
     end
 
-    # Make an HTTP request with the given verb
-    # @param (see Client#request)
+    # Make an HTTP request with the given verb.
+    # See Client#request.
     def request(*args)
       branch(default_options).request(*args)
     end
@@ -224,7 +231,10 @@ module HTTP
     end
 
     # Set options for HTTP
-    # @param opts
+    #
+    # See HTTP::Options.defined_options for list of options.
+    #
+    # @param [Hash] opts
     # @return [HTTP::Options]
     def default_options=(opts)
       @default_options = HTTP::Options.new(opts)

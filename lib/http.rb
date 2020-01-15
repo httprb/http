@@ -15,7 +15,17 @@ require "http/response"
 require "http/response/body"
 require "http/response/parser"
 
-# HTTP should be easy
+# HTTP should be easy.
+#
+# Basic Usage
+#
+# HTTP.post("https://server.com", options)
+#
+# For more detailed documentation and usage notes:
+# @see https://github.com/httprb/http/wiki the http wiki
+#
+# Methods in HTTP class object generally are implemented in the Chainable module.
+#
 module HTTP
   extend Chainable
 
