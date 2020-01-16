@@ -6,6 +6,19 @@ require "socket"
 require "http/uri"
 
 module HTTP
+  # Options are passed to request as a hash.
+  #
+  # Keys for the hash include:
+  #
+  #   :headers for request headers
+  #
+  #   :body to set the body contents
+  #
+  #   :json to send JSON
+  #
+  #   :form to send form parameters, also used with multipart form using HTTP::FormData::File
+  #
+  #   :ssl for TLS/SSL options, @see https://ruby-doc.org/stdlib-2.5.1/libdoc/openssl/rdoc/OpenSSL/SSL/SSLContext.html OpenSSL::SSL::SSLContext
   class Options # rubocop:disable Metrics/ClassLength
     @default_socket_class     = TCPSocket
     @default_ssl_socket_class = OpenSSL::SSL::SSLSocket

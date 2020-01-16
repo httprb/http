@@ -25,11 +25,11 @@ module HTTP
     end
 
     # Make an HTTP request.
-    # See HTTP::Options.defined_options for list of option keys.
+    # @see Options
     # @see https://ruby-doc.org/stdlib-2.5.1/libdoc/openssl/rdoc/OpenSSL/SSL/SSLContext.html OpenSSL::SSL::SSLContext for more information on :ssl options.
-    # @param [Symbol] verb The HTTP method.
-    # @param [String] uri The URL/URI.
-    # @option options [Hash]
+    # @param [Symbol] verb @see #build_request
+    # @param [String] uri @see #build_request
+    # @param [Hash] opts @see Options
     def request(verb, uri, opts = {}) # rubocop:disable Style/OptionHash
       opts = @default_options.merge(opts)
       req = build_request(verb, uri, opts)

@@ -7,7 +7,7 @@ require "http/headers"
 module HTTP
   module Chainable
     # Request a get sans response body.
-    # See Client#request.
+    # @see Client#request
     # @param uri
     # @option options [Hash]
     def head(uri, options = {}) # rubocop:disable Style/OptionHash
@@ -15,7 +15,7 @@ module HTTP
     end
 
     # Get a resource.
-    # See Client#request.
+    # @see Client#request
     # @param uri
     # @option options [Hash]
     def get(uri, options = {}) # rubocop:disable Style/OptionHash
@@ -23,7 +23,7 @@ module HTTP
     end
 
     # Post to a resource.
-    # See Client#request.
+    # @see Client#request
     # @param uri
     # @option options [Hash]
     def post(uri, options = {}) # rubocop:disable Style/OptionHash
@@ -31,7 +31,7 @@ module HTTP
     end
 
     # Put to a resource.
-    # See Client#request.
+    # @see Client#request
     # @param uri
     # @option options [Hash]
     def put(uri, options = {}) # rubocop:disable Style/OptionHash
@@ -39,7 +39,7 @@ module HTTP
     end
 
     # Delete a resource.
-    # See Client#request.
+    # @see Client#request
     # @param uri
     # @option options [Hash]
     def delete(uri, options = {}) # rubocop:disable Style/OptionHash
@@ -47,7 +47,7 @@ module HTTP
     end
 
     # Echo the request back to the client.
-    # See Client#request.
+    # @see Client#request
     # @param uri
     # @option options [Hash]
     def trace(uri, options = {}) # rubocop:disable Style/OptionHash
@@ -69,7 +69,7 @@ module HTTP
     end
 
     # Apply partial modifications to a resource.
-    # See Client#request.
+    # @see Client#request
     # @param uri
     # @option options [Hash]
     def patch(uri, options = {}) # rubocop:disable Style/OptionHash
@@ -77,7 +77,7 @@ module HTTP
     end
 
     # Make an HTTP request with the given verb.
-    # See Client#request.
+    # @see Client#request
     def request(*args)
       branch(default_options).request(*args)
     end
@@ -231,9 +231,7 @@ module HTTP
     end
 
     # Set options for HTTP
-    #
-    # See HTTP::Options.defined_options for list of options.
-    #
+    # @see Options
     # @param [Hash] opts
     # @return [HTTP::Options]
     def default_options=(opts)

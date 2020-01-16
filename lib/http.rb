@@ -19,13 +19,12 @@ require "http/response/parser"
 #
 # Basic Usage
 #
-# HTTP.post("https://server.com", options)
+#     HTTP.post("https://server.com", options)
+#     => #<HTTP::Response ...>
 #
-# For more detailed documentation and usage notes:
-# @see https://github.com/httprb/http/wiki the http wiki
+# @see https://github.com/httprb/http/wiki wiki
 #
 # Methods in HTTP class object generally are implemented in the Chainable module.
-#
 module HTTP
   extend Chainable
 
