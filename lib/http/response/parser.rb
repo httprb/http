@@ -49,14 +49,17 @@ module HTTP
       #
 
       def on_header_field(_response, field)
-        @field = field
+        append_header if @reading_header_value
+        @field << field
       end
 
       def on_header_value(_response, value)
-        @headers.add(@field, value) if @field
+        @reading_header_value = true
+        @field_value << value
       end
 
       def on_headers_complete(_reposse)
+        append_header if @reading_header_value
         @finished[:headers] = true
       end
 
@@ -89,14 +92,25 @@ module HTTP
       def reset
         @state.reset!
 
-        @finished = Hash.new(false)
-        @headers  = HTTP::Headers.new
-        @field    = nil
-        @chunk    = nil
+        @finished             = Hash.new(false)
+        @headers              = HTTP::Headers.new
+        @reading_header_value = false
+        @field                = +""
+        @field_value          = +""
+        @chunk                = nil
       end
 
       def finished?
         @finished[:message]
+      end
+
+      private
+
+      def append_header
+        @headers.add(@field, @field_value)
+        @reading_header_value = false
+        @field_value          = +""
+        @field                = +""
       end
     end
   end
