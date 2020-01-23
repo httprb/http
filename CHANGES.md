@@ -1,5 +1,29 @@
 ## future is unwritten (master)
 
+* [#590](https://github.com/httprb/http/pull/590)
+  [#589](https://github.com/httprb/http/issues/589)
+  Fix response headers paring.
+  ([@Bonias])
+
+* [#587](https://github.com/httprb/http/pull/587)
+  [#585](https://github.com/httprb/http/issues/585)
+  Fix redirections when server responds with multiple Location headers.
+  ([@ixti])
+
+* [#581](https://github.com/httprb/http/pull/581)
+  [#582](https://github.com/httprb/http/issues/582)
+  Add Ruby 2.7.x support.
+  ([@janko])
+
+* [#577](https://github.com/httprb/http/pull/577)
+  Fix `Chainable#timeout` with frozen Hash.
+  ([@antonvolkoff])
+
+* [#576](https://github.com/httprb/http/pull/576)
+  [#524](https://github.com/httprb/http/issues/524)
+  Preserve header names casing.
+  ([@joshuaflanagan])
+
 * [#532](https://github.com/httprb/http/pull/532)
   Fix pipes support in request bodies.
   ([@ixti])
@@ -810,3 +834,4 @@ end
 [@fxposter]: https://github.com/fxposter
 [@mamoonraja]: https://github.com/mamoonraja
 [@joshuaflanagan]: https://github.com/joshuaflanagan
+[@antonvolkoff]: https://github.com/antonvolkoff
