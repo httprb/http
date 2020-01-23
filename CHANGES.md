@@ -26,6 +26,13 @@
   Drop Ruby 2.3.x support.
   ([@ixti])
 
+* [#587](https://github.com/httprb/http/pull/587)
+  Fix redircetion with multiple Location headers.
+  ([@ixti])
+  
+* [#590](https://github.com/httprb/http/pull/590)
+  Fix parser so it properly parses headers.
+  ([@Bonias])
 
 ## 4.2.0 (2019-10-22)
 
