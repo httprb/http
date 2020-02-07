@@ -86,7 +86,11 @@ module HTTP
       end
 
       def on_message_complete(_response)
-        @finished[:message] = true
+        if @state.http_status < 200
+          reset
+        else
+          @finished[:message] = true
+        end
       end
 
       def reset

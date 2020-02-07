@@ -42,4 +42,33 @@ RSpec.describe HTTP::Response::Parser do
       expect(subject.read(expected_body.size)).to eq(expected_body)
     end
   end
+
+  context "when got 100 Continue response" do
+    let :raw_response do
+      "HTTP/1.1 100 Continue\r\n\r\n" \
+      "HTTP/1.1 200 OK\r\n" \
+      "Content-Length: 12\r\n\r\n" \
+      "Hello World!"
+    end
+
+    context "when response is feeded in one part" do
+      let(:parts) { [raw_response] }
+
+      it "skips to next non-info response" do
+        expect(subject.status_code).to eq(200)
+        expect(subject.headers).to eq("Content-Length" => "12")
+        expect(subject.read(12)).to eq("Hello World!")
+      end
+    end
+
+    context "when response is feeded in many parts" do
+      let(:parts) { raw_response.split(//) }
+
+      it "skips to next non-info response" do
+        expect(subject.status_code).to eq(200)
+        expect(subject.headers).to eq("Content-Length" => "12")
+        expect(subject.read(12)).to eq("Hello World!")
+      end
+    end
+  end
 end
