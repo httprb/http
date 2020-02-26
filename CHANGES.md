@@ -1,5 +1,10 @@
 ## future is unwritten (master)
 
+* [#593](https://github.com/httprb/http/pull/593)
+  [#592](https://github.com/httprb/http/issues/592)
+  Support informational (1XX) responses.
+  ([@ixti])
+
 * [#590](https://github.com/httprb/http/pull/590)
   [#589](https://github.com/httprb/http/issues/589)
   Fix response headers paring.
