@@ -247,6 +247,28 @@ module HTTP
       branch default_options.with_features(features)
     end
 
+    # Returns retriable client instance, which retries requests if they failed
+    # due to some socket errors or response status is `5xx`.
+    #
+    # @example Usage
+    #
+    #   # Retry max 5 times with randomly growing delay between retries
+    #   HTTP.retriable.get(url)
+    #
+    #   # Retry max 3 times with randomly growing delay between retries
+    #   HTTP.retriable(:times => 3).get(url)
+    #
+    #   # Retry max 3 times with 1 sec delay between retries
+    #   HTTP.retriable(:times => 3, :delay => proc { 1 }).get(url)
+    #
+    #   # Retry max 3 times with geometrically progressed delay between retries
+    #   HTTP.retriable(:times => 3, :delay => proc { |i| 1 + i*i }).get(url)
+    #
+    # @param (see Performer#initialize)
+    def retriable(options = {})
+      Retriable::Client.new(Retriable::Performer.new(options), default_options)
+    end
+
     private
 
     # :nodoc:
