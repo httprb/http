@@ -265,7 +265,7 @@ module HTTP
     #   HTTP.retriable(:times => 3, :delay => proc { |i| 1 + i*i }).get(url)
     #
     # @param (see Performer#initialize)
-    def retriable(options = {})
+    def retriable(**options)
       Retriable::Client.new(Retriable::Performer.new(options), default_options)
     end
 

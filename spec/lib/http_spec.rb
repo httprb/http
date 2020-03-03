@@ -152,6 +152,37 @@ RSpec.describe HTTP do
     end
   end
 
+  describe ".retry" do
+    it "ensure endpoint counts retries" do
+      expect(HTTP.get("#{dummy.endpoint}/retry-2").to_s).to eq "retried 1x"
+      expect(HTTP.get("#{dummy.endpoint}/retry-2").to_s).to eq "retried 2x"
+    end
+
+    it "retries the request" do
+      response = HTTP.retriable(:delay => 0).get "#{dummy.endpoint}/retry-2"
+      expect(response.to_s).to eq "retried 2x"
+    end
+
+    it "retries the request and gives us access to the failed requests" do
+      err = nil
+      retry_callback = ->(_, _, res) {
+        expect(res.to_s).to match(/^retried \dx$/)
+      }
+      begin
+        HTTP.retriable(
+          :should_retry => ->(*) { true },
+          :tries        => 3,
+          :delay        => 0,
+          :on_retry     => retry_callback
+        ).get "#{dummy.endpoint}/retry-2"
+      rescue HTTP::Error => e
+        err = e
+      end
+
+      expect(err.response.to_s).to eq "retried 3x"
+    end
+  end
+
   context "posting forms to resources" do
     it "is easy" do
       response = HTTP.post "#{dummy.endpoint}/form", form: {example: "testing-form"}
