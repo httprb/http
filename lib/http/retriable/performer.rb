@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "date"
 require "http"
 require "http/retriable/errors"
 require "openssl"
@@ -22,15 +23,48 @@ module HTTP
         IOError
       ].freeze
 
+      RETRIABLE_STATUSES = [500].freeze
+
       # Default retry delay proc
-      DELAY_PROC = proc { |i| 1 + i * rand }
+      DELAY_PROC = ->(i) {
+        delay = 2**(i - 1) - 1
+        delay_noise = rand
+        delay + delay_noise
+      }
 
       # @param [Hash] opts
       # @option opts [#to_i] :tries (5)
-      # @option opts [#call] :delay (DELAY_PROC)
+      # @option opts [#call, #to_i] :delay (DELAY_PROC)
+      # @option opts [Array(Exception)] :exceptions (RETRIABLE_ERRORS)
+      # @option opts [Array(#to_i)] :retry_statuses ([500])
+      # @option opts [#call] :on_retry
+      # @option opts [#to_f] :max_delay (Float::MAX)
+      # @option opts [#call] :should_retry
       def initialize(opts)
+        if opts.key?(:should_retry)
+          @should_retry_proc = opts.fetch(:should_retry)
+        else
+          @exception_classes = opts.fetch(:exceptions, RETRIABLE_ERRORS)
+          @retry_statuses = opts.fetch(:retry_statuses, RETRIABLE_STATUSES)
+          @should_retry_proc = ->(_req, err, res, _i) {
+            if err
+              @exception_classes.any? { |e| err.is_a?(e) }
+            else
+              @retry_statuses.include?(res.status.to_i)
+            end
+          }
+        end
         @tries = opts.fetch(:tries, 5).to_i
-        @delay = opts.fetch(:delay, DELAY_PROC)
+        @on_retry = opts.fetch(:on_retry, ->(*) {})
+        @maximum_delay = opts.fetch(:max_delay, Float::MAX).to_f
+        @delay = begin
+          case delay = opts.fetch(:delay, DELAY_PROC)
+          when Numeric
+            ->(*) { delay }
+          else
+            delay
+          end
+        end
       end
 
       # Watches request/response execution.
@@ -42,49 +76,102 @@ module HTTP
       # @see #initialize
       # @api private
       def perform(client, req)
-        i = 0
+        1.upto(Float::INFINITY) do |i| # infinite loop with index
+          err, res = nil
 
-        while i < @tries
+          # rubocop:disable Lint/RescueException
           begin
             res = yield
-            return res unless 500 <= res.status.to_i
-
-            # Some servers support Keep-Alive on any response. Thus we should
-            # flush response before retry, to avoid state error (when socket
-            # has pending response data and we try to write new request).
-            # Alternatively, as we don't need response body here at all, we
-            # are going to close client, effectivle closing underlying socket
-            # and resetting client's state.
-            client.close
-          rescue *RETRIABLE_ERRORS => e
-            client.close
+          rescue Exception => e
             err = e
-          rescue
-            client.close
-            raise
           end
+          # rubocop:enable Lint/RescueException
 
-          sleep @delay.call i
-          i += 1
+          if @should_retry_proc.call(req, err, res, i)
+            if i < @tries
+              @on_retry.call(req, err, res)
+
+              # Some servers support Keep-Alive on any response. Thus we should
+              # flush response before retry, to avoid state error (when socket
+              # has pending response data and we try to write new request).
+              # Alternatively, as we don't need response body here at all, we
+              # are going to close client, effectivle closing underlying socket
+              # and resetting client's state.
+              client.close
+
+              sleep calculate_delay(i, res)
+            else
+              res&.flush
+              client.close
+              raise out_of_retries_error(req, res, err)
+            end
+          elsif err
+            client.close
+            raise err
+          elsif res
+            return res
+          end
         end
+      end
 
-        raise OutOfRetriesError, error_message(req, res&.status, err)
+      def calculate_delay(iteration, response)
+        if response && (retry_header = response.headers["Retry-After"])
+          delay_from_retry_header(retry_header)
+        else
+          calculate_delay_from_iteration(iteration)
+        end
+      end
+
+      RFC2822_DATE_REGEX = /^
+        (?:Sun|Mon|Tue|Wed|Thu|Fri|Sat),\s+
+        (?:0[1-9]|[1-2]?[0-9]|3[01])\s+
+        (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+
+        (?:19[0-9]{2}|[2-9][0-9]{3})\s+
+        (?:2[0-3]|[0-1][0-9]):(?:[0-5][0-9]):(?:60|[0-5][0-9])\s+
+        GMT
+      $/x.freeze
+
+      # Spec for Retry-After header
+      # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
+      def delay_from_retry_header(value)
+        value = value.to_s.strip
+
+        delay = case value
+                when RFC2822_DATE_REGEX then DateTime.rfc2822(value).to_time - Time.now.utc
+                when /^\d+$/            then value.to_i
+                else 0
+                end
+
+        ensure_dealy_in_bounds(delay)
+      end
+
+      def calculate_delay_from_iteration(iteration)
+        ensure_dealy_in_bounds(
+          @delay.call(iteration)
+        )
+      end
+
+      def ensure_dealy_in_bounds(delay)
+        [0, [delay, @maximum_delay].min].max
       end
 
       private
 
-      # Builds out of retries error message.
+      # Builds OutOfRetriesError
       #
       # @param req [HTTP::Request]
-      # @param status [HTTP::Response::Status, nil]
+      # @param status [HTTP::Response, nil]
       # @param exception [Exception, nil]
-      def error_message(req, status, exception)
+      def out_of_retries_error(req, response, exception)
         message = "#{req.verb.to_s.upcase} <#{req.uri}> failed"
 
-        message += " with #{status}" if status
-        message += ":#{exception}"   if exception
+        message += " with #{response.status}" if response
+        message += ":#{exception}" if exception
 
-        message
+        HTTP::OutOfRetriesError.new(message).tap do |ex|
+          ex.cause = exception
+          ex.response = response
+        end
       end
     end
   end
