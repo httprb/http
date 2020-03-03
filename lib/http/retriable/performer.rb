@@ -2,7 +2,6 @@
 
 require "http"
 require "http/retriable/errors"
-require "http/retriable/client"
 require "openssl"
 
 module HTTP

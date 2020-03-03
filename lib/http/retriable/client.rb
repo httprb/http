@@ -1,3 +1,5 @@
+require "http/retriable/performer"
+
 module HTTP
   module Retriable
     # Retriable version of HTTP::Client.
