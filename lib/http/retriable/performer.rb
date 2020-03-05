@@ -26,8 +26,8 @@ module HTTP
       RETRIABLE_STATUSES = [500].freeze
 
       # Default retry delay proc
-      DELAY_PROC = ->(i) {
-        delay = 2**(i - 1) - 1
+      DELAY_PROC = ->(attempt) {
+        delay = 2**(attempt - 1) - 1
         delay_noise = rand
         delay + delay_noise
       }
@@ -41,30 +41,13 @@ module HTTP
       # @option opts [#to_f] :max_delay (Float::MAX)
       # @option opts [#call] :should_retry
       def initialize(opts)
-        if opts.key?(:should_retry)
-          @should_retry_proc = opts.fetch(:should_retry)
-        else
-          @exception_classes = opts.fetch(:exceptions, RETRIABLE_ERRORS)
-          @retry_statuses = opts.fetch(:retry_statuses, RETRIABLE_STATUSES)
-          @should_retry_proc = ->(_req, err, res, _i) {
-            if err
-              @exception_classes.any? { |e| err.is_a?(e) }
-            else
-              @retry_statuses.include?(res.status.to_i)
-            end
-          }
-        end
+        @exception_classes = opts.fetch(:exceptions, RETRIABLE_ERRORS)
+        @retry_statuses = opts.fetch(:retry_statuses, RETRIABLE_STATUSES)
         @tries = opts.fetch(:tries, 5).to_i
         @on_retry = opts.fetch(:on_retry, ->(*) {})
         @maximum_delay = opts.fetch(:max_delay, Float::MAX).to_f
-        @delay = begin
-          case delay = opts.fetch(:delay, DELAY_PROC)
-          when Numeric
-            ->(*) { delay }
-          else
-            delay
-          end
-        end
+        @should_retry_proc = opts.fetch(:should_retry, build_retry_proc(@exception_classes, @retry_statuses))
+        @delay = build_delay_proc(opts.fetch(:delay, DELAY_PROC))
       end
 
       # Watches request/response execution.
@@ -76,21 +59,13 @@ module HTTP
       # @see #initialize
       # @api private
       def perform(client, req)
-        1.upto(Float::INFINITY) do |i| # infinite loop with index
-          err, res = nil
+        1.upto(Float::INFINITY) do |attempt| # infinite loop with index
+          err, res = try_request { yield }
 
-          # rubocop:disable Lint/RescueException
-          begin
-            res = yield
-          rescue Exception => e
-            err = e
-          end
-          # rubocop:enable Lint/RescueException
-
-          if @should_retry_proc.call(req, err, res, i)
-            if i < @tries
-              @on_retry.call(req, err, res)
-
+          if @should_retry_proc.call(req, err, res, attempt)
+            begin
+              wait_for_retry_or_raise(req, err, res, attempt)
+            ensure
               # Some servers support Keep-Alive on any response. Thus we should
               # flush response before retry, to avoid state error (when socket
               # has pending response data and we try to write new request).
@@ -98,12 +73,6 @@ module HTTP
               # are going to close client, effectivle closing underlying socket
               # and resetting client's state.
               client.close
-
-              sleep calculate_delay(i, res)
-            else
-              res&.flush
-              client.close
-              raise out_of_retries_error(req, res, err)
             end
           elsif err
             client.close
@@ -157,13 +126,37 @@ module HTTP
 
       private
 
+      # rubocop:disable Lint/RescueException
+      def try_request
+        err, res = nil
+
+        begin
+          res = yield
+        rescue Exception => e
+          err = e
+        end
+
+        [err, res]
+      end
+      # rubocop:enable Lint/RescueException
+
+      def wait_for_retry_or_raise(req, err, res, attempt)
+        if attempt < @tries
+          @on_retry.call(req, err, res)
+          sleep calculate_delay(attempt, res)
+        else
+          res&.flush
+          raise out_of_retries_error(req, res, err)
+        end
+      end
+
       # Builds OutOfRetriesError
       #
-      # @param req [HTTP::Request]
+      # @param request [HTTP::Request]
       # @param status [HTTP::Response, nil]
       # @param exception [Exception, nil]
-      def out_of_retries_error(req, response, exception)
-        message = "#{req.verb.to_s.upcase} <#{req.uri}> failed"
+      def out_of_retries_error(request, response, exception)
+        message = "#{request.verb.to_s.upcase} <#{request.uri}> failed"
 
         message += " with #{response.status}" if response
         message += ":#{exception}" if exception
@@ -171,6 +164,23 @@ module HTTP
         HTTP::OutOfRetriesError.new(message).tap do |ex|
           ex.cause = exception
           ex.response = response
+        end
+      end
+
+      def build_retry_proc(exception_classes, retry_statuses)
+        ->(_req, err, res, _i) {
+          if err
+            exception_classes.any? { |e| err.is_a?(e) }
+          else
+            retry_statuses.include?(res.status.to_i)
+          end
+        }
+      end
+
+      def build_delay_proc(delay)
+        case delay
+        when Numeric then ->(*) { delay }
+        else delay
         end
       end
     end
