@@ -146,7 +146,7 @@ RSpec.describe HTTP::Retriable::Performer do
       it "can be a proc number" do
         time, = measure_wait do
           begin
-            perform(:delay => ->(i) { i / 10.0 }, :tries => 3, :should_retry => ->(*) { true })
+            perform(:delay => ->(attempt) { attempt / 10.0 }, :tries => 3, :should_retry => ->(*) { true })
           rescue HTTP::OutOfRetriesError
           end
         end
@@ -155,8 +155,8 @@ RSpec.describe HTTP::Retriable::Performer do
 
       it "receives correct retry number when a proc" do
         retry_count = 0
-        retry_proc = ->(i) {
-          expect(i).to eq(retry_count).and(be > 0)
+        retry_proc = ->(attempt) {
+          expect(attempt).to eq(retry_count).and(be > 0)
           0
         }
         begin
@@ -171,7 +171,7 @@ RSpec.describe HTTP::Retriable::Performer do
 
     describe "should_retry option" do
       it "decides if the request should be retried" do
-        retry_proc = ->(req, err, res, i) do
+        retry_proc = ->(req, err, res, attempt) do
           expect(req).to eq request
           if res
             expect(err).to be_nil
@@ -181,7 +181,7 @@ RSpec.describe HTTP::Retriable::Performer do
             expect(res).to be_nil
           end
 
-          i < 5
+          attempt < 5
         end
 
         begin
