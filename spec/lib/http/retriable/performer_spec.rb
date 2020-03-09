@@ -73,12 +73,46 @@ RSpec.describe HTTP::Retriable::Performer do
     end
 
     describe "expected status codes" do
+
+      def response(options = {})
+        HTTP::Response.new(
+          {
+            :status  => 200,
+            :version => "1.1",
+            :headers => {},
+            :body    => "Hello world!",
+            :uri     => "http://example.com/",
+            :request => request
+          }.merge(options)
+        )
+      end
+
       it "retries the request" do
         expect do
           perform(:retry_statuses => [200], :tries => 2)
         end.to raise_error HTTP::OutOfRetriesError
 
         expect(counter_spy).to eq 2
+      end
+
+      describe "status codes can be expressed in many ways" do
+
+        [
+          301,
+          [200, 301, 485],
+          250...400,
+          [250...Float::INFINITY],
+          ->(status_code) { status_code == 301  },
+          [->(status_code) { status_code == 301  }]
+        ].each do |retry_statuses|
+          it retry_statuses.to_s do
+            expect do
+              perform(:retry_statuses => retry_statuses, :tries => 2) do
+                response(:status => 301)
+              end
+            end.to raise_error HTTP::OutOfRetriesError
+          end
+        end
       end
     end
 

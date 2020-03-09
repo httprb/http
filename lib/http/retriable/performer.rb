@@ -168,11 +168,20 @@ module HTTP
       end
 
       def build_retry_proc(exception_classes, retry_statuses)
+        retry_statuses = [retry_statuses].flatten
+
         ->(_req, err, res, _i) {
           if err
             exception_classes.any? { |e| err.is_a?(e) }
           else
-            retry_statuses.include?(res.status.to_i)
+            response_status = res.status.to_i
+            retry_statuses.any? do |matcher|
+              case matcher
+              when Range then matcher.include?(response_status)
+              when Numeric then matcher == response_status
+              else matcher.call(response_status)
+              end
+            end
           end
         }
       end
