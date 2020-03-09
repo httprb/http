@@ -23,7 +23,7 @@ module HTTP
         IOError
       ].freeze
 
-      RETRIABLE_STATUSES = [500].freeze
+      RETRIABLE_STATUSES = (500...Float::INFINITY).freeze
 
       # Default retry delay proc
       DELAY_PROC = ->(attempt) {
