@@ -208,7 +208,7 @@ RSpec.describe HTTP::Client do
           expect(opts[:body].to_s).to eq "foo=bar"
         end
 
-        client.get("http://example.com/", :form => HTTP::FormData.create({ :foo => "bar" }))
+        client.get("http://example.com/", :form => HTTP::FormData.create(:foo => "bar"))
       end
     end
   end
