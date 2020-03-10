@@ -197,6 +197,20 @@ RSpec.describe HTTP::Client do
 
       client.get("http://example.com/", :form => {:foo => HTTP::FormData::Part.new("content")})
     end
+
+    context "when passing an HTTP::FormData object directly" do
+      it "creates url encoded form data object" do
+        client = HTTP::Client.new
+        allow(client).to receive(:perform)
+
+        expect(HTTP::Request).to receive(:new) do |opts|
+          expect(opts[:body]).to be_a(HTTP::FormData::Urlencoded)
+          expect(opts[:body].to_s).to eq "foo=bar"
+        end
+
+        client.get("http://example.com/", :form => HTTP::FormData.create({ :foo => "bar" }))
+      end
+    end
   end
 
   describe "passing json" do

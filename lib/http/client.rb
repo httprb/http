@@ -175,7 +175,7 @@ module HTTP
       when opts.body
         opts.body
       when opts.form
-        form = HTTP::FormData.create opts.form
+        form = form_data(opts.form)
         headers[Headers::CONTENT_TYPE] ||= form.content_type
         form
       when opts.json
@@ -183,6 +183,10 @@ module HTTP
         headers[Headers::CONTENT_TYPE] ||= "application/json; charset=#{body.encoding.name}"
         body
       end
+    end
+
+    def form_data(form)
+      (form || {}).respond_to?(:to_h) ? HTTP::FormData.create(form) : form
     end
   end
 end
