@@ -3,6 +3,7 @@
 require "date"
 require "http"
 require "http/retriable/errors"
+require "http/retriable/delay_calculator"
 require "openssl"
 
 module HTTP
@@ -25,13 +26,6 @@ module HTTP
 
       RETRIABLE_STATUSES = (500...Float::INFINITY).freeze
 
-      # Default retry delay proc
-      DELAY_PROC = ->(attempt) {
-        delay = 2**(attempt - 1) - 1
-        delay_noise = rand
-        delay + delay_noise
-      }
-
       # @param [Hash] opts
       # @option opts [#to_i] :tries (5)
       # @option opts [#call, #to_i] :delay (DELAY_PROC)
@@ -45,9 +39,8 @@ module HTTP
         @retry_statuses = opts.fetch(:retry_statuses, RETRIABLE_STATUSES)
         @tries = opts.fetch(:tries, 5).to_i
         @on_retry = opts.fetch(:on_retry, ->(*) {})
-        @maximum_delay = opts.fetch(:max_delay, Float::MAX).to_f
-        @should_retry_proc = opts.fetch(:should_retry, build_retry_proc(@exception_classes, @retry_statuses))
-        @delay = build_delay_proc(opts.fetch(:delay, DELAY_PROC))
+        @should_retry_proc = opts[:should_retry]
+        @delay_calculator = DelayCalculator.new(opts)
       end
 
       # Watches request/response execution.
@@ -62,7 +55,7 @@ module HTTP
         1.upto(Float::INFINITY) do |attempt| # infinite loop with index
           err, res = try_request { yield }
 
-          if @should_retry_proc.call(req, err, res, attempt)
+          if retry_request?(req, err, res, attempt)
             begin
               wait_for_retry_or_raise(req, err, res, attempt)
             ensure
@@ -84,44 +77,7 @@ module HTTP
       end
 
       def calculate_delay(iteration, response)
-        if response && (retry_header = response.headers["Retry-After"])
-          delay_from_retry_header(retry_header)
-        else
-          calculate_delay_from_iteration(iteration)
-        end
-      end
-
-      RFC2822_DATE_REGEX = /^
-        (?:Sun|Mon|Tue|Wed|Thu|Fri|Sat),\s+
-        (?:0[1-9]|[1-2]?[0-9]|3[01])\s+
-        (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+
-        (?:19[0-9]{2}|[2-9][0-9]{3})\s+
-        (?:2[0-3]|[0-1][0-9]):(?:[0-5][0-9]):(?:60|[0-5][0-9])\s+
-        GMT
-      $/x.freeze
-
-      # Spec for Retry-After header
-      # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
-      def delay_from_retry_header(value)
-        value = value.to_s.strip
-
-        delay = case value
-                when RFC2822_DATE_REGEX then DateTime.rfc2822(value).to_time - Time.now.utc
-                when /^\d+$/            then value.to_i
-                else 0
-                end
-
-        ensure_dealy_in_bounds(delay)
-      end
-
-      def calculate_delay_from_iteration(iteration)
-        ensure_dealy_in_bounds(
-          @delay.call(iteration)
-        )
-      end
-
-      def ensure_dealy_in_bounds(delay)
-        [0, [delay, @maximum_delay].min].max
+        @delay_calculator.call(iteration, response)
       end
 
       private
@@ -139,6 +95,33 @@ module HTTP
         [err, res]
       end
       # rubocop:enable Lint/RescueException
+
+      def retry_request?(req, err, res, attempt)
+        if @should_retry_proc
+          @should_retry_proc.call(req, err, res, attempt)
+        elsif err
+          retry_exception?(err)
+        else
+          retry_response?(res)
+        end
+      end
+
+      def retry_exception?(err)
+        @exception_classes.any? { |e| err.is_a?(e) }
+      end
+
+      def retry_response?(res)
+        response_status = res.status.to_i
+        retry_matchers = [@retry_statuses].flatten
+
+        retry_matchers.any? do |matcher|
+          case matcher
+          when Range then matcher.cover?(response_status)
+          when Numeric then matcher == response_status
+          else matcher.call(response_status)
+          end
+        end
+      end
 
       def wait_for_retry_or_raise(req, err, res, attempt)
         if attempt < @tries
@@ -164,32 +147,6 @@ module HTTP
         HTTP::OutOfRetriesError.new(message).tap do |ex|
           ex.cause = exception
           ex.response = response
-        end
-      end
-
-      def build_retry_proc(exception_classes, retry_statuses)
-        retry_statuses = [retry_statuses].flatten
-
-        ->(_req, err, res, _i) {
-          if err
-            exception_classes.any? { |e| err.is_a?(e) }
-          else
-            response_status = res.status.to_i
-            retry_statuses.any? do |matcher|
-              case matcher
-              when Range then matcher.include?(response_status)
-              when Numeric then matcher == response_status
-              else matcher.call(response_status)
-              end
-            end
-          end
-        }
-      end
-
-      def build_delay_proc(delay)
-        case delay
-        when Numeric then ->(*) { delay }
-        else delay
         end
       end
     end
