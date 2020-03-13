@@ -24,19 +24,17 @@ module HTTP
         IOError
       ].freeze
 
-      RETRIABLE_STATUSES = (500...Float::INFINITY).freeze
-
       # @param [Hash] opts
       # @option opts [#to_i] :tries (5)
       # @option opts [#call, #to_i] :delay (DELAY_PROC)
       # @option opts [Array(Exception)] :exceptions (RETRIABLE_ERRORS)
-      # @option opts [Array(#to_i)] :retry_statuses ([500])
+      # @option opts [Array(#to_i)] :retry_statuses
       # @option opts [#call] :on_retry
       # @option opts [#to_f] :max_delay (Float::MAX)
       # @option opts [#call] :should_retry
       def initialize(opts)
         @exception_classes = opts.fetch(:exceptions, RETRIABLE_ERRORS)
-        @retry_statuses = opts.fetch(:retry_statuses, RETRIABLE_STATUSES)
+        @retry_statuses = opts[:retry_statuses]
         @tries = opts.fetch(:tries, 5).to_i
         @on_retry = opts.fetch(:on_retry, ->(*) {})
         @should_retry_proc = opts[:should_retry]
@@ -111,6 +109,8 @@ module HTTP
       end
 
       def retry_response?(res)
+        return false unless @retry_statuses
+
         response_status = res.status.to_i
         retry_matchers = [@retry_statuses].flatten
 

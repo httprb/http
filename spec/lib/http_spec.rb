@@ -157,7 +157,7 @@ RSpec.describe HTTP do
     end
 
     it "retries the request" do
-      response = HTTP.retriable(:delay => 0).get "#{dummy.endpoint}/retry-2"
+      response = HTTP.retriable(:delay => 0, :retry_statuses => 500...600).get "#{dummy.endpoint}/retry-2"
       expect(response.to_s).to eq "retried 2x"
     end
 
