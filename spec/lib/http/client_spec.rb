@@ -105,9 +105,8 @@ RSpec.describe HTTP::Client do
       end
 
       it "works like a charm in real world" do
-        url    = "http://git.io/jNeY"
-        client = HTTP.follow
-        expect(client.get(url).to_s).to include "support for non-ascii URIs"
+        expect(HTTP.follow.get("https://bit.ly/2UaBT4R").parse(:json)).
+          to include("url" => "https://httpbin.org/anything/könig")
       end
     end
   end
@@ -236,9 +235,9 @@ RSpec.describe HTTP::Client do
       end
 
       it "works like a charm in real world" do
-        url     = "https://github.com/httprb/http.rb/pull/197/ö無"
-        client  = HTTP.follow
-        expect(client.get(url).to_s).to include "support for non-ascii URIs"
+        url = "https://httpbin.org/anything/ö無"
+
+        expect(HTTP.follow.get(url).parse(:json)).to include("url" => url)
       end
     end
 
