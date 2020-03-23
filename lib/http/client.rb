@@ -169,7 +169,7 @@ module HTTP
       when opts.body
         opts.body
       when opts.form
-        form = HTTP::FormData.create opts.form
+        form = make_form_data(opts.form)
         headers[Headers::CONTENT_TYPE] ||= form.content_type
         form
       when opts.json
@@ -177,6 +177,13 @@ module HTTP
         headers[Headers::CONTENT_TYPE] ||= "application/json; charset=#{body.encoding.name}"
         body
       end
+    end
+
+    def make_form_data(form)
+      return form if form.is_a? HTTP::FormData::Multipart
+      return form if form.is_a? HTTP::FormData::Urlencoded
+
+      HTTP::FormData.create(form)
     end
   end
 end
