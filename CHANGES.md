@@ -1,5 +1,17 @@
 ## future is unwritten (master)
 
+* [#632](https://github.com/httprb/http/pull/632)
+  Respect the SSL context's verify_hostname value
+  ([@colemannugent])
+
+* [#625](https://github.com/httprb/http/pull/625)
+  Fix inflator with empty responses
+  ([@LukaszMaslej])
+
+* [#599](https://github.com/httprb/http/pull/599)
+  Allow passing HTTP::FormData::{Multipart,UrlEncoded} object directly.
+  ([@ixti])
+
 * [#593](https://github.com/httprb/http/pull/593)
   [#592](https://github.com/httprb/http/issues/592)
   Support informational (1XX) responses.
@@ -54,6 +66,24 @@
 * [#571](https://github.com/httprb/http/pull/571)
   Drop Ruby 2.3.x support.
   ([@ixti])
+
+
+## 4.4.0 (2020-03-25)
+
+* Backport [#587](https://github.com/httprb/http/pull/587)
+  Fix redirections when server responds with multiple Location headers.
+  ([@ixti])
+
+* Backport [#599](https://github.com/httprb/http/pull/599)
+  Allow passing HTTP::FormData::{Multipart,UrlEncoded} object directly.
+  ([@ixti])
+
+
+## 4.3.0 (2020-01-09)
+
+* Backport [#581](https://github.com/httprb/http/pull/581)
+  Add Ruby-2.7 compatibility.
+  ([@ixti], [@janko])
 
 
 ## 4.2.0 (2019-10-22)
@@ -840,3 +870,5 @@ end
 [@mamoonraja]: https://github.com/mamoonraja
 [@joshuaflanagan]: https://github.com/joshuaflanagan
 [@antonvolkoff]: https://github.com/antonvolkoff
+[@LukaszMaslej]: https://github.com/LukaszMaslej
+[@colemannugent]: https://github.com/colemannugent
