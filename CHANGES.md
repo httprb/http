@@ -1,3 +1,9 @@
+## 4.4.1 (2020-03-29)
+
+* Backport [#590](https://github.com/httprb/http/pull/590)
+  Fix parser failing on some edge cases.
+  ([@ixti])
+
 ## 4.4.0 (2020-03-25)
 
 * Backport [#587](https://github.com/httprb/http/pull/587)
