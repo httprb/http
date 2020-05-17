@@ -89,6 +89,32 @@ RSpec.describe HTTP::Redirector do
       expect(res.to_s).to eq "http://example.com/123"
     end
 
+    context "with on_redirect callback" do
+      let(:options) do
+        {
+          :on_redirect => proc do |response, location|
+            @redirect_response = response
+            @redirect_location = location
+          end
+        }
+      end
+
+      it "calls on_redirect" do
+        req = HTTP::Request.new :verb => :head, :uri => "http://example.com"
+        hops = [
+          redirect_response(301, "http://example.com/1"),
+          redirect_response(301, "http://example.com/2"),
+          simple_response(200, "foo")
+        ]
+
+        redirector.perform(req, hops.shift) do |prev_req, _|
+          expect(@redirect_location).to eq prev_req.uri.to_s
+          expect(@redirect_response.code).to eq 301
+          hops.shift
+        end
+      end
+    end
+
     context "following 300 redirect" do
       context "with strict mode" do
         let(:options) { {:strict => true} }
