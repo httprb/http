@@ -17,7 +17,7 @@ module HTTP
           :headers => response.headers,
           :proxy_headers => response.proxy_headers,
           :connection => response.connection,
-          :body => stream_for(response.connection)
+          :body => stream_for(response.connection, response.body.encoding)
         }
 
         options[:uri] = response.uri if response.uri
@@ -25,8 +25,8 @@ module HTTP
         Response.new(options)
       end
 
-      def stream_for(connection)
-        Response::Body.new(Response::Inflater.new(connection))
+      def stream_for(connection, encoding)
+        Response::Body.new(Response::Inflater.new(connection), :encoding => encoding)
       end
 
       private

@@ -64,6 +64,14 @@ RSpec.describe HTTP::Features::AutoInflate do
       end
     end
 
+    context "for gzip Content-Encoding header with charset" do
+      let(:headers) { {:content_encoding => "gzip", :content_type => "text/html; charset=Shift_JIS"} }
+
+      it "returns a HTTP::Response with the encoding from the response charset" do
+        expect(result.body.encoding).to be Encoding::Shift_JIS
+      end
+    end
+
     # TODO(ixti): We should refactor API to either make uri non-optional,
     #   or add reference to request into response object (better).
     context "when response has uri" do
