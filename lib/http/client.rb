@@ -40,7 +40,7 @@ module HTTP
     def build_request(verb, uri, opts = {}) # rubocop:disable Style/OptionHash
       opts    = @default_options.merge(opts)
       uri     = make_request_uri(uri, opts)
-      headers = make_request_headers(opts)
+      headers = make_request_headers(uri, opts)
       body    = make_request_body(opts, headers)
 
       req = HTTP::Request.new(
@@ -147,18 +147,26 @@ module HTTP
     end
 
     # Creates request headers with cookies (if any) merged in
-    def make_request_headers(opts)
+    def make_request_headers(uri, opts)
       headers = opts.headers
 
       # Tell the server to keep the conn open
       headers[Headers::CONNECTION] = default_options.persistent? ? Connection::KEEP_ALIVE : Connection::CLOSE
 
-      cookies = opts.cookies.values
+      followjar = opts.follow && opts.follow[:jar]
 
-      unless cookies.empty?
-        cookies = opts.headers.get(Headers::COOKIE).concat(cookies).join("; ")
-        headers[Headers::COOKIE] = cookies
+      hash_cookies = opts.cookies.values
+      header_cookies = opts.headers.get(Headers::COOKIE)
+      followjar_cookies = followjar ? followjar.each(uri).map(&:cookie_value) : []
+
+      sync_to_followjar = followjar ? hash_cookies + header_cookies.join.split("; ") : []
+      sync_to_followjar.each do |name_val|
+        name, value = name_val.split("=", 2)
+        followjar << Cookie.new(name, value, :domain => uri, :secure => uri.https?, :path => "/")
       end
+
+      cookies = header_cookies + hash_cookies + followjar_cookies
+      headers[Headers::COOKIE] = cookies.join("; ") unless cookies.empty?
 
       headers
     end

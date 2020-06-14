@@ -97,9 +97,10 @@ module HTTP
     end
 
     # Returns new Request with updated uri
-    def redirect(uri, verb = @verb)
+    def redirect(uri, verb = @verb, cookies_raw: nil)
       headers = self.headers.dup
       headers.delete(Headers::HOST)
+      headers[Headers::COOKIE] = cookies_raw if cookies_raw
 
       self.class.new(
         :verb           => verb,

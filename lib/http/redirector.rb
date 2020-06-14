@@ -39,9 +39,11 @@ module HTTP
     # @param [Hash] opts
     # @option opts [Boolean] :strict (true) redirector hops policy
     # @option opts [#to_i] :max_hops (5) maximum allowed amount of hops
+    # @option opts [HTTP::CookieJar] :jar (HTTP::CookieJar.new) stateful CookieJar used across hops
     def initialize(opts = {}) # rubocop:disable Style/OptionHash
       @strict   = opts.fetch(:strict, true)
       @max_hops = opts.fetch(:max_hops, 5).to_i
+      @jar      = opts.fetch(:jar, CookieJar.new)
     end
 
     # Follows redirects until non-redirect response found
@@ -61,6 +63,7 @@ module HTTP
         # XXX(ixti): using `Array#inject` to return `nil` if no Location header.
         @request  = redirect_to(@response.headers.get(Headers::LOCATION).inject(:+))
         @response = yield @request
+        @response.cookies.inject(@jar, :<<)
       end
 
       @response
@@ -77,7 +80,8 @@ module HTTP
     # Check if we got into an endless loop
     # @return [Boolean]
     def endless_loop?
-      2 <= @visited.count(@visited.last)
+      visits = @visited.count(@visited.last)
+      @visited.last == @visited.first ? visits > 2 : visits > 1 # allow retrying first uri once
     end
 
     # Redirect policy for follow
@@ -94,8 +98,10 @@ module HTTP
       end
 
       verb = :get if !SEE_OTHER_ALLOWED_VERBS.include?(verb) && 303 == code
+      redirect_uri = @request.uri.join(uri)
+      cookies_raw = @jar.each(redirect_uri).map(&:cookie_value).join("; ")
 
-      @request.redirect(uri, verb)
+      @request.redirect(uri, verb, :cookies_raw => cookies_raw)
     end
   end
 end
