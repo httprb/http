@@ -164,7 +164,7 @@ module HTTP
 
     # @!method hash
     #   Compute a hash-code for this headers container.
-    #   Two conatiners with the same content will have the same hash code.
+    #   Two containers with the same content will have the same hash code.
     #
     #   @see http://www.ruby-doc.org/core/Object.html#method-i-hash
     #   @return [Fixnum]
