@@ -16,6 +16,11 @@ class DummyServer < WEBrick::HTTPServer
       @handlers ||= {}
     end
 
+    def initialize(server, memo)
+      super(server)
+      @memo = memo
+    end
+
     %w[get post head].each do |method|
       class_eval <<-RUBY, __FILE__, __LINE__ + 1
         def self.#{method}(path, &block)
@@ -171,6 +176,14 @@ class DummyServer < WEBrick::HTTPServer
                  else
                    "#{req.body}-raw"
                  end
+    end
+
+    get "/retry-2" do |_req, res|
+      @memo[:attempts] ||= 0
+      @memo[:attempts] += 1
+
+      res.body = "retried #{@memo[:attempts]}x"
+      res.status = @memo[:attempts] == 2 ? 200 : 500
     end
   end
 end
