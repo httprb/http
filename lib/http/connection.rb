@@ -90,17 +90,19 @@ module HTTP
     #
     # @return [String] data chunk
     # @return [nil] when no more data left
-    def readpartial(size = BUFFER_SIZE)
+    def readpartial(size = BUFFER_SIZE, outbuf = nil)
       return unless @pending_response
 
       chunk = @parser.read(size)
-      return chunk if chunk
 
-      finished = (read_more(size) == :eof) || @parser.finished?
-      chunk    = @parser.read(size)
-      finish_response if finished
+      unless chunk
+        finished = (read_more(size) == :eof) || @parser.finished?
+        chunk    = @parser.read(size)
+        finish_response if finished
+      end
 
-      chunk || "".b
+      chunk ||= "".b
+      outbuf ? outbuf.replace(chunk) : chunk
     end
 
     # Reads data from socket up until headers are loaded

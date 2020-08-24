@@ -84,5 +84,13 @@ RSpec.describe HTTP::Connection do
       expect(buffer).to eq "1234567890"
       expect(connection.finished_request?).to be true
     end
+
+    it "fill outbuf when present" do
+      connection.read_headers!
+      outbuf = String.new
+      buffer = String.new
+      buffer << outbuf while connection.readpartial(2, outbuf)
+      expect(buffer).to eq "1234567890"
+    end
   end
 end
