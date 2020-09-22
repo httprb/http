@@ -96,11 +96,11 @@ module HTTP
       @body    = prepare_body(opts[:body])
     end
 
+    # @deprecated Will be removes in 5.0.0
     # Returns new Request with updated uri
-    def redirect(uri, verb = @verb, cookies_raw: nil)
+    def redirect(uri, verb = @verb)
       headers = self.headers.dup
       headers.delete(Headers::HOST)
-      headers[Headers::COOKIE] = cookies_raw if cookies_raw
 
       self.class.new(
         :verb           => verb,

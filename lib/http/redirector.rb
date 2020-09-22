@@ -63,6 +63,7 @@ module HTTP
         # XXX(ixti): using `Array#inject` to return `nil` if no Location header.
         @request  = redirect_to(@response.headers.get(Headers::LOCATION).inject(:+))
         @response = yield @request
+
         @response.cookies.inject(@jar, :<<)
       end
 
@@ -81,7 +82,11 @@ module HTTP
     # @return [Boolean]
     def endless_loop?
       visits = @visited.count(@visited.last)
-      @visited.last == @visited.first ? visits > 2 : visits > 1 # allow retrying first uri once
+
+      # HACK: allow retrying first uri once, to support situation when first
+      #   request redirects to the same URI but sets some cookies. Perfectly we
+      #   should probably respect cookies as well here...
+      @visited.last == @visited.first ? visits > 2 : visits > 1
     end
 
     # Redirect policy for follow
@@ -98,10 +103,25 @@ module HTTP
       end
 
       verb = :get if !SEE_OTHER_ALLOWED_VERBS.include?(verb) && 303 == code
-      redirect_uri = @request.uri.join(uri)
-      cookies_raw = @jar.each(redirect_uri).map(&:cookie_value).join("; ")
 
-      @request.redirect(uri, verb, :cookies_raw => cookies_raw)
+      redirect_request(verb, @request.uri.join(uri))
+    end
+
+    def redirect_request(verb, uri)
+      headers = @request.headers.dup
+
+      headers.delete(Headers::HOST)
+      headers[Headers::COOKIE] = @jar.each(uri).map(&:cookie_value).join("; ")
+
+      Request.new(
+        :verb           => verb,
+        :uri            => uri,
+        :headers        => headers,
+        :proxy          => @request.proxy,
+        :body           => @request.body.source,
+        :version        => @request.version,
+        :uri_normalizer => @request.uri_normalizer
+      )
     end
   end
 end
