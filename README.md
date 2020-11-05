@@ -45,22 +45,22 @@ Top three reasons:
    http.rb achieves the best performance of any Ruby HTTP library which
    implements the HTTP protocol in Ruby instead of C:
 
-  | HTTP client              | Time   | Implementation        |
-  |--------------------------|--------|-----------------------|
-  | curb (persistent)        | 2.519  | libcurl wrapper       |
-  | em-http-request          | 2.731  | EM + http_parser.rb   |
-  | Typhoeus                 | 2.851  | libcurl wrapper       |
-  | StreamlyFFI (persistent) | 2.853  | libcurl wrapper       |
-  | http.rb (persistent)     | 2.970  | Ruby + http_parser.rb |
-  | http.rb                  | 3.588  | Ruby + http_parser.rb |
-  | HTTParty                 | 3.931  | Net::HTTP wrapper     |
-  | Net::HTTP                | 3.959  | Pure Ruby             |
-  | Net::HTTP (persistent)   | 4.043  | Pure Ruby             |
-  | open-uri                 | 4.479  | Net::HTTP wrapper     |
-  | Excon (persistent)       | 4.618  | Pure Ruby             |
-  | Excon                    | 4.701  | Pure Ruby             |
-  | RestClient               | 26.838 | Net::HTTP wrapper     |
-
+  | Time   | HTTP client              | Implementation        |
+  |--------|--------------------------|-----------------------|
+  | 2.519  | curb (persistent)        | libcurl wrapper       |
+  | 2.731  | em-http-request          | EM + http_parser.rb   |  
+  | 2.851  | Typhoeus                 | libcurl wrapper       |
+  | 2.853  | StreamlyFFI (persistent) | libcurl wrapper       |
+  | 2.970  | http.rb (persistent)     | Ruby + http_parser.rb |
+  | 3.588  | http.rb                  | Ruby + http_parser.rb |
+  | 3.931  | HTTParty                 | Net::HTTP wrapper     |
+  | 3.959  | Net::HTTP                | Pure Ruby             |
+  | 4.043  | Net::HTTP (persistent)   | Pure Ruby             |
+  | 4.479  | open-uri                 | Net::HTTP wrapper     |  
+  | 4.618  | Excon (persistent)       | Pure Ruby             |
+  | 4.701  | Excon                    | Pure Ruby             |
+  | 26.838 | RestClient               | Net::HTTP wrapper     |
+  
 Benchmarks performed using excon's benchmarking tool
 
 DISCLAIMER: Most benchmarks you find in READMEs are crap,
