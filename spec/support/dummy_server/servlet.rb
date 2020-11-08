@@ -172,5 +172,17 @@ class DummyServer < WEBrick::HTTPServer
                    "#{req.body}-raw"
                  end
     end
+
+    post "/no-content-204" do |req, res|
+      res.status = 204
+      res.body   = ""
+
+      case req["Accept-Encoding"]
+      when "gzip" then
+        res["Content-Encoding"] = "gzip"
+      when "deflate" then
+        res["Content-Encoding"] = "deflate"
+      end
+    end
   end
 end

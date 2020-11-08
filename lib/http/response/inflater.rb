@@ -16,7 +16,7 @@ module HTTP
         if chunk
           chunk = zstream.inflate(chunk)
         elsif !zstream.closed?
-          zstream.finish
+          zstream.finish if zstream.total_in.positive?
           zstream.close
         end
         chunk
