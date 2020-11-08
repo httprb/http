@@ -438,6 +438,22 @@ RSpec.describe HTTP do
 
         expect(response.to_s).to eq("#{body}-deflated")
       end
+
+      it "returns empty body for no content response where Content-Encoding is gzip" do
+        client   = HTTP.use(:auto_inflate).headers("Accept-Encoding" => "gzip")
+        body     = "Hello!"
+        response = client.post("#{dummy.endpoint}/no-content-204", :body => body)
+
+        expect(response.to_s).to eq("")
+      end
+
+      it "returns empty body for no content response where Content-Encoding is deflate" do
+        client   = HTTP.use(:auto_inflate).headers("Accept-Encoding" => "deflate")
+        body     = "Hello!"
+        response = client.post("#{dummy.endpoint}/no-content-204", :body => body)
+
+        expect(response.to_s).to eq("")
+      end
     end
 
     context "with :normalize_uri" do
