@@ -115,8 +115,8 @@ for more detailed documentation and usage notes.
 
 The following API documentation is also available:
 
-* [YARD API documentation](http://www.rubydoc.info/gems/http/frames)
-* [Chainable module (all chainable methods)](http://www.rubydoc.info/gems/http/HTTP/Chainable)
+* [YARD API documentation](https://www.rubydoc.info/github/httprb/http)
+* [Chainable module (all chainable methods)](https://www.rubydoc.info/github/httprb/http/HTTP/Chainable)
 
 [documentation]: https://github.com/httprb/http/wiki
 
