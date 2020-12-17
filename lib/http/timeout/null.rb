@@ -37,7 +37,7 @@ module HTTP
 
         return unless ssl_context.verify_mode == OpenSSL::SSL::VERIFY_PEER
 
-        @socket.post_connection_check(host)
+        @socket.post_connection_check(host) if ssl_context.verify_hostname
       end
 
       # Read from the socket
