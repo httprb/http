@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        ruby: [ ruby-2.4, ruby-2.5, ruby-2.6, ruby-2.7, jruby-9.2.11 ]
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+
+      - uses: actions/cache@v1
+        with:
+          path: vendor/bundle
+          key: bundle-use-ruby-${{ matrix.os }}-${{ matrix.ruby }}-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: bundle-use-ruby-${{ matrix.os }}-${{ matrix.ruby }}-
+
+      - name: bundle install
+        run: |
+          bundle config set path "vendor/bundle"
+          bundle config set without "development"
+          bundle install --jobs 4
+
+      - run: bundle exec rspec --format progress --force-colour
+
+      - name: Prepare Coveralls test coverage report
+        uses: coverallsapp/github-action@v1.1.2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          flag-name: "${{ matrix.ruby }} @${{ matrix.os }}"
+          path-to-lcov: ./coverage/lcov/lcov.info
+          parallel: true
+
+  coveralls:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Finalize Coveralls test coverage report
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          parallel-finished: true
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.4
+
+      - uses: actions/cache@v1
+        with:
+          path: vendor/bundle
+          key: bundle-use-ruby-lint-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: bundle-use-ruby-lint-
+
+      - name: bundle install
+        run: |
+          bundle config set path "vendor/bundle"
+          bundle config set without "development"
+          bundle install --jobs 4
+
+      - run: bundle exec rubocop --color
+      - run: bundle exec rake verify_measurements
