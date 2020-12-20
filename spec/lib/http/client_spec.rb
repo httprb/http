@@ -350,7 +350,8 @@ RSpec.describe HTTP::Client do
     let(:client)  { described_class.new(options.merge(extra_options)) }
   end
 
-  describe "working with SSL" do
+  # TODO: https://github.com/httprb/http/issues/627
+  xdescribe "working with SSL" do
     run_server(:dummy_ssl) { DummyServer.new(:ssl => true) }
 
     let(:extra_options) { {} }
