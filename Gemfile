@@ -19,14 +19,14 @@ group :development do
 end
 
 group :test do
-  gem "certificate_authority", :require => false
+  gem "certificate_authority", "~> 1.0", :require => false
 
   gem "backports"
 
   gem "simplecov",      :require => false
   gem "simplecov-lcov", :require => false
 
-  gem "rspec", "~> 3.0"
+  gem "rspec", "~> 3.10"
   gem "rspec-its"
 
   gem "rubocop", "= 0.68.1"
