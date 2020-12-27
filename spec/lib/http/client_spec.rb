@@ -8,46 +8,50 @@ require "support/ssl_helper"
 RSpec.describe HTTP::Client do
   run_server(:dummy) { DummyServer.new }
 
-  StubbedClient = Class.new(HTTP::Client) do
-    def perform(request, options)
-      stubbed = stubs[request.uri]
-      stubbed ? stubbed.call(request) : super(request, options)
-    end
-
-    def stubs
-      @stubs ||= {}
-    end
-
-    def stub(stubs)
-      @stubs = stubs.each_with_object({}) do |(k, v), o|
-        o[HTTP::URI.parse k] = v
+  before do
+    stubbed_client = Class.new(HTTP::Client) do
+      def perform(request, options)
+        stubbed = stubs[HTTP::URI::NORMALIZER.call(request.uri).to_s]
+        stubbed ? stubbed.call(request) : super(request, options)
       end
 
-      self
-    end
-  end
+      def stubs
+        @stubs ||= {}
+      end
 
-  def redirect_response(location, status = 302)
-    lambda do |request|
-      HTTP::Response.new(
-        :status  => status,
-        :version => "1.1",
-        :headers => {"Location" => location},
-        :body    => "",
-        :request => request
-      )
-    end
-  end
+      def stub(stubs)
+        @stubs = stubs.each_with_object({}) do |(k, v), o|
+          o[HTTP::URI::NORMALIZER.call(k).to_s] = v
+        end
 
-  def simple_response(body, status = 200)
-    lambda do |request|
-      HTTP::Response.new(
-        :status  => status,
-        :version => "1.1",
-        :body    => body,
-        :request => request
-      )
+        self
+      end
     end
+
+    def redirect_response(location, status = 302)
+      lambda do |request|
+        HTTP::Response.new(
+          :status  => status,
+          :version => "1.1",
+          :headers => {"Location" => location},
+          :body    => "",
+          :request => request
+        )
+      end
+    end
+
+    def simple_response(body, status = 200)
+      lambda do |request|
+        HTTP::Response.new(
+          :status  => status,
+          :version => "1.1",
+          :body    => body,
+          :request => request
+        )
+      end
+    end
+
+    stub_const("StubbedClient", stubbed_client)
   end
 
   describe "following redirects" do
