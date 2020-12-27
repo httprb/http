@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         ruby: [ ruby-2.4, ruby-2.5, ruby-2.6, ruby-2.7, jruby-9.2.11 ]
-        os: [ ubuntu-latest, macos-latest, windows-latest ]
+        os: [ ubuntu-latest ]
 
     steps:
       - uses: actions/checkout@v2
