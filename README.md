@@ -108,6 +108,21 @@ require "http"
 ...to pull it in as a dependency.
 
 
+### jRuby
+
+If running on jRuby you eill need to install [`openssl`][openssl-gem], by
+running:
+
+    gem install openssl
+
+Or by adding it to your Gemfile:
+
+    # file: Gemfile
+    gem "openssl"
+
+[openssl-gem]: https://github.com/ruby/openssl
+
+
 ## Documentation
 
 [Please see the http.rb wiki][documentation]
