@@ -5,8 +5,6 @@ ruby RUBY_VERSION
 
 gem "rake"
 
-gem "openssl", "~> 2.0.7", :platform => :jruby
-
 group :development do
   gem "guard-rspec", :require => false
   gem "nokogiri",    :require => false
