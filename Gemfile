@@ -10,22 +10,23 @@ group :development do
   gem "nokogiri",    :require => false
   gem "pry",         :require => false
 
-  platform :ruby_20 do
-    gem "pry-debugger",       :require => false
-    gem "pry-stack_explorer", :require => false
+  # RSpec formatter
+  gem "fuubar", :require => false
+
+  platform :mri do
+    gem "pry-byebug"
   end
 end
 
 group :test do
-  gem "activemodel", :require => false # Used by certificate_authority
-  gem "certificate_authority", :require => false
+  gem "certificate_authority", "~> 1.0", :require => false
 
   gem "backports"
 
-  gem "coveralls", :require => false
-  gem "simplecov", ">= 0.9"
+  gem "simplecov",      :require => false
+  gem "simplecov-lcov", :require => false
 
-  gem "rspec", "~> 3.0"
+  gem "rspec", "~> 3.10"
   gem "rspec-its"
 
   gem "rubocop", "= 0.68.1"

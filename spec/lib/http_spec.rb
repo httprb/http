@@ -95,7 +95,8 @@ RSpec.describe HTTP do
         expect(response.to_s).to match(/<!doctype html>/)
       end
 
-      context "ssl" do
+      # TODO: htt:s://github.com/httprb/http/issues/627
+      xcontext "ssl" do
         it "responds with the endpoint's body" do
           response = ssl_client.via(proxy.addr, proxy.port).get dummy_ssl.endpoint
           expect(response.to_s).to match(/<!doctype html>/)
@@ -131,7 +132,8 @@ RSpec.describe HTTP do
         expect(response.status).to eq(407)
       end
 
-      context "ssl" do
+      # TODO: htt:s://github.com/httprb/http/issues/627
+      xcontext "ssl" do
         it "responds with the endpoint's body" do
           response = ssl_client.via(proxy.addr, proxy.port, "username", "password").get dummy_ssl.endpoint
           expect(response.to_s).to match(/<!doctype html>/)
