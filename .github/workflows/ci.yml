@@ -34,7 +34,10 @@ jobs:
           bundle config set without "development"
           bundle install --jobs 4
 
-      - run: bundle exec rspec --format progress --force-colour
+      - name: bundle exec rspec
+        env:
+          JRUBY_OPTS: --debug
+        run: bundle exec rspec --format progress --force-colour
 
       - name: Prepare Coveralls test coverage report
         uses: coverallsapp/github-action@v1.1.2
