@@ -1,8 +1,9 @@
 require: rubocop-performance
 
 AllCops:
-  TargetRubyVersion: 2.3
   DisplayCopNames: true
+  DefaultFormatter: fuubar
+  TargetRubyVersion: 2.3
 
 ## Layout ######################################################################
 

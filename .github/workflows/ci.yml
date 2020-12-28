@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ master ]
 
+env:
+  BUNDLE_WITHOUT: "development"
+  JRUBY_OPTS: "--dev --debug"
+
 jobs:
   test:
     runs-on: ${{ matrix.os }}
@@ -21,22 +25,9 @@ jobs:
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
-
-      - uses: actions/cache@v1
-        with:
-          path: vendor/bundle
-          key: bundle-use-ruby-${{ matrix.os }}-${{ matrix.ruby }}-${{ hashFiles('**/Gemfile.lock') }}
-          restore-keys: bundle-use-ruby-${{ matrix.os }}-${{ matrix.ruby }}-
-
-      - name: bundle install
-        run: |
-          bundle config set path "vendor/bundle"
-          bundle config set without "development"
-          bundle install --jobs 4
+          bundler-cache: true
 
       - name: bundle exec rspec
-        env:
-          JRUBY_OPTS: --debug
         run: bundle exec rspec --format progress --force-colour
 
       - name: Prepare Coveralls test coverage report
@@ -66,18 +57,9 @@ jobs:
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: 2.4
+          bundler-cache: true
 
-      - uses: actions/cache@v1
-        with:
-          path: vendor/bundle
-          key: bundle-use-ruby-lint-${{ hashFiles('**/Gemfile.lock') }}
-          restore-keys: bundle-use-ruby-lint-
+      - name: bundle exec rubocop
+        run: bundle exec rubocop --format progress --color
 
-      - name: bundle install
-        run: |
-          bundle config set path "vendor/bundle"
-          bundle config set without "development"
-          bundle install --jobs 4
-
-      - run: bundle exec rubocop --color
       - run: bundle exec rake verify_measurements
