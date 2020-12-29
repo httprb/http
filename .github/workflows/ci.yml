@@ -16,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        ruby: [ ruby-2.4, ruby-2.5, ruby-2.6, ruby-2.7, jruby-9.2.11 ]
+        ruby: [ ruby-2.4, ruby-2.5, ruby-2.6, ruby-2.7, jruby-9.2 ]
         os: [ ubuntu-latest ]
 
     steps:

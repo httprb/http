@@ -321,17 +321,17 @@ RSpec.describe HTTP::Headers do
 
     it "yields header keys specified as symbols in normalized form" do
       keys = headers.each.map(&:first)
-      expect(keys).to eq(["Set-Cookie", "Content-Type", "Set-Cookie"])
+      expect(keys).to eq(%w[Set-Cookie Content-Type Set-Cookie])
     end
 
     it "yields headers specified as strings without conversion" do
       headers.add "X_kEy", "value"
       keys = headers.each.map(&:first)
-      expect(keys).to eq(["Set-Cookie", "Content-Type", "Set-Cookie", "X_kEy"])
+      expect(keys).to eq(%w[Set-Cookie Content-Type Set-Cookie X_kEy])
     end
 
     it "returns self instance if block given" do
-      expect(headers.each { |*| }).to be headers
+      expect(headers.each { |*| }).to be headers # rubocop:disable Lint/EmptyBlock
     end
 
     it "returns Enumerator if no block given" do

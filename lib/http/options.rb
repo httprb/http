@@ -32,7 +32,7 @@ module HTTP
 
       def def_option(name, reader_only: false, &interpreter)
         defined_options << name.to_sym
-        interpreter ||= lambda { |v| v }
+        interpreter ||= ->(v) { v }
 
         if reader_only
           attr_reader name
@@ -47,7 +47,7 @@ module HTTP
       end
     end
 
-    def initialize(options = {}) # rubocop:disable Style/OptionHash
+    def initialize(options = {})
       defaults = {
         :response           => :auto,
         :proxy              => {},

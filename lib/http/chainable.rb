@@ -9,63 +9,63 @@ module HTTP
     # Request a get sans response body
     # @param uri
     # @option options [Hash]
-    def head(uri, options = {}) # rubocop:disable Style/OptionHash
+    def head(uri, options = {})
       request :head, uri, options
     end
 
     # Get a resource
     # @param uri
     # @option options [Hash]
-    def get(uri, options = {}) # rubocop:disable Style/OptionHash
+    def get(uri, options = {})
       request :get, uri, options
     end
 
     # Post to a resource
     # @param uri
     # @option options [Hash]
-    def post(uri, options = {}) # rubocop:disable Style/OptionHash
+    def post(uri, options = {})
       request :post, uri, options
     end
 
     # Put to a resource
     # @param uri
     # @option options [Hash]
-    def put(uri, options = {}) # rubocop:disable Style/OptionHash
+    def put(uri, options = {})
       request :put, uri, options
     end
 
     # Delete a resource
     # @param uri
     # @option options [Hash]
-    def delete(uri, options = {}) # rubocop:disable Style/OptionHash
+    def delete(uri, options = {})
       request :delete, uri, options
     end
 
     # Echo the request back to the client
     # @param uri
     # @option options [Hash]
-    def trace(uri, options = {}) # rubocop:disable Style/OptionHash
+    def trace(uri, options = {})
       request :trace, uri, options
     end
 
     # Return the methods supported on the given URI
     # @param uri
     # @option options [Hash]
-    def options(uri, options = {}) # rubocop:disable Style/OptionHash
+    def options(uri, options = {})
       request :options, uri, options
     end
 
     # Convert to a transparent TCP/IP tunnel
     # @param uri
     # @option options [Hash]
-    def connect(uri, options = {}) # rubocop:disable Style/OptionHash
+    def connect(uri, options = {})
       request :connect, uri, options
     end
 
     # Apply partial modifications to a resource
     # @param uri
     # @option options [Hash]
-    def patch(uri, options = {}) # rubocop:disable Style/OptionHash
+    def patch(uri, options = {})
       request :patch, uri, options
     end
 
@@ -148,7 +148,7 @@ module HTTP
 
       yield p_client
     ensure
-      p_client.close if p_client
+      p_client&.close
     end
 
     # Make a request through an HTTP proxy
@@ -173,7 +173,7 @@ module HTTP
     # @param options
     # @return [HTTP::Client]
     # @see Redirector#initialize
-    def follow(options = {}) # rubocop:disable Style/OptionHash
+    def follow(options = {})
       branch default_options.with_follow options
     end
 
@@ -211,10 +211,11 @@ module HTTP
     # @option opts [#to_s] :user
     # @option opts [#to_s] :pass
     def basic_auth(opts)
-      user = opts.fetch :user
-      pass = opts.fetch :pass
+      user  = opts.fetch(:user)
+      pass  = opts.fetch(:pass)
+      creds = "#{user}:#{pass}"
 
-      auth("Basic " + Base64.strict_encode64("#{user}:#{pass}"))
+      auth("Basic #{Base64.strict_encode64(creds)}")
     end
 
     # Get options for HTTP

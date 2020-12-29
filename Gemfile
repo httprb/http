@@ -23,14 +23,16 @@ group :test do
 
   gem "backports"
 
+  gem "rubocop"
+  gem "rubocop-performance"
+  gem "rubocop-rake"
+  gem "rubocop-rspec"
+
   gem "simplecov",      :require => false
   gem "simplecov-lcov", :require => false
 
   gem "rspec", "~> 3.10"
   gem "rspec-its"
-
-  gem "rubocop", "= 0.68.1"
-  gem "rubocop-performance"
 
   gem "yardstick"
 end

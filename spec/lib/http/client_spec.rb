@@ -318,7 +318,7 @@ RSpec.describe HTTP::Client do
 
         expect(response.code).to eq(200)
         expect(feature_instance.captured_request.verb).to eq(:get)
-        expect(feature_instance.captured_request.uri.to_s).to eq(dummy.endpoint + "/")
+        expect(feature_instance.captured_request.uri.to_s).to eq("#{dummy.endpoint}/")
       end
 
       it "is given a chance to wrap the Response" do

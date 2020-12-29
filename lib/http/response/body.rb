@@ -27,8 +27,7 @@ module HTTP
       # (see HTTP::Client#readpartial)
       def readpartial(*args)
         stream!
-        chunk = @stream.readpartial(*args)
-        chunk.force_encoding(@encoding) if chunk
+        @stream.readpartial(*args)&.force_encoding(@encoding)
       end
 
       # Iterate over the body, allowing it to be enumerable

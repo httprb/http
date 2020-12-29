@@ -12,7 +12,7 @@ module HTTP
 
       attr_reader :options, :socket
 
-      def initialize(options = {}) # rubocop:disable Style/OptionHash
+      def initialize(options = {})
         @options = options
       end
 

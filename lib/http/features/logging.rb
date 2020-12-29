@@ -9,33 +9,7 @@ module HTTP
     #    HTTP.use(logging: {logger: Logger.new(STDOUT)}).get("https://example.com/")
     #
     class Logging < Feature
-      attr_reader :logger
-
-      def initialize(logger: NullLogger.new)
-        @logger = logger
-      end
-
-      def wrap_request(request)
-        logger.info { "> #{request.verb.to_s.upcase} #{request.uri}" }
-        logger.debug do
-          headers = request.headers.map { |name, value| "#{name}: #{value}" }.join("\n")
-          body = request.body.source
-
-          headers + "\n\n" + body.to_s
-        end
-        request
-      end
-
-      def wrap_response(response)
-        logger.info { "< #{response.status}" }
-        logger.debug do
-          headers = response.headers.map { |name, value| "#{name}: #{value}" }.join("\n")
-          body = response.body.to_s
-
-          headers + "\n\n" + body
-        end
-        response
-      end
+      HTTP::Options.register_feature(:logging, self)
 
       class NullLogger
         %w[fatal error warn info debug].each do |level|
@@ -49,7 +23,31 @@ module HTTP
         end
       end
 
-      HTTP::Options.register_feature(:logging, self)
+      attr_reader :logger
+
+      def initialize(logger: NullLogger.new)
+        @logger = logger
+      end
+
+      def wrap_request(request)
+        logger.info { "> #{request.verb.to_s.upcase} #{request.uri}" }
+        logger.debug { "#{stringify_headers(request.headers)}\n\n#{request.body.source}" }
+
+        request
+      end
+
+      def wrap_response(response)
+        logger.info { "< #{response.status}" }
+        logger.debug { "#{stringify_headers(response.headers)}\n\n#{response.body}" }
+
+        response
+      end
+
+      private
+
+      def stringify_headers(headers)
+        headers.map { |name, value| "#{name}: #{value}" }.join("\n")
+      end
     end
   end
 end

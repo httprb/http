@@ -25,7 +25,7 @@ module HTTP
     end
 
     # Make an HTTP request
-    def request(verb, uri, opts = {}) # rubocop:disable Style/OptionHash
+    def request(verb, uri, opts = {})
       opts = @default_options.merge(opts)
       req = build_request(verb, uri, opts)
       res = perform(req, opts)
@@ -37,7 +37,7 @@ module HTTP
     end
 
     # Prepare an HTTP request
-    def build_request(verb, uri, opts = {}) # rubocop:disable Style/OptionHash
+    def build_request(verb, uri, opts = {})
       opts    = @default_options.merge(opts)
       uri     = make_request_uri(uri, opts)
       headers = make_request_headers(opts)
@@ -97,7 +97,7 @@ module HTTP
     end
 
     def close
-      @connection.close if @connection
+      @connection&.close
       @connection = nil
       @state = :clean
     end
@@ -120,15 +120,15 @@ module HTTP
     def verify_connection!(uri)
       if default_options.persistent? && uri.origin != default_options.persistent
         raise StateError, "Persistence is enabled for #{default_options.persistent}, but we got #{uri.origin}"
+      end
+
       # We re-create the connection object because we want to let prior requests
       # lazily load the body as long as possible, and this mimics prior functionality.
-      elsif @connection && (!@connection.keep_alive? || @connection.expired?)
-        close
+      return close if @connection && (!@connection.keep_alive? || @connection.expired?)
+
       # If we get into a bad state (eg, Timeout.timeout ensure being killed)
       # close the connection to prevent potential for mixed responses.
-      elsif @state == :dirty
-        close
-      end
+      return close if @state == :dirty
     end
 
     # Merges query params if needed

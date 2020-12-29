@@ -35,7 +35,7 @@ task :generate_status_codes do
   end
 
   File.open("./lib/http/response/status/reasons.rb", "w") do |io|
-    io.puts <<-TPL.gsub(/^[ ]{6}/, "")
+    io.puts <<~TPL
       # AUTO-GENERATED FILE, DO NOT CHANGE IT MANUALLY
 
       require "delegate"
