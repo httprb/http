@@ -204,7 +204,7 @@ RSpec.describe HTTP::Client do
     context "when passing an HTTP::FormData object directly" do
       it "creates url encoded form data object" do
         client    = HTTP::Client.new
-        form_data = HTTP::FormData::Multipart.new(:foo => "bar")
+        form_data = HTTP::FormData::Multipart.new({ :foo => "bar" })
 
         allow(client).to receive(:perform)
 

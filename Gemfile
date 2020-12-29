@@ -5,6 +5,10 @@ ruby RUBY_VERSION
 
 gem "rake"
 
+# Ruby 3.0 does not ship it anymore.
+# TODO: We should probably refactor specs to avoid need for it.
+gem "webrick"
+
 group :development do
   gem "guard-rspec", :require => false
   gem "nokogiri",    :require => false
