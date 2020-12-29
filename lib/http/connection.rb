@@ -3,7 +3,7 @@
 require "forwardable"
 
 require "http/headers"
-require "http/response/parser"
+require "http/response/llparser"
 
 module HTTP
   # A connection to the HTTP server
@@ -37,7 +37,7 @@ module HTTP
       @failed_proxy_connect = false
       @buffer               = "".b
 
-      @parser = Response::Parser.new
+      @parser = Response::LLParser.new
 
       @socket = options.timeout_class.new(options.timeout_options)
       @socket.connect(options.socket_class, req.socket_host, req.socket_port, options.nodelay)
