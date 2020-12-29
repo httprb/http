@@ -39,7 +39,7 @@ module HTTP
     # @param [Hash] opts
     # @option opts [Boolean] :strict (true) redirector hops policy
     # @option opts [#to_i] :max_hops (5) maximum allowed amount of hops
-    def initialize(opts = {}) # rubocop:disable Style/OptionHash
+    def initialize(opts = {})
       @strict   = opts.fetch(:strict, true)
       @max_hops = opts.fetch(:max_hops, 5).to_i
     end

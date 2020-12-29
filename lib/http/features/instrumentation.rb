@@ -29,7 +29,7 @@ module HTTP
       def wrap_request(request)
         # Emit a separate "start" event, so a logger can print the request
         # being run without waiting for a response
-        instrumenter.instrument("start_#{name}", :request => request) {}
+        instrumenter.instrument("start_#{name}", :request => request)
         instrumenter.start(name, :request => request)
         request
       end

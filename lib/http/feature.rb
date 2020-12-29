@@ -2,7 +2,7 @@
 
 module HTTP
   class Feature
-    def initialize(opts = {}) # rubocop:disable Style/OptionHash
+    def initialize(opts = {})
       @opts = opts
     end
 

@@ -58,7 +58,7 @@ module HTTP
       #   SYMBOLS[418] # => :im_a_teapot
       #
       # @return [Hash<Fixnum => Symbol>]
-      SYMBOLS = Hash[REASONS.map { |k, v| [k, symbolize(v)] }].freeze
+      SYMBOLS = REASONS.transform_values { |v| symbolize(v) }.freeze
 
       # Reversed {SYMBOLS} map.
       #

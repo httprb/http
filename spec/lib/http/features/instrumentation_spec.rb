@@ -2,7 +2,28 @@
 
 RSpec.describe HTTP::Features::Instrumentation do
   subject(:feature) { HTTP::Features::Instrumentation.new(:instrumenter => instrumenter) }
+
   let(:instrumenter) { TestInstrumenter.new }
+
+  before do
+    test_instrumenter = Class.new(HTTP::Features::Instrumentation::NullInstrumenter) do
+      attr_reader :output
+
+      def initialize
+        @output = {}
+      end
+
+      def start(_name, payload)
+        output[:start] = payload
+      end
+
+      def finish(_name, payload)
+        output[:finish] = payload
+      end
+    end
+
+    stub_const("TestInstrumenter", test_instrumenter)
+  end
 
   describe "logging the request" do
     let(:request) do
@@ -37,21 +58,6 @@ RSpec.describe HTTP::Features::Instrumentation do
       feature.wrap_response(response)
 
       expect(instrumenter.output[:finish]).to eq(:response => response)
-    end
-  end
-
-  class TestInstrumenter < HTTP::Features::Instrumentation::NullInstrumenter
-    attr_reader :output
-    def initialize
-      @output = {}
-    end
-
-    def start(_name, payload)
-      output[:start] = payload
-    end
-
-    def finish(_name, payload)
-      output[:finish] = payload
     end
   end
 end

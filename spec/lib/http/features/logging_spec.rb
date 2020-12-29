@@ -4,10 +4,8 @@ require "logger"
 
 RSpec.describe HTTP::Features::Logging do
   subject(:feature) do
-    logger = Logger.new(logdev)
-    logger.formatter = ->(severity, _, _, message) do
-      format("** %s **\n%s\n", severity, message)
-    end
+    logger           = Logger.new(logdev)
+    logger.formatter = ->(severity, _, _, message) { format("** %s **\n%s\n", severity, message) }
 
     described_class.new(:logger => logger)
   end

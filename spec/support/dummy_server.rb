@@ -24,7 +24,7 @@ class DummyServer < WEBrick::HTTPServer
     :SSLStartImmediately => true
   ).freeze
 
-  def initialize(options = {}) # rubocop:disable Style/OptionHash
+  def initialize(options = {})
     super(options[:ssl] ? SSL_CONFIG : CONFIG)
     mount("/", Servlet)
   end
