@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-require "timeout"
 require "io/wait"
+require "resolv"
+require "timeout"
 
 require "http/timeout/null"
 
@@ -12,6 +13,9 @@ module HTTP
         super
 
         @timeout = @time_left = options.fetch(:global_timeout)
+        @dns_resolver = options.fetch(:dns_resolver) do
+          ::Resolv.method(:getaddresses)
+        end
       end
 
       # To future me: Don't remove this again, past you was smarter.
@@ -19,14 +23,28 @@ module HTTP
         @time_left = @timeout
       end
 
-      def connect(socket_class, host, port, nodelay = false)
-        reset_timer
-        ::Timeout.timeout(@time_left, TimeoutError) do
-          @socket = socket_class.open(host, port)
-          @socket.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1) if nodelay
+      def connect(socket_class, host_name, *args)
+        connect_operation = lambda do |host_address|
+          ::Timeout.timeout(@time_left, TimeoutError) do
+            super(socket_class, host_address, *args)
+          end
         end
-
-        log_time
+        host_addresses = @dns_resolver.call(host_name)
+        # ensure something to iterates
+        trying_targets = host_addresses.empty? ? [host_name] : host_addresses
+        reset_timer
+        trying_iterator = trying_targets.lazy
+        error = nil
+        begin
+          connect_operation.call(trying_iterator.next).tap do
+            log_time
+          end
+        rescue TimeoutError => e
+          error = e
+          retry
+        rescue ::StopIteration
+          raise error
+        end
       end
 
       def connect_ssl
