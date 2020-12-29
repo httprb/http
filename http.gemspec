@@ -31,6 +31,7 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency "http-cookie",    "~> 1.0"
   gem.add_runtime_dependency "http-form_data", "~> 2.2"
   gem.add_runtime_dependency "http-parser",    "~> 1.2.0"
+  gem.add_runtime_dependency "llhttp"
 
   gem.add_development_dependency "bundler", "~> 2.0"
 
