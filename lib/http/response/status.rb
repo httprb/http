@@ -139,6 +139,26 @@ module HTTP
         RUBY
       end
 
+      # Hash representation of a
+      #
+      # @return [Hash[Symbol, Any]]
+      def to_h
+        {
+          code: code,
+          reason: reason
+        }
+      end
+
+      # Pattern matching interface
+      #
+      # @param keys [Array]
+      #   Keys to be extracted
+      #
+      # @return [Hash[Symbol, Any]]
+      def deconstruct_keys(keys)
+        to_h.slice(*keys)
+      end
+
       def __setobj__(obj)
         raise TypeError, "Expected #{obj.inspect} to respond to #to_i" unless obj.respond_to? :to_i
 

@@ -169,6 +169,16 @@ module HTTP
       Hash[*hash_pairs]
     end
 
+    # Pattern matching interface
+    #
+    # @param keys [Array]
+    #   Keys to be extracted
+    #
+    # @return [Hash[Symbol, Any]]
+    def deconstruct_keys(keys)
+      to_hash.slice(*keys)
+    end
+
     def dup
       dupped = super
       yield(dupped) if block_given?

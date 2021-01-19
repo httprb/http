@@ -171,4 +171,47 @@ RSpec.describe HTTP::Response do
     end
     it { is_expected.not_to be_chunked }
   end
+
+  # Pattern Matching only exists in Ruby 2.7+, guard against execution of
+  # tests otherwise
+  if RUBY_VERSION >= '2.7'
+    describe '#to_h' do
+      it 'returns a Hash representation of a Response' do
+        expect(response.to_h).to include({
+          body: "Hello world!",
+          headers: a_kind_of(HTTP::Headers),
+          proxy_headers: a_kind_of(HTTP::Headers),
+          request: a_kind_of(HTTP::Request),
+          status: a_kind_of(HTTP::Response::Status),
+          version: "1.1",
+        })
+      end
+    end
+
+    describe 'Pattern Matching' do
+      it 'can perform a pattern match' do
+        value =
+          case response
+          in body: /Hello/, version: /^1.\d/
+            true
+          else
+            false
+          end
+
+        expect(value).to eq(true)
+      end
+
+      it 'can perform an array pattern match' do
+        value =
+          case response
+          in [200, *]
+            true
+          else
+            false
+          end
+
+        expect(value).to eq(true)
+      end
+    end
+  end
 end

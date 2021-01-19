@@ -22,6 +22,25 @@ module HTTP
         chunk
       end
 
+      # Hash representation of an inflater
+      #
+      # @return [Hash[Symbol, Any]]
+      def to_h
+        {
+          connection: connection
+        }
+      end
+
+      # Pattern matching interface
+      #
+      # @param keys [Array[Symbol]]
+      #   Keys to extract
+      #
+      # @return [Hash[Symbol, Any]]
+      def deconstruct_keys(keys)
+        to_h.slice(*keys)
+      end
+
       private
 
       def zstream

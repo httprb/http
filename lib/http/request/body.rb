@@ -49,6 +49,26 @@ module HTTP
         self.class == other.class && self.source == other.source # rubocop:disable Style/RedundantSelf
       end
 
+      # Hash representation of a
+      #
+      # @return [Hash[Symbol, Any]]
+      def to_h
+        {
+          source: @source,
+          size: size
+        }
+      end
+
+      # Pattern matching interface
+      #
+      # @param keys [Array]
+      #   Keys to be extracted
+      #
+      # @return [Hash[Symbol, Any]]
+      def deconstruct_keys(keys)
+        to_h.slice(*keys)
+      end
+
       private
 
       def rewind(io)

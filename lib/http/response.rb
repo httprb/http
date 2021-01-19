@@ -90,6 +90,34 @@ module HTTP
       [status.to_i, headers.to_h, body.to_s]
     end
 
+    # Adds pattern matching interface using `to_a` as a base
+    alias_method :deconstruct, :to_a
+
+    # Returns a Hash of accessible properties
+    #
+    # @return [Hash[Symbol, Any]]
+    def to_h
+      {
+        version: @version,
+        request: @request,
+        status: @status,
+        headers: @headers,
+        proxy_headers: @proxy_headers,
+        body: @body,
+        status: @status,
+      }
+    end
+
+    # Pattern matching interface
+    #
+    # @param keys [Array]
+    #   Keys to be extracted
+    #
+    # @return [Hash[Symbol, Any]]
+    def deconstruct_keys(keys)
+      to_h.slice(*keys)
+    end
+
     # Flushes body and returns self-reference
     #
     # @return [Response]

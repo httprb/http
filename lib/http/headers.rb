@@ -115,12 +115,31 @@ module HTTP
     end
     alias to_hash to_h
 
+    # Pattern matching interface
+    #
+    # @param keys [Array[Symbol]]
+    #   Keys to extract
+    #
+    # @return [Hash[Symbol, Any]]
+    def deconstruct_keys(keys)
+      underscored_keys_map = underscored_keys_mapping
+
+      self
+        .to_h
+        .map { |k, v| [underscored_keys_map[k], v] }
+        .to_h
+        .slice(*keys)
+    end
+
     # Returns headers key/value pairs.
     #
     # @return [Array<[String, String]>]
     def to_a
       @pile.map { |item| item[1..2] }
     end
+
+    # Adds pattern matching interface using `to_a` as a base
+    alias_method :deconstruct, :to_a
 
     # Returns human-readable representation of `self` instance.
     #
@@ -218,6 +237,14 @@ module HTTP
     end
 
     private
+
+    # Underscored version of HTTP Header keys for
+    # Pattern Matching
+    #
+    # @return [Hash[String, Symbol]]
+    def underscored_keys_mapping
+      Hash[keys.map { |k| [k, k.tr('A-Z-', 'a-z_').to_sym] }]
+    end
 
     # Transforms `name` to canonical HTTP header capitalization
     #

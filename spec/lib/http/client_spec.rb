@@ -502,4 +502,35 @@ RSpec.describe HTTP::Client do
       end
     end
   end
+
+  # Pattern Matching only exists in Ruby 2.7+, guard against execution of
+  # tests otherwise
+  if RUBY_VERSION >= '2.7'
+    describe '#to_h' do
+      let(:client) { described_class.new }
+
+      it 'returns a Hash representation of a Client' do
+        expect(client.to_h).to include({
+          connection: nil,
+          state: :clean
+        })
+      end
+    end
+
+    describe 'Pattern Matching' do
+      let(:client) { described_class.new }
+
+      it 'can perform a pattern match' do
+        value =
+          case client
+          in state: :clean
+            true
+          else
+            false
+          end
+
+        expect(value).to eq(true)
+      end
+    end
+  end
 end

@@ -523,5 +523,29 @@ RSpec.describe HTTP::Headers do
     it "is aliased as .[]" do
       expect(described_class.method(:coerce)).to eq described_class.method(:[])
     end
+
+    # Pattern Matching only exists in Ruby 2.7+, guard against execution of
+    # tests otherwise
+    if RUBY_VERSION >= '2.7'
+      describe 'Pattern Matching' do
+        before do
+          headers.add :content_type, "application/json"
+          headers.add :set_cookie,   "hoo=ray"
+          headers.add :set_cookie,   "woo=hoo"
+        end
+
+        it 'can perform a pattern match' do
+          value =
+            case headers
+            in content_type: /json/, set_cookie: [/hoo/, *]
+              true
+            else
+              false
+            end
+
+          expect(value).to eq(true)
+        end
+      end
+    end
   end
 end

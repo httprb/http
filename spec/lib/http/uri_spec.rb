@@ -29,4 +29,37 @@ RSpec.describe HTTP::URI do
       expect(http_uri.to_s).to eq("http://example.com")
     end
   end
+
+  # Pattern Matching only exists in Ruby 2.7+, guard against execution of
+  # tests otherwise
+  if RUBY_VERSION >= '2.7'
+    describe '#to_h' do
+      it 'returns a Hash representation of a URI' do
+        expect(http_uri.to_h).to include({
+          fragment: nil,
+          host: "example.com",
+          password: nil,
+          path: "",
+          port: 80,
+          query: nil,
+          scheme: "http",
+          user: nil
+        })
+      end
+    end
+
+    describe 'Pattern Matching' do
+      it 'can perform a pattern match' do
+        value =
+          case http_uri
+          in host: /example/, port: 50..100, scheme: 'http'
+            true
+          else
+            false
+          end
+
+        expect(value).to eq(true)
+      end
+    end
+  end
 end

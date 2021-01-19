@@ -63,4 +63,40 @@ RSpec.describe HTTP::Connection do
       expect(buffer).to eq "1234567890"
     end
   end
+
+  # Pattern Matching only exists in Ruby 2.7+, guard against execution of
+  # tests otherwise
+  if RUBY_VERSION >= '2.7'
+    describe '#to_h' do
+      it 'returns a Hash representation of a Connection' do
+        expect(connection.to_h).to include({
+          buffer: "",
+          failed_proxy_connect: false,
+          headers: a_kind_of(HTTP::Headers),
+          http_version: "0.0",
+          keep_alive_timeout: 5.0,
+          parser: a_kind_of(HTTP::Response::Parser),
+          pending_request: false,
+          pending_response: false,
+          persistent: false,
+          socket: socket,
+          status_code: 0,
+        })
+      end
+    end
+
+    describe 'Pattern Matching' do
+      it 'can perform a pattern match' do
+        value =
+          case connection
+          in status_code: 0, pending_request: false
+            true
+          else
+            false
+          end
+
+        expect(value).to eq(true)
+      end
+    end
+  end
 end

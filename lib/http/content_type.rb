@@ -30,5 +30,25 @@ module HTTP
       @mime_type = mime_type
       @charset   = charset
     end
+
+    # Hash representaiton of ContentType
+    #
+    # @return [Hash[Symbol, Any]]
+    def to_h
+      {
+        mime_type: @mime_type,
+        charset: @charset,
+      }
+    end
+
+    # Pattern matching interface
+    #
+    # @param keys [Array[Symbol]]
+    #   Keys to extract
+    #
+    # @return [Hash[Symbol, Any]]
+    def deconstruct_keys(keys)
+      to_h.slice(*keys)
+    end
   end
 end

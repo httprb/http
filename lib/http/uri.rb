@@ -146,5 +146,31 @@ module HTTP
     def inspect
       format("#<%s:0x%014x URI:%s>", self.class.name, object_id << 1, to_s)
     end
+
+    # Hash representation of a URI
+    #
+    # @return [Hash[Symbol, Any]]
+    def to_h
+      {
+        scheme: scheme,
+        user: user,
+        password: password,
+        host: host,
+        port: port,
+        path: path,
+        query: query,
+        fragment: fragment,
+      }
+    end
+
+    # Pattern matching interface for a URI
+    #
+    # @param keys [Array[Symbol]]
+    #   Keys to extract from the URI
+    #
+    # @return [Hash[Symbol, Any]]
+    def deconstruct_keys(keys)
+      to_h.slice(*keys)
+    end
   end
 end

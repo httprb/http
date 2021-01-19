@@ -72,6 +72,29 @@ module HTTP
         "#<#{self.class}:#{object_id.to_s(16)} @streaming=#{!!@streaming}>"
       end
 
+      # Hash representation of a body
+      #
+      # @return [Hash[Symbol, Any]]
+      def to_h
+        {
+          stream: @stream,
+          connection: @connection,
+          streaming: @streaming,
+          contents: @contents,
+          encoding: @encoding,
+        }
+      end
+
+      # Pattern matching interface
+      #
+      # @param keys [Array[Symbol]]
+      #   Keys to extract
+      #
+      # @return [Hash[Symbol, Any]]
+      def deconstruct_keys(keys)
+        to_h.slice(*keys)
+      end
+
       private
 
       # Retrieve encoding by name. If encoding cannot be found, default to binary.

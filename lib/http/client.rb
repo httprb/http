@@ -102,6 +102,26 @@ module HTTP
       @state = :clean
     end
 
+    # Hash representation of a client
+    #
+    # @return [Hash[Symbol, Any]]
+    def to_h
+      {
+        connection: @connection,
+        state: @state,
+      }
+    end
+
+    # Pattern matching interface
+    #
+    # @param keys [Array]
+    #   Keys to be extracted
+    #
+    # @return [Hash[Symbol, Any]]
+    def deconstruct_keys(keys)
+      to_h.slice(*keys)
+    end
+
     private
 
     def build_response(req, options)

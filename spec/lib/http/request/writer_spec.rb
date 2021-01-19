@@ -107,4 +107,33 @@ RSpec.describe HTTP::Request::Writer do
       end
     end
   end
+
+  # Pattern Matching only exists in Ruby 2.7+, guard against execution of
+  # tests otherwise
+  if RUBY_VERSION >= '2.7'
+    describe '#to_h' do
+      it 'returns a Hash representation of a Writer' do
+        expect(subject.to_h).to include({
+          body: a_kind_of(HTTP::Request::Body),
+          headers: a_kind_of(HTTP::Headers),
+          request_header: ["GET /test HTTP/1.1"],
+          socket: a_kind_of(StringIO)
+        })
+      end
+    end
+
+    describe 'Pattern Matching' do
+      it 'can perform a pattern match' do
+        value =
+          case subject
+          in request_header: [/GET .*/]
+            true
+          else
+            false
+          end
+
+        expect(value).to eq(true)
+      end
+    end
+  end
 end
