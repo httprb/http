@@ -59,13 +59,15 @@ RSpec.describe HTTP::ContentType do
 
     describe 'Pattern Matching' do
       it 'can perform a pattern match' do
-        value =
+        # Cursed hack to ignore syntax errors to test Pattern Matching.
+        value = eval <<~RUBY
           case described_class.new('text/plain', 'utf-8')
           in mime_type: /text/
             true
           else
             false
           end
+        RUBY
 
         expect(value).to eq(true)
       end

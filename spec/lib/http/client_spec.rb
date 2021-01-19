@@ -521,13 +521,15 @@ RSpec.describe HTTP::Client do
       let(:client) { described_class.new }
 
       it 'can perform a pattern match' do
-        value =
+        # Cursed hack to ignore syntax errors to test Pattern Matching.
+        value = eval <<~RUBY
           case client
           in state: :clean
             true
           else
             false
           end
+        RUBY
 
         expect(value).to eq(true)
       end

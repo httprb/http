@@ -269,13 +269,15 @@ RSpec.describe HTTP::Response::Status do
       subject { described_class.new("200.0") }
 
       it 'can perform a pattern match' do
-        value =
+        # Cursed hack to ignore syntax errors to test Pattern Matching.
+        value = eval <<~RUBY
           case subject
           in code: 200..299
             true
           else
             false
           end
+        RUBY
 
         expect(value).to eq(true)
       end

@@ -99,13 +99,15 @@ RSpec.describe HTTP::Response::Body do
 
     describe 'Pattern Matching' do
       it 'can perform a pattern match' do
-        value =
+        # Cursed hack to ignore syntax errors to test Pattern Matching.
+        value = eval <<~RUBY
           case subject
           in contents: nil
             true
           else
             false
           end
+        RUBY
 
         expect(value).to eq(true)
       end

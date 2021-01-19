@@ -535,13 +535,15 @@ RSpec.describe HTTP::Headers do
         end
 
         it 'can perform a pattern match' do
-          value =
+          # Cursed hack to ignore syntax errors to test Pattern Matching.
+          value = eval <<~RUBY
             case headers
             in content_type: /json/, set_cookie: [/hoo/, *]
               true
             else
               false
             end
+          RUBY
 
           expect(value).to eq(true)
         end

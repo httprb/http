@@ -124,13 +124,15 @@ RSpec.describe HTTP::Request::Writer do
 
     describe 'Pattern Matching' do
       it 'can perform a pattern match' do
-        value =
+        # Cursed hack to ignore syntax errors to test Pattern Matching.
+        value = eval <<~RUBY
           case subject
           in request_header: [/GET .*/]
             true
           else
             false
           end
+        RUBY
 
         expect(value).to eq(true)
       end

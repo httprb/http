@@ -190,25 +190,29 @@ RSpec.describe HTTP::Response do
 
     describe 'Pattern Matching' do
       it 'can perform a pattern match' do
-        value =
+        # Cursed hack to ignore syntax errors to test Pattern Matching.
+        value = eval <<~RUBY
           case response
-          in body: /Hello/, version: /^1.\d/
+          in body: /Hello/, version: /^1\\.\\d/
             true
           else
             false
           end
+        RUBY
 
         expect(value).to eq(true)
       end
 
       it 'can perform an array pattern match' do
-        value =
+        # Cursed hack to ignore syntax errors to test Pattern Matching.
+        value = eval <<~RUBY
           case response
           in [200, *]
             true
           else
             false
           end
+        RUBY
 
         expect(value).to eq(true)
       end

@@ -252,13 +252,15 @@ RSpec.describe HTTP::Request do
 
     describe 'Pattern Matching' do
       it 'can perform a pattern match' do
-        value =
+        # Cursed hack to ignore syntax errors to test Pattern Matching.
+        value = eval <<~RUBY
           case request
-          in port: 80, verb: :get, version: /^1\.\d/
+          in port: 80, verb: :get, version: /^1\\.\\d/
             true
           else
             false
           end
+        RUBY
 
         expect(value).to eq(true)
       end
