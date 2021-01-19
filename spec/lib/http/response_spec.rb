@@ -174,24 +174,24 @@ RSpec.describe HTTP::Response do
 
   # Pattern Matching only exists in Ruby 2.7+, guard against execution of
   # tests otherwise
-  if RUBY_VERSION >= '2.7'
-    describe '#to_h' do
-      it 'returns a Hash representation of a Response' do
-        expect(response.to_h).to include({
-          body: "Hello world!",
-          headers: a_kind_of(HTTP::Headers),
-          proxy_headers: a_kind_of(HTTP::Headers),
-          request: a_kind_of(HTTP::Request),
-          status: a_kind_of(HTTP::Response::Status),
-          version: "1.1",
-        })
+  if RUBY_VERSION >= "2.7"
+    describe "#to_h" do
+      it "returns a Hash representation of a Response" do
+        expect(response.to_h).to include(
+          :body          => "Hello world!",
+          :headers       => a_kind_of(HTTP::Headers),
+          :proxy_headers => a_kind_of(HTTP::Headers),
+          :request       => a_kind_of(HTTP::Request),
+          :status        => a_kind_of(HTTP::Response::Status),
+          :version       => "1.1"
+        )
       end
     end
 
-    describe 'Pattern Matching' do
-      it 'can perform a pattern match' do
+    describe "Pattern Matching" do
+      it "can perform a pattern match" do
         # Cursed hack to ignore syntax errors to test Pattern Matching.
-        value = eval <<~RUBY
+        value = instance_eval <<-RUBY, __FILE__, __LINE__ + 1
           case response
           in body: /Hello/, version: /^1\\.\\d/
             true
@@ -203,9 +203,9 @@ RSpec.describe HTTP::Response do
         expect(value).to eq(true)
       end
 
-      it 'can perform an array pattern match' do
+      it "can perform an array pattern match" do
         # Cursed hack to ignore syntax errors to test Pattern Matching.
-        value = eval <<~RUBY
+        value = instance_eval <<-RUBY, __FILE__, __LINE__ + 1
           case response
           in [200, *]
             true

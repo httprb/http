@@ -66,29 +66,29 @@ RSpec.describe HTTP::Connection do
 
   # Pattern Matching only exists in Ruby 2.7+, guard against execution of
   # tests otherwise
-  if RUBY_VERSION >= '2.7'
-    describe '#to_h' do
-      it 'returns a Hash representation of a Connection' do
-        expect(connection.to_h).to include({
-          buffer: "",
-          failed_proxy_connect: false,
-          headers: a_kind_of(HTTP::Headers),
-          http_version: "0.0",
-          keep_alive_timeout: 5.0,
-          parser: a_kind_of(HTTP::Response::Parser),
-          pending_request: false,
-          pending_response: false,
-          persistent: false,
-          socket: socket,
-          status_code: 0,
-        })
+  if RUBY_VERSION >= "2.7"
+    describe "#to_h" do
+      it "returns a Hash representation of a Connection" do
+        expect(connection.to_h).to include(
+          :buffer               => "",
+          :failed_proxy_connect => false,
+          :headers              => a_kind_of(HTTP::Headers),
+          :http_version         => "0.0",
+          :keep_alive_timeout   => 5.0,
+          :parser               => a_kind_of(HTTP::Response::Parser),
+          :pending_request      => false,
+          :pending_response     => false,
+          :persistent           => false,
+          :socket               => socket,
+          :status_code          => 0
+        )
       end
     end
 
-    describe 'Pattern Matching' do
-      it 'can perform a pattern match' do
+    describe "Pattern Matching" do
+      it "can perform a pattern match" do
         # Cursed hack to ignore syntax errors to test Pattern Matching.
-        value = eval <<~RUBY
+        value = instance_eval <<-RUBY, __FILE__, __LINE__ + 1
           case connection
           in status_code: 0, pending_request: false
             true

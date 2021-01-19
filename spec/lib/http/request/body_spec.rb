@@ -211,20 +211,20 @@ RSpec.describe HTTP::Request::Body do
 
   # Pattern Matching only exists in Ruby 2.7+, guard against execution of
   # tests otherwise
-  if RUBY_VERSION >= '2.7'
-    describe '#to_h' do
-      it 'returns a Hash representation of a Body' do
-        expect(subject.to_h).to include({
-          source: '',
-          size: 0
-        })
+  if RUBY_VERSION >= "2.7"
+    describe "#to_h" do
+      it "returns a Hash representation of a Body" do
+        expect(subject.to_h).to include(
+          :source => "",
+          :size   => 0
+        )
       end
     end
 
-    describe 'Pattern Matching' do
-      it 'can perform a pattern match' do
+    describe "Pattern Matching" do
+      it "can perform a pattern match" do
         # Cursed hack to ignore syntax errors to test Pattern Matching.
-        value = eval <<~RUBY
+        value = instance_eval <<~RUBY, __FILE__, __LINE__ + 1
           case subject
           in size: 0
             true

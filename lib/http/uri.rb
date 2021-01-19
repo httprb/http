@@ -152,14 +152,14 @@ module HTTP
     # @return [Hash[Symbol, Any]]
     def to_h
       {
-        scheme: scheme,
-        user: user,
-        password: password,
-        host: host,
-        port: port,
-        path: path,
-        query: query,
-        fragment: fragment,
+        :scheme   => scheme,
+        :user     => user,
+        :password => password,
+        :host     => host,
+        :port     => port,
+        :path     => path,
+        :query    => query,
+        :fragment => fragment
       }
     end
 

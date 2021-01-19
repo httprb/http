@@ -36,8 +36,8 @@ module HTTP
     # @return [Hash[Symbol, Any]]
     def to_h
       {
-        mime_type: @mime_type,
-        charset: @charset,
+        :mime_type => @mime_type,
+        :charset   => @charset
       }
     end
 

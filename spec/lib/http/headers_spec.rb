@@ -526,17 +526,17 @@ RSpec.describe HTTP::Headers do
 
     # Pattern Matching only exists in Ruby 2.7+, guard against execution of
     # tests otherwise
-    if RUBY_VERSION >= '2.7'
-      describe 'Pattern Matching' do
+    if RUBY_VERSION >= "2.7"
+      describe "Pattern Matching" do
         before do
           headers.add :content_type, "application/json"
           headers.add :set_cookie,   "hoo=ray"
           headers.add :set_cookie,   "woo=hoo"
         end
 
-        it 'can perform a pattern match' do
+        it "can perform a pattern match" do
           # Cursed hack to ignore syntax errors to test Pattern Matching.
-          value = eval <<~RUBY
+          value = instance_eval <<-RUBY, __FILE__, __LINE__ + 1
             case headers
             in content_type: /json/, set_cookie: [/hoo/, *]
               true

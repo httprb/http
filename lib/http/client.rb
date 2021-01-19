@@ -107,8 +107,8 @@ module HTTP
     # @return [Hash[Symbol, Any]]
     def to_h
       {
-        connection: @connection,
-        state: @state,
+        :connection => @connection,
+        :state      => @state
       }
     end
 

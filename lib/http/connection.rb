@@ -150,17 +150,17 @@ module HTTP
     # @return [Hash[Symbol, Any]]
     def to_h
       {
-        persistent: @persistent,
-        keep_alive_timeout: @keep_alive_timeout,
-        pending_request: @pending_request,
-        pending_response: @pending_response,
-        failed_proxy_connect: @failed_proxy_connect,
-        buffer: @buffer,
-        parser: @parser,
-        socket: @socket,
-        status_code: status_code,
-        http_version: http_version,
-        headers: headers
+        :persistent           => @persistent,
+        :keep_alive_timeout   => @keep_alive_timeout,
+        :pending_request      => @pending_request,
+        :pending_response     => @pending_response,
+        :failed_proxy_connect => @failed_proxy_connect,
+        :buffer               => @buffer,
+        :parser               => @parser,
+        :socket               => @socket,
+        :status_code          => status_code,
+        :http_version         => http_version,
+        :headers              => headers
       }
     end
 

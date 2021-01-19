@@ -77,11 +77,11 @@ module HTTP
       # @return [Hash[Symbol, Any]]
       def to_h
         {
-          stream: @stream,
-          connection: @connection,
-          streaming: @streaming,
-          contents: @contents,
-          encoding: @encoding,
+          :stream     => @stream,
+          :connection => @connection,
+          :streaming  => @streaming,
+          :contents   => @contents,
+          :encoding   => @encoding
         }
       end
 

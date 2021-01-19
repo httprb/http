@@ -107,10 +107,10 @@ module HTTP
       # @return [Hash[Symbol, Any]]
       def to_h
         {
-          body: @body,
-          socket: @socket,
-          headers: @headers,
-          request_header: @request_header,
+          :body           => @body,
+          :socket         => @socket,
+          :headers        => @headers,
+          :request_header => @request_header
         }
       end
 

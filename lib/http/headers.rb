@@ -124,8 +124,7 @@ module HTTP
     def deconstruct_keys(keys)
       underscored_keys_map = underscored_keys_mapping
 
-      self
-        .to_h
+      to_h
         .map { |k, v| [underscored_keys_map[k], v] }
         .to_h
         .slice(*keys)
@@ -139,7 +138,7 @@ module HTTP
     end
 
     # Adds pattern matching interface using `to_a` as a base
-    alias_method :deconstruct, :to_a
+    alias deconstruct to_a
 
     # Returns human-readable representation of `self` instance.
     #
@@ -243,7 +242,7 @@ module HTTP
     #
     # @return [Hash[String, Symbol]]
     def underscored_keys_mapping
-      Hash[keys.map { |k| [k, k.tr('A-Z-', 'a-z_').to_sym] }]
+      Hash[keys.map { |k| [k, k.tr("A-Z-", "a-z_").to_sym] }]
     end
 
     # Transforms `name` to canonical HTTP header capitalization

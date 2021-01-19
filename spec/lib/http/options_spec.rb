@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable Metrics/BlockLength
 RSpec.describe HTTP::Options do
   subject { described_class.new(:response => :body) }
 
@@ -13,38 +14,38 @@ RSpec.describe HTTP::Options do
 
   # Pattern Matching only exists in Ruby 2.7+, guard against execution of
   # tests otherwise
-  if RUBY_VERSION >= '2.7'
-    describe '#to_hash' do
-      it 'returns a Hash representation of Options' do
-        expect(subject.to_hash).to include({
-          body: nil,
-          cookies: {},
-          encoding: nil,
-          features: {},
-          follow: nil,
-          form: nil,
-          headers: an_instance_of(HTTP::Headers),
-          json: nil,
-          keep_alive_timeout: 5,
-          nodelay: false,
-          params: nil,
-          persistent: nil,
-          proxy: {},
-          response: :body,
-          socket_class: TCPSocket,
-          ssl: {},
-          ssl_context: nil,
-          ssl_socket_class: OpenSSL::SSL::SSLSocket,
-          timeout_class: HTTP::Timeout::Null,
-          timeout_options: {},
-        })
+  if RUBY_VERSION >= "2.7"
+    describe "#to_hash" do
+      it "returns a Hash representation of Options" do
+        expect(subject.to_hash).to include(
+          :body               => nil,
+          :cookies            => {},
+          :encoding           => nil,
+          :features           => {},
+          :follow             => nil,
+          :form               => nil,
+          :headers            => an_instance_of(HTTP::Headers),
+          :json               => nil,
+          :keep_alive_timeout => 5,
+          :nodelay            => false,
+          :params             => nil,
+          :persistent         => nil,
+          :proxy              => {},
+          :response           => :body,
+          :socket_class       => TCPSocket,
+          :ssl                => {},
+          :ssl_context        => nil,
+          :ssl_socket_class   => OpenSSL::SSL::SSLSocket,
+          :timeout_class      => HTTP::Timeout::Null,
+          :timeout_options    => {}
+        )
       end
     end
 
-    describe 'Pattern Matching' do
-      it 'can perform a pattern match' do
+    describe "Pattern Matching" do
+      it "can perform a pattern match" do
         # Cursed hack to ignore syntax errors to test Pattern Matching.
-        value = eval <<~RUBY
+        value = instance_eval <<-RUBY, __FILE__, __LINE__ + 1
           case subject
           in keep_alive_timeout: 5..10
             true
@@ -58,3 +59,4 @@ RSpec.describe HTTP::Options do
     end
   end
 end
+# rubocop:enable Metrics/BlockLength

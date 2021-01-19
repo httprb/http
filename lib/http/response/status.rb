@@ -144,8 +144,8 @@ module HTTP
       # @return [Hash[Symbol, Any]]
       def to_h
         {
-          code: code,
-          reason: reason
+          :code   => code,
+          :reason => reason
         }
       end
 

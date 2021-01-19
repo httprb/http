@@ -204,14 +204,14 @@ module HTTP
     # @return [Hash[Symbol, Any]]
     def to_h
       {
-        verb: @verb,
-        uri: @uri,
-        scheme: @scheme,
-        proxy: @proxy,
-        version: @version,
-        headers: @headers,
-        body: @body,
-        port: port
+        :verb    => @verb,
+        :uri     => @uri,
+        :scheme  => @scheme,
+        :proxy   => @proxy,
+        :version => @version,
+        :headers => @headers,
+        :body    => @body,
+        :port    => port
       }
     end
 

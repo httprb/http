@@ -54,8 +54,8 @@ module HTTP
       # @return [Hash[Symbol, Any]]
       def to_h
         {
-          source: @source,
-          size: size
+          :source => @source,
+          :size   => size
         }
       end
 
