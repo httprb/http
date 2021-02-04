@@ -46,7 +46,10 @@ module HTTP
       :patch,
 
       # draft-reschke-webdav-search: WebDAV Search
-      :search
+      :search,
+
+      # RFC 4791: Calendaring Extensions to WebDAV -- CalDAV
+      :mkcalendar
     ].freeze
 
     # Allowed schemes
