@@ -1,7 +1,7 @@
 # ![http.rb](https://raw.github.com/httprb/http.rb/master/logo.png)
 
-[![Gem Version](https://badge.fury.io/rb/http.svg)](https://rubygems.org/gems/http)
-[![Build Status](https://secure.travis-ci.org/httprb/http.svg?branch=master)](https://travis-ci.org/httprb/http)
+[![Gem Version](https://img.shields.io/gem/v/http?logo=ruby)](https://rubygems.org/gems/http)
+[![Build Status](https://github.com/httprb/http/workflows/CI/badge.svg)](https://github.com/httprb/http/actions?query=workflow:CI)
 [![Code Climate](https://codeclimate.com/github/httprb/http.svg?branch=master)](https://codeclimate.com/github/httprb/http)
 [![Coverage Status](https://coveralls.io/repos/httprb/http/badge.svg?branch=master)](https://coveralls.io/r/httprb/http)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/httprb/http/blob/master/LICENSE.txt)
