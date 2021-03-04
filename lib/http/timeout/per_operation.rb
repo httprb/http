@@ -34,66 +34,42 @@ module HTTP
         end
       end
 
-      # NIO with exceptions
-      if RUBY_VERSION < "2.1.0"
-        # Read data from the socket
-        def readpartial(size, buffer = nil)
-          rescue_readable do
-            @socket.read_nonblock(size, buffer)
-          end
-        rescue EOFError
-          :eof
+      # Read data from the socket
+      def readpartial(size, buffer = nil)
+        timeout = false
+        loop do
+          result = @socket.read_nonblock(size, buffer, :exception => false)
+
+          return :eof   if result.nil?
+          return result if result != :wait_readable
+
+          raise TimeoutError, "Read timed out after #{@read_timeout} seconds" if timeout
+
+          # marking the socket for timeout. Why is this not being raised immediately?
+          # it seems there is some race-condition on the network level between calling
+          # #read_nonblock and #wait_readable, in which #read_nonblock signalizes waiting
+          # for reads, and when waiting for x seconds, it returns nil suddenly without completing
+          # the x seconds. In a normal case this would be a timeout on wait/read, but it can
+          # also mean that the socket has been closed by the server. Therefore we "mark" the
+          # socket for timeout and try to read more bytes. If it returns :eof, it's all good, no
+          # timeout. Else, the first timeout was a proper timeout.
+          # This hack has to be done because io/wait#wait_readable doesn't provide a value for when
+          # the socket is closed by the server, and HTTP::Parser doesn't provide the limit for the chunks.
+          timeout = true unless @socket.to_io.wait_readable(@read_timeout)
         end
+      end
 
-        # Write data to the socket
-        def write(data)
-          rescue_writable do
-            @socket.write_nonblock(data)
-          end
-        rescue EOFError
-          :eof
+      # Write data to the socket
+      def write(data)
+        timeout = false
+        loop do
+          result = @socket.write_nonblock(data, :exception => false)
+          return result unless result == :wait_writable
+
+          raise TimeoutError, "Write timed out after #{@write_timeout} seconds" if timeout
+
+          timeout = true unless @socket.to_io.wait_writable(@write_timeout)
         end
-
-      # NIO without exceptions
-      else
-        # Read data from the socket
-        def readpartial(size, buffer = nil)
-          timeout = false
-          loop do
-            result = @socket.read_nonblock(size, buffer, :exception => false)
-
-            return :eof   if result.nil?
-            return result if result != :wait_readable
-
-            raise TimeoutError, "Read timed out after #{@read_timeout} seconds" if timeout
-
-            # marking the socket for timeout. Why is this not being raised immediately?
-            # it seems there is some race-condition on the network level between calling
-            # #read_nonblock and #wait_readable, in which #read_nonblock signalizes waiting
-            # for reads, and when waiting for x seconds, it returns nil suddenly without completing
-            # the x seconds. In a normal case this would be a timeout on wait/read, but it can
-            # also mean that the socket has been closed by the server. Therefore we "mark" the
-            # socket for timeout and try to read more bytes. If it returns :eof, it's all good, no
-            # timeout. Else, the first timeout was a proper timeout.
-            # This hack has to be done because io/wait#wait_readable doesn't provide a value for when
-            # the socket is closed by the server, and HTTP::Parser doesn't provide the limit for the chunks.
-            timeout = true unless @socket.to_io.wait_readable(@read_timeout)
-          end
-        end
-
-        # Write data to the socket
-        def write(data)
-          timeout = false
-          loop do
-            result = @socket.write_nonblock(data, :exception => false)
-            return result unless result == :wait_writable
-
-            raise TimeoutError, "Write timed out after #{@write_timeout} seconds" if timeout
-
-            timeout = true unless @socket.to_io.wait_writable(@write_timeout)
-          end
-        end
-
       end
     end
   end
