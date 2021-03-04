@@ -10,7 +10,7 @@ module HTTP
 
       def initialize
         @handler = Handler.new(self)
-        @parser = LLHttp::Parser.new(@handler, type: :response)
+        @parser = LLHttp::Parser.new(@handler, :type => :response)
         reset
       end
 
@@ -29,8 +29,8 @@ module HTTP
         parser << data
 
         self
-      rescue LLHttp::Error => error
-        raise IOError, error.message
+      rescue LLHttp::Error => e
+        raise IOError, e.message
       end
 
       alias << add
@@ -115,7 +115,9 @@ module HTTP
           @target.mark_message_finished
         end
 
-        private def append_header
+        private
+
+        def append_header
           @target.add_header(@field, @field_value)
           @reading_header_value = false
           @field_value = +""
