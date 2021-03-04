@@ -1,69 +1,63 @@
 # frozen_string_literal: true
 
-require "http-parser"
+require "llhttp"
 
 module HTTP
   class Response
     # @api private
-    #
-    # NOTE(ixti): This class is a subject of future refactoring, thus don't
-    #   expect this class API to be stable until this message disappears and
-    #   class is not marked as private anymore.
     class Parser
-      attr_reader :headers
+      attr_reader :parser, :headers, :status_code, :http_version
 
       def initialize
-        @state  = HttpParser::Parser.new_instance { |i| i.type = :response }
-        @parser = HttpParser::Parser.new(self)
-
+        @handler = Handler.new(self)
+        @parser = LLHttp::Parser.new(@handler, type: :response)
         reset
       end
 
-      # @return [self]
-      def add(data)
-        # XXX(ixti): API doc of HttpParser::Parser is misleading, it says that
-        #   it returns boolean true if data was parsed successfully, but instead
-        #   it's response tells if there was an error; So when it's `true` that
-        #   means parse failed, and `false` means parse was successful.
-        #   case of success.
-        return self unless @parser.parse(@state, data)
-
-        raise IOError, "Could not parse data"
+      def reset
+        @parser.finish
+        @handler.reset
+        @header_finished = false
+        @message_finished = false
+        @headers = Headers.new
+        @chunk = nil
+        @status_code = nil
+        @http_version = nil
       end
+
+      def add(data)
+        parser << data
+
+        self
+      rescue LLHttp::Error => error
+        raise IOError, error.message
+      end
+
       alias << add
 
+      def mark_header_finished
+        @header_finished = true
+        @status_code = @parser.status_code
+        @http_version = "#{@parser.http_major}.#{@parser.http_minor}"
+      end
+
       def headers?
-        @finished[:headers]
+        @header_finished
       end
 
-      def http_version
-        @state.http_version
+      def add_header(name, value)
+        @headers.add(name, value)
       end
 
-      def status_code
-        @state.http_status
+      def mark_message_finished
+        @message_finished = true
       end
 
-      #
-      # HTTP::Parser callbacks
-      #
-
-      def on_header_field(_response, field)
-        append_header if @reading_header_value
-        @field << field
+      def finished?
+        @message_finished
       end
 
-      def on_header_value(_response, value)
-        @reading_header_value = true
-        @field_value << value
-      end
-
-      def on_headers_complete(_reposse)
-        append_header if @reading_header_value
-        @finished[:headers] = true
-      end
-
-      def on_body(_response, chunk)
+      def add_body(chunk)
         if @chunk
           @chunk << chunk
         else
@@ -85,36 +79,48 @@ module HTTP
         chunk
       end
 
-      def on_message_complete(_response)
-        if @state.http_status < 200
+      class Handler < LLHttp::Delegate
+        def initialize(target)
+          @target = target
+          super()
           reset
-        else
-          @finished[:message] = true
         end
-      end
 
-      def reset
-        @state.reset!
+        def reset
+          @reading_header_value = false
+          @field_value = +""
+          @field = +""
+        end
 
-        @finished             = Hash.new(false)
-        @headers              = HTTP::Headers.new
-        @reading_header_value = false
-        @field                = +""
-        @field_value          = +""
-        @chunk                = nil
-      end
+        def on_header_field(field)
+          append_header if @reading_header_value
+          @field << field
+        end
 
-      def finished?
-        @finished[:message]
-      end
+        def on_header_value(value)
+          @reading_header_value = true
+          @field_value << value
+        end
 
-      private
+        def on_headers_complete
+          append_header if @reading_header_value
+          @target.mark_header_finished
+        end
 
-      def append_header
-        @headers.add(@field, @field_value)
-        @reading_header_value = false
-        @field_value          = +""
-        @field                = +""
+        def on_body(body)
+          @target.add_body(body)
+        end
+
+        def on_message_complete
+          @target.mark_message_finished
+        end
+
+        private def append_header
+          @target.add_header(@field, @field_value)
+          @reading_header_value = false
+          @field_value = +""
+          @field = +""
+        end
       end
     end
   end
