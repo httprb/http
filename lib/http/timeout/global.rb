@@ -59,22 +59,12 @@ module HTTP
 
       private
 
-      if RUBY_VERSION < "2.1.0"
-        def read_nonblock(size, buffer = nil)
-          @socket.read_nonblock(size, buffer)
-        end
+      def read_nonblock(size, buffer = nil)
+        @socket.read_nonblock(size, buffer, :exception => false)
+      end
 
-        def write_nonblock(data)
-          @socket.write_nonblock(data)
-        end
-      else
-        def read_nonblock(size, buffer = nil)
-          @socket.read_nonblock(size, buffer, :exception => false)
-        end
-
-        def write_nonblock(data)
-          @socket.write_nonblock(data, :exception => false)
-        end
+      def write_nonblock(data)
+        @socket.write_nonblock(data, :exception => false)
       end
 
       # Perform the given I/O operation with the given argument
@@ -82,20 +72,18 @@ module HTTP
         reset_timer
 
         loop do
-          begin
-            result = yield
+          result = yield
 
-            case result
-            when :wait_readable then wait_readable_or_timeout
-            when :wait_writable then wait_writable_or_timeout
-            when NilClass       then return :eof
-            else                return result
-            end
-          rescue IO::WaitReadable
-            wait_readable_or_timeout
-          rescue IO::WaitWritable
-            wait_writable_or_timeout
+          case result
+          when :wait_readable then wait_readable_or_timeout
+          when :wait_writable then wait_writable_or_timeout
+          when NilClass       then return :eof
+          else                return result
           end
+        rescue IO::WaitReadable
+          wait_readable_or_timeout
+        rescue IO::WaitWritable
+          wait_writable_or_timeout
         end
       rescue EOFError
         :eof

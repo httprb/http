@@ -20,8 +20,8 @@ RSpec.describe HTTP::Client do
       end
 
       def stub(stubs)
-        @stubs = stubs.each_with_object({}) do |(k, v), o|
-          o[HTTP::URI::NORMALIZER.call(k).to_s] = v
+        @stubs = stubs.transform_keys do |k|
+          HTTP::URI::NORMALIZER.call(k).to_s
         end
 
         self
