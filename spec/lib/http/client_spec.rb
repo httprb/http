@@ -310,6 +310,7 @@ RSpec.describe HTTP::Client do
           end
         end
       end
+
       it "is given a chance to wrap the Request" do
         feature_instance = feature_class.new
 
@@ -343,6 +344,19 @@ RSpec.describe HTTP::Client do
         expect(feature_instance.captured_error).to be_a(HTTP::TimeoutError)
         expect(feature_instance.captured_request.verb).to eq(:post)
         expect(feature_instance.captured_request.uri.to_s).to eq(sleep_url)
+      end
+
+      it "is given a chance to handle a connection timeout error" do
+        allow(TCPSocket).to receive(:open) { sleep 1 }
+        sleep_url = "#{dummy.endpoint}/sleep"
+        feature_instance = feature_class.new
+
+        expect do
+          client.use(:test_feature => feature_instance).
+            timeout(0.001).
+            request(:post, sleep_url)
+        end.to raise_error(HTTP::TimeoutError)
+        expect(feature_instance.captured_error).to be_a(HTTP::TimeoutError)
       end
     end
   end
