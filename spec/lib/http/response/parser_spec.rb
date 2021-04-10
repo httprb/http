@@ -32,7 +32,7 @@ RSpec.describe HTTP::Response::Parser do
   end
 
   context "response in many parts" do
-    let(:parts) { raw_response.split(//) }
+    let(:parts) { raw_response.chars }
 
     it "parses headers" do
       expect(subject.headers.to_h).to eq(expected_headers)
@@ -62,7 +62,7 @@ RSpec.describe HTTP::Response::Parser do
     end
 
     context "when response is feeded in many parts" do
-      let(:parts) { raw_response.split(//) }
+      let(:parts) { raw_response.chars }
 
       it "skips to next non-info response" do
         expect(subject.status_code).to eq(200)
