@@ -3,7 +3,6 @@
 [![Gem Version](https://img.shields.io/gem/v/http?logo=ruby)](https://rubygems.org/gems/http)
 [![Build Status](https://github.com/httprb/http/workflows/CI/badge.svg)](https://github.com/httprb/http/actions?query=workflow:CI)
 [![Code Climate](https://codeclimate.com/github/httprb/http.svg?branch=master)](https://codeclimate.com/github/httprb/http)
-[![Coverage Status](https://coveralls.io/repos/httprb/http/badge.svg?branch=master)](https://coveralls.io/r/httprb/http)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/httprb/http/blob/master/LICENSE.txt)
 
 [Documentation]
@@ -18,14 +17,12 @@ HTTP (The Gem! a.k.a. http.rb) is an easy-to-use client library for making reque
 from Ruby. It uses a simple method chaining system for building requests, similar to
 Python's [Requests].
 
-Under the hood, via [Ruby FFI bindings][http-parser-ffi], http.rb uses the Node.js
-[http-parser], a fast HTTP parsing native extension. This library
-isn't just yet another wrapper around Net::HTTP. It implements the HTTP protocol
-natively and outsources the parsing to native extensions.
+Under the hood, http.rb uses the [llhttp] parser, a fast HTTP parsing native extension.
+This library isn't just yet another wrapper around `Net::HTTP`. It implements the HTTP
+protocol natively and outsources the parsing to native extensions.
 
 [requests]: http://docs.python-requests.org/en/latest/
-[http-parser]: https://github.com/nodejs/http-parser
-[http-parser-ffi]: https://github.com/cotag/http-parser
+[llhttp]: https://llhttp.org/
 
 
 ## Another Ruby HTTP library? Why should I care?
@@ -198,5 +195,5 @@ dropped.
 
 ## Copyright
 
-Copyright (c) 2011-2019 Tony Arcieri, Alexey V. Zapparov, Erik Michaels-Ober, Zachary Anker.
+Copyright (c) 2011-2021 Tony Arcieri, Alexey V. Zapparov, Erik Michaels-Ober, Zachary Anker.
 See LICENSE.txt for further details.
