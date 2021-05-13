@@ -1,7 +1,19 @@
-## future is unwritten (master)
+## 5.0.0 (2021-05-12)
+
+* [#656](https://github.com/httprb/http/pull/656)
+  Handle connection timeouts in `Features`
+  ([@semenyukdmitry])
+
+* [#651](https://github.com/httprb/http/pull/651)
+  Replace `http-parser` with `llhttp`
+  ([@bryanp])
+
+* [#647](https://github.com/httprb/http/pull/647)
+  Add support for `MKCALENDAR` HTTP verb
+  ([@meanphil])
 
 * [#632](https://github.com/httprb/http/pull/632)
-  Respect the SSL context's verify_hostname value
+  Respect the SSL context's `verify_hostname` value
   ([@colemannugent])
 
 * [#625](https://github.com/httprb/http/pull/625)
@@ -9,7 +21,7 @@
   ([@LukaszMaslej])
 
 * [#599](https://github.com/httprb/http/pull/599)
-  Allow passing HTTP::FormData::{Multipart,UrlEncoded} object directly.
+  Allow passing `HTTP::FormData::{Multipart,UrlEncoded}` object directly.
   ([@ixti])
 
 * [#593](https://github.com/httprb/http/pull/593)
@@ -872,3 +884,6 @@ end
 [@antonvolkoff]: https://github.com/antonvolkoff
 [@LukaszMaslej]: https://github.com/LukaszMaslej
 [@colemannugent]: https://github.com/colemannugent
+[@semenyukdmitry]: https://github.com/semenyukdmitry
+[@bryanp]: https://github.com/bryanp
+[@meanphil]: https://github.com/meanphil
