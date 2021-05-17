@@ -79,6 +79,9 @@
   Drop Ruby 2.3.x support.
   ([@ixti])
 
+* [3ed0c31](https://github.com/httprb/http/commit/3ed0c318eab6a8c390654cda17bf6df9e963c7d6)
+  Drop Ruby 2.4.x support.
+
 
 ## 4.4.0 (2020-03-25)
 
