@@ -53,6 +53,12 @@
   Preserve header names casing.
   ([@joshuaflanagan])
 
+* [#540](https://github.com/httprb/http/pull/540)
+  [#538](https://github.com/httprb/http/issues/538)
+  **BREAKING CHANGE**
+  Require explicit MIME type for Response#parse
+  ([@ixti])
+
 * [#532](https://github.com/httprb/http/pull/532)
   Fix pipes support in request bodies.
   ([@ixti])
