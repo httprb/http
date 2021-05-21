@@ -396,5 +396,49 @@ RSpec.describe HTTP::Redirector do
         end
       end
     end
+
+    describe "changing verbs during redirects" do
+      let(:options) { {:strict => false} }
+      let(:post_body) { HTTP::Request::Body.new("i might be way longer in real life") }
+      let(:cookie) { "dont eat my cookies" }
+
+      def a_dangerous_request(verb)
+        HTTP::Request.new(
+          :verb => verb, :uri => "http://example.com",
+          :body => post_body, :headers => {
+            "Content-Type" => "meme",
+            "Cookie"       => cookie
+          }
+        )
+      end
+
+      def empty_body
+        HTTP::Request::Body.new(nil)
+      end
+
+      it "follows without body/content type if it has to change verb" do
+        req = a_dangerous_request(:post)
+        res = redirect_response 302, "http://example.com/1"
+
+        redirector.perform(req, res) do |prev_req, _|
+          expect(prev_req.body).to eq(empty_body)
+          expect(prev_req.headers["Cookie"]).to eq(cookie)
+          expect(prev_req.headers["Content-Type"]).to eq(nil)
+          simple_response 200
+        end
+      end
+
+      it "leaves body/content-type intact if it does not have to change verb" do
+        req = a_dangerous_request(:post)
+        res = redirect_response 307, "http://example.com/1"
+
+        redirector.perform(req, res) do |prev_req, _|
+          expect(prev_req.body).to eq(post_body)
+          expect(prev_req.headers["Cookie"]).to eq(cookie)
+          expect(prev_req.headers["Content-Type"]).to eq("meme")
+          simple_response 200
+        end
+      end
+    end
   end
 end
