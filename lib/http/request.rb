@@ -104,12 +104,26 @@ module HTTP
       headers = self.headers.dup
       headers.delete(Headers::HOST)
 
+      new_body = body.source
+      if verb == :get
+        # request bodies should not always be resubmitted when following a redirect
+        # some servers will close the connection after receiving the request headers
+        # which may cause Errno::ECONNRESET: Connection reset by peer
+        # see https://github.com/httprb/http/issues/649
+        # new_body = Request::Body.new(nil)
+        new_body = nil
+        # the CONTENT_TYPE header causes problems if set on a get request w/ an empty body
+        # the server might assume that there should be content if it is set to multipart
+        # rack raises EmptyContentError if this happens
+        headers.delete(Headers::CONTENT_TYPE)
+      end
+
       self.class.new(
         :verb           => verb,
         :uri            => @uri.join(uri),
         :headers        => headers,
         :proxy          => proxy,
-        :body           => body.source,
+        :body           => new_body,
         :version        => version,
         :uri_normalizer => uri_normalizer
       )
