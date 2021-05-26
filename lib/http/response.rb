@@ -155,14 +155,7 @@ module HTTP
     # @raise [HTTP::Error] if adapter not found
     # @return [Object]
     def parse(as = nil)
-      unless as
-        warn "#{self.class}##{__method__} with implicit mime type is deprecated " \
-          "and will be removed in 5.0.0; specify type explicitly, i.e. #parse(:json)"
-
-        as = mime_type
-      end
-
-      MimeType[as].decode to_s
+      MimeType[as || mime_type].decode to_s
     end
 
     # Inspect a response
