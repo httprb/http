@@ -156,8 +156,8 @@ module HTTP
     # @param type [#to_s] Parse as given MIME type.
     # @raise (see MimeType.[])
     # @return [Object]
-    def parse(type)
-      MimeType[type].decode to_s
+    def parse(type = nil)
+      MimeType[type || mime_type].decode to_s
     end
 
     # Inspect a response
