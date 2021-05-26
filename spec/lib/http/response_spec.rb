@@ -87,19 +87,32 @@ RSpec.describe HTTP::Response do
   end
 
   describe "#parse" do
-    let(:headers)   { {"Content-Type" => "application/json"} }
+    let(:headers)   { {"Content-Type" => content_type} }
     let(:body)      { '{"foo":"bar"}' }
 
-    it "fails if MIME type decoder is not found" do
-      expect { response.parse "text/html" }.to raise_error(HTTP::Error)
+    context "with known content type" do
+      let(:content_type) { "application/json" }
+      it "returns parsed body" do
+        expect(response.parse).to eq "foo" => "bar"
+      end
     end
 
-    it "uses decoder found by given MIME type" do
-      expect(response.parse("application/json")).to eq("foo" => "bar")
+    context "with unknown content type" do
+      let(:content_type) { "application/deadbeef" }
+      it "raises HTTP::Error" do
+        expect { response.parse }.to raise_error HTTP::Error
+      end
     end
 
-    it "uses decoder found by given MIME type alias" do
-      expect(response.parse(:json)).to eq("foo" => "bar")
+    context "with explicitly given mime type" do
+      let(:content_type) { "application/deadbeef" }
+      it "ignores mime_type of response" do
+        expect(response.parse("application/json")).to eq "foo" => "bar"
+      end
+
+      it "supports mime type aliases" do
+        expect(response.parse(:json)).to eq "foo" => "bar"
+      end
     end
   end
 
