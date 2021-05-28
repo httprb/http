@@ -102,6 +102,28 @@ module HTTP
         @headers[Headers::TRANSFER_ENCODING] == CHUNKED
       end
 
+      # Hash representation of a
+      #
+      # @return [Hash[Symbol, Any]]
+      def to_h
+        {
+          :body           => @body,
+          :socket         => @socket,
+          :headers        => @headers,
+          :request_header => @request_header
+        }
+      end
+
+      # Pattern matching interface
+      #
+      # @param keys [Array]
+      #   Keys to be extracted
+      #
+      # @return [Hash[Symbol, Any]]
+      def deconstruct_keys(keys)
+        to_h.slice(*keys)
+      end
+
       private
 
       def write(data)

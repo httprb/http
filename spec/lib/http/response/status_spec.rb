@@ -250,4 +250,37 @@ RSpec.describe HTTP::Response::Status do
       expect(described_class.method(:coerce)).to eq described_class.method :[]
     end
   end
+
+  # Pattern Matching only exists in Ruby 2.7+, guard against execution of
+  # tests otherwise
+  if RUBY_VERSION >= "2.7"
+    describe "#to_h" do
+      subject { described_class.new("200.0") }
+
+      it "returns a Hash representation of a Status" do
+        expect(subject.to_h).to include(
+          :code   => 200,
+          :reason => "OK"
+        )
+      end
+    end
+
+    describe "Pattern Matching" do
+      subject { described_class.new("200.0") }
+
+      it "can perform a pattern match" do
+        # Cursed hack to ignore syntax errors to test Pattern Matching.
+        value = instance_eval <<-RUBY, __FILE__, __LINE__ + 1
+          case subject
+          in code: 200..299
+            true
+          else
+            false
+          end
+        RUBY
+
+        expect(value).to eq(true)
+      end
+    end
+  end
 end

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable Metrics/BlockLength
 RSpec.describe HTTP::URI do
   let(:example_http_uri_string)  { "http://example.com" }
   let(:example_https_uri_string) { "https://example.com" }
@@ -29,4 +30,40 @@ RSpec.describe HTTP::URI do
       expect(http_uri.to_s).to eq("http://example.com")
     end
   end
+
+  # Pattern Matching only exists in Ruby 2.7+, guard against execution of
+  # tests otherwise
+  if RUBY_VERSION >= "2.7"
+    describe "#to_h" do
+      it "returns a Hash representation of a URI" do
+        expect(http_uri.to_h).to include(
+          :fragment => nil,
+          :host     => "example.com",
+          :password => nil,
+          :path     => "",
+          :port     => 80,
+          :query    => nil,
+          :scheme   => "http",
+          :user     => nil
+        )
+      end
+    end
+
+    describe "Pattern Matching" do
+      it "can perform a pattern match" do
+        # Cursed hack to ignore syntax errors to test Pattern Matching.
+        value = instance_eval <<-RUBY, __FILE__, __LINE__ + 1
+          case http_uri
+          in host: /example/, port: 50..100, scheme: 'http'
+            true
+          else
+            false
+          end
+        RUBY
+
+        expect(value).to eq(true)
+      end
+    end
+  end
 end
+# rubocop:enable Metrics/BlockLength

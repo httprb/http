@@ -144,6 +144,35 @@ module HTTP
       !@conn_expires_at || @conn_expires_at < Time.now
     end
 
+    # Hash representation of a connection
+    #
+    # @return [Hash[Symbol, Any]]
+    def to_h
+      {
+        :persistent           => @persistent,
+        :keep_alive_timeout   => @keep_alive_timeout,
+        :pending_request      => @pending_request,
+        :pending_response     => @pending_response,
+        :failed_proxy_connect => @failed_proxy_connect,
+        :buffer               => @buffer,
+        :parser               => @parser,
+        :socket               => @socket,
+        :status_code          => status_code,
+        :http_version         => http_version,
+        :headers              => headers
+      }
+    end
+
+    # Pattern matching interface
+    #
+    # @param keys [Array]
+    #   Keys to be extracted
+    #
+    # @return [Hash[Symbol, Any]]
+    def deconstruct_keys(keys)
+      to_h.slice(*keys)
+    end
+
     private
 
     # Sets up SSL context and starts TLS if needed.

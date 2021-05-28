@@ -231,4 +231,39 @@ RSpec.describe HTTP::Request do
 
     it { is_expected.to eq "#<HTTP::Request/1.1 GET #{request_uri}>" }
   end
+
+  # Pattern Matching only exists in Ruby 2.7+, guard against execution of
+  # tests otherwise
+  if RUBY_VERSION >= "2.7"
+    describe "#to_h" do
+      it "returns a Hash representation of a Request" do
+        expect(request.to_h).to include(
+          :body    => a_kind_of(HTTP::Request::Body),
+          :headers => a_kind_of(HTTP::Headers),
+          :port    => 80,
+          :proxy   => {},
+          :scheme  => :http,
+          :uri     => a_kind_of(HTTP::URI),
+          :verb    => :get,
+          :version => "1.1"
+        )
+      end
+    end
+
+    describe "Pattern Matching" do
+      it "can perform a pattern match" do
+        # Cursed hack to ignore syntax errors to test Pattern Matching.
+        value = instance_eval <<-RUBY, __FILE__, __LINE__ + 1
+          case request
+          in port: 80, verb: :get, version: /^1\\.\\d/
+            true
+          else
+            false
+          end
+        RUBY
+
+        expect(value).to eq(true)
+      end
+    end
+  end
 end

@@ -216,6 +216,32 @@ module HTTP
       "#<#{self.class}/#{@version} #{verb.to_s.upcase} #{uri}>"
     end
 
+    # Hash representation of a request
+    #
+    # @return [Hash[Symbol, Any]]
+    def to_h
+      {
+        :verb    => @verb,
+        :uri     => @uri,
+        :scheme  => @scheme,
+        :proxy   => @proxy,
+        :version => @version,
+        :headers => @headers,
+        :body    => @body,
+        :port    => port
+      }
+    end
+
+    # Pattern matching interface
+    #
+    # @param keys [Array]
+    #   Keys to be extracted
+    #
+    # @return [Hash[Symbol, Any]]
+    def deconstruct_keys(keys)
+      to_h.slice(*keys)
+    end
+
     private
 
     # @!attribute [r] host

@@ -44,4 +44,33 @@ RSpec.describe HTTP::ContentType do
       its(:charset)   { is_expected.to eq "utf-8" }
     end
   end
+
+  # Pattern Matching only exists in Ruby 2.7+, guard against execution of
+  # tests otherwise
+  if RUBY_VERSION >= "2.7"
+    describe "#to_h" do
+      it "returns a Hash representation of a Content Type" do
+        expect(described_class.new("text/plain", "utf-8").to_h).to include(
+          :charset   => "utf-8",
+          :mime_type => "text/plain"
+        )
+      end
+    end
+
+    describe "Pattern Matching" do
+      it "can perform a pattern match" do
+        # Cursed hack to ignore syntax errors to test Pattern Matching.
+        value = instance_eval <<-RUBY, __FILE__, __LINE__ + 1
+          case described_class.new('text/plain', 'utf-8')
+          in mime_type: /text/
+            true
+          else
+            false
+          end
+        RUBY
+
+        expect(value).to eq(true)
+      end
+    end
+  end
 end
