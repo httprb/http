@@ -1,3 +1,17 @@
+## 5.0.1 (2021-06-26)
+
+* [#670](https://github.com/httprb/http/pull/670)
+  Revert `Response#parse` behavior introduced in #540.
+  ([@DannyBen])
+
+* [#669](https://github.com/httprb/http/pull/669)
+  Prevent bodies from being resubmitted when following unsafe redirects.
+  ([@odinhb])
+
+* [#664](https://github.com/httprb/http/pull/664)
+  Bump llhttp-ffi to 0.3.0.
+  ([@bryanp])
+
 ## 5.0.0 (2021-05-12)
 
 * [#656](https://github.com/httprb/http/pull/656)
@@ -896,3 +910,5 @@ end
 [@semenyukdmitry]: https://github.com/semenyukdmitry
 [@bryanp]: https://github.com/bryanp
 [@meanphil]: https://github.com/meanphil
+[@odinhb]: https://github.com/odinhb
+[@DannyBen]: https://github.com/DannyBen
