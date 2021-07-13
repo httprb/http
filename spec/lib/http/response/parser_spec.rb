@@ -46,9 +46,9 @@ RSpec.describe HTTP::Response::Parser do
   context "when got 100 Continue response" do
     let :raw_response do
       "HTTP/1.1 100 Continue\r\n\r\n" \
-      "HTTP/1.1 200 OK\r\n" \
-      "Content-Length: 12\r\n\r\n" \
-      "Hello World!"
+        "HTTP/1.1 200 OK\r\n" \
+        "Content-Length: 12\r\n\r\n" \
+        "Hello World!"
     end
 
     context "when response is feeded in one part" do
