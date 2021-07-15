@@ -74,7 +74,6 @@ RSpec.describe HTTP::Features::AutoInflate do
           :status     => 200,
           :headers    => {:content_encoding => "gzip"},
           :connection => connection,
-          :uri        => "https://example.com",
           :request    => HTTP::Request.new(:verb => :get, :uri => "https://example.com")
         )
       end

@@ -21,8 +21,6 @@ module HTTP
           :request       => response.request
         }
 
-        options[:uri] = response.uri if response.uri
-
         Response.new(options)
       end
 
