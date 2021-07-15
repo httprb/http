@@ -40,10 +40,11 @@ module HTTP
     # @option opts [HTTP::Connection] :connection
     # @option opts [String] :encoding Encoding to use when reading body
     # @option opts [String] :body
-    # @option opts [HTTP::Request] request
+    # @option opts [HTTP::Request] request The request this is in response to.
+    # @option opts [String] :uri (DEPRECATED) used to populate a missing request
     def initialize(opts)
       @version       = opts.fetch(:version)
-      @request       = opts.fetch(:request)
+      @request       = init_request(opts)
       @status        = HTTP::Response::Status.new(opts.fetch(:status))
       @headers       = HTTP::Headers.coerce(opts[:headers] || {})
       @proxy_headers = HTTP::Headers.coerce(opts[:proxy_headers] || {})
@@ -163,6 +164,23 @@ module HTTP
     # Inspect a response
     def inspect
       "#<#{self.class}/#{@version} #{code} #{reason} #{headers.to_h.inspect}>"
+    end
+
+    private
+
+    # Initialize an HTTP::Request from options.
+    #
+    # @return [HTTP::Request]
+    def init_request(opts)
+      raise ArgumentError, ":uri is for backwards compatibilty and conflicts with :request" \
+        if opts[:request] && opts[:uri]
+
+      # For backwards compatibilty
+      if opts[:uri]
+        HTTP::Request.new(:uri => opts[:uri], :verb => :get)
+      else
+        opts.fetch(:request)
+      end
     end
   end
 end
