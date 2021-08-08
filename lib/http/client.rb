@@ -32,7 +32,7 @@ module HTTP
       return res unless opts.follow
 
       Redirector.new(opts.follow).perform(req, res) do |request|
-        perform(request, opts)
+        perform(wrap_request(request, opts), opts)
       end
     end
 
@@ -52,9 +52,7 @@ module HTTP
         :body           => body
       )
 
-      opts.features.inject(req) do |request, (_name, feature)|
-        feature.wrap_request(request)
-      end
+      wrap_request(req, opts)
     end
 
     # @!method persistent?
@@ -103,6 +101,12 @@ module HTTP
     end
 
     private
+
+    def wrap_request(req, opts)
+      opts.features.inject(req) do |request, (_name, feature)|
+        feature.wrap_request(request)
+      end
+    end
 
     def build_response(req, options)
       Response.new(
