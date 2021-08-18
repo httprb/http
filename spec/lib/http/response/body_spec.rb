@@ -2,7 +2,7 @@
 
 RSpec.describe HTTP::Response::Body do
   let(:connection) { double(:sequence_id => 0) }
-  let(:chunks)     { [String.new("Hello, "), String.new("World!")] }
+  let(:chunks)     { ["Hello, ", "World!"] }
 
   before do
     allow(connection).to receive(:readpartial) { chunks.shift }
@@ -16,7 +16,7 @@ RSpec.describe HTTP::Response::Body do
   end
 
   context "when body empty" do
-    let(:chunks) { [String.new("")] }
+    let(:chunks) { [""] }
 
     it "returns responds to empty? with true" do
       expect(subject).to be_empty
@@ -45,12 +45,12 @@ RSpec.describe HTTP::Response::Body do
     it "returns content in specified encoding" do
       body = described_class.new(connection)
       expect(connection).to receive(:readpartial).
-        and_return(String.new("content").force_encoding(Encoding::UTF_8))
+        and_return(String.new("content", :encoding => Encoding::UTF_8))
       expect(body.readpartial.encoding).to eq Encoding::BINARY
 
       body = described_class.new(connection, :encoding => Encoding::UTF_8)
       expect(connection).to receive(:readpartial).
-        and_return(String.new("content").force_encoding(Encoding::BINARY))
+        and_return(String.new("content", :encoding => Encoding::BINARY))
       expect(body.readpartial.encoding).to eq Encoding::UTF_8
     end
   end
@@ -59,7 +59,7 @@ RSpec.describe HTTP::Response::Body do
     let(:chunks) do
       body = Zlib::Deflate.deflate("Hi, HTTP here ☺")
       len  = body.length
-      [String.new(body[0, len / 2]), String.new(body[(len / 2)..-1])]
+      [body[0, len / 2], body[(len / 2)..-1]]
     end
     subject(:body) do
       inflater = HTTP::Response::Inflater.new(connection)
