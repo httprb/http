@@ -15,7 +15,7 @@ module HTTP
       end
 
       def reset
-        @parser.finish
+        @parser.reset
         @handler.reset
         @header_finished = false
         @message_finished = false
