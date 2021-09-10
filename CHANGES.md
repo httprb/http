@@ -1,7 +1,37 @@
+## 5.0.2 (2021-09-10)
+
+* [#686](https://github.com/httprb/http/pull/686)
+  Correctly reset the parser.
+  ([@bryanp])
+
+* [#684](https://github.com/httprb/http/pull/684)
+  Don't set Content-Length for GET, HEAD, DELETE, or CONNECT requests without a BODY.
+  ([@jyn514])
+
+* [#679](https://github.com/httprb/http/pull/679)
+  Use features on redirected requests.
+  ([@nomis])
+
+* [#678](https://github.com/schwern)
+  Restore `HTTP::Response` `:uri` option for backwards compatibility.
+  ([@schwern])
+
+* [#676](https://github.com/httprb/http/pull/676)
+  Update addressable because of CVE-2021-32740.
+  ([@matheussilvasantos])
+
+* [#653](https://github.com/httprb/http/pull/653)
+  Avoid force encodings on frozen strings.
+  ([@bvicenzo])
+
+* [#638](https://github.com/httprb/http/pull/638)
+  DNS failover handling.
+  ([@midnight-wonderer])  
+
 ## 5.0.1 (2021-06-26)
 
 * [#670](https://github.com/httprb/http/pull/670)
-  Revert `Response#parse` behavior introduced in #540.
+  Revert `Response#parse` behavior introduced in [#540].
   ([@DannyBen])
 
 * [#669](https://github.com/httprb/http/pull/669)
@@ -912,3 +942,9 @@ end
 [@meanphil]: https://github.com/meanphil
 [@odinhb]: https://github.com/odinhb
 [@DannyBen]: https://github.com/DannyBen
+[@jyn514]: https://github.com/jyn514
+[@bvicenzo]: https://github.com/bvicenzo
+[@nomis]: https://github.com/nomis
+[@midnight-wonderer]: https://github.com/midnight-wonderer
+[@schwern]: https://github.com/schwern
+[@matheussilvasantos]: https://github.com/matheussilvasantos
