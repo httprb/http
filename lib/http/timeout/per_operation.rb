@@ -23,6 +23,8 @@ module HTTP
         end
       end
 
+      # TODO: refactor
+      # rubocop:disable Metrics/MethodLength
       def connect(socket_class, host_name, *args)
         connect_operation = lambda do |host_address|
           ::Timeout.timeout(@connect_timeout, TimeoutError) do
@@ -43,6 +45,7 @@ module HTTP
           raise error
         end
       end
+      # rubocop:enable Metrics/MethodLength
 
       def connect_ssl
         rescue_readable(@connect_timeout) do
