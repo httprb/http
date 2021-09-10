@@ -4,6 +4,7 @@
 require "support/http_handling_shared"
 require "support/dummy_server"
 require "support/ssl_helper"
+require "logger"
 
 RSpec.describe HTTP::Client do
   run_server(:dummy) { DummyServer.new }
@@ -101,6 +102,39 @@ RSpec.describe HTTP::Client do
         expect(HTTP.follow.get("https://bit.ly/2UaBT4R").parse(:json)).
           to include("url" => "https://httpbin.org/anything/könig")
       end
+    end
+  end
+
+  describe "following redirects with logging" do
+    let(:logger) do
+      logger           = Logger.new(logdev)
+      logger.formatter = ->(severity, _, _, message) { format("** %s **\n%s\n", severity, message) }
+      logger.level     = Logger::INFO
+      logger
+    end
+
+    let(:logdev) { StringIO.new }
+
+    it "logs all requests" do
+      client = StubbedClient.new(:follow => true, :features => { :logging => { :logger => logger } }).stub(
+        "http://example.com/"  => redirect_response("/1"),
+        "http://example.com/1" => redirect_response("/2"),
+        "http://example.com/2" => redirect_response("/3"),
+        "http://example.com/3" => simple_response("OK")
+      )
+
+      expect { client.get("http://example.com/") }.not_to raise_error
+
+      expect(logdev.string).to eq <<~OUTPUT
+        ** INFO **
+        > GET http://example.com/
+        ** INFO **
+        > GET http://example.com/1
+        ** INFO **
+        > GET http://example.com/2
+        ** INFO **
+        > GET http://example.com/3
+      OUTPUT
     end
   end
 
