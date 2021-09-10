@@ -47,6 +47,27 @@ RSpec.describe HTTP::Request::Writer do
       end
     end
 
+    context "when body is encoded as ASCII-8BIT and headers are encoded as UTF-8" do
+      let(:bad_string) do
+        (100..1000).to_a.each_with_object("".dup) do |char, string|
+          string << char
+        end
+      end
+
+      let(:body) { HTTP::Request::Body.new(bad_string.b) }
+
+      it "doesn't write anything to the socket and sets Content-Length" do
+        headers.set("Authorization", bad_string)
+        writer.stream
+        expect(io.string).to eq [
+          "#{headerstart}\r\n",
+          "Authorization: #{bad_string}\r\n",
+          "Content-Length: 1774\r\n\r\n",
+          bad_string
+        ].join
+      end
+    end
+
     context "when Content-Length header is set" do
       let(:headers) { HTTP::Headers.coerce "Content-Length" => "12" }
       let(:body)    { HTTP::Request::Body.new("content") }
