@@ -7,10 +7,6 @@
 
 [Documentation]
 
-_NOTE: This is the 5.x **development** branch.  For the 4.x **stable** branch, please see:_
-
-https://github.com/httprb/http/tree/4-x-stable
-
 ## About
 
 HTTP (The Gem! a.k.a. http.rb) is an easy-to-use client library for making requests
