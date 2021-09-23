@@ -53,11 +53,11 @@ module HTTP
         begin
           @socket.connect_nonblock
         rescue IO::WaitReadable
-          IO.select([@socket], nil, nil, @time_left)
+          @socket.wait_readable(@time_left)
           log_time
           retry
         rescue IO::WaitWritable
-          IO.select(nil, [@socket], nil, @time_left)
+          @socket.wait_writable(@time_left)
           log_time
           retry
         end

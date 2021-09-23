@@ -61,7 +61,7 @@ module HTTP
       def join_headers
         # join the headers array with crlfs, stick two on the end because
         # that ends the request header
-        @request_header.join(CRLF) + CRLF * 2
+        @request_header.join(CRLF) + (CRLF * 2)
       end
 
       # Writes HTTP request data into the socket.

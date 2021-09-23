@@ -118,10 +118,10 @@ RSpec.describe HTTP::Request::Body do
     end
 
     context "when body is a non-Enumerable IO" do
-      let(:body) { FakeIO.new("a" * 16 * 1024 + "b" * 10 * 1024) }
+      let(:body) { FakeIO.new(("a" * 16 * 1024) + ("b" * 10 * 1024)) }
 
       it "yields chunks of content" do
-        expect(chunks.inject("", :+)).to eq "a" * 16 * 1024 + "b" * 10 * 1024
+        expect(chunks.inject("", :+)).to eq ("a" * 16 * 1024) + ("b" * 10 * 1024)
       end
     end
 
@@ -148,7 +148,7 @@ RSpec.describe HTTP::Request::Body do
     end
 
     context "when body is an Enumerable IO" do
-      let(:data) { "a" * 16 * 1024 + "b" * 10 * 1024 }
+      let(:data) { ("a" * 16 * 1024) + ("b" * 10 * 1024) }
       let(:body) { StringIO.new data }
 
       it "yields chunks of content" do
