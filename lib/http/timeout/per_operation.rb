@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require "resolv"
 require "timeout"
 
 require "http/timeout/null"
@@ -18,34 +17,14 @@ module HTTP
         @read_timeout = options.fetch(:read_timeout, READ_TIMEOUT)
         @write_timeout = options.fetch(:write_timeout, WRITE_TIMEOUT)
         @connect_timeout = options.fetch(:connect_timeout, CONNECT_TIMEOUT)
-        @dns_resolver = options.fetch(:dns_resolver) do
-          ::Resolv.method(:getaddresses)
-        end
       end
 
-      # TODO: refactor
-      # rubocop:disable Metrics/MethodLength
-      def connect(socket_class, host_name, *args)
-        connect_operation = lambda do |host_address|
-          ::Timeout.timeout(@connect_timeout, TimeoutError) do
-            super(socket_class, host_address, *args)
-          end
-        end
-        host_addresses = @dns_resolver.call(host_name)
-        # ensure something to iterates
-        trying_targets = host_addresses.empty? ? [host_name] : host_addresses
-        trying_iterator = trying_targets.lazy
-        error = nil
-        begin
-          connect_operation.call(trying_iterator.next)
-        rescue TimeoutError => e
-          error = e
-          retry
-        rescue ::StopIteration
-          raise error
+      def connect(socket_class, host, port, nodelay = false)
+        ::Timeout.timeout(@connect_timeout, TimeoutError) do
+          @socket = socket_class.open(host, port)
+          @socket.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1) if nodelay
         end
       end
-      # rubocop:enable Metrics/MethodLength
 
       def connect_ssl
         rescue_readable(@connect_timeout) do
