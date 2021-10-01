@@ -138,7 +138,7 @@ module HTTP
     def_delegator :content_type, :charset
 
     def cookies
-      @cookies ||= headers[Headers::SET_COOKIE].each_with_object CookieJar.new do |v, jar|
+      @cookies ||= headers.get(Headers::SET_COOKIE).each_with_object CookieJar.new do |v, jar|
         jar.parse(v, uri)
       end
     end
