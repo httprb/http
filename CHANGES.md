@@ -1,3 +1,13 @@
+## 5.0.3 (2021-10-06)
+
+* [#695](https://github.com/httprb/http/pull/695)
+  Revert DNS resolving feature.
+  ([@PhilCoggins])
+
+* [#694](https://github.com/httprb/http/pull/694)
+  Fix cookies extraction.
+  ([@flosacca])
+
 ## 5.0.2 (2021-09-10)
 
 * [#686](https://github.com/httprb/http/pull/686)
@@ -28,6 +38,7 @@
   DNS failover handling.
   ([@midnight-wonderer])  
 
+
 ## 5.0.1 (2021-06-26)
 
 * [#670](https://github.com/httprb/http/pull/670)
@@ -41,6 +52,7 @@
 * [#664](https://github.com/httprb/http/pull/664)
   Bump llhttp-ffi to 0.3.0.
   ([@bryanp])
+
 
 ## 5.0.0 (2021-05-12)
 
@@ -948,3 +960,5 @@ end
 [@midnight-wonderer]: https://github.com/midnight-wonderer
 [@schwern]: https://github.com/schwern
 [@matheussilvasantos]: https://github.com/matheussilvasantos
+[@PhilCoggins]: https://github.com/PhilCoggins
+[@flosacca]: https://github.com/flosacca
