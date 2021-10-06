@@ -1,9 +1,9 @@
-# ![http.rb](https://raw.github.com/httprb/http.rb/master/logo.png)
+# ![http.rb](https://raw.github.com/httprb/http.rb/main/logo.png)
 
-[![Gem Version](https://img.shields.io/gem/v/http?logo=ruby)](https://rubygems.org/gems/http)
-[![Build Status](https://github.com/httprb/http/workflows/CI/badge.svg)](https://github.com/httprb/http/actions?query=workflow:CI)
-[![Code Climate](https://codeclimate.com/github/httprb/http.svg?branch=master)](https://codeclimate.com/github/httprb/http)
-[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/httprb/http/blob/master/LICENSE.txt)
+[![Gem Version][gem-image]][gem-link]
+[![MIT licensed][license-image]][license-link]
+[![Build Status][build-image]][build-link]
+[![Code Climate][codeclimate-image]][codeclimate-link]
 
 [Documentation]
 
@@ -17,63 +17,16 @@ Under the hood, http.rb uses the [llhttp] parser, a fast HTTP parsing native ext
 This library isn't just yet another wrapper around `Net::HTTP`. It implements the HTTP
 protocol natively and outsources the parsing to native extensions.
 
-[requests]: http://docs.python-requests.org/en/latest/
-[llhttp]: https://llhttp.org/
+### Why http.rb?
 
-
-## Another Ruby HTTP library? Why should I care?
-
-There are a lot of HTTP libraries to choose from in the Ruby ecosystem.
-So why would you choose this one?
-
-Top three reasons:
-
-1. **Clean API**: http.rb offers an easy-to-use API that should be a
+- **Clean API**: http.rb offers an easy-to-use API that should be a
    breath of fresh air after using something like Net::HTTP.
 
-2. **Maturity**: http.rb is one of the most mature Ruby HTTP clients, supporting
+- **Maturity**: http.rb is one of the most mature Ruby HTTP clients, supporting
    features like persistent connections and fine-grained timeouts.
 
-3. **Performance**: using native parsers and a clean, lightweight implementation,
-   http.rb achieves the best performance of any Ruby HTTP library which
-   implements the HTTP protocol in Ruby instead of C:
-
-  | HTTP client              | Time   | Implementation        |
-  |--------------------------|--------|-----------------------|
-  | curb (persistent)        | 2.519  | libcurl wrapper       |
-  | em-http-request          | 2.731  | EM + http_parser.rb   |
-  | Typhoeus                 | 2.851  | libcurl wrapper       |
-  | StreamlyFFI (persistent) | 2.853  | libcurl wrapper       |
-  | http.rb (persistent)     | 2.970  | Ruby + http_parser.rb |
-  | http.rb                  | 3.588  | Ruby + http_parser.rb |
-  | HTTParty                 | 3.931  | Net::HTTP wrapper     |
-  | Net::HTTP                | 3.959  | Pure Ruby             |
-  | Net::HTTP (persistent)   | 4.043  | Pure Ruby             |
-  | open-uri                 | 4.479  | Net::HTTP wrapper     |
-  | Excon (persistent)       | 4.618  | Pure Ruby             |
-  | Excon                    | 4.701  | Pure Ruby             |
-  | RestClient               | 26.838 | Net::HTTP wrapper     |
-
-Benchmarks performed using excon's benchmarking tool
-
-DISCLAIMER: Most benchmarks you find in READMEs are crap,
-including this one. These are out-of-date. If you care about
-performance, benchmark for yourself for your own use cases!
-
-## Help and Discussion
-
-If you need help or just want to talk about the http.rb,
-visit the http.rb Google Group:
-
-https://groups.google.com/forum/#!forum/httprb
-
-You can join by email by sending a message to:
-
-[httprb+subscribe@googlegroups.com](mailto:httprb+subscribe@googlegroups.com)
-
-If you believe you've found a bug, please report it at:
-
-https://github.com/httprb/http/issues
+- **Performance**: using native parsers and a clean, lightweight implementation,
+   http.rb achieves high performance while implementing HTTP in Ruby instead of C.
 
 
 ## Installation
@@ -108,10 +61,9 @@ for more detailed documentation and usage notes.
 
 The following API documentation is also available:
 
-* [YARD API documentation](https://www.rubydoc.info/github/httprb/http)
-* [Chainable module (all chainable methods)](https://www.rubydoc.info/github/httprb/http/HTTP/Chainable)
+- [YARD API documentation](https://www.rubydoc.info/github/httprb/http)
+- [Chainable module (all chainable methods)](https://www.rubydoc.info/github/httprb/http/HTTP/Chainable)
 
-[documentation]: https://github.com/httprb/http/wiki
 
 ### Basic Usage
 
@@ -138,7 +90,7 @@ We can also obtain an `HTTP::Response::Body` object for this response:
 ```
 
 The response body can be streamed with `HTTP::Response::Body#readpartial`.
-In practice, you'll want to bind the HTTP::Response::Body to a local variable
+In practice, you'll want to bind the `HTTP::Response::Body` to a local variable
 and call `#readpartial` on it repeatedly until it returns `nil`:
 
 ```ruby
@@ -155,13 +107,13 @@ and call `#readpartial` on it repeatedly until it returns `nil`:
 
 ## Supported Ruby Versions
 
-This library aims to support and is [tested against][travis] the following Ruby
-versions:
+This library aims to support and is [tested against][build-link]
+the following Ruby  versions:
 
-* Ruby 2.6
-* Ruby 2.7
-* Ruby 3.0
-* JRuby 9.2
+- Ruby 2.6
+- Ruby 2.7
+- Ruby 3.0
+- JRuby 9.2
 
 If something doesn't work on one of these versions, it's a bug.
 
@@ -176,20 +128,36 @@ patches in a timely fashion. If critical issues for a particular implementation
 exist at the time of a major release, support for that Ruby version may be
 dropped.
 
-[travis]: http://travis-ci.org/httprb/http
-
 
 ## Contributing to http.rb
 
-* Fork http.rb on GitHub
-* Make your changes
-* Ensure all tests pass (`bundle exec rake`)
-* Send a pull request
-* If we like them we'll merge them
-* If we've accepted a patch, feel free to ask for commit access!
+- Fork http.rb on GitHub
+- Make your changes
+- Ensure all tests pass (`bundle exec rake`)
+- Send a pull request
+- If we like them we'll merge them
+- If we've accepted a patch, feel free to ask for commit access!
 
 
 ## Copyright
 
-Copyright (c) 2011-2021 Tony Arcieri, Alexey V. Zapparov, Erik Michaels-Ober, Zachary Anker.
+Copyright © 2011-2021 Tony Arcieri, Alexey V. Zapparov, Erik Michaels-Ober, Zachary Anker.
 See LICENSE.txt for further details.
+
+
+[//]: # (badges)
+
+[gem-image]: https://img.shields.io/gem/v/http?logo=ruby
+[gem-link]: https://rubygems.org/gems/http
+[license-image]: https://img.shields.io/badge/license-MIT-blue.svg
+[license-link]: https://github.com/httprb/http/blob/main/LICENSE.txt
+[build-image]: https://github.com/httprb/http/workflows/CI/badge.svg
+[build-link]: https://github.com/httprb/http/actions/workflows/ci.yml
+[codeclimate-image]: https://codeclimate.com/github/httprb/http.svg?branch=main
+[codeclimate-link]: https://codeclimate.com/github/httprb/http
+
+[//]: # (links)
+
+[documentation]: https://github.com/httprb/http/wiki
+[requests]: http://docs.python-requests.org/en/latest/
+[llhttp]: https://llhttp.org/
