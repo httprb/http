@@ -35,12 +35,10 @@ module HTTP
         begin
           @socket.connect_nonblock
         rescue IO::WaitReadable
-          @socket.wait_readable(@time_left)
-          log_time
+          wait_readable_or_timeout
           retry
         rescue IO::WaitWritable
-          @socket.wait_writable(@time_left)
-          log_time
+          wait_writable_or_timeout
           retry
         end
       end
