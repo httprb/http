@@ -1,3 +1,9 @@
+## 5.0.4 (2021-10-07)
+
+* [#698](https://github.com/httprb/http/pull/698)
+  Fix `HTTP::Timeout::Global#connect_ssl`.
+  ([@tarcieri])
+
 ## 5.0.3 (2021-10-06)
 
 * [#695](https://github.com/httprb/http/pull/695)
