@@ -112,6 +112,7 @@
 
 * [#576](https://github.com/httprb/http/pull/576)
   [#524](https://github.com/httprb/http/issues/524)
+  **BREAKING CHANGE**
   Preserve header names casing.
   ([@joshuaflanagan])
 
