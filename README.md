@@ -141,7 +141,7 @@ dropped.
 
 ## Copyright
 
-Copyright © 2011-2021 Tony Arcieri, Alexey V. Zapparov, Erik Michaels-Ober, Zachary Anker.
+Copyright © 2011-2022 Tony Arcieri, Alexey V. Zapparov, Erik Michaels-Ober, Zachary Anker.
 See LICENSE.txt for further details.
 
 
