@@ -389,8 +389,8 @@ RSpec.describe HTTP::Client do
           client.use(:test_feature => feature_instance).
             timeout(0.001).
             request(:post, sleep_url)
-        end.to raise_error(HTTP::ConnectionTimeoutError)
-        expect(feature_instance.captured_error).to be_a(HTTP::ConnectionTimeoutError)
+        end.to raise_error(HTTP::ConnectTimeoutError)
+        expect(feature_instance.captured_error).to be_a(HTTP::ConnectTimeoutError)
       end
     end
   end

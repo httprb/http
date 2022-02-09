@@ -20,7 +20,7 @@ module HTTP
   class TimeoutError < Error; end
 
   # Timeout when first establishing the conncetion
-  class ConnectionTimeoutError < TimeoutError; end
+  class ConnectTimeoutError < TimeoutError; end
 
   # Header value is of unexpected format (similar to Net::HTTPHeaderSyntaxError)
   class HeaderError < Error; end
