@@ -20,7 +20,7 @@ module HTTP
       end
 
       def connect(socket_class, host, port, nodelay = false)
-        ::Timeout.timeout(@connect_timeout, TimeoutError) do
+        ::Timeout.timeout(@connect_timeout, ConnectTimeoutError) do
           @socket = socket_class.open(host, port)
           @socket.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1) if nodelay
         end

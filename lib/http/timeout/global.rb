@@ -21,7 +21,7 @@ module HTTP
 
       def connect(socket_class, host, port, nodelay = false)
         reset_timer
-        ::Timeout.timeout(@time_left, TimeoutError) do
+        ::Timeout.timeout(@time_left, ConnectTimeoutError) do
           @socket = socket_class.open(host, port)
           @socket.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1) if nodelay
         end

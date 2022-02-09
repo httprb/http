@@ -77,7 +77,7 @@ RSpec.shared_context "HTTP handling" do
         sleep 1.25
       end
 
-      expect { response }.to raise_error(HTTP::TimeoutError, /execution/)
+      expect { response }.to raise_error(HTTP::ConnectTimeoutError, /execution/)
     end
 
     it "errors if reading takes too long" do
