@@ -59,11 +59,42 @@ module HTTP
         @response.flush
 
         # XXX(ixti): using `Array#inject` to return `nil` if no Location header.
-        @request  = redirect_to(@response.headers.get(Headers::LOCATION).inject(:+))
+        @request = redirect_to(@response.headers.get(Headers::LOCATION).inject(:+))
+        self.class.update_cookies(@response, @request)
         @response = yield @request
       end
 
       @response
+    end
+
+    class << self
+      # Used internally to update cookies between redirects. If a redirct response contains
+      # a Set-Cookie header(s), the following request should have that cookie set.
+      #
+      # The `request` parameter is modified (no return value).
+      def update_cookies(response, request)
+        request_cookie_header = request.headers["Cookie"]
+        cookies =
+          if request_cookie_header
+            HTTP::Cookie.cookie_value_to_hash(request_cookie_header)
+          else
+            {}
+          end
+        cookies = overwrite_cookies(response.cookies, cookies)
+
+        request.headers[Headers::COOKIE] = cookies.map { |k, v| "#{k}=#{v}" }.join("; ")
+      end
+
+      def overwrite_cookies(from, into_h)
+        from.each do |cookie|
+          if cookie.value == ""
+            into_h.delete(cookie.name)
+          else
+            into_h[cookie.name] = cookie.value
+          end
+        end
+        into_h
+      end
     end
 
     private

@@ -33,6 +33,45 @@ RSpec.describe HTTP::Redirector do
     end
   end
 
+  describe "#update_cookies" do
+    subject { described_class.update_cookies }
+
+    def set_cookie(name, value)
+      "#{name}=#{value}; path=/; httponly; secure; SameSite=none; Secure"
+    end
+
+    it "creates a new cookie" do
+      req = HTTP::Request.new :verb => :post, :uri => "http://example.com"
+      res = simple_response(301)
+      res.headers["Set-Cookie"] = set_cookie("foo", 1)
+      described_class.update_cookies(res, req)
+
+      expect(req.headers["Cookie"]).to eq "foo=1"
+    end
+
+    it "overwrites an existing cookie" do
+      req = HTTP::Request.new :verb => :post, :uri => "http://example.com", :headers => {
+        "Cookie" => "foo=0"
+      }
+      res = simple_response(301)
+      res.headers["Set-Cookie"] = set_cookie("foo", "1")
+      described_class.update_cookies(res, req)
+
+      expect(req.headers["Cookie"]).to eq "foo=1"
+    end
+
+    it "unsets an existing cookie" do
+      req = HTTP::Request.new :verb => :post, :uri => "http://example.com", :headers => {
+        "Cookie" => "foo=0"
+      }
+      res = simple_response(301)
+      res.headers["Set-Cookie"] = set_cookie("foo", "")
+      described_class.update_cookies(res, req)
+
+      expect(req.headers["Cookie"]).to eq ""
+    end
+  end
+
   describe "#perform" do
     let(:options)    { {} }
     let(:redirector) { described_class.new options }
@@ -400,7 +439,7 @@ RSpec.describe HTTP::Redirector do
     describe "changing verbs during redirects" do
       let(:options) { {:strict => false} }
       let(:post_body) { HTTP::Request::Body.new("i might be way longer in real life") }
-      let(:cookie) { "dont eat my cookies" }
+      let(:cookie) { "dont=eat my cookies" }
 
       def a_dangerous_request(verb)
         HTTP::Request.new(
