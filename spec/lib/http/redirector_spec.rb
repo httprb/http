@@ -11,8 +11,12 @@ RSpec.describe HTTP::Redirector do
     )
   end
 
-  def redirect_response(status, location)
-    simple_response status, "", "Location" => location
+  def redirect_response(status, location, set_cookie = {})
+    res = simple_response status, "", "Location" => location
+    set_cookie.each do |name, value|
+      res.headers.add("Set-Cookie", "#{name}=#{value}; path=/; httponly; secure; SameSite=none; Secure")
+    end
+    res
   end
 
   describe "#strict" do
@@ -30,45 +34,6 @@ RSpec.describe HTTP::Redirector do
     context "by default" do
       let(:redirector) { described_class.new }
       it { is_expected.to eq 5 }
-    end
-  end
-
-  describe "#update_cookies" do
-    subject { described_class.update_cookies }
-
-    def set_cookie(name, value)
-      "#{name}=#{value}; path=/; httponly; secure; SameSite=none; Secure"
-    end
-
-    it "creates a new cookie" do
-      req = HTTP::Request.new :verb => :post, :uri => "http://example.com"
-      res = simple_response(301)
-      res.headers["Set-Cookie"] = set_cookie("foo", 1)
-      described_class.update_cookies(res, req)
-
-      expect(req.headers["Cookie"]).to eq "foo=1"
-    end
-
-    it "overwrites an existing cookie" do
-      req = HTTP::Request.new :verb => :post, :uri => "http://example.com", :headers => {
-        "Cookie" => "foo=0"
-      }
-      res = simple_response(301)
-      res.headers["Set-Cookie"] = set_cookie("foo", "1")
-      described_class.update_cookies(res, req)
-
-      expect(req.headers["Cookie"]).to eq "foo=1"
-    end
-
-    it "unsets an existing cookie" do
-      req = HTTP::Request.new :verb => :post, :uri => "http://example.com", :headers => {
-        "Cookie" => "foo=0"
-      }
-      res = simple_response(301)
-      res.headers["Set-Cookie"] = set_cookie("foo", "")
-      described_class.update_cookies(res, req)
-
-      expect(req.headers["Cookie"]).to eq ""
     end
   end
 
@@ -126,6 +91,26 @@ RSpec.describe HTTP::Redirector do
       end
 
       expect(res.to_s).to eq "http://example.com/123"
+    end
+
+    it "returns cookies in response" do
+      req  = HTTP::Request.new :verb => :head, :uri => "http://example.com"
+      hops = [
+        redirect_response(301, "http://example.com/1", {"foo" => "42"}),
+        redirect_response(301, "http://example.com/2", {"bar" => "53", "deleted" => "foo"}),
+        redirect_response(301, "http://example.com/3", {"baz" => "64", "deleted" => ""}),
+        redirect_response(301, "http://example.com/4", {"baz" => "65"}),
+        simple_response(200, "bar")
+      ]
+
+      res = redirector.perform(req, hops.shift) { hops.shift }
+      expect(res.to_s).to eq "bar"
+      cookies = res.cookies.cookies.map { |c| [c.name, c.value] }.to_h
+      puts cookies
+      expect(cookies["foo"]).to eq "42"
+      expect(cookies["bar"]).to eq "53"
+      expect(cookies["baz"]).to eq "65"
+      expect(cookies["deleted"]).to eq nil
     end
 
     context "following 300 redirect" do

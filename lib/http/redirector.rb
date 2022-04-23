@@ -49,6 +49,7 @@ module HTTP
       @request  = request
       @response = response
       @visited  = []
+      collect_cookies
 
       while REDIRECT_CODES.include? @response.status.code
         @visited << "#{@request.verb} #{@request.uri}"
@@ -60,44 +61,38 @@ module HTTP
 
         # XXX(ixti): using `Array#inject` to return `nil` if no Location header.
         @request = redirect_to(@response.headers.get(Headers::LOCATION).inject(:+))
-        self.class.update_cookies(@response, @request)
         @response = yield @request
+        collect_cookies
       end
 
       @response
     end
 
-    class << self
-      # Used internally to update cookies between redirects. If a redirct response contains
-      # a Set-Cookie header(s), the following request should have that cookie set.
-      #
-      # The `request` parameter is modified (no return value).
-      def update_cookies(response, request)
-        request_cookie_header = request.headers["Cookie"]
-        cookies =
-          if request_cookie_header
-            HTTP::Cookie.cookie_value_to_hash(request_cookie_header)
-          else
-            {}
-          end
-        cookies = overwrite_cookies(response.cookies, cookies)
+    private
 
-        request.headers[Headers::COOKIE] = cookies.map { |k, v| "#{k}=#{v}" }.join("; ")
+    # Carry cookies from one response to the next. Carrying cookies to the next response ends up
+    # carrying them to the next request as well.
+    #
+    # Note that this isn't part of the IETF standard, but all major browsers support setting cookies
+    # on redirect: https://blog.dubbelboer.com/2012/11/25/302-cookie.html
+    def collect_cookies
+      # it seems that @response.cookies instance is reused between responses, so we have to "clone"
+      @cookie_jar ||= HTTP::CookieJar.new
+
+      # Overwrite previous cookies
+      @response.cookies.each do |cookie|
+        if cookie.value == ""
+          @cookie_jar.delete(cookie)
+        else
+          @cookie_jar.add(cookie)
+        end
       end
 
-      def overwrite_cookies(from, into_h)
-        from.each do |cookie|
-          if cookie.value == ""
-            into_h.delete(cookie.name)
-          else
-            into_h[cookie.name] = cookie.value
-          end
-        end
-        into_h
+      # I wish we could just do @response.cookes = @cookie_jar
+      @cookie_jar.each do |cookie|
+        @response.cookies.add(cookie)
       end
     end
-
-    private
 
     # Check if we reached max amount of redirect hops
     # @return [Boolean]
