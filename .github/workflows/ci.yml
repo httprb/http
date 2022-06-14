@@ -59,9 +59,6 @@ jobs:
           ruby-version: 2.5
           bundler-cache: true
 
-      - name: Display rubocop version
-        run: bundle exec rubocop -V
-
       - name: bundle exec rubocop
         run: bundle exec rubocop --format progress --color
 
