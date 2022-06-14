@@ -223,4 +223,40 @@ RSpec.describe HTTP::Response do
       end
     end
   end
+
+  describe "#body" do
+    let(:connection) { double(:sequence_id => 0) }
+    let(:chunks)     { ["Hello, ", "World!"] }
+
+    subject(:response) do
+      HTTP::Response.new(
+        :status     => 200,
+        :version    => "1.1",
+        :headers    => headers,
+        :request    => request,
+        :connection => connection
+      )
+    end
+
+    before do
+      allow(connection).to receive(:readpartial) { chunks.shift }
+      allow(connection).to receive(:body_completed?) { chunks.empty? }
+    end
+
+    context "with no Content-Type" do
+      let(:headers) { {} }
+
+      it "returns a body with default binary encoding" do
+        expect(response.body.to_s.encoding).to eq Encoding::BINARY
+      end
+    end
+
+    context "with Content-Type: application/json" do
+      let(:headers) { {"Content-Type" => "application/json"} }
+
+      it "returns a body with a default UTF_8 encoding" do
+        expect(response.body.to_s.encoding).to eq Encoding::UTF_8
+      end
+    end
+  end
 end
