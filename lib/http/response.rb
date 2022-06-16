@@ -53,7 +53,7 @@ module HTTP
         @body = opts.fetch(:body)
       else
         connection = opts.fetch(:connection)
-        encoding   = fetch_or_default_encoding(opts)
+        encoding = opts[:encoding] || charset || default_encoding
 
         @body = Response::Body.new(connection, :encoding => encoding)
       end
@@ -168,15 +168,9 @@ module HTTP
 
     private
 
-    def fetch_or_default_encoding(opts)
-      return opts[:encoding] if opts[:encoding]
-      return charset if charset
-
-      if mime_type == "application/json"
-        Encoding::UTF_8
-      else
-        Encoding::BINARY
-      end
+    def default_encoding
+      return Encoding::UTF_8 if mime_type == "application/json"
+      Encoding::BINARY
     end
 
     # Initialize an HTTP::Request from options.
