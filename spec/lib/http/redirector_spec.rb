@@ -116,7 +116,7 @@ RSpec.describe HTTP::Redirector do
         hops.shift
       end
       expect(res.to_s).to eq "bar"
-      cookies = res.cookies.cookies.map { |c| [c.name, c.value] }.to_h
+      cookies = res.cookies.cookies.to_h { |c| [c.name, c.value] }
       expect(cookies["foo"]).to eq "42"
       expect(cookies["bar"]).to eq "53"
       expect(cookies["baz"]).to eq "65"
@@ -142,7 +142,7 @@ RSpec.describe HTTP::Redirector do
         hops.shift
       end
       expect(res.to_s).to eq "bar"
-      cookies = res.cookies.cookies.map { |c| [c.name, c.value] }.to_h
+      cookies = res.cookies.cookies.to_h { |c| [c.name, c.value] }
       expect(cookies["foo"]).to eq "42"
       expect(cookies["bar"]).to eq "64"
       expect(cookies["deleted"]).to eq nil
