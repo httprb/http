@@ -49,6 +49,8 @@ module HTTP
       @request  = request
       @response = response
       @visited  = []
+      collect_cookies_from_request
+      collect_cookies_from_response
 
       while REDIRECT_CODES.include? @response.status.code
         @visited << "#{@request.verb} #{@request.uri}"
@@ -59,14 +61,60 @@ module HTTP
         @response.flush
 
         # XXX(ixti): using `Array#inject` to return `nil` if no Location header.
-        @request  = redirect_to(@response.headers.get(Headers::LOCATION).inject(:+))
+        @request = redirect_to(@response.headers.get(Headers::LOCATION).inject(:+))
+        unless cookie_jar.empty?
+          @request.headers.set(Headers::COOKIE, cookie_jar.cookies.map { |c| "#{c.name}=#{c.value}" }.join("; "))
+        end
         @response = yield @request
+        collect_cookies_from_response
       end
 
       @response
     end
 
     private
+
+    # All known cookies. On the original request, this is only the original cookies, but after that,
+    # Set-Cookie headers can add, set or delete cookies.
+    def cookie_jar
+      # it seems that @response.cookies instance is reused between responses, so we have to "clone"
+      @cookie_jar ||= HTTP::CookieJar.new
+    end
+
+    def collect_cookies_from_request
+      request_cookie_header = @request.headers["Cookie"]
+      cookies =
+        if request_cookie_header
+          HTTP::Cookie.cookie_value_to_hash(request_cookie_header)
+        else
+          {}
+        end
+
+      cookies.each do |key, value|
+        cookie_jar.add(HTTP::Cookie.new(key, value, :path => @request.uri.path, :domain => @request.host))
+      end
+    end
+
+    # Carry cookies from one response to the next. Carrying cookies to the next response ends up
+    # carrying them to the next request as well.
+    #
+    # Note that this isn't part of the IETF standard, but all major browsers support setting cookies
+    # on redirect: https://blog.dubbelboer.com/2012/11/25/302-cookie.html
+    def collect_cookies_from_response
+      # Overwrite previous cookies
+      @response.cookies.each do |cookie|
+        if cookie.value == ""
+          cookie_jar.delete(cookie)
+        else
+          cookie_jar.add(cookie)
+        end
+      end
+
+      # I wish we could just do @response.cookes = cookie_jar
+      cookie_jar.each do |cookie|
+        @response.cookies.add(cookie)
+      end
+    end
 
     # Check if we reached max amount of redirect hops
     # @return [Boolean]
