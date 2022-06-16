@@ -1,3 +1,15 @@
+## development
+
+* Drop ruby-2.5 support.
+
+* [#715](https://github.com/httprb/http/pull/715)
+  Set default encoding to UTF-8 for `application/json`.
+  ([@drwl])
+
+* [#707](https://github.com/httprb/http/pull/707)
+  Distinguish connection timeouts.
+  ([@YuLeven])
+
 ## 5.0.4 (2021-10-07)
 
 * [#698](https://github.com/httprb/http/pull/698)
@@ -42,7 +54,7 @@
 
 * [#638](https://github.com/httprb/http/pull/638)
   DNS failover handling.
-  ([@midnight-wonderer])  
+  ([@midnight-wonderer])
 
 
 ## 5.0.1 (2021-06-26)
@@ -969,3 +981,5 @@ end
 [@matheussilvasantos]: https://github.com/matheussilvasantos
 [@PhilCoggins]: https://github.com/PhilCoggins
 [@flosacca]: https://github.com/flosacca
+[@YuLeven]: https://github.com/YuLeven
+[@drwl]: https://github.com/drwl
