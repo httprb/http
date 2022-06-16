@@ -69,7 +69,7 @@ module HTTP
       #   SYMBOL_CODES[:im_a_teapot]           # => 418
       #
       # @return [Hash<Symbol => Fixnum>]
-      SYMBOL_CODES = SYMBOLS.map { |k, v| [v, k] }.to_h.freeze
+      SYMBOL_CODES = SYMBOLS.to_h { |k, v| [v, k] }.freeze
 
       # @return [Fixnum] status code
       attr_reader :code

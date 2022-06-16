@@ -59,7 +59,7 @@ RSpec.describe HTTP::Response::Body do
     let(:chunks) do
       body = Zlib::Deflate.deflate("Hi, HTTP here ☺")
       len  = body.length
-      [body[0, len / 2], body[(len / 2)..-1]]
+      [body[0, len / 2], body[(len / 2)..]]
     end
     subject(:body) do
       inflater = HTTP::Response::Inflater.new(connection)

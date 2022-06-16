@@ -16,11 +16,11 @@ jobs:
 
     strategy:
       matrix:
-        ruby: [ ruby-2.5, ruby-2.6, ruby-2.7, ruby-3.0, ruby-3.1 ]
+        ruby: [ ruby-2.6, ruby-2.7, ruby-3.0, ruby-3.1 ]
         os: [ ubuntu-latest ]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - uses: ruby/setup-ruby@v1
         with:
@@ -52,11 +52,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.5
+          ruby-version: 2.6
           bundler-cache: true
 
       - name: bundle exec rubocop
