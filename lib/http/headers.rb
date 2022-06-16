@@ -111,7 +111,7 @@ module HTTP
     #
     # @return [Hash]
     def to_h
-      keys.map { |k| [k, self[k]] }.to_h
+      keys.to_h { |k| [k, self[k]] }
     end
     alias to_hash to_h
 
