@@ -1,10 +1,14 @@
-## development
+## 5.1.0 (2022-06-17)
 
 * Drop ruby-2.5 support.
 
 * [#715](https://github.com/httprb/http/pull/715)
   Set default encoding to UTF-8 for `application/json`.
   ([@drwl])
+
+* [#712](https://github.com/httprb/http/pull/712)
+  Recognize cookies set by redirect.
+  ([@tkellogg])
 
 * [#707](https://github.com/httprb/http/pull/707)
   Distinguish connection timeouts.
@@ -983,3 +987,4 @@ end
 [@flosacca]: https://github.com/flosacca
 [@YuLeven]: https://github.com/YuLeven
 [@drwl]: https://github.com/drwl
+[@tkellogg]: https://github.com/tkellogg
