@@ -1,6 +1,7 @@
 # coding: utf-8
 # frozen_string_literal: true
 
+require "cgi"
 require "support/http_handling_shared"
 require "support/dummy_server"
 require "support/ssl_helper"
