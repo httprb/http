@@ -1,6 +1,8 @@
 # encoding: UTF-8
 # frozen_string_literal: true
 
+require "cgi"
+
 class DummyServer < WEBrick::HTTPServer
   class Servlet < WEBrick::HTTPServlet::AbstractServlet # rubocop:disable Metrics/ClassLength
     def self.sockets

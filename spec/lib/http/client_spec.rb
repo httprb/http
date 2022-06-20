@@ -1,10 +1,12 @@
 # coding: utf-8
 # frozen_string_literal: true
 
+require "cgi"
+require "logger"
+
 require "support/http_handling_shared"
 require "support/dummy_server"
 require "support/ssl_helper"
-require "logger"
 
 RSpec.describe HTTP::Client do
   run_server(:dummy) { DummyServer.new }
