@@ -38,6 +38,26 @@ jobs:
           path-to-lcov: ./coverage/lcov/lcov.info
           parallel: true
 
+  test-flaky:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        ruby: [ jruby-9.3 ]
+        os: [ ubuntu-latest ]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+
+      - name: bundle exec rspec
+        continue-on-error: true
+        run: bundle exec rspec --format progress --force-colour
+
   coveralls:
     needs: test
     runs-on: ubuntu-latest
