@@ -15,6 +15,11 @@ module HTTP
       #
       # @return [HTTP::Connection]
       attr_reader :connection
+      
+      # The charset encoding determined by the Response
+      #
+      # @return [Encoding]
+      attr_reader :encoding
 
       def initialize(stream, encoding: Encoding::BINARY)
         @stream     = stream
