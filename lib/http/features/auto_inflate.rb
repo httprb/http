@@ -17,14 +17,14 @@ module HTTP
           :headers       => response.headers,
           :proxy_headers => response.proxy_headers,
           :connection    => response.connection,
-          :body          => stream_for(response.connection, response.body.encoding),
+          :body          => stream_for(response.connection, :encoding => response.body.encoding),
           :request       => response.request
         }
 
         Response.new(options)
       end
 
-      def stream_for(connection, encoding)
+      def stream_for(connection, encoding: Encoding::BINARY)
         Response::Body.new(Response::Inflater.new(connection), :encoding => encoding)
       end
 
