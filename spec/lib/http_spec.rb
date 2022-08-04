@@ -456,7 +456,7 @@ RSpec.describe HTTP do
 
         expect(response.to_s).to eq("")
       end
-      
+
       it "returns decoded body with the correct charset" do
         encoding = Encoding::Shift_JIS
         client   = HTTP.use(:auto_inflate).headers("Accept-Encoding" => "gzip").encoding(encoding)

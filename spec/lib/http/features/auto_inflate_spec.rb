@@ -64,7 +64,7 @@ RSpec.describe HTTP::Features::AutoInflate do
         expect(result.body).to be_instance_of HTTP::Response::Body
       end
     end
-    
+
     context "for gzip Content-Encoding header with charset" do
       let(:headers) { {:content_encoding => "gzip", :content_type => "text/html; charset=Shift_JIS"} }
 

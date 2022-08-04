@@ -15,7 +15,7 @@ module HTTP
       #
       # @return [HTTP::Connection]
       attr_reader :connection
-      
+
       # The charset encoding determined by the Response
       #
       # @return [Encoding]
