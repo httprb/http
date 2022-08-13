@@ -23,6 +23,9 @@ module HTTP
     # The scheme of given URI was not understood
     class UnsupportedSchemeError < RequestError; end
 
+    # Provided url is missing or wrong
+    class InvalidURIError < RequestError; end
+
     # Default User-Agent header value
     USER_AGENT = "http.rb/#{HTTP::VERSION}"
 
@@ -90,6 +93,7 @@ module HTTP
       @uri    = @uri_normalizer.call(opts.fetch(:uri))
       @scheme = @uri.scheme.to_s.downcase.to_sym if @uri.scheme
 
+      raise(InvalidURIError, "empty uri provided") if @uri.host.nil?
       raise(UnsupportedMethodError, "unknown method: #{verb}") unless METHODS.include?(@verb)
       raise(UnsupportedSchemeError, "unknown scheme: #{scheme}") unless SCHEMES.include?(@scheme)
 

@@ -21,7 +21,7 @@ RSpec.describe HTTP::Request do
 
   it "requires URI to have scheme part" do
     expect { HTTP::Request.new(:verb => :get, :uri => "example.com/") }.to \
-      raise_error(HTTP::Request::UnsupportedSchemeError)
+      raise_error(HTTP::Request::InvalidURIError)
   end
 
   it "provides a #scheme accessor" do
