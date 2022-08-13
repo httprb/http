@@ -93,9 +93,7 @@ module HTTP
       @uri    = @uri_normalizer.call(opts.fetch(:uri))
       @scheme = @uri.scheme.to_s.downcase.to_sym if @uri.scheme
 
-      raise(InvalidURIError, "empty uri provided") if @uri.host.nil?
-      raise(UnsupportedMethodError, "unknown method: #{verb}") unless METHODS.include?(@verb)
-      raise(UnsupportedSchemeError, "unknown scheme: #{scheme}") unless SCHEMES.include?(@scheme)
+      check_errors
 
       @proxy   = opts[:proxy] || {}
       @version = opts[:version] || "1.1"
@@ -225,6 +223,12 @@ module HTTP
     # @!attribute [r] host
     #   @return [String]
     def_delegator :@uri, :host
+
+    def check_errors
+      raise(InvalidURIError, "empty uri provided") if @uri.host.nil?
+      raise(UnsupportedMethodError, "unknown method: #{verb}") unless METHODS.include?(@verb)
+      raise(UnsupportedSchemeError, "unknown scheme: #{scheme}") unless SCHEMES.include?(@scheme)
+    end
 
     # @!attribute [r] port
     #   @return [Fixnum]
