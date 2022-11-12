@@ -40,8 +40,9 @@ module HTTP
     # @option opts [Boolean] :strict (true) redirector hops policy
     # @option opts [#to_i] :max_hops (5) maximum allowed amount of hops
     def initialize(opts = {})
-      @strict   = opts.fetch(:strict, true)
-      @max_hops = opts.fetch(:max_hops, 5).to_i
+      @strict      = opts.fetch(:strict, true)
+      @max_hops    = opts.fetch(:max_hops, 5).to_i
+      @on_redirect = opts.fetch(:on_redirect, nil)
     end
 
     # Follows redirects until non-redirect response found
@@ -65,6 +66,7 @@ module HTTP
         unless cookie_jar.empty?
           @request.headers.set(Headers::COOKIE, cookie_jar.cookies.map { |c| "#{c.name}=#{c.value}" }.join("; "))
         end
+        @on_redirect.call @response, @request if @on_redirect.respond_to?(:call)
         @response = yield @request
         collect_cookies_from_response
       end
