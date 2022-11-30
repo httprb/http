@@ -18,6 +18,7 @@ module HTTP
 
       # Connects to a socket
       def connect(socket_class, host, port, nodelay = false)
+        host = strip_ipv6_brackets(host)
         @socket = socket_class.open(host, port)
         @socket.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1) if nodelay
       end
@@ -70,6 +71,14 @@ module HTTP
       rescue IO::WaitWritable
         retry if @socket.to_io.wait_writable(timeout)
         raise TimeoutError, "Write timed out after #{timeout} seconds"
+      end
+
+      # Strip brackets from IPv6 addresses
+      def strip_ipv6_brackets(host)
+        match_data = /\[(.+)\]/.match(host)
+        return host if match_data.nil?
+
+        match_data[1]
       end
     end
   end
