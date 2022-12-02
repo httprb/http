@@ -9,7 +9,6 @@ module HTTP
     def_delegators :@uri, :scheme, :normalized_scheme, :scheme=
     def_delegators :@uri, :user, :normalized_user, :user=
     def_delegators :@uri, :password, :normalized_password, :password=
-    def_delegators :@uri, :host, :normalized_host, :host=
     def_delegators :@uri, :authority, :normalized_authority, :authority=
     def_delegators :@uri, :origin, :origin=
     def_delegators :@uri, :normalized_port, :port=
@@ -108,6 +107,54 @@ module HTTP
     # @return [Integer] A hash of the URI
     def hash
       @hash ||= to_s.hash * -1
+    end
+
+    # Host, either a domain name or IP address. If the host is an IPv6 address, it will be returned
+    # without brackets surrounding it.
+    #
+    # @return [String] The host of the URI
+    def host
+      @host ||= begin
+        ip = IPAddr.new(@uri.host)
+
+        if ip.ipv6?
+          ip.to_s
+        else
+          @uri.host
+        end
+      rescue IPAddr::Error
+        @uri.host
+      end
+    end
+
+    # Normalized host, either a domain name or IP address. If the host is an IPv6 address, it will
+    # be returned without brackets surrounding it.
+    #
+    # @return [String] The normalized host of the URI
+    def normalized_host
+      @normalized_host ||= begin
+        ip = IPAddr.new(@uri.normalized_host)
+
+        if ip.ipv6?
+          ip.to_s
+        else
+          @uri.normalized_host
+        end
+      rescue IPAddr::Error
+        @uri.normalized_host
+      end
+    end
+
+    # Sets the host component for the URI.
+    #
+    # @param [String, #to_str] new_host The new host component.
+    # @return [void]
+    def host=(new_host)
+      @uri.host = new_host
+
+      # Reset dependent values
+      remove_instance_variable(:@host) if defined?(@host)
+      remove_instance_variable(:@normalized_host) if defined?(@normalized_host)
     end
 
     # Port number, either as specified or the default if unspecified
