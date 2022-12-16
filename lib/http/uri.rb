@@ -9,7 +9,6 @@ module HTTP
     def_delegators :@uri, :scheme, :normalized_scheme, :scheme=
     def_delegators :@uri, :user, :normalized_user, :user=
     def_delegators :@uri, :password, :normalized_password, :password=
-    def_delegators :@uri, :host, :normalized_host, :host=
     def_delegators :@uri, :authority, :normalized_authority, :authority=
     def_delegators :@uri, :origin, :origin=
     def_delegators :@uri, :normalized_port, :port=
@@ -19,6 +18,18 @@ module HTTP
     def_delegators :@uri, :request_uri, :request_uri=
     def_delegators :@uri, :fragment, :normalized_fragment, :fragment=
     def_delegators :@uri, :omit, :join, :normalize
+
+    # Host, either a domain name or IP address. If the host is an IPv6 address, it will be returned
+    # without brackets surrounding it.
+    #
+    # @return [String] The host of the URI
+    attr_reader :host
+
+    # Normalized host, either a domain name or IP address. If the host is an IPv6 address, it will
+    # be returned without brackets surrounding it.
+    #
+    # @return [String] The normalized host of the URI
+    attr_reader :normalized_host
 
     # @private
     HTTP_SCHEME = "http"
@@ -83,6 +94,9 @@ module HTTP
       else
         raise TypeError, "expected Hash for options, got #{options_or_uri.class}"
       end
+
+      @host = process_ipv6_brackets(@uri.host)
+      @normalized_host = process_ipv6_brackets(@uri.normalized_host)
     end
 
     # Are these URI objects equal? Normalizes both URIs prior to comparison
@@ -108,6 +122,17 @@ module HTTP
     # @return [Integer] A hash of the URI
     def hash
       @hash ||= to_s.hash * -1
+    end
+
+    # Sets the host component for the URI.
+    #
+    # @param [String, #to_str] new_host The new host component.
+    # @return [void]
+    def host=(new_host)
+      @uri.host = process_ipv6_brackets(new_host, :brackets => true)
+
+      @host = process_ipv6_brackets(@uri.host)
+      @normalized_host = process_ipv6_brackets(@uri.normalized_host)
     end
 
     # Port number, either as specified or the default if unspecified
@@ -145,6 +170,26 @@ module HTTP
     # @return [String] human-readable representation of URI
     def inspect
       format("#<%s:0x%014x URI:%s>", self.class.name, object_id << 1, to_s)
+    end
+
+    private
+
+    # Process a URI host, adding or removing surrounding brackets if the host is an IPv6 address.
+    #
+    # @param [Boolean] brackets When true, brackets will be added to IPv6 addresses if missing. When
+    #   false, they will be removed if present.
+    #
+    # @return [String] Host with IPv6 address brackets added or removed
+    def process_ipv6_brackets(raw_host, brackets: false)
+      ip = IPAddr.new(raw_host)
+
+      if ip.ipv6?
+        brackets ? "[#{ip}]" : ip.to_s
+      else
+        raw_host
+      end
+    rescue IPAddr::Error
+      raw_host
     end
   end
 end
