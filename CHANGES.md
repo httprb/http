@@ -1,3 +1,13 @@
+## 5.1.1 (2022-12-17)
+
+* [#731](https://github.com/httprb/http/pull/731)
+  Strip brackets from IPv6 addresses in `HTTP::URI`.
+  ([@jeraki])
+
+* [#722](https://github.com/httprb/http/pull/722)
+  Add `on_redirect` callback.
+  ([@benubois])
+
 ## 5.1.0 (2022-06-17)
 
 * Drop ruby-2.5 support.
@@ -988,3 +998,5 @@ end
 [@YuLeven]: https://github.com/YuLeven
 [@drwl]: https://github.com/drwl
 [@tkellogg]: https://github.com/tkellogg
+[@jeraki]: https://github.com/jeraki
+[@benubois]: https://github.com/benubois
