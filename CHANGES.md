@@ -54,7 +54,7 @@
   Use features on redirected requests.
   ([@nomis])
 
-* [#678](https://github.com/schwern)
+* [#678](https://github.com/httprb/http/pull/678)
   Restore `HTTP::Response` `:uri` option for backwards compatibility.
   ([@schwern])
 
