@@ -14,7 +14,11 @@ RSpec.describe HTTP::Options, "headers" do
   end
 
   it "accepts any object that respond to :to_hash" do
-    x = Struct.new(:to_hash).new("accept" => "json")
+    x = if RUBY_VERSION >= "3.2.0"
+          Data.define(:to_hash).new(:to_hash => { "accept" => "json" })
+        else
+          Struct.new(:to_hash).new({ "accept" => "json" })
+        end
     expect(opts.with_headers(x).headers["accept"]).to eq("json")
   end
 end
