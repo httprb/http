@@ -132,6 +132,10 @@ module HTTP
       @pending_request  = false
     end
 
+    def finished?
+      !@pending_request && !@pending_response
+    end
+
     # Whether we're keeping the conn alive
     # @return [Boolean]
     def keep_alive?
