@@ -58,11 +58,11 @@ RSpec.describe HTTP::Connection do
       connection.read_headers!
       buffer = String.new
       while (s = connection.readpartial(3))
-        expect(connection.finished?).to be false if s != ""
+        expect(connection.finished_request?).to be false if s != ""
         buffer << s
       end
       expect(buffer).to eq "1234567890"
-      expect(connection.finished?).to be true
+      expect(connection.finished_request?).to be true
     end
   end
 end
