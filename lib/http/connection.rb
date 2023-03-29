@@ -132,7 +132,7 @@ module HTTP
       @pending_request  = false
     end
 
-    def finished?
+    def finished_request?
       !@pending_request && !@pending_response
     end
 
