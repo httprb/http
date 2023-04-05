@@ -19,11 +19,12 @@ module HTTP
     #    and `finish` so the duration of the request can be calculated.
     #
     class Instrumentation < Feature
-      attr_reader :instrumenter, :name
+      attr_reader :instrumenter, :name, :error_name
 
       def initialize(instrumenter: NullInstrumenter.new, namespace: "http")
         @instrumenter = instrumenter
         @name = "request.#{namespace}"
+        @error_name = "error.#{namespace}"
       end
 
       def wrap_request(request)
@@ -37,6 +38,10 @@ module HTTP
       def wrap_response(response)
         instrumenter.finish(name, :response => response)
         response
+      end
+
+      def on_error(request, error)
+        instrumenter.instrument(error_name, :request => request, :error => error)
       end
 
       HTTP::Options.register_feature(:instrumentation, self)

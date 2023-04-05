@@ -59,4 +59,23 @@ RSpec.describe HTTP::Features::Instrumentation do
       expect(instrumenter.output[:finish]).to eq(:response => response)
     end
   end
+
+  describe "logging errors" do
+    let(:request) do
+      HTTP::Request.new(
+        :verb    => :post,
+        :uri     => "https://example.com/",
+        :headers => {:accept => "application/json"},
+        :body    => '{"hello": "world!"}'
+      )
+    end
+
+    let(:error) { HTTP::TimeoutError.new }
+
+    it "should log the error" do
+      feature.on_error(request, error)
+
+      expect(instrumenter.output[:finish]).to eq(:request => request, :error => error)
+    end
+  end
 end
