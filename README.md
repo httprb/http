@@ -110,11 +110,12 @@ and call `#readpartial` on it repeatedly until it returns `nil`:
 This library aims to support and is [tested against][build-link]
 the following Ruby  versions:
 
+- JRuby 9.3
 - Ruby 2.6
 - Ruby 2.7
 - Ruby 3.0
 - Ruby 3.1
-- JRuby 9.3
+- Ruby 3.2
 
 If something doesn't work on one of these versions, it's a bug.
 
@@ -160,5 +161,5 @@ See LICENSE.txt for further details.
 [//]: # (links)
 
 [documentation]: https://github.com/httprb/http/wiki
-[requests]: http://docs.python-requests.org/en/latest/
+[requests]: https://docs.python-requests.org/en/latest/
 [llhttp]: https://llhttp.org/
