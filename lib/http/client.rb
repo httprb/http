@@ -184,7 +184,7 @@ module HTTP
         form
       when opts.json
         body = MimeType[:json].encode opts.json
-        headers[Headers::CONTENT_TYPE] ||= "application/json; charset=#{body.encoding.name}"
+        headers[Headers::CONTENT_TYPE] ||= "application/json; charset=#{body.encoding.name.downcase}"
         body
       end
     end

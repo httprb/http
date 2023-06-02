@@ -261,6 +261,7 @@ RSpec.describe HTTP::Client do
 
       expect(HTTP::Request).to receive(:new) do |opts|
         expect(opts[:body]).to eq '{"foo":"bar"}'
+        expect(opts[:headers]["Content-Type"]).to eq "application/json; charset=utf-8"
       end
 
       client.get("http://example.com/", :json => {:foo => :bar})
