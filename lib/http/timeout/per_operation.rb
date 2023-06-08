@@ -11,6 +11,7 @@ module HTTP
       WRITE_TIMEOUT = 0.25
       READ_TIMEOUT = 0.25
 
+      SETTINGS = Set.new(%i[read_timeout write_timeout connect_timeout])
       def initialize(*args)
         super
 
