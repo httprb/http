@@ -95,27 +95,7 @@ module HTTP
       klass, options = case options
                        when Numeric then [HTTP::Timeout::Global, {:global_timeout => options}]
                        when Hash
-                         options = options.dup
-                         %i[read write connect].each do |k|
-                           next unless options.key? k
-
-                           if options.key?("#{k}_timeout".to_sym)
-                             raise ArgumentError, "can't pass both #{k} and #{"#{k}_timeout".to_sym}"
-                           end
-
-                           options["#{k}_timeout".to_sym] = options.delete k
-                         end
-
-                         options.each do |key, value|
-                           unless HTTP::Timeout::PerOperation::SETTINGS.member?(key) && value.is_a?(Numeric)
-                             raise ArgumentError, "invalid option #{key.inspect}, must be numeric " \
-                                                  "`.timeout(connect: x, write: y, read: z)`."
-                           end
-                         end
-
-                         raise ArgumentError, "at least one option" if options.empty?
-
-                         [HTTP::Timeout::PerOperation, options.dup]
+                         [HTTP::Timeout::PerOperation, HTTP::Timeout::PerOperation.parse_options(options)]
                        when :null then [HTTP::Timeout::Null, {}]
                        else raise ArgumentError, "Use `.timeout(:null)`, " \
                                                  "`.timeout(global_timeout_in_seconds)` or " \
