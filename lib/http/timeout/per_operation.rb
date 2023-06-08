@@ -12,6 +12,39 @@ module HTTP
       READ_TIMEOUT = 0.25
 
       SETTINGS = Set.new(%i[read_timeout write_timeout connect_timeout])
+
+      class << self
+        def parse_options(options)
+          options = options.dup.then { |opts| expand_names(opts) }
+          options.each do |key, value|
+            unless SETTINGS.member?(key) && value.is_a?(Numeric)
+              raise ArgumentError, "invalid option #{key.inspect}, must be numeric " \
+                                   "`.timeout(connect: x, write: y, read: z)`."
+            end
+          end
+
+          raise ArgumentError, "at least one option" if options.empty?
+
+          options
+        end
+
+        private
+
+        def expand_names(options)
+          %i[read write connect].each do |k|
+            next unless options.key? k
+
+            if options.key?("#{k}_timeout".to_sym)
+              raise ArgumentError, "can't pass both #{k} and #{"#{k}_timeout".to_sym}"
+            end
+
+            options["#{k}_timeout".to_sym] = options.delete k
+          end
+
+          options
+        end
+      end
+
       def initialize(*args)
         super
 
