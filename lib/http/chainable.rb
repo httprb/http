@@ -95,7 +95,7 @@ module HTTP
       klass, options = case options
                        when Numeric then [HTTP::Timeout::Global, {:global_timeout => options}]
                        when Hash
-                         [HTTP::Timeout::PerOperation, HTTP::Timeout::PerOperation.parse_options(options)]
+                         [HTTP::Timeout::PerOperation, HTTP::Timeout::PerOperation.normalize_options(options)]
                        when :null then [HTTP::Timeout::Null, {}]
                        else raise ArgumentError, "Use `.timeout(:null)`, " \
                                                  "`.timeout(global_timeout_in_seconds)` or " \

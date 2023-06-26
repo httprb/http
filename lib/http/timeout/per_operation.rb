@@ -11,37 +11,25 @@ module HTTP
       WRITE_TIMEOUT = 0.25
       READ_TIMEOUT = 0.25
 
-      SETTINGS = Set.new(%i[read_timeout write_timeout connect_timeout])
+      KEYS = %i[read write connect].to_h { |k| [k, :"#{k}_timeout"] }.freeze
 
       class << self
-        def parse_options(options)
-          options = options.dup.then { |opts| expand_names(opts) }
-          options.each do |key, value|
-            unless SETTINGS.member?(key) && value.is_a?(Numeric)
-              raise ArgumentError, "invalid option #{key.inspect}, must be numeric " \
-                                   "`.timeout(connect: x, write: y, read: z)`."
-            end
+        def normalize_options(options)
+          normalized = {}
+          original   = options.dup
+
+          KEYS.each do |short, long|
+            next if !original.key?(short) && !original.key?(long)
+            raise ArgumentError, "can't pass both #{short} and #{long}" if original.key?(short) && original.key?(long)
+
+            normalized[long] = original.key?(long) ? original.delete(long) : original.delete(short)
+            raise ArgumentError, "#{long} must be numeric" unless normalized[long].is_a?(Numeric)
           end
 
-          raise ArgumentError, "at least one option" if options.empty?
+          raise ArgumentError, "unknown timeout options: #{original.keys.join(', ')}" if original.size.positive?
+          raise ArgumentError, "no timeout options given" if normalized.empty?
 
-          options
-        end
-
-        private
-
-        def expand_names(options)
-          %i[read write connect].each do |k|
-            next unless options.key? k
-
-            if options.key?("#{k}_timeout".to_sym)
-              raise ArgumentError, "can't pass both #{k} and #{"#{k}_timeout".to_sym}"
-            end
-
-            options["#{k}_timeout".to_sym] = options.delete k
-          end
-
-          options
+          normalized
         end
       end
 
