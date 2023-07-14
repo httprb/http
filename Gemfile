@@ -27,10 +27,10 @@ group :test do
 
   gem "backports"
 
-  gem "rubocop", "~> 1.30.0"
+  gem "rubocop", "~> 1.54.2"
   gem "rubocop-performance"
   gem "rubocop-rake"
-  gem "rubocop-rspec"
+  gem "rubocop-rspec", "~> 2.22.0"
 
   gem "simplecov",      :require => false
   gem "simplecov-lcov", :require => false

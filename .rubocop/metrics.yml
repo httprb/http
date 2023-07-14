@@ -1,0 +1,17 @@
+Metrics/BlockLength:
+  Enabled: true
+  Exclude:
+    - "spec/**/*_spec.rb"
+    - "**/*.gemspec"
+
+Metrics/ClassLength:
+  Enabled: true
+  CountAsOne: [array, hash, heredoc, method_call]
+
+Metrics/MethodLength:
+  Enabled: true
+  CountAsOne: [array, hash, heredoc, method_call]
+
+Metrics/ModuleLength:
+  Enabled: true
+  CountAsOne: [array, hash, heredoc, method_call]

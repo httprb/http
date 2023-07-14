@@ -14,7 +14,7 @@ module HTTP
       KEYS = %i[read write connect].to_h { |k| [k, :"#{k}_timeout"] }.freeze
 
       class << self
-        def normalize_options(options)
+        def normalize_options(options) # rubocop:disable Metrics/AbcSize,Metrics/CyclomaticComplexity,Metrics/MethodLength,Metrics/PerceivedComplexity
           normalized = {}
           original   = options.dup
 
