@@ -38,7 +38,7 @@ gem "http"
 
 And then execute:
 ```bash
-$ bundle
+bundle
 ```
 
 Or install it yourself as:
