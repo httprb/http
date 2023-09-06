@@ -9,9 +9,9 @@ class DummyServer < WEBrick::HTTPServer
       @sockets ||= []
     end
 
-    def not_found(_req, res)
+    def not_found(req, res)
       res.status = 404
-      res.body   = "Not Found"
+      res.body   = "#{req.unparsed_uri} not found"
     end
 
     def self.handlers
@@ -27,7 +27,7 @@ class DummyServer < WEBrick::HTTPServer
         def do_#{method.upcase}(req, res)
           handler = self.class.handlers["#{method}:\#{req.path}"]
           return instance_exec(req, res, &handler) if handler
-          not_found
+          not_found(req, res)
         end
       RUBY
     end
@@ -68,7 +68,7 @@ class DummyServer < WEBrick::HTTPServer
     end
 
     get "/params" do |req, res|
-      next not_found unless "foo=bar" == req.query_string
+      next not_found(req, res) unless "foo=bar" == req.query_string
 
       res.status = 200
       res.body   = "Params!"
@@ -77,7 +77,7 @@ class DummyServer < WEBrick::HTTPServer
     get "/multiple-params" do |req, res|
       params = CGI.parse req.query_string
 
-      next not_found unless {"foo" => ["bar"], "baz" => ["quux"]} == params
+      next not_found(req, res) unless {"foo" => ["bar"], "baz" => ["quux"]} == params
 
       res.status = 200
       res.body   = "More Params!"
