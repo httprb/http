@@ -8,10 +8,30 @@ RSpec.describe HTTP::Connection do
       :headers => {}
     )
   end
-  let(:socket) { double(:connect => nil) }
+  let(:socket) { double(:connect => nil, :close => nil) }
   let(:timeout_class) { double(:new => socket) }
   let(:opts) { HTTP::Options.new(:timeout_class => timeout_class) }
   let(:connection) { HTTP::Connection.new(req, opts) }
+
+  describe "#initialize times out" do
+    let(:req) do
+      HTTP::Request.new(
+        :verb    => :get,
+        :uri     => "https://example.com/",
+        :headers => {}
+      )
+    end
+
+    before do
+      expect(socket).to receive(:start_tls).and_raise(HTTP::TimeoutError)
+      expect(socket).to receive(:closed?) { false }
+      expect(socket).to receive(:close)
+    end
+
+    it "closes the connection" do
+      expect { connection }.to raise_error(HTTP::TimeoutError)
+    end
+  end
 
   describe "#read_headers!" do
     before do

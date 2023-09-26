@@ -1,15 +1,10 @@
 # frozen_string_literal: true
 
-require "forwardable"
 require "io/wait"
 
 module HTTP
   module Timeout
     class Null
-      extend Forwardable
-
-      def_delegators :@socket, :close, :closed?
-
       attr_reader :options, :socket
 
       def initialize(options = {})
@@ -25,6 +20,14 @@ module HTTP
       # Starts a SSL connection on a socket
       def connect_ssl
         @socket.connect
+      end
+
+      def close
+        @socket&.close
+      end
+
+      def closed?
+        @socket&.closed?
       end
 
       # Configures the SSL connection and starts the connection
