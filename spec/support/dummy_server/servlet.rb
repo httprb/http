@@ -149,7 +149,7 @@ class DummyServer < WEBrick::HTTPServer
       res.body   = req.body
     end
 
-    get "/hello world" do |_req, res|
+    get "/héllö-wörld".b do |_req, res|
       res.status = 200
       res.body   = "hello world"
     end
