@@ -169,10 +169,10 @@ module HTTP
     def headline
       request_uri =
         if using_proxy? && !uri.https?
-          uri.omit(:fragment).to_s
+          uri.omit(:fragment)
         else
-          uri.request_uri.to_s
-        end
+          uri.request_uri
+        end.to_s
 
       raise RequestError, "Invalid request URI: #{request_uri.inspect}" if request_uri.match?(/\s/)
 
