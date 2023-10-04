@@ -460,20 +460,37 @@ RSpec.describe HTTP do
 
     context "with :normalize_uri" do
       it "normalizes URI" do
-        response = HTTP.get "#{dummy.endpoint}/hello world"
+        response = HTTP.get "#{dummy.endpoint}/héllö-wörld"
         expect(response.to_s).to eq("hello world")
       end
 
       it "uses the custom URI Normalizer method" do
         client = HTTP.use(:normalize_uri => {:normalizer => :itself.to_proc})
-        response = client.get("#{dummy.endpoint}/hello world")
+        response = client.get("#{dummy.endpoint}/héllö-wörld")
         expect(response.status).to eq(400)
+      end
+
+      it "raises if custom URI Normalizer returns invalid path" do
+        client = HTTP.use(:normalize_uri => {:normalizer => :itself.to_proc})
+        expect { client.get("#{dummy.endpoint}/hello\nworld") }.
+          to raise_error HTTP::RequestError, 'Invalid request URI: "/hello\nworld"'
+      end
+
+      it "raises if custom URI Normalizer returns invalid host" do
+        normalizer = lambda do |uri|
+          uri.port = nil
+          uri.instance_variable_set(:@host, "example\ncom")
+          uri
+        end
+        client = HTTP.use(:normalize_uri => {:normalizer => normalizer})
+        expect { client.get(dummy.endpoint) }.
+          to raise_error HTTP::RequestError, 'Invalid host: "example\ncom"'
       end
 
       it "uses the default URI normalizer" do
         client = HTTP.use :normalize_uri
         expect(HTTP::URI::NORMALIZER).to receive(:call).and_call_original
-        response = client.get("#{dummy.endpoint}/hello world")
+        response = client.get("#{dummy.endpoint}/héllö-wörld")
         expect(response.to_s).to eq("hello world")
       end
     end

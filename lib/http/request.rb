@@ -172,7 +172,9 @@ module HTTP
           uri.omit(:fragment)
         else
           uri.request_uri
-        end
+        end.to_s
+
+      raise RequestError, "Invalid request URI: #{request_uri.inspect}" if request_uri.match?(/\s/)
 
       "#{verb.to_s.upcase} #{request_uri} HTTP/#{version}"
     end
@@ -230,7 +232,11 @@ module HTTP
 
     # @return [String] Default host (with port if needed) header value.
     def default_host_header_value
-      PORTS[@scheme] == port ? host : "#{host}:#{port}"
+      value = PORTS[@scheme] == port ? host : "#{host}:#{port}"
+
+      raise RequestError, "Invalid host: #{value.inspect}" if value.match?(/\s/)
+
+      value
     end
 
     def prepare_body(body)
