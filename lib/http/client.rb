@@ -81,7 +81,7 @@ module HTTP
       end
       res = build_response(req, options)
 
-      res = options.features.inject(res) do |response, (_name, feature)|
+      res = options.features.values.reverse.inject(res) do |response, feature|
         feature.wrap_response(response)
       end
 
