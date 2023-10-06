@@ -38,14 +38,17 @@ module HTTP
     HTTPS_SCHEME = "https"
 
     # @private
+    PERCENT_ENCODE = /[^\x21-\x7E]+/.freeze
+
+    # @private
     NORMALIZER = lambda do |uri|
       uri = HTTP::URI.parse uri
 
       HTTP::URI.new(
         :scheme    => uri.normalized_scheme,
         :authority => uri.normalized_authority,
-        :path      => uri.normalized_path,
-        :query     => uri.query,
+        :path      => uri.path.empty? ? "/" : percent_encode(Addressable::URI.normalize_path(uri.path)),
+        :query     => percent_encode(uri.query),
         :fragment  => uri.normalized_fragment
       )
     end
@@ -69,6 +72,19 @@ module HTTP
     # @return [String] encoded value
     def self.form_encode(form_values, sort = false)
       Addressable::URI.form_encode(form_values, sort)
+    end
+
+    # Percent-encode all characters matching a regular expression.
+    #
+    # @param [String] string raw string
+    #
+    # @return [String] encoded value
+    #
+    # @private
+    def self.percent_encode(string)
+      string&.gsub(PERCENT_ENCODE) do |substr|
+        substr.encode(Encoding::UTF_8).bytes.map { |c| format("%%%02X", c) }.join
+      end
     end
 
     # Creates an HTTP::URI instance from the given options
