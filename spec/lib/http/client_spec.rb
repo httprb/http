@@ -395,6 +395,44 @@ RSpec.describe HTTP::Client do
         end.to raise_error(HTTP::ConnectTimeoutError)
         expect(feature_instance.captured_error).to be_a(HTTP::ConnectTimeoutError)
       end
+
+      it "handle responses in the reverse order from the requests" do
+        feature_class_order =
+          Class.new(HTTP::Feature) do
+            @order = []
+
+            class << self
+              attr_reader :order
+            end
+
+            def initialize(id:)
+              @id = id
+            end
+
+            def wrap_request(req)
+              self.class.order << "request.#{@id}"
+              req
+            end
+
+            def wrap_response(res)
+              self.class.order << "response.#{@id}"
+              res
+            end
+          end
+        feature_instance_a = feature_class_order.new(:id => "a")
+        feature_instance_b = feature_class_order.new(:id => "b")
+        feature_instance_c = feature_class_order.new(:id => "c")
+
+        client.use(
+          :test_feature_a => feature_instance_a,
+          :test_feature_b => feature_instance_b,
+          :test_feature_c => feature_instance_c
+        ).request(:get, dummy.endpoint)
+
+        expect(feature_class_order.order).to eq(
+          ["request.a", "request.b", "request.c", "response.c", "response.b", "response.a"]
+        )
+      end
     end
   end
 
