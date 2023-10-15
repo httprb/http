@@ -22,7 +22,7 @@ RSpec.describe HTTP::Features::Logging do
       )
     end
 
-    it "should log the request" do
+    it "logs the request" do
       feature.wrap_request(request)
 
       expect(logdev.string).to eq <<~OUTPUT
@@ -49,7 +49,7 @@ RSpec.describe HTTP::Features::Logging do
       )
     end
 
-    it "should log the response" do
+    it "logs the response" do
       feature.wrap_response(response)
 
       expect(logdev.string).to eq <<~OUTPUT

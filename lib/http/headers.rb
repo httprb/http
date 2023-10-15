@@ -226,11 +226,11 @@ module HTTP
     #   match {HEADER_NAME_RE}
     # @return [String] canonical HTTP header name
     def normalize_header(name)
-      return name if name =~ CANONICAL_NAME_RE
+      return name if CANONICAL_NAME_RE.match?(name)
 
       normalized = name.split(/[\-_]/).each(&:capitalize!).join("-")
 
-      return normalized if normalized =~ COMPLIANT_NAME_RE
+      return normalized if COMPLIANT_NAME_RE.match?(normalized)
 
       raise HeaderError, "Invalid HTTP header field name: #{name.inspect}"
     end

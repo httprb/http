@@ -27,7 +27,7 @@ group :test do
 
   gem "backports"
 
-  gem "rubocop", "~> 1.30.0"
+  gem "rubocop", "~> 1.57.0"
   gem "rubocop-performance"
   gem "rubocop-rake"
   gem "rubocop-rspec"

@@ -35,7 +35,7 @@ RSpec.describe HTTP::Features::Instrumentation do
       )
     end
 
-    it "should log the request" do
+    it "logs the request" do
       feature.wrap_request(request)
 
       expect(instrumenter.output[:start]).to eq(:request => request)
@@ -53,7 +53,7 @@ RSpec.describe HTTP::Features::Instrumentation do
       )
     end
 
-    it "should log the response" do
+    it "logs the response" do
       feature.wrap_response(response)
 
       expect(instrumenter.output[:finish]).to eq(:response => response)
@@ -72,7 +72,7 @@ RSpec.describe HTTP::Features::Instrumentation do
 
     let(:error) { HTTP::TimeoutError.new }
 
-    it "should log the error" do
+    it "logs the error" do
       feature.on_error(request, error)
 
       expect(instrumenter.output[:finish]).to eq(:request => request, :error => error)

@@ -24,6 +24,7 @@ RSpec.describe HTTP::Redirector do
 
     context "by default" do
       let(:redirector) { described_class.new }
+
       it { is_expected.to be true }
     end
   end
@@ -33,6 +34,7 @@ RSpec.describe HTTP::Redirector do
 
     context "by default" do
       let(:redirector) { described_class.new }
+
       it { is_expected.to eq 5 }
     end
   end
@@ -178,7 +180,7 @@ RSpec.describe HTTP::Redirector do
       context "with strict mode" do
         let(:options) { {:strict => true} }
 
-        it "it follows with original verb if it's safe" do
+        it "follows with original verb if it's safe" do
           req = HTTP::Request.new :verb => :head, :uri => "http://example.com"
           res = redirect_response 300, "http://example.com/1"
 
@@ -216,7 +218,7 @@ RSpec.describe HTTP::Redirector do
       context "with non-strict mode" do
         let(:options) { {:strict => false} }
 
-        it "it follows with original verb if it's safe" do
+        it "follows with original verb if it's safe" do
           req = HTTP::Request.new :verb => :head, :uri => "http://example.com"
           res = redirect_response 300, "http://example.com/1"
 
@@ -226,7 +228,7 @@ RSpec.describe HTTP::Redirector do
           end
         end
 
-        it "it follows with GET if original request was PUT" do
+        it "follows with GET if original request was PUT" do
           req = HTTP::Request.new :verb => :put, :uri => "http://example.com"
           res = redirect_response 300, "http://example.com/1"
 
@@ -236,7 +238,7 @@ RSpec.describe HTTP::Redirector do
           end
         end
 
-        it "it follows with GET if original request was POST" do
+        it "follows with GET if original request was POST" do
           req = HTTP::Request.new :verb => :post, :uri => "http://example.com"
           res = redirect_response 300, "http://example.com/1"
 
@@ -246,7 +248,7 @@ RSpec.describe HTTP::Redirector do
           end
         end
 
-        it "it follows with GET if original request was DELETE" do
+        it "follows with GET if original request was DELETE" do
           req = HTTP::Request.new :verb => :delete, :uri => "http://example.com"
           res = redirect_response 300, "http://example.com/1"
 
@@ -262,7 +264,7 @@ RSpec.describe HTTP::Redirector do
       context "with strict mode" do
         let(:options) { {:strict => true} }
 
-        it "it follows with original verb if it's safe" do
+        it "follows with original verb if it's safe" do
           req = HTTP::Request.new :verb => :head, :uri => "http://example.com"
           res = redirect_response 301, "http://example.com/1"
 
@@ -300,7 +302,7 @@ RSpec.describe HTTP::Redirector do
       context "with non-strict mode" do
         let(:options) { {:strict => false} }
 
-        it "it follows with original verb if it's safe" do
+        it "follows with original verb if it's safe" do
           req = HTTP::Request.new :verb => :head, :uri => "http://example.com"
           res = redirect_response 301, "http://example.com/1"
 
@@ -310,7 +312,7 @@ RSpec.describe HTTP::Redirector do
           end
         end
 
-        it "it follows with GET if original request was PUT" do
+        it "follows with GET if original request was PUT" do
           req = HTTP::Request.new :verb => :put, :uri => "http://example.com"
           res = redirect_response 301, "http://example.com/1"
 
@@ -320,7 +322,7 @@ RSpec.describe HTTP::Redirector do
           end
         end
 
-        it "it follows with GET if original request was POST" do
+        it "follows with GET if original request was POST" do
           req = HTTP::Request.new :verb => :post, :uri => "http://example.com"
           res = redirect_response 301, "http://example.com/1"
 
@@ -330,7 +332,7 @@ RSpec.describe HTTP::Redirector do
           end
         end
 
-        it "it follows with GET if original request was DELETE" do
+        it "follows with GET if original request was DELETE" do
           req = HTTP::Request.new :verb => :delete, :uri => "http://example.com"
           res = redirect_response 301, "http://example.com/1"
 
@@ -346,7 +348,7 @@ RSpec.describe HTTP::Redirector do
       context "with strict mode" do
         let(:options) { {:strict => true} }
 
-        it "it follows with original verb if it's safe" do
+        it "follows with original verb if it's safe" do
           req = HTTP::Request.new :verb => :head, :uri => "http://example.com"
           res = redirect_response 302, "http://example.com/1"
 
@@ -384,7 +386,7 @@ RSpec.describe HTTP::Redirector do
       context "with non-strict mode" do
         let(:options) { {:strict => false} }
 
-        it "it follows with original verb if it's safe" do
+        it "follows with original verb if it's safe" do
           req = HTTP::Request.new :verb => :head, :uri => "http://example.com"
           res = redirect_response 302, "http://example.com/1"
 
@@ -394,7 +396,7 @@ RSpec.describe HTTP::Redirector do
           end
         end
 
-        it "it follows with GET if original request was PUT" do
+        it "follows with GET if original request was PUT" do
           req = HTTP::Request.new :verb => :put, :uri => "http://example.com"
           res = redirect_response 302, "http://example.com/1"
 
@@ -404,7 +406,7 @@ RSpec.describe HTTP::Redirector do
           end
         end
 
-        it "it follows with GET if original request was POST" do
+        it "follows with GET if original request was POST" do
           req = HTTP::Request.new :verb => :post, :uri => "http://example.com"
           res = redirect_response 302, "http://example.com/1"
 
@@ -414,7 +416,7 @@ RSpec.describe HTTP::Redirector do
           end
         end
 
-        it "it follows with GET if original request was DELETE" do
+        it "follows with GET if original request was DELETE" do
           req = HTTP::Request.new :verb => :delete, :uri => "http://example.com"
           res = redirect_response 302, "http://example.com/1"
 

@@ -17,6 +17,10 @@ Style/HashSyntax:
 Style/OptionHash:
   Enabled: true
 
+# Using explicit `./` makes code more consistent
+Style/RedundantCurrentDirectoryInPath:
+  Enabled: false
+
 Style/RescueStandardError:
   Enabled: true
   EnforcedStyle: implicit

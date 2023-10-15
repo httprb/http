@@ -2,12 +2,12 @@
 # frozen_string_literal: true
 
 RSpec.describe HTTP::Request::Writer do
+  subject(:writer)  { described_class.new(io, body, headers, headerstart) }
+
   let(:io)          { StringIO.new }
   let(:body)        { HTTP::Request::Body.new("") }
   let(:headers)     { HTTP::Headers.new }
   let(:headerstart) { "GET /test HTTP/1.1" }
-
-  subject(:writer)  { described_class.new(io, body, headers, headerstart) }
 
   describe "#stream" do
     context "when multiple headers are set" do

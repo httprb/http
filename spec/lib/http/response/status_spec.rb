@@ -7,12 +7,13 @@ RSpec.describe HTTP::Response::Status do
     end
 
     it "accepts any object that responds to #to_i" do
-      expect { described_class.new double :to_i => 200 }.to_not raise_error
+      expect { described_class.new double :to_i => 200 }.not_to raise_error
     end
   end
 
   describe "#code" do
     subject { described_class.new("200.0").code }
+
     it { is_expected.to eq 200 }
     it { is_expected.to be_a Integer }
   end
@@ -22,6 +23,7 @@ RSpec.describe HTTP::Response::Status do
 
     context "with unknown code" do
       let(:code) { 1024 }
+
       it { is_expected.to be_nil }
     end
 
@@ -161,6 +163,7 @@ RSpec.describe HTTP::Response::Status do
 
     context "with unknown code" do
       let(:code) { 1024 }
+
       it { is_expected.to be_nil }
     end
 

@@ -24,7 +24,7 @@ RSpec.describe HTTP::Connection do
 
     before do
       expect(socket).to receive(:start_tls).and_raise(HTTP::TimeoutError)
-      expect(socket).to receive(:closed?) { false }
+      expect(socket).to receive(:closed?).and_return(false)
       expect(socket).to receive(:close)
     end
 
@@ -37,7 +37,7 @@ RSpec.describe HTTP::Connection do
     before do
       connection.instance_variable_set(:@pending_response, true)
       expect(socket).to receive(:readpartial) do
-        <<-RESPONSE.gsub(/^\s*\| */, "").gsub(/\n/, "\r\n")
+        <<-RESPONSE.gsub(/^\s*\| */, "").gsub("\n", "\r\n")
         | HTTP/1.1 200 OK
         | Content-Type: text
         | foo_bar: 123
@@ -58,20 +58,20 @@ RSpec.describe HTTP::Connection do
     before do
       connection.instance_variable_set(:@pending_response, true)
       expect(socket).to receive(:readpartial) do
-        <<-RESPONSE.gsub(/^\s*\| */, "").gsub(/\n/, "\r\n")
+        <<-RESPONSE.gsub(/^\s*\| */, "").gsub("\n", "\r\n")
         | HTTP/1.1 200 OK
         | Content-Type: text
         |
         RESPONSE
       end
-      expect(socket).to receive(:readpartial) { "1" }
-      expect(socket).to receive(:readpartial) { "23" }
-      expect(socket).to receive(:readpartial) { "456" }
-      expect(socket).to receive(:readpartial) { "78" }
-      expect(socket).to receive(:readpartial) { "9" }
-      expect(socket).to receive(:readpartial) { "0" }
-      expect(socket).to receive(:readpartial) { :eof }
-      expect(socket).to receive(:closed?) { true }
+      expect(socket).to receive(:readpartial).and_return("1")
+      expect(socket).to receive(:readpartial).and_return("23")
+      expect(socket).to receive(:readpartial).and_return("456")
+      expect(socket).to receive(:readpartial).and_return("78")
+      expect(socket).to receive(:readpartial).and_return("9")
+      expect(socket).to receive(:readpartial).and_return("0")
+      expect(socket).to receive(:readpartial).and_return(:eof)
+      expect(socket).to receive(:closed?).and_return(true)
     end
 
     it "reads data in parts" do
