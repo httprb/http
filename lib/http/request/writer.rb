@@ -15,7 +15,7 @@ module HTTP
       CHUNKED = "chunked"
 
       # End of a chunked transfer
-      CHUNKED_END = "#{ZERO}#{CRLF}#{CRLF}"
+      CHUNKED_END = "#{ZERO}#{CRLF}#{CRLF}".freeze
 
       def initialize(socket, body, headers, headline)
         @body           = body

@@ -8,4 +8,4 @@ AllCops:
   DefaultFormatter: fuubar
   DisplayCopNames: true
   NewCops: enable
-  TargetRubyVersion: 2.6
+  TargetRubyVersion: 3.0
