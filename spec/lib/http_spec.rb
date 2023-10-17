@@ -459,6 +459,15 @@ RSpec.describe HTTP do
 
         expect(response.to_s).to eq("")
       end
+
+      it "returns decoded body with the correct charset" do
+        encoding = Encoding::Shift_JIS
+        client   = HTTP.use(:auto_inflate).headers("Accept-Encoding" => "gzip").encoding(encoding)
+        body     = "もしもし!".encode(encoding, Encoding::UTF_8)
+        response = client.post("#{dummy.endpoint}/encoded-body", :body => body)
+
+        expect(response.to_s).to eq("#{body}-gzipped")
+      end
     end
 
     context "with :normalize_uri" do
