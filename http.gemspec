@@ -37,7 +37,7 @@ Gem::Specification.new do |gem|
     "source_code_uri"       => "https://github.com/httprb/http",
     "wiki_uri"              => "https://github.com/httprb/http/wiki",
     "bug_tracker_uri"       => "https://github.com/httprb/http/issues",
-    "changelog_uri"         => "https://github.com/httprb/http/blob/v#{HTTP::VERSION}/CHANGES.md",
+    "changelog_uri"         => "https://github.com/httprb/http/blob/v#{HTTP::VERSION}/CHANGELOG.md",
     "rubygems_mfa_required" => "true"
   }
 end
