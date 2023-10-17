@@ -2,6 +2,7 @@
 
 RSpec.describe HTTP::Response::Parser do
   subject(:parser) { described_class.new }
+
   let(:raw_response) do
     "HTTP/1.1 200 OK\r\nContent-Length: 2\r\nContent-Type: application/json\r\nMyHeader: val\r\nEmptyHeader: \r\n\r\n{}"
   end

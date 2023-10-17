@@ -1,4 +1,26 @@
 Metrics/BlockLength:
+  CountAsOne:
+    - array
+    - heredoc
+    - method_call
   Exclude:
     - 'spec/**/*.rb'
     - '*.gemspec'
+
+Metrics/ClassLength:
+  CountAsOne:
+    - array
+    - heredoc
+    - method_call
+
+Metrics/MethodLength:
+  CountAsOne:
+    - array
+    - heredoc
+    - method_call
+
+Metrics/ModuleLength:
+  CountAsOne:
+    - array
+    - heredoc
+    - method_call

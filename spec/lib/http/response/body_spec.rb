@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.describe HTTP::Response::Body do
+  subject(:body) { described_class.new(connection, :encoding => Encoding::UTF_8) }
+
   let(:connection) { double(:sequence_id => 0) }
   let(:chunks)     { ["Hello, ", "World!"] }
 
@@ -8,8 +10,6 @@ RSpec.describe HTTP::Response::Body do
     allow(connection).to receive(:readpartial) { chunks.shift }
     allow(connection).to receive(:body_completed?) { chunks.empty? }
   end
-
-  subject(:body) { described_class.new(connection, :encoding => Encoding::UTF_8) }
 
   it "streams bodies from responses" do
     expect(subject.to_s).to eq("Hello, World!")
@@ -33,7 +33,7 @@ RSpec.describe HTTP::Response::Body do
 
     context "without size given" do
       it "does not blows up" do
-        expect { body.readpartial }.to_not raise_error
+        expect { body.readpartial }.not_to raise_error
       end
 
       it "calls underlying connection readpartial without specific size" do
@@ -56,14 +56,15 @@ RSpec.describe HTTP::Response::Body do
   end
 
   context "when body is gzipped" do
+    subject(:body) do
+      inflater = HTTP::Response::Inflater.new(connection)
+      described_class.new(inflater, :encoding => Encoding::UTF_8)
+    end
+
     let(:chunks) do
       body = Zlib::Deflate.deflate("Hi, HTTP here ☺")
       len  = body.length
       [body[0, len / 2], body[(len / 2)..]]
-    end
-    subject(:body) do
-      inflater = HTTP::Response::Inflater.new(connection)
-      described_class.new(inflater, :encoding => Encoding::UTF_8)
     end
 
     it "decodes body" do

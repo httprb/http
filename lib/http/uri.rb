@@ -38,7 +38,7 @@ module HTTP
     HTTPS_SCHEME = "https"
 
     # @private
-    PERCENT_ENCODE = /[^\x21-\x7E]+/.freeze
+    PERCENT_ENCODE = /[^\x21-\x7E]+/
 
     # @private
     NORMALIZER = lambda do |uri|

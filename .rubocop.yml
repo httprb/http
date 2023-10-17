@@ -1,3 +1,8 @@
+require:
+  - rubocop-performance
+  - rubocop-rake
+  - rubocop-rspec
+
 inherit_from:
   - .rubocop_todo.yml
   - .rubocop/layout.yml
@@ -7,5 +12,6 @@ inherit_from:
 AllCops:
   DefaultFormatter: fuubar
   DisplayCopNames: true
+  DisplayStyleGuide: true
   NewCops: enable
-  TargetRubyVersion: 2.6
+  TargetRubyVersion: 3.0

@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe HTTP::Request::Body do
-  let(:body) { "" }
   subject    { HTTP::Request::Body.new(body) }
+
+  let(:body) { "" }
 
   describe "#initialize" do
     context "when body is nil" do

@@ -2,10 +2,6 @@
 # frozen_string_literal: true
 
 RSpec.describe HTTP::Request do
-  let(:proxy)       { {} }
-  let(:headers)     { {:accept => "text/html"} }
-  let(:request_uri) { "http://example.com/foo?bar=baz" }
-
   subject :request do
     HTTP::Request.new(
       :verb    => :get,
@@ -14,6 +10,10 @@ RSpec.describe HTTP::Request do
       :proxy   => proxy
     )
   end
+
+  let(:proxy)       { {} }
+  let(:headers)     { {:accept => "text/html"} }
+  let(:request_uri) { "http://example.com/foo?bar=baz" }
 
   it "includes HTTP::Headers::Mixin" do
     expect(described_class).to include HTTP::Headers::Mixin
@@ -44,12 +44,14 @@ RSpec.describe HTTP::Request do
 
       context "and request URI has non-standard port" do
         let(:request_uri) { "http://example.com:3000/" }
+
         it { is_expected.to eq "example.com:3000" }
       end
     end
 
     context "was explicitly given" do
       before { headers[:host] = "github.com" }
+
       it { is_expected.to eq "github.com" }
     end
   end
@@ -63,11 +65,14 @@ RSpec.describe HTTP::Request do
 
     context "was explicitly given" do
       before { headers[:user_agent] = "MrCrawly/123" }
+
       it { is_expected.to eq "MrCrawly/123" }
     end
   end
 
   describe "#redirect" do
+    subject(:redirected) { request.redirect "http://blog.example.com/" }
+
     let(:headers)   { {:accept => "text/html"} }
     let(:proxy)     { {:proxy_username => "douglas", :proxy_password => "adams"} }
     let(:body)      { "The Ultimate Question" }
@@ -81,8 +86,6 @@ RSpec.describe HTTP::Request do
         :body    => body
       )
     end
-
-    subject(:redirected) { request.redirect "http://blog.example.com/" }
 
     its(:uri)     { is_expected.to eq HTTP::URI.parse "http://blog.example.com/" }
 
@@ -180,6 +183,7 @@ RSpec.describe HTTP::Request do
 
     context "with new verb given" do
       subject { request.redirect "http://blog.example.com/", :get }
+
       its(:verb) { is_expected.to be :get }
     end
   end
@@ -216,6 +220,7 @@ RSpec.describe HTTP::Request do
 
     context "with proxy" do
       let(:proxy) { {:user => "user", :pass => "pass"} }
+
       it { is_expected.to eq "GET http://example.com/foo?bar=baz HTTP/1.1" }
 
       context "and HTTPS uri" do

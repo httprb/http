@@ -110,12 +110,10 @@ and call `#readpartial` on it repeatedly until it returns `nil`:
 This library aims to support and is [tested against][build-link]
 the following Ruby  versions:
 
-- JRuby 9.3
-- Ruby 2.6
-- Ruby 2.7
 - Ruby 3.0
 - Ruby 3.1
 - Ruby 3.2
+- JRuby 9.4
 
 If something doesn't work on one of these versions, it's a bug.
 

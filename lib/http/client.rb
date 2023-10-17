@@ -16,7 +16,7 @@ module HTTP
     extend Forwardable
     include Chainable
 
-    HTTP_OR_HTTPS_RE = %r{^https?://}i.freeze
+    HTTP_OR_HTTPS_RE = %r{^https?://}i
 
     def initialize(default_options = {})
       @default_options = HTTP::Options.new(default_options)
@@ -132,7 +132,7 @@ module HTTP
 
       # If we get into a bad state (eg, Timeout.timeout ensure being killed)
       # close the connection to prevent potential for mixed responses.
-      return close if @state == :dirty
+      close if @state == :dirty
     end
 
     # Merges query params if needed

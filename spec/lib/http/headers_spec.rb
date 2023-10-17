@@ -185,7 +185,7 @@ RSpec.describe HTTP::Headers do
       before { headers.set "Content-Type", "application/json" }
 
       it "normalizes header name" do
-        expect(headers[:content_type]).to_not be_nil
+        expect(headers[:content_type]).not_to be_nil
       end
 
       it "returns it returns a single value" do
@@ -200,7 +200,7 @@ RSpec.describe HTTP::Headers do
       end
 
       it "normalizes header name" do
-        expect(headers[:set_cookie]).to_not be_nil
+        expect(headers[:set_cookie]).not_to be_nil
       end
 
       it "returns array of associated values" do
@@ -237,7 +237,7 @@ RSpec.describe HTTP::Headers do
     end
 
     it "returns a Hash" do
-      expect(headers.to_h).to be_a ::Hash
+      expect(headers.to_h).to be_a Hash
     end
 
     it "returns Hash with normalized keys" do
@@ -278,8 +278,9 @@ RSpec.describe HTTP::Headers do
   end
 
   describe "#inspect" do
-    before  { headers.set :set_cookie, %w[hoo=ray woo=hoo] }
     subject { headers.inspect }
+
+    before  { headers.set :set_cookie, %w[hoo=ray woo=hoo] }
 
     it { is_expected.to eq '#<HTTP::Headers {"Set-Cookie"=>["hoo=ray", "woo=hoo"]}>' }
   end
@@ -348,6 +349,7 @@ RSpec.describe HTTP::Headers do
 
     context "when header exists" do
       before { headers.add :accept, "text/plain" }
+
       it { is_expected.to be false }
     end
 
@@ -395,7 +397,7 @@ RSpec.describe HTTP::Headers do
       right.add :cookie, "woo=hoo"
       right.add :accept, "text/plain"
 
-      expect(left).to_not eq right
+      expect(left).not_to eq right
     end
 
     it "sensitive to header values order" do
@@ -404,14 +406,14 @@ RSpec.describe HTTP::Headers do
       right.add :cookie, "woo=hoo"
       right.add :cookie, "hoo=ray"
 
-      expect(left).to_not eq right
+      expect(left).not_to eq right
     end
   end
 
   describe "#dup" do
-    before { headers.set :content_type, "application/json" }
-
     subject(:dupped) { headers.dup }
+
+    before { headers.set :content_type, "application/json" }
 
     it { is_expected.to be_a described_class }
     it { is_expected.not_to be headers }
@@ -454,20 +456,20 @@ RSpec.describe HTTP::Headers do
   end
 
   describe "#merge" do
+    subject(:merged) do
+      headers.merge :accept => "plain/text", :cookie => %w[hoo=ray woo=hoo]
+    end
+
     before do
       headers.set :host, "example.com"
       headers.set :accept, "application/json"
-    end
-
-    subject(:merged) do
-      headers.merge :accept => "plain/text", :cookie => %w[hoo=ray woo=hoo]
     end
 
     it { is_expected.to be_a described_class }
     it { is_expected.not_to be headers }
 
     it "does not affects original headers" do
-      expect(merged.to_h).to_not eq headers.to_h
+      expect(merged.to_h).not_to eq headers.to_h
     end
 
     it "leaves headers not presented in other as is" do
@@ -510,13 +512,7 @@ RSpec.describe HTTP::Headers do
 
       it "adds all headers" do
         expect(described_class.coerce(headers).to_a).
-          to match_array(
-            [
-              %w[Set-Cookie hoo=ray],
-              %w[set_cookie woo=hoo],
-              %w[Set-Cookie ta=da]
-            ]
-          )
+          to contain_exactly(%w[Set-Cookie hoo=ray], %w[set_cookie woo=hoo], %w[Set-Cookie ta=da])
       end
     end
 

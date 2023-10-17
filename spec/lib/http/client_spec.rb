@@ -153,6 +153,7 @@ RSpec.describe HTTP::Client do
 
   describe "parsing params" do
     let(:client) { HTTP::Client.new }
+
     before { allow(client).to receive :perform }
 
     it "accepts params within the provided URL" do
@@ -497,7 +498,7 @@ RSpec.describe HTTP::Client do
 
     context "with HEAD request" do
       it "does not iterates through body" do
-        expect_any_instance_of(HTTP::Connection).to_not receive(:readpartial)
+        expect_any_instance_of(HTTP::Connection).not_to receive(:readpartial)
         client.head(dummy.endpoint)
       end
 
@@ -512,7 +513,7 @@ RSpec.describe HTTP::Client do
         socket_spy = double
 
         chunks = [
-          <<-RESPONSE.gsub(/^\s*\| */, "").gsub(/\n/, "\r\n")
+          <<-RESPONSE.gsub(/^\s*\| */, "").gsub("\n", "\r\n")
           | HTTP/1.1 200 OK
           | Content-Type: text/html
           | Server: WEBrick/1.3.1 (Ruby/1.9.3/2013-11-22)
@@ -524,8 +525,8 @@ RSpec.describe HTTP::Client do
           RESPONSE
         ]
 
-        allow(socket_spy).to receive(:close) { nil }
-        allow(socket_spy).to receive(:closed?) { true }
+        allow(socket_spy).to receive(:close).and_return(nil)
+        allow(socket_spy).to receive(:closed?).and_return(true)
         allow(socket_spy).to receive(:readpartial) { chunks.shift || :eof }
         allow(socket_spy).to receive(:write) { chunks[0].length }
 
@@ -541,7 +542,7 @@ RSpec.describe HTTP::Client do
     context "when uses chunked transfer encoding" do
       let(:chunks) do
         [
-          <<-RESPONSE.gsub(/^\s*\| */, "").gsub(/\n/, "\r\n") << body
+          <<-RESPONSE.gsub(/^\s*\| */, "").gsub("\n", "\r\n") << body
           | HTTP/1.1 200 OK
           | Content-Type: application/json
           | Transfer-Encoding: chunked
@@ -551,7 +552,7 @@ RSpec.describe HTTP::Client do
         ]
       end
       let(:body) do
-        <<-BODY.gsub(/^\s*\| */, "").gsub(/\n/, "\r\n")
+        <<-BODY.gsub(/^\s*\| */, "").gsub("\n", "\r\n")
         | 9
         | {"state":
         | 5
@@ -564,8 +565,8 @@ RSpec.describe HTTP::Client do
       before do
         socket_spy = double
 
-        allow(socket_spy).to receive(:close) { nil }
-        allow(socket_spy).to receive(:closed?) { true }
+        allow(socket_spy).to receive(:close).and_return(nil)
+        allow(socket_spy).to receive(:closed?).and_return(true)
         allow(socket_spy).to receive(:readpartial) { chunks.shift || :eof }
         allow(socket_spy).to receive(:write) { chunks[0].length }
 
@@ -579,7 +580,7 @@ RSpec.describe HTTP::Client do
 
       context "with broken body (too early closed connection)" do
         let(:body) do
-          <<-BODY.gsub(/^\s*\| */, "").gsub(/\n/, "\r\n")
+          <<-BODY.gsub(/^\s*\| */, "").gsub("\n", "\r\n")
           | 9
           | {"state":
           BODY

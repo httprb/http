@@ -35,7 +35,7 @@ RSpec.shared_context "HTTP handling" do
         let(:conn_timeout) { 1 }
 
         it "does not time out" do
-          expect { response }.to_not raise_error
+          expect { response }.not_to raise_error
         end
       end
     end
@@ -53,7 +53,7 @@ RSpec.shared_context "HTTP handling" do
         let(:read_timeout) { 2.5 }
 
         it "does not time out", :flaky do
-          expect { client.get("#{server.endpoint}/sleep").body.to_s }.to_not raise_error
+          expect { client.get("#{server.endpoint}/sleep").body.to_s }.not_to raise_error
         end
       end
     end
@@ -115,7 +115,7 @@ RSpec.shared_context "HTTP handling" do
       end
 
       it "re-uses the socket" do
-        expect(sockets_used).to_not include("")
+        expect(sockets_used).not_to include("")
         expect(sockets_used.uniq.length).to eq(1)
       end
 
@@ -127,7 +127,7 @@ RSpec.shared_context "HTTP handling" do
 
           second_socket_id = client.get("#{server.endpoint}/socket/2").body.to_s
 
-          expect(first_socket_id).to_not eq(second_socket_id)
+          expect(first_socket_id).not_to eq(second_socket_id)
         end
       end
 
@@ -153,7 +153,7 @@ RSpec.shared_context "HTTP handling" do
       context "with a socket issue" do
         it "transparently reopens", :flaky do
           first_socket_id = client.get("#{server.endpoint}/socket").body.to_s
-          expect(first_socket_id).to_not eq("")
+          expect(first_socket_id).not_to eq("")
           # Kill off the sockets we used
           # rubocop:disable Style/RescueModifier
           DummyServer::Servlet.sockets.each do |socket|
@@ -167,7 +167,7 @@ RSpec.shared_context "HTTP handling" do
 
           # Should succeed since we create a new socket
           second_socket_id = client.get("#{server.endpoint}/socket").body.to_s
-          expect(second_socket_id).to_not eq(first_socket_id)
+          expect(second_socket_id).not_to eq(first_socket_id)
         end
       end
 
@@ -182,7 +182,7 @@ RSpec.shared_context "HTTP handling" do
       let(:options) { {} }
 
       it "opens new sockets", :flaky do
-        expect(sockets_used).to_not include("")
+        expect(sockets_used).not_to include("")
         expect(sockets_used.uniq.length).to eq(2)
       end
     end

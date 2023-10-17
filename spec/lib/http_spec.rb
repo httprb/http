@@ -259,6 +259,7 @@ RSpec.describe HTTP do
 
     context "with host only given" do
       subject { HTTP.persistent host }
+
       it { is_expected.to be_an HTTP::Client }
       it { is_expected.to be_persistent }
     end
@@ -278,6 +279,7 @@ RSpec.describe HTTP do
 
     context "with timeout specified" do
       subject(:client) { HTTP.persistent host, :timeout => 100 }
+
       it "sets keep_alive_timeout" do
         options = client.default_options
         expect(options.keep_alive_timeout).to eq(100)
@@ -310,8 +312,9 @@ RSpec.describe HTTP do
     end
 
     context "specifying per operation timeouts as frozen hash" do
-      let(:frozen_options) { {:read => 123}.freeze }
       subject(:client) { HTTP.timeout(frozen_options) }
+
+      let(:frozen_options) { {:read => 123}.freeze }
 
       it "does not raise an error" do
         expect { client }.not_to raise_error

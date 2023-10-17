@@ -1,15 +1,17 @@
 # frozen_string_literal: true
 
 RSpec.describe HTTP::URI do
+  subject(:ipv6_uri) { described_class.parse(example_ipv6_uri_string) }
+
   let(:example_ipv6_address) { "2606:2800:220:1:248:1893:25c8:1946" }
 
   let(:example_http_uri_string)  { "http://example.com" }
   let(:example_https_uri_string) { "https://example.com" }
   let(:example_ipv6_uri_string) { "https://[#{example_ipv6_address}]" }
 
-  subject(:http_uri)  { described_class.parse(example_http_uri_string) }
-  subject(:https_uri) { described_class.parse(example_https_uri_string) }
-  subject(:ipv6_uri) { described_class.parse(example_ipv6_uri_string) }
+  let(:http_uri)  { described_class.parse(example_http_uri_string) }
+
+  let(:https_uri) { described_class.parse(example_https_uri_string) }
 
   it "knows URI schemes" do
     expect(http_uri.scheme).to eq "http"

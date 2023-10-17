@@ -1,11 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe HTTP::Response do
-  let(:body)          { "Hello world!" }
-  let(:uri)           { "http://example.com/" }
-  let(:headers)       { {} }
-  let(:request)       { HTTP::Request.new(:verb => :get, :uri => uri) }
-
   subject(:response) do
     HTTP::Response.new(
       :status  => 200,
@@ -15,6 +10,11 @@ RSpec.describe HTTP::Response do
       :request => request
     )
   end
+
+  let(:body)          { "Hello world!" }
+  let(:uri)           { "http://example.com/" }
+  let(:headers)       { {} }
+  let(:request)       { HTTP::Request.new(:verb => :get, :uri => uri) }
 
   it "includes HTTP::Headers::Mixin" do
     expect(described_class).to include HTTP::Headers::Mixin
@@ -39,11 +39,13 @@ RSpec.describe HTTP::Response do
 
     context "with Content-Length: 5" do
       let(:headers) { {"Content-Length" => "5"} }
+
       it { is_expected.to eq 5 }
     end
 
     context "with invalid Content-Length" do
       let(:headers) { {"Content-Length" => "foo"} }
+
       it { is_expected.to be_nil }
     end
   end
@@ -53,16 +55,19 @@ RSpec.describe HTTP::Response do
 
     context "without Content-Type header" do
       let(:headers) { {} }
+
       it { is_expected.to be_nil }
     end
 
     context "with Content-Type: text/html" do
       let(:headers) { {"Content-Type" => "text/html"} }
+
       it { is_expected.to eq "text/html" }
     end
 
     context "with Content-Type: text/html; charset=utf-8" do
       let(:headers) { {"Content-Type" => "text/html; charset=utf-8"} }
+
       it { is_expected.to eq "text/html" }
     end
   end
@@ -72,16 +77,19 @@ RSpec.describe HTTP::Response do
 
     context "without Content-Type header" do
       let(:headers) { {} }
+
       it { is_expected.to be_nil }
     end
 
     context "with Content-Type: text/html" do
       let(:headers) { {"Content-Type" => "text/html"} }
+
       it { is_expected.to be_nil }
     end
 
     context "with Content-Type: text/html; charset=utf-8" do
       let(:headers) { {"Content-Type" => "text/html; charset=utf-8"} }
+
       it { is_expected.to eq "utf-8" }
     end
   end
@@ -92,6 +100,7 @@ RSpec.describe HTTP::Response do
 
     context "with known content type" do
       let(:content_type) { "application/json" }
+
       it "returns parsed body" do
         expect(response.parse).to eq "foo" => "bar"
       end
@@ -99,6 +108,7 @@ RSpec.describe HTTP::Response do
 
     context "with unknown content type" do
       let(:content_type) { "application/deadbeef" }
+
       it "raises HTTP::Error" do
         expect { response.parse }.to raise_error HTTP::Error
       end
@@ -106,6 +116,7 @@ RSpec.describe HTTP::Response do
 
     context "with explicitly given mime type" do
       let(:content_type) { "application/deadbeef" }
+
       it "ignores mime_type of response" do
         expect(response.parse("application/json")).to eq "foo" => "bar"
       end
@@ -139,10 +150,10 @@ RSpec.describe HTTP::Response do
   end
 
   describe "#cookies" do
+    subject(:jar) { response.cookies }
+
     let(:cookies) { ["a=1", "b=2; domain=example.com", "c=3; domain=bad.org"] }
     let(:headers) { {"Set-Cookie" => cookies} }
-
-    subject(:jar) { response.cookies }
 
     it { is_expected.to be_an HTTP::CookieJar }
 
@@ -160,8 +171,6 @@ RSpec.describe HTTP::Response do
   end
 
   describe "#connection" do
-    let(:connection) { double }
-
     subject(:response) do
       HTTP::Response.new(
         :version    => "1.1",
@@ -171,6 +180,8 @@ RSpec.describe HTTP::Response do
       )
     end
 
+    let(:connection) { double }
+
     it "returns the connection object used to instantiate the response" do
       expect(response.connection).to eq connection
     end
@@ -178,10 +189,13 @@ RSpec.describe HTTP::Response do
 
   describe "#chunked?" do
     subject { response }
+
     context "when encoding is set to chunked" do
       let(:headers) { {"Transfer-Encoding" => "chunked"} }
+
       it { is_expected.to be_chunked }
     end
+
     it { is_expected.not_to be_chunked }
   end
 
@@ -225,9 +239,6 @@ RSpec.describe HTTP::Response do
   end
 
   describe "#body" do
-    let(:connection) { double(:sequence_id => 0) }
-    let(:chunks)     { ["Hello, ", "World!"] }
-
     subject(:response) do
       HTTP::Response.new(
         :status     => 200,
@@ -237,6 +248,9 @@ RSpec.describe HTTP::Response do
         :connection => connection
       )
     end
+
+    let(:connection) { double(:sequence_id => 0) }
+    let(:chunks)     { ["Hello, ", "World!"] }
 
     before do
       allow(connection).to receive(:readpartial) { chunks.shift }
