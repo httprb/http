@@ -49,7 +49,10 @@ module HTTP
       :search,
 
       # RFC 4791: Calendaring Extensions to WebDAV -- CalDAV
-      :mkcalendar
+      :mkcalendar,
+
+      # Implemented by several caching servers, like Squid, Varnish or Fastly
+      :purge
     ].freeze
 
     # Allowed schemes
