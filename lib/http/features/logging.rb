@@ -26,6 +26,7 @@ module HTTP
       attr_reader :logger
 
       def initialize(logger: NullLogger.new)
+        super()
         @logger = logger
       end
 

@@ -92,7 +92,7 @@ module HTTP
     #   @param [Numeric] global_timeout
     def timeout(options)
       klass, options = case options
-                       when Numeric then [HTTP::Timeout::Global, {:global => options}]
+                       when Numeric then [HTTP::Timeout::Global, {global: options}]
                        when Hash    then [HTTP::Timeout::PerOperation, options.dup]
                        when :null   then [HTTP::Timeout::Null, {}]
                        else raise ArgumentError, "Use `.timeout(global_timeout_in_seconds)` or `.timeout(connect: x, write: y, read: z)`."
@@ -106,8 +106,8 @@ module HTTP
       end
 
       branch default_options.merge(
-        :timeout_class   => klass,
-        :timeout_options => options
+        timeout_class:   klass,
+        timeout_options: options
       )
     end
 
@@ -142,7 +142,7 @@ module HTTP
     #   @yieldparam [HTTP::Client] client Persistent client
     #   @return [Object] result of last expression in the block
     def persistent(host, timeout: 5)
-      options  = {:keep_alive_timeout => timeout}
+      options  = {keep_alive_timeout: timeout}
       p_client = branch default_options.merge(options).with_persistent host
       return p_client unless block_given?
 

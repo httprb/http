@@ -8,6 +8,7 @@ module HTTP
       attr_reader :normalizer
 
       def initialize(normalizer: HTTP::URI::NORMALIZER)
+        super()
         @normalizer = normalizer
       end
 

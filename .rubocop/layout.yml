@@ -2,6 +2,10 @@ Layout/DotPosition:
   Enabled: true
   EnforcedStyle: leading
 
+Layout/FirstHashElementIndentation:
+  Enabled: true
+  EnforcedStyle: consistent
+
 Layout/HashAlignment:
   Enabled: true
   EnforcedColonStyle: table

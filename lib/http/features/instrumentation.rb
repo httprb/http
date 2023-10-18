@@ -22,6 +22,7 @@ module HTTP
       attr_reader :instrumenter, :name, :error_name
 
       def initialize(instrumenter: NullInstrumenter.new, namespace: "http")
+        super()
         @instrumenter = instrumenter
         @name = "request.#{namespace}"
         @error_name = "error.#{namespace}"
@@ -30,18 +31,18 @@ module HTTP
       def wrap_request(request)
         # Emit a separate "start" event, so a logger can print the request
         # being run without waiting for a response
-        instrumenter.instrument("start_#{name}", :request => request)
-        instrumenter.start(name, :request => request)
+        instrumenter.instrument("start_#{name}", request: request)
+        instrumenter.start(name, request: request)
         request
       end
 
       def wrap_response(response)
-        instrumenter.finish(name, :response => response)
+        instrumenter.finish(name, response: response)
         response
       end
 
       def on_error(request, error)
-        instrumenter.instrument(error_name, :request => request, :error => error)
+        instrumenter.instrument(error_name, request: request, error: error)
       end
 
       HTTP::Options.register_feature(:instrumentation, self)

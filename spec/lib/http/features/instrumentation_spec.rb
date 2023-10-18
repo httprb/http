@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe HTTP::Features::Instrumentation do
-  subject(:feature) { HTTP::Features::Instrumentation.new(:instrumenter => instrumenter) }
+  subject(:feature) { HTTP::Features::Instrumentation.new(instrumenter: instrumenter) }
 
   let(:instrumenter) { TestInstrumenter.new }
 
@@ -28,45 +28,45 @@ RSpec.describe HTTP::Features::Instrumentation do
   describe "logging the request" do
     let(:request) do
       HTTP::Request.new(
-        :verb    => :post,
-        :uri     => "https://example.com/",
-        :headers => {:accept => "application/json"},
-        :body    => '{"hello": "world!"}'
+        verb:    :post,
+        uri:     "https://example.com/",
+        headers: {accept: "application/json"},
+        body:    '{"hello": "world!"}'
       )
     end
 
     it "logs the request" do
       feature.wrap_request(request)
 
-      expect(instrumenter.output[:start]).to eq(:request => request)
+      expect(instrumenter.output[:start]).to eq(request: request)
     end
   end
 
   describe "logging the response" do
     let(:response) do
       HTTP::Response.new(
-        :version => "1.1",
-        :status  => 200,
-        :headers => {:content_type => "application/json"},
-        :body    => '{"success": true}',
-        :request => HTTP::Request.new(:verb => :get, :uri => "https://example.com")
+        version: "1.1",
+        status:  200,
+        headers: {content_type: "application/json"},
+        body:    '{"success": true}',
+        request: HTTP::Request.new(verb: :get, uri: "https://example.com")
       )
     end
 
     it "logs the response" do
       feature.wrap_response(response)
 
-      expect(instrumenter.output[:finish]).to eq(:response => response)
+      expect(instrumenter.output[:finish]).to eq(response: response)
     end
   end
 
   describe "logging errors" do
     let(:request) do
       HTTP::Request.new(
-        :verb    => :post,
-        :uri     => "https://example.com/",
-        :headers => {:accept => "application/json"},
-        :body    => '{"hello": "world!"}'
+        verb:    :post,
+        uri:     "https://example.com/",
+        headers: {accept: "application/json"},
+        body:    '{"hello": "world!"}'
       )
     end
 
@@ -75,7 +75,7 @@ RSpec.describe HTTP::Features::Instrumentation do
     it "logs the error" do
       feature.on_error(request, error)
 
-      expect(instrumenter.output[:finish]).to eq(:request => request, :error => error)
+      expect(instrumenter.output[:finish]).to eq(request: request, error: error)
     end
   end
 end

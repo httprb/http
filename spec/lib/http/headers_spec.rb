@@ -439,7 +439,7 @@ RSpec.describe HTTP::Headers do
     before do
       headers.set :host, "example.com"
       headers.set :accept, "application/json"
-      headers.merge! :accept => "plain/text", :cookie => %w[hoo=ray woo=hoo]
+      headers.merge! accept: "plain/text", cookie: %w[hoo=ray woo=hoo]
     end
 
     it "leaves headers not presented in other as is" do
@@ -457,7 +457,7 @@ RSpec.describe HTTP::Headers do
 
   describe "#merge" do
     subject(:merged) do
-      headers.merge :accept => "plain/text", :cookie => %w[hoo=ray woo=hoo]
+      headers.merge accept: "plain/text", cookie: %w[hoo=ray woo=hoo]
     end
 
     before do
@@ -489,17 +489,17 @@ RSpec.describe HTTP::Headers do
     let(:dummyClass) { Class.new { def respond_to?(*); end } }
 
     it "accepts any object that respond to #to_hash" do
-      hashie = double :to_hash => {"accept" => "json"}
+      hashie = double to_hash: {"accept" => "json"}
       expect(described_class.coerce(hashie)["accept"]).to eq "json"
     end
 
     it "accepts any object that respond to #to_h" do
-      hashie = double :to_h => {"accept" => "json"}
+      hashie = double to_h: {"accept" => "json"}
       expect(described_class.coerce(hashie)["accept"]).to eq "json"
     end
 
     it "accepts any object that respond to #to_a" do
-      hashie = double :to_a => [%w[accept json]]
+      hashie = double to_a: [%w[accept json]]
       expect(described_class.coerce(hashie)["accept"]).to eq "json"
     end
 

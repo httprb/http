@@ -2,7 +2,7 @@
 
 RSpec.shared_context "HTTP handling" do
   context "without timeouts" do
-    let(:options) { {:timeout_class => HTTP::Timeout::Null, :timeout_options => {}} }
+    let(:options) { {timeout_class: HTTP::Timeout::Null, timeout_options: {}} }
 
     it "works" do
       expect(client.get(server.endpoint).body.to_s).to eq("<!doctype html>")
@@ -14,11 +14,11 @@ RSpec.shared_context "HTTP handling" do
 
     let(:options) do
       {
-        :timeout_class   => HTTP::Timeout::PerOperation,
-        :timeout_options => {
-          :connect_timeout => conn_timeout,
-          :read_timeout    => read_timeout,
-          :write_timeout   => write_timeout
+        timeout_class:   HTTP::Timeout::PerOperation,
+        timeout_options: {
+          connect_timeout: conn_timeout,
+          read_timeout:    read_timeout,
+          write_timeout:   write_timeout
         }
       }
     end
@@ -62,9 +62,9 @@ RSpec.shared_context "HTTP handling" do
   context "with a global timeout" do
     let(:options) do
       {
-        :timeout_class   => HTTP::Timeout::Global,
-        :timeout_options => {
-          :global_timeout => global_timeout
+        timeout_class:   HTTP::Timeout::Global,
+        timeout_options: {
+          global_timeout: global_timeout
         }
       }
     end
@@ -86,7 +86,7 @@ RSpec.shared_context "HTTP handling" do
     end
 
     context "it resets state when reusing connections" do
-      let(:extra_options) { {:persistent => server.endpoint} }
+      let(:extra_options) { {persistent: server.endpoint} }
 
       let(:global_timeout) { 2.5 }
 
@@ -106,7 +106,7 @@ RSpec.shared_context "HTTP handling" do
     end
 
     context "when enabled" do
-      let(:options) { {:persistent => server.endpoint} }
+      let(:options) { {persistent: server.endpoint} }
 
       context "without a host" do
         it "infers host from persistent config" do

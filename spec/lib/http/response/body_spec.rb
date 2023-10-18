@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe HTTP::Response::Body do
-  subject(:body) { described_class.new(connection, :encoding => Encoding::UTF_8) }
+  subject(:body) { described_class.new(connection, encoding: Encoding::UTF_8) }
 
-  let(:connection) { double(:sequence_id => 0) }
+  let(:connection) { double(sequence_id: 0) }
   let(:chunks)     { ["Hello, ", "World!"] }
 
   before do
@@ -45,12 +45,12 @@ RSpec.describe HTTP::Response::Body do
     it "returns content in specified encoding" do
       body = described_class.new(connection)
       expect(connection).to receive(:readpartial).
-        and_return(String.new("content", :encoding => Encoding::UTF_8))
+        and_return(String.new("content", encoding: Encoding::UTF_8))
       expect(body.readpartial.encoding).to eq Encoding::BINARY
 
-      body = described_class.new(connection, :encoding => Encoding::UTF_8)
+      body = described_class.new(connection, encoding: Encoding::UTF_8)
       expect(connection).to receive(:readpartial).
-        and_return(String.new("content", :encoding => Encoding::BINARY))
+        and_return(String.new("content", encoding: Encoding::BINARY))
       expect(body.readpartial.encoding).to eq Encoding::UTF_8
     end
   end
@@ -58,7 +58,7 @@ RSpec.describe HTTP::Response::Body do
   context "when body is gzipped" do
     subject(:body) do
       inflater = HTTP::Response::Inflater.new(connection)
-      described_class.new(inflater, :encoding => Encoding::UTF_8)
+      described_class.new(inflater, encoding: Encoding::UTF_8)
     end
 
     let(:chunks) do

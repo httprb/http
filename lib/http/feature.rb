@@ -2,10 +2,6 @@
 
 module HTTP
   class Feature
-    def initialize(opts = {})
-      @opts = opts
-    end
-
     def wrap_request(request)
       request
     end
@@ -14,7 +10,7 @@ module HTTP
       response
     end
 
-    def on_error(request, error); end
+    def on_error(_request, _error); end
   end
 end
 

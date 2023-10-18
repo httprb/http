@@ -58,11 +58,11 @@ module HTTP
       private
 
       def read_nonblock(size, buffer = nil)
-        @socket.read_nonblock(size, buffer, :exception => false)
+        @socket.read_nonblock(size, buffer, exception: false)
       end
 
       def write_nonblock(data)
-        @socket.write_nonblock(data, :exception => false)
+        @socket.write_nonblock(data, exception: false)
       end
 
       # Perform the given I/O operation with the given argument

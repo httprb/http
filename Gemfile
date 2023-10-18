@@ -10,12 +10,12 @@ gem "rake"
 gem "webrick"
 
 group :development do
-  gem "guard-rspec", :require => false
-  gem "nokogiri",    :require => false
-  gem "pry",         :require => false
+  gem "guard-rspec", require: false
+  gem "nokogiri",    require: false
+  gem "pry",         require: false
 
   # RSpec formatter
-  gem "fuubar", :require => false
+  gem "fuubar", require: false
 
   platform :mri do
     gem "pry-byebug"
@@ -23,7 +23,7 @@ group :development do
 end
 
 group :test do
-  gem "certificate_authority", "~> 1.0", :require => false
+  gem "certificate_authority", "~> 1.0", require: false
 
   gem "backports"
 
@@ -32,8 +32,8 @@ group :test do
   gem "rubocop-rake", "~> 0.6.0"
   gem "rubocop-rspec", "~> 2.24.1"
 
-  gem "simplecov",      :require => false
-  gem "simplecov-lcov", :require => false
+  gem "simplecov",      require: false
+  gem "simplecov-lcov", require: false
 
   gem "rspec", "~> 3.10"
   gem "rspec-its"

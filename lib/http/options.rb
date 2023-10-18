@@ -49,19 +49,19 @@ module HTTP
 
     def initialize(options = {})
       defaults = {
-        :response           => :auto,
-        :proxy              => {},
-        :timeout_class      => self.class.default_timeout_class,
-        :timeout_options    => {},
-        :socket_class       => self.class.default_socket_class,
-        :nodelay            => false,
-        :ssl_socket_class   => self.class.default_ssl_socket_class,
-        :ssl                => {},
-        :keep_alive_timeout => 5,
-        :headers            => {},
-        :cookies            => {},
-        :encoding           => nil,
-        :features           => {}
+        response:           :auto,
+        proxy:              {},
+        timeout_class:      self.class.default_timeout_class,
+        timeout_options:    {},
+        socket_class:       self.class.default_socket_class,
+        nodelay:            false,
+        ssl_socket_class:   self.class.default_ssl_socket_class,
+        ssl:                {},
+        keep_alive_timeout: 5,
+        headers:            {},
+        cookies:            {},
+        encoding:           nil,
+        features:           {}
       }
 
       opts_w_defaults = defaults.merge(options)
@@ -84,7 +84,7 @@ module HTTP
       self.encoding = Encoding.find(encoding)
     end
 
-    def_option :features, :reader_only => true do |new_features|
+    def_option :features, reader_only: true do |new_features|
       # Normalize features from:
       #
       #     [{feature_one: {opt: 'val'}}, :feature_two]
@@ -124,7 +124,7 @@ module HTTP
       def_option method_name
     end
 
-    def_option :follow, :reader_only => true
+    def_option :follow, reader_only: true
 
     def follow=(value)
       @follow =
@@ -136,7 +136,7 @@ module HTTP
         end
     end
 
-    def_option :persistent, :reader_only => true
+    def_option :persistent, reader_only: true
 
     def persistent=(value)
       @persistent = value ? HTTP::URI.parse(value).origin : nil

@@ -55,7 +55,7 @@ module HTTP
         connection = opts.fetch(:connection)
         encoding = opts[:encoding] || charset || default_encoding
 
-        @body = Response::Body.new(connection, :encoding => encoding)
+        @body = Response::Body.new(connection, encoding: encoding)
       end
     end
 
@@ -183,7 +183,7 @@ module HTTP
 
       # For backwards compatibilty
       if opts[:uri]
-        HTTP::Request.new(:uri => opts[:uri], :verb => :get)
+        HTTP::Request.new(uri: opts[:uri], verb: :get)
       else
         opts.fetch(:request)
       end

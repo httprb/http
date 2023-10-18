@@ -60,10 +60,10 @@ module HTTP
 
     # Default ports of supported schemes
     PORTS = {
-      :http  => 80,
-      :https => 443,
-      :ws    => 80,
-      :wss   => 443
+      http:  80,
+      https: 443,
+      ws:    80,
+      wss:   443
     }.freeze
 
     # Method is given as a lowercase symbol e.g. :get, :post
@@ -122,13 +122,13 @@ module HTTP
       end
 
       self.class.new(
-        :verb           => verb,
-        :uri            => @uri.join(uri),
-        :headers        => headers,
-        :proxy          => proxy,
-        :body           => new_body,
-        :version        => version,
-        :uri_normalizer => uri_normalizer
+        verb:           verb,
+        uri:            @uri.join(uri),
+        headers:        headers,
+        proxy:          proxy,
+        body:           new_body,
+        version:        version,
+        uri_normalizer: uri_normalizer
       )
     end
 

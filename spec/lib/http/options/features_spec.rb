@@ -16,7 +16,7 @@ RSpec.describe HTTP::Options, "features" do
   end
 
   it "accepts feature name with its options in array" do
-    opts2 = opts.with_features([{:auto_deflate => {:method => :deflate}}])
+    opts2 = opts.with_features([{auto_deflate: {method: :deflate}}])
     expect(opts.features).to be_empty
     expect(opts2.features.keys).to eq([:auto_deflate])
     expect(opts2.features[:auto_deflate]).

@@ -8,11 +8,11 @@ RSpec.describe HTTP::Features::AutoInflate do
 
   let(:response) do
     HTTP::Response.new(
-      :version    => "1.1",
-      :status     => 200,
-      :headers    => headers,
-      :connection => connection,
-      :request    => HTTP::Request.new(:verb => :get, :uri => "http://example.com")
+      version:    "1.1",
+      status:     200,
+      headers:    headers,
+      connection: connection,
+      request:    HTTP::Request.new(verb: :get, uri: "http://example.com")
     )
   end
 
@@ -26,7 +26,7 @@ RSpec.describe HTTP::Features::AutoInflate do
     end
 
     context "for identity Content-Encoding header" do
-      let(:headers) { {:content_encoding => "identity"} }
+      let(:headers) { {content_encoding: "identity"} }
 
       it "returns original request" do
         expect(result).to be response
@@ -34,7 +34,7 @@ RSpec.describe HTTP::Features::AutoInflate do
     end
 
     context "for unknown Content-Encoding header" do
-      let(:headers) { {:content_encoding => "not-supported"} }
+      let(:headers) { {content_encoding: "not-supported"} }
 
       it "returns original request" do
         expect(result).to be response
@@ -42,7 +42,7 @@ RSpec.describe HTTP::Features::AutoInflate do
     end
 
     context "for deflate Content-Encoding header" do
-      let(:headers) { {:content_encoding => "deflate"} }
+      let(:headers) { {content_encoding: "deflate"} }
 
       it "returns a HTTP::Response wrapping the inflated response body" do
         expect(result.body).to be_instance_of HTTP::Response::Body
@@ -50,7 +50,7 @@ RSpec.describe HTTP::Features::AutoInflate do
     end
 
     context "for gzip Content-Encoding header" do
-      let(:headers) { {:content_encoding => "gzip"} }
+      let(:headers) { {content_encoding: "gzip"} }
 
       it "returns a HTTP::Response wrapping the inflated response body" do
         expect(result.body).to be_instance_of HTTP::Response::Body
@@ -58,7 +58,7 @@ RSpec.describe HTTP::Features::AutoInflate do
     end
 
     context "for x-gzip Content-Encoding header" do
-      let(:headers) { {:content_encoding => "x-gzip"} }
+      let(:headers) { {content_encoding: "x-gzip"} }
 
       it "returns a HTTP::Response wrapping the inflated response body" do
         expect(result.body).to be_instance_of HTTP::Response::Body
@@ -70,11 +70,11 @@ RSpec.describe HTTP::Features::AutoInflate do
     context "when response has uri" do
       let(:response) do
         HTTP::Response.new(
-          :version    => "1.1",
-          :status     => 200,
-          :headers    => {:content_encoding => "gzip"},
-          :connection => connection,
-          :request    => HTTP::Request.new(:verb => :get, :uri => "https://example.com")
+          version:    "1.1",
+          status:     200,
+          headers:    {content_encoding: "gzip"},
+          connection: connection,
+          request:    HTTP::Request.new(verb: :get, uri: "https://example.com")
         )
       end
 

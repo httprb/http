@@ -1,21 +1,24 @@
 # frozen_string_literal: true
 
-require "zlib"
+require "set"
 require "tempfile"
+require "zlib"
 
 require "http/request/body"
 
 module HTTP
   module Features
     class AutoDeflate < Feature
+      VALID_METHODS = Set.new(%w[gzip deflate]).freeze
+
       attr_reader :method
 
-      def initialize(**)
-        super
+      def initialize(method: "gzip")
+        super()
 
-        @method = @opts.key?(:method) ? @opts[:method].to_s : "gzip"
+        @method = method.to_s
 
-        raise Error, "Only gzip and deflate methods are supported" unless %w[gzip deflate].include?(@method)
+        raise Error, "Only gzip and deflate methods are supported" unless VALID_METHODS.include?(@method)
       end
 
       def wrap_request(request)
@@ -27,13 +30,13 @@ module HTTP
         request.headers[Headers::CONTENT_ENCODING] = method
 
         Request.new(
-          :version        => request.version,
-          :verb           => request.verb,
-          :uri            => request.uri,
-          :headers        => request.headers,
-          :proxy          => request.proxy,
-          :body           => deflated_body(request.body),
-          :uri_normalizer => request.uri_normalizer
+          version:        request.version,
+          verb:           request.verb,
+          uri:            request.uri,
+          headers:        request.headers,
+          proxy:          request.proxy,
+          body:           deflated_body(request.body),
+          uri_normalizer: request.uri_normalizer
         )
       end
 
@@ -82,7 +85,7 @@ module HTTP
         end
 
         def compress_all!
-          @compressed = Tempfile.new("http-compressed_body", :binmode => true)
+          @compressed = Tempfile.new("http-compressed_body", binmode: true)
           compress { |data| @compressed.write(data) }
           @compressed.rewind
         end

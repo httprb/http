@@ -8,10 +8,10 @@ require "support/proxy_server"
 
 RSpec.describe HTTP do
   run_server(:dummy) { DummyServer.new }
-  run_server(:dummy_ssl) { DummyServer.new(:ssl => true) }
+  run_server(:dummy_ssl) { DummyServer.new(ssl: true) }
 
   let(:ssl_client) do
-    HTTP::Client.new :ssl_context => SSLHelper.client_context
+    HTTP::Client.new ssl_context: SSLHelper.client_context
   end
 
   context "getting resources" do
@@ -29,14 +29,14 @@ RSpec.describe HTTP do
 
     context "with query string parameters" do
       it "is easy" do
-        response = HTTP.get "#{dummy.endpoint}/params", :params => {:foo => "bar"}
+        response = HTTP.get "#{dummy.endpoint}/params", params: {foo: "bar"}
         expect(response.to_s).to match(/Params!/)
       end
     end
 
     context "with query string parameters in the URI and opts hash" do
       it "includes both" do
-        response = HTTP.get "#{dummy.endpoint}/multiple-params?foo=bar", :params => {:baz => "quux"}
+        response = HTTP.get "#{dummy.endpoint}/multiple-params?foo=bar", params: {baz: "quux"}
         expect(response.to_s).to match(/More Params!/)
       end
     end
@@ -57,12 +57,12 @@ RSpec.describe HTTP do
     context "with a large request body" do
       let(:request_body) { "“" * 1_000_000 } # use multi-byte character
 
-      [:null, 6, {:read => 2, :write => 2, :connect => 2}].each do |timeout|
+      [:null, 6, {read: 2, write: 2, connect: 2}].each do |timeout|
         context "with `.timeout(#{timeout.inspect})`" do
           let(:client) { HTTP.timeout(timeout) }
 
           it "writes the whole body" do
-            response = client.post "#{dummy.endpoint}/echo-body", :body => request_body
+            response = client.post "#{dummy.endpoint}/echo-body", body: request_body
 
             expect(response.body.to_s).to eq(request_body.b)
             expect(response.headers["Content-Length"].to_i).to eq request_body.bytesize
@@ -154,7 +154,7 @@ RSpec.describe HTTP do
 
   context "posting forms to resources" do
     it "is easy" do
-      response = HTTP.post "#{dummy.endpoint}/form", :form => {:example => "testing-form"}
+      response = HTTP.post "#{dummy.endpoint}/form", form: {example: "testing-form"}
       expect(response.to_s).to eq("passed :)")
     end
   end
@@ -175,7 +175,7 @@ RSpec.describe HTTP do
 
     context "with encoding option" do
       it "respects option" do
-        response = HTTP.get "#{dummy.endpoint}/iso-8859-1", :encoding => Encoding::BINARY
+        response = HTTP.get "#{dummy.endpoint}/iso-8859-1", encoding: Encoding::BINARY
         expect(response.to_s.encoding).to eq(Encoding::BINARY)
       end
     end
@@ -183,7 +183,7 @@ RSpec.describe HTTP do
 
   context "passing a string encoding type" do
     it "finds encoding" do
-      response = HTTP.get dummy.endpoint, :encoding => "ascii"
+      response = HTTP.get dummy.endpoint, encoding: "ascii"
       expect(response.to_s.encoding).to eq(Encoding::ASCII)
     end
   end
@@ -197,7 +197,7 @@ RSpec.describe HTTP do
 
   context "posting with an explicit body" do
     it "is easy" do
-      response = HTTP.post "#{dummy.endpoint}/body", :body => "testing-body"
+      response = HTTP.post "#{dummy.endpoint}/body", body: "testing-body"
       expect(response.to_s).to eq("passed :)")
     end
   end
@@ -229,7 +229,7 @@ RSpec.describe HTTP do
     end
 
     it "accepts any #to_s object" do
-      client = HTTP.auth double :to_s => "abc"
+      client = HTTP.auth double to_s: "abc"
       expect(client.default_options.headers[:authorization]).to eq "abc"
     end
   end
@@ -240,15 +240,15 @@ RSpec.describe HTTP do
     end
 
     it "fails when :pass is not given" do
-      expect { HTTP.basic_auth :user => "[USER]" }.to raise_error(KeyError)
+      expect { HTTP.basic_auth user: "[USER]" }.to raise_error(KeyError)
     end
 
     it "fails when :user is not given" do
-      expect { HTTP.basic_auth :pass => "[PASS]" }.to raise_error(KeyError)
+      expect { HTTP.basic_auth pass: "[PASS]" }.to raise_error(KeyError)
     end
 
     it "sets Authorization header with proper BasicAuth value" do
-      client = HTTP.basic_auth :user => "foo", :pass => "bar"
+      client = HTTP.basic_auth user: "foo", pass: "bar"
       expect(client.default_options.headers[:authorization]).
         to match(%r{^Basic [A-Za-z0-9+/]+=*$})
     end
@@ -278,7 +278,7 @@ RSpec.describe HTTP do
     end
 
     context "with timeout specified" do
-      subject(:client) { HTTP.persistent host, :timeout => 100 }
+      subject(:client) { HTTP.persistent host, timeout: 100 }
 
       it "sets keep_alive_timeout" do
         options = client.default_options
@@ -298,7 +298,7 @@ RSpec.describe HTTP do
     end
 
     context "specifying per operation timeouts" do
-      subject(:client) { HTTP.timeout :read => 123 }
+      subject(:client) { HTTP.timeout read: 123 }
 
       it "sets timeout_class to PerOperation" do
         expect(client.default_options.timeout_class).
@@ -307,14 +307,14 @@ RSpec.describe HTTP do
 
       it "sets given timeout options" do
         expect(client.default_options.timeout_options).
-          to eq :read_timeout => 123
+          to eq read_timeout: 123
       end
     end
 
     context "specifying per operation timeouts as frozen hash" do
       subject(:client) { HTTP.timeout(frozen_options) }
 
-      let(:frozen_options) { {:read => 123}.freeze }
+      let(:frozen_options) { {read: 123}.freeze }
 
       it "does not raise an error" do
         expect { client }.not_to raise_error
@@ -331,7 +331,7 @@ RSpec.describe HTTP do
 
       it "sets given timeout option" do
         expect(client.default_options.timeout_options).
-          to eq :global_timeout => 123
+          to eq global_timeout: 123
       end
     end
   end
@@ -340,7 +340,7 @@ RSpec.describe HTTP do
     let(:endpoint) { "#{dummy.endpoint}/cookies" }
 
     it "passes correct `Cookie` header" do
-      expect(HTTP.cookies(:abc => :def).get(endpoint).to_s).
+      expect(HTTP.cookies(abc: :def).get(endpoint).to_s).
         to eq "abc: def"
     end
 
@@ -353,20 +353,20 @@ RSpec.describe HTTP do
 
     it "properly merges cookies" do
       res     = HTTP.get(endpoint).flush
-      client  = HTTP.cookies(:foo => 123, :bar => 321).cookies(res.cookies)
+      client  = HTTP.cookies(foo: 123, bar: 321).cookies(res.cookies)
 
       expect(client.get(endpoint).to_s).to eq "foo: bar\nbar: 321"
     end
 
     it "properly merges Cookie headers and cookies" do
-      client = HTTP.headers("Cookie" => "foo=bar").cookies(:baz => :moo)
+      client = HTTP.headers("Cookie" => "foo=bar").cookies(baz: :moo)
       expect(client.get(endpoint).to_s).to eq "foo: bar\nbaz: moo"
     end
   end
 
   describe ".nodelay" do
     before do
-      HTTP.default_options = {:socket_class => socket_spy_class}
+      HTTP.default_options = {socket_class: socket_spy_class}
     end
 
     after do
@@ -404,16 +404,16 @@ RSpec.describe HTTP do
       it "sends gzipped body" do
         client   = HTTP.use :auto_deflate
         body     = "Hello!"
-        response = client.post("#{dummy.endpoint}/echo-body", :body => body)
+        response = client.post("#{dummy.endpoint}/echo-body", body: body)
         encoded  = response.to_s
 
         expect(Zlib::GzipReader.new(StringIO.new(encoded)).read).to eq body
       end
 
       it "sends deflated body" do
-        client   = HTTP.use :auto_deflate => {:method => "deflate"}
+        client   = HTTP.use auto_deflate: {method: "deflate"}
         body     = "Hello!"
-        response = client.post("#{dummy.endpoint}/echo-body", :body => body)
+        response = client.post("#{dummy.endpoint}/echo-body", body: body)
         encoded  = response.to_s
 
         expect(Zlib::Inflate.inflate(encoded)).to eq body
@@ -424,14 +424,14 @@ RSpec.describe HTTP do
       it "returns raw body when Content-Encoding type is missing" do
         client   = HTTP.use :auto_inflate
         body     = "Hello!"
-        response = client.post("#{dummy.endpoint}/encoded-body", :body => body)
+        response = client.post("#{dummy.endpoint}/encoded-body", body: body)
         expect(response.to_s).to eq("#{body}-raw")
       end
 
       it "returns decoded body" do
         client   = HTTP.use(:auto_inflate).headers("Accept-Encoding" => "gzip")
         body     = "Hello!"
-        response = client.post("#{dummy.endpoint}/encoded-body", :body => body)
+        response = client.post("#{dummy.endpoint}/encoded-body", body: body)
 
         expect(response.to_s).to eq("#{body}-gzipped")
       end
@@ -439,7 +439,7 @@ RSpec.describe HTTP do
       it "returns deflated body" do
         client   = HTTP.use(:auto_inflate).headers("Accept-Encoding" => "deflate")
         body     = "Hello!"
-        response = client.post("#{dummy.endpoint}/encoded-body", :body => body)
+        response = client.post("#{dummy.endpoint}/encoded-body", body: body)
 
         expect(response.to_s).to eq("#{body}-deflated")
       end
@@ -447,7 +447,7 @@ RSpec.describe HTTP do
       it "returns empty body for no content response where Content-Encoding is gzip" do
         client   = HTTP.use(:auto_inflate).headers("Accept-Encoding" => "gzip")
         body     = "Hello!"
-        response = client.post("#{dummy.endpoint}/no-content-204", :body => body)
+        response = client.post("#{dummy.endpoint}/no-content-204", body: body)
 
         expect(response.to_s).to eq("")
       end
@@ -455,7 +455,7 @@ RSpec.describe HTTP do
       it "returns empty body for no content response where Content-Encoding is deflate" do
         client   = HTTP.use(:auto_inflate).headers("Accept-Encoding" => "deflate")
         body     = "Hello!"
-        response = client.post("#{dummy.endpoint}/no-content-204", :body => body)
+        response = client.post("#{dummy.endpoint}/no-content-204", body: body)
 
         expect(response.to_s).to eq("")
       end
@@ -468,13 +468,13 @@ RSpec.describe HTTP do
       end
 
       it "uses the custom URI Normalizer method" do
-        client = HTTP.use(:normalize_uri => {:normalizer => :itself.to_proc})
+        client = HTTP.use(normalize_uri: {normalizer: :itself.to_proc})
         response = client.get("#{dummy.endpoint}/héllö-wörld")
         expect(response.status).to eq(400)
       end
 
       it "raises if custom URI Normalizer returns invalid path" do
-        client = HTTP.use(:normalize_uri => {:normalizer => :itself.to_proc})
+        client = HTTP.use(normalize_uri: {normalizer: :itself.to_proc})
         expect { client.get("#{dummy.endpoint}/hello\nworld") }.
           to raise_error HTTP::RequestError, 'Invalid request URI: "/hello\nworld"'
       end
@@ -485,7 +485,7 @@ RSpec.describe HTTP do
           uri.instance_variable_set(:@host, "example\ncom")
           uri
         end
-        client = HTTP.use(:normalize_uri => {:normalizer => normalizer})
+        client = HTTP.use(normalize_uri: {normalizer: normalizer})
         expect { client.get(dummy.endpoint) }.
           to raise_error HTTP::RequestError, 'Invalid host: "example\ncom"'
       end

@@ -45,11 +45,11 @@ module HTTP
       uri = HTTP::URI.parse uri
 
       HTTP::URI.new(
-        :scheme    => uri.normalized_scheme,
-        :authority => uri.normalized_authority,
-        :path      => uri.path.empty? ? "/" : percent_encode(Addressable::URI.normalize_path(uri.path)),
-        :query     => percent_encode(uri.query),
-        :fragment  => uri.normalized_fragment
+        scheme:    uri.normalized_scheme,
+        authority: uri.normalized_authority,
+        path:      uri.path.empty? ? "/" : percent_encode(Addressable::URI.normalize_path(uri.path)),
+        query:     percent_encode(uri.query),
+        fragment:  uri.normalized_fragment
       )
     end
 
@@ -145,7 +145,7 @@ module HTTP
     # @param [String, #to_str] new_host The new host component.
     # @return [void]
     def host=(new_host)
-      @uri.host = process_ipv6_brackets(new_host, :brackets => true)
+      @uri.host = process_ipv6_brackets(new_host, brackets: true)
 
       @host = process_ipv6_brackets(@uri.host)
       @normalized_host = process_ipv6_brackets(@uri.normalized_host)
