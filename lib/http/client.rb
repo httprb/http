@@ -154,6 +154,8 @@ module HTTP
       uri.path = "/" if uri.path.empty?
 
       uri
+    rescue Addressable::URI::InvalidURIError => e
+      raise HTTP::Request::InvalidURIError, e.message
     end
 
     # Creates request headers with cookies (if any) merged in

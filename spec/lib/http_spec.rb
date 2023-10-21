@@ -394,6 +394,23 @@ RSpec.describe HTTP do
     end
   end
 
+  describe "gives a proper error for invalid URLs" do
+    it "throws InvalidURIError on nil" do
+      expect { HTTP.get(nil) }.to raise_error(HTTP::Request::InvalidURIError)
+      expect { HTTP.post(nil, :body => "Hello") }.to raise_error(HTTP::Request::InvalidURIError)
+    end
+
+    it "throws InvalidURIError on empty" do
+      expect { HTTP.get("") }.to raise_error(HTTP::Request::InvalidURIError)
+      expect { HTTP.post("", :body => "Hello") }.to raise_error(HTTP::Request::InvalidURIError)
+    end
+
+    it "throws InvalidURIError for incorrect url" do
+      expect { HTTP.get("/") }.to raise_error(HTTP::Request::InvalidURIError)
+      expect { HTTP.get(":") }.to raise_error(HTTP::Request::InvalidURIError)
+    end
+  end
+
   describe ".use" do
     it "turns on given feature" do
       client = HTTP.use :auto_deflate
