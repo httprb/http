@@ -13,15 +13,15 @@ class DummyServer < WEBrick::HTTPServer
   include ServerConfig
 
   CONFIG = {
-    :BindAddress => "127.0.0.1",
-    :Port        => 0,
-    :AccessLog   => BlackHole,
-    :Logger      => BlackHole
+    BindAddress: "127.0.0.1",
+    Port:        0,
+    AccessLog:   BlackHole,
+    Logger:      BlackHole
   }.freeze
 
   SSL_CONFIG = CONFIG.merge(
-    :SSLEnable           => true,
-    :SSLStartImmediately => true
+    SSLEnable:           true,
+    SSLStartImmediately: true
   ).freeze
 
   def initialize(options = {})

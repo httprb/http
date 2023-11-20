@@ -1,0 +1,5 @@
+RSpec/ExampleLength:
+  CountAsOne:
+    - array
+    - heredoc
+    - method_call

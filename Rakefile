@@ -61,4 +61,4 @@ task :generate_status_codes do
   end
 end
 
-task :default => %i[spec rubocop verify_measurements]
+task default: %i[spec rubocop verify_measurements]

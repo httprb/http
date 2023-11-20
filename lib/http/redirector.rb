@@ -93,7 +93,7 @@ module HTTP
         end
 
       cookies.each do |key, value|
-        cookie_jar.add(HTTP::Cookie.new(key, value, :path => @request.uri.path, :domain => @request.host))
+        cookie_jar.add(HTTP::Cookie.new(key, value, path: @request.uri.path, domain: @request.host))
       end
     end
 

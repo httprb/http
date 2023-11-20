@@ -7,7 +7,7 @@ RSpec.describe HTTP::Response::Status do
     end
 
     it "accepts any object that responds to #to_i" do
-      expect { described_class.new double :to_i => 200 }.not_to raise_error
+      expect { described_class.new double to_i: 200 }.not_to raise_error
     end
   end
 

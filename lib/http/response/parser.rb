@@ -10,7 +10,7 @@ module HTTP
 
       def initialize
         @handler = Handler.new(self)
-        @parser = LLHttp::Parser.new(@handler, :type => :response)
+        @parser = LLHttp::Parser.new(@handler, type: :response)
         reset
       end
 

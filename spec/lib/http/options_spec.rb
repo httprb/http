@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe HTTP::Options do
-  subject { described_class.new(:response => :body) }
+  subject { described_class.new(response: :body) }
 
   it "has reader methods for attributes" do
     expect(subject.response).to eq(:body)

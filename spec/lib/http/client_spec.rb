@@ -34,11 +34,11 @@ RSpec.describe HTTP::Client do
     def redirect_response(location, status = 302)
       lambda do |request|
         HTTP::Response.new(
-          :status  => status,
-          :version => "1.1",
-          :headers => {"Location" => location},
-          :body    => "",
-          :request => request
+          status:  status,
+          version: "1.1",
+          headers: {"Location" => location},
+          body:    "",
+          request: request
         )
       end
     end
@@ -46,10 +46,10 @@ RSpec.describe HTTP::Client do
     def simple_response(body, status = 200)
       lambda do |request|
         HTTP::Response.new(
-          :status  => status,
-          :version => "1.1",
-          :body    => body,
-          :request => request
+          status:  status,
+          version: "1.1",
+          body:    body,
+          request: request
         )
       end
     end
@@ -59,7 +59,7 @@ RSpec.describe HTTP::Client do
 
   describe "following redirects" do
     it "returns response of new location" do
-      client = StubbedClient.new(:follow => true).stub(
+      client = StubbedClient.new(follow: true).stub(
         "http://example.com/"     => redirect_response("http://example.com/blog"),
         "http://example.com/blog" => simple_response("OK")
       )
@@ -68,7 +68,7 @@ RSpec.describe HTTP::Client do
     end
 
     it "prepends previous request uri scheme and host if needed" do
-      client = StubbedClient.new(:follow => true).stub(
+      client = StubbedClient.new(follow: true).stub(
         "http://example.com/"           => redirect_response("/index"),
         "http://example.com/index"      => redirect_response("/index.html"),
         "http://example.com/index.html" => simple_response("OK")
@@ -78,7 +78,7 @@ RSpec.describe HTTP::Client do
     end
 
     it "fails upon endless redirects" do
-      client = StubbedClient.new(:follow => true).stub(
+      client = StubbedClient.new(follow: true).stub(
         "http://example.com/" => redirect_response("/")
       )
 
@@ -87,7 +87,7 @@ RSpec.describe HTTP::Client do
     end
 
     it "fails if max amount of hops reached" do
-      client = StubbedClient.new(:follow => {:max_hops => 5}).stub(
+      client = StubbedClient.new(follow: {max_hops: 5}).stub(
         "http://example.com/"  => redirect_response("/1"),
         "http://example.com/1" => redirect_response("/2"),
         "http://example.com/2" => redirect_response("/3"),
@@ -103,7 +103,7 @@ RSpec.describe HTTP::Client do
 
     context "with non-ASCII URLs" do
       it "theoretically works like a charm" do
-        client = StubbedClient.new(:follow => true).stub(
+        client = StubbedClient.new(follow: true).stub(
           "http://example.com/"      => redirect_response("/könig"),
           "http://example.com/könig" => simple_response("OK")
         )
@@ -129,7 +129,7 @@ RSpec.describe HTTP::Client do
     let(:logdev) { StringIO.new }
 
     it "logs all requests" do
-      client = StubbedClient.new(:follow => true, :features => { :logging => { :logger => logger } }).stub(
+      client = StubbedClient.new(follow: true, features: { logging: { logger: logger } }).stub(
         "http://example.com/"  => redirect_response("/1"),
         "http://example.com/1" => redirect_response("/2"),
         "http://example.com/2" => redirect_response("/3"),
@@ -169,7 +169,7 @@ RSpec.describe HTTP::Client do
         expect(CGI.parse(opts[:uri].query)).to eq("foo" => %w[bar], "baz" => %w[quux])
       end
 
-      client.get("http://example.com/?foo=bar", :params => {:baz => "quux"})
+      client.get("http://example.com/?foo=bar", params: {baz: "quux"})
     end
 
     it "merges duplicate values" do
@@ -177,7 +177,7 @@ RSpec.describe HTTP::Client do
         expect(opts[:uri].query).to match(/^(a=1&a=2|a=2&a=1)$/)
       end
 
-      client.get("http://example.com/?a=1", :params => {:a => 2})
+      client.get("http://example.com/?a=1", params: {a: 2})
     end
 
     it "does not modifies query part if no params were given" do
@@ -193,7 +193,7 @@ RSpec.describe HTTP::Client do
         expect(CGI.parse(opts[:uri].query)).to eq "a[]" => %w[b c], "d" => %w[e]
       end
 
-      client.get("http://example.com/?a[]=b&a[]=c", :params => {:d => "e"})
+      client.get("http://example.com/?a[]=b&a[]=c", params: {d: "e"})
     end
 
     it "properly encodes colons" do
@@ -201,7 +201,7 @@ RSpec.describe HTTP::Client do
         expect(opts[:uri].query).to eq "t=1970-01-01T00%3A00%3A00Z"
       end
 
-      client.get("http://example.com/", :params => {:t => "1970-01-01T00:00:00Z"})
+      client.get("http://example.com/", params: {t: "1970-01-01T00:00:00Z"})
     end
 
     it 'does not convert newlines into \r\n before encoding string values' do
@@ -209,7 +209,7 @@ RSpec.describe HTTP::Client do
         expect(opts[:uri].query).to eq "foo=bar%0Abaz"
       end
 
-      client.get("http://example.com/", :params => {:foo => "bar\nbaz"})
+      client.get("http://example.com/", params: {foo: "bar\nbaz"})
     end
   end
 
@@ -223,7 +223,7 @@ RSpec.describe HTTP::Client do
         expect(opts[:body].to_s).to eq "foo=bar"
       end
 
-      client.get("http://example.com/", :form => {:foo => "bar"})
+      client.get("http://example.com/", form: {foo: "bar"})
     end
 
     it "creates multipart form data object" do
@@ -235,13 +235,13 @@ RSpec.describe HTTP::Client do
         expect(opts[:body].to_s).to include("content")
       end
 
-      client.get("http://example.com/", :form => {:foo => HTTP::FormData::Part.new("content")})
+      client.get("http://example.com/", form: {foo: HTTP::FormData::Part.new("content")})
     end
 
     context "when passing an HTTP::FormData object directly" do
       it "creates url encoded form data object" do
         client    = HTTP::Client.new
-        form_data = HTTP::FormData::Multipart.new({ :foo => "bar" })
+        form_data = HTTP::FormData::Multipart.new({ foo: "bar" })
 
         allow(client).to receive(:perform)
 
@@ -250,7 +250,7 @@ RSpec.describe HTTP::Client do
           expect(opts[:body].to_s).to match(/^Content-Disposition: form-data; name="foo"\r\n\r\nbar\r\n/m)
         end
 
-        client.get("http://example.com/", :form => form_data)
+        client.get("http://example.com/", form: form_data)
       end
     end
   end
@@ -265,7 +265,7 @@ RSpec.describe HTTP::Client do
         expect(opts[:headers]["Content-Type"]).to eq "application/json; charset=utf-8"
       end
 
-      client.get("http://example.com/", :json => {:foo => :bar})
+      client.get("http://example.com/", json: {foo: :bar})
     end
   end
 
@@ -285,7 +285,7 @@ RSpec.describe HTTP::Client do
 
     context "with explicitly given `Host` header" do
       let(:headers) { {"Host" => "another.example.com"} }
-      let(:client)  { described_class.new :headers => headers }
+      let(:client)  { described_class.new headers: headers }
 
       it "keeps `Host` header as is" do
         expect(client).to receive(:perform) do |req, _|
@@ -298,7 +298,7 @@ RSpec.describe HTTP::Client do
 
     context "when :auto_deflate was specified" do
       let(:headers) { {"Content-Length" => "12"} }
-      let(:client)  { described_class.new :headers => headers, :features => {:auto_deflate => {}}, :body => "foo" }
+      let(:client)  { described_class.new headers: headers, features: {auto_deflate: {}}, body: "foo" }
 
       it "deletes Content-Length header" do
         expect(client).to receive(:perform) do |req, _|
@@ -317,7 +317,7 @@ RSpec.describe HTTP::Client do
       end
 
       context "and there is no body" do
-        let(:client) { described_class.new :headers => headers, :features => {:auto_deflate => {}} }
+        let(:client) { described_class.new headers: headers, features: {auto_deflate: {}} }
 
         it "doesn't set Content-Encoding header" do
           expect(client).to receive(:perform) do |req, _|
@@ -352,7 +352,7 @@ RSpec.describe HTTP::Client do
       it "is given a chance to wrap the Request" do
         feature_instance = feature_class.new
 
-        response = client.use(:test_feature => feature_instance).
+        response = client.use(test_feature: feature_instance).
                    request(:get, dummy.endpoint)
 
         expect(response.code).to eq(200)
@@ -363,7 +363,7 @@ RSpec.describe HTTP::Client do
       it "is given a chance to wrap the Response" do
         feature_instance = feature_class.new
 
-        response = client.use(:test_feature => feature_instance).
+        response = client.use(test_feature: feature_instance).
                    request(:get, dummy.endpoint)
 
         expect(feature_instance.captured_response).to eq(response)
@@ -374,7 +374,7 @@ RSpec.describe HTTP::Client do
         feature_instance = feature_class.new
 
         expect do
-          client.use(:test_feature => feature_instance).
+          client.use(test_feature: feature_instance).
             timeout(0.2).
             request(:post, sleep_url)
         end.to raise_error(HTTP::TimeoutError)
@@ -390,7 +390,7 @@ RSpec.describe HTTP::Client do
         feature_instance = feature_class.new
 
         expect do
-          client.use(:test_feature => feature_instance).
+          client.use(test_feature: feature_instance).
             timeout(0.001).
             request(:post, sleep_url)
         end.to raise_error(HTTP::ConnectTimeoutError)
@@ -420,14 +420,14 @@ RSpec.describe HTTP::Client do
               res
             end
           end
-        feature_instance_a = feature_class_order.new(:id => "a")
-        feature_instance_b = feature_class_order.new(:id => "b")
-        feature_instance_c = feature_class_order.new(:id => "c")
+        feature_instance_a = feature_class_order.new(id: "a")
+        feature_instance_b = feature_class_order.new(id: "b")
+        feature_instance_c = feature_class_order.new(id: "c")
 
         client.use(
-          :test_feature_a => feature_instance_a,
-          :test_feature_b => feature_instance_b,
-          :test_feature_c => feature_instance_c
+          test_feature_a: feature_instance_a,
+          test_feature_b: feature_instance_b,
+          test_feature_c: feature_instance_c
         ).request(:get, dummy.endpoint)
 
         expect(feature_class_order.order).to eq(
@@ -446,12 +446,12 @@ RSpec.describe HTTP::Client do
 
   # TODO: https://github.com/httprb/http/issues/627
   xdescribe "working with SSL" do
-    run_server(:dummy_ssl) { DummyServer.new(:ssl => true) }
+    run_server(:dummy_ssl) { DummyServer.new(ssl: true) }
 
     let(:extra_options) { {} }
 
     let(:client) do
-      described_class.new options.merge(:ssl_context => SSLHelper.client_context).merge(extra_options)
+      described_class.new options.merge(ssl_context: SSLHelper.client_context).merge(extra_options)
     end
 
     include_context "HTTP handling" do
@@ -470,7 +470,7 @@ RSpec.describe HTTP::Client do
 
     context "with SSL options instead of a context" do
       let(:client) do
-        described_class.new options.merge :ssl => SSLHelper.client_params
+        described_class.new options.merge ssl: SSLHelper.client_params
       end
 
       it "just works" do

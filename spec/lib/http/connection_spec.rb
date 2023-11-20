@@ -3,22 +3,22 @@
 RSpec.describe HTTP::Connection do
   let(:req) do
     HTTP::Request.new(
-      :verb    => :get,
-      :uri     => "http://example.com/",
-      :headers => {}
+      verb:    :get,
+      uri:     "http://example.com/",
+      headers: {}
     )
   end
-  let(:socket) { double(:connect => nil, :close => nil) }
-  let(:timeout_class) { double(:new => socket) }
-  let(:opts) { HTTP::Options.new(:timeout_class => timeout_class) }
+  let(:socket) { double(connect: nil, close: nil) }
+  let(:timeout_class) { double(new: socket) }
+  let(:opts) { HTTP::Options.new(timeout_class: timeout_class) }
   let(:connection) { HTTP::Connection.new(req, opts) }
 
   describe "#initialize times out" do
     let(:req) do
       HTTP::Request.new(
-        :verb    => :get,
-        :uri     => "https://example.com/",
-        :headers => {}
+        verb:    :get,
+        uri:     "https://example.com/",
+        headers: {}
       )
     end
 

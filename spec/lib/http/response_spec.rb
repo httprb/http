@@ -3,18 +3,18 @@
 RSpec.describe HTTP::Response do
   subject(:response) do
     HTTP::Response.new(
-      :status  => 200,
-      :version => "1.1",
-      :headers => headers,
-      :body    => body,
-      :request => request
+      status:  200,
+      version: "1.1",
+      headers: headers,
+      body:    body,
+      request: request
     )
   end
 
   let(:body)          { "Hello world!" }
   let(:uri)           { "http://example.com/" }
   let(:headers)       { {} }
-  let(:request)       { HTTP::Request.new(:verb => :get, :uri => uri) }
+  let(:request)       { HTTP::Request.new(verb: :get, uri: uri) }
 
   it "includes HTTP::Headers::Mixin" do
     expect(described_class).to include HTTP::Headers::Mixin
@@ -128,7 +128,7 @@ RSpec.describe HTTP::Response do
   end
 
   describe "#flush" do
-    let(:body) { double :to_s => "" }
+    let(:body) { double to_s: "" }
 
     it "returns response self-reference" do
       expect(response.flush).to be response
@@ -143,8 +143,8 @@ RSpec.describe HTTP::Response do
   describe "#inspect" do
     subject { response.inspect }
 
-    let(:headers) { {:content_type => "text/plain"} }
-    let(:body)    { double :to_s => "foobar" }
+    let(:headers) { {content_type: "text/plain"} }
+    let(:body)    { double to_s: "foobar" }
 
     it { is_expected.to eq '#<HTTP::Response/1.1 200 OK {"Content-Type"=>"text/plain"}>' }
   end
@@ -173,10 +173,10 @@ RSpec.describe HTTP::Response do
   describe "#connection" do
     subject(:response) do
       HTTP::Response.new(
-        :version    => "1.1",
-        :status     => 200,
-        :connection => connection,
-        :request    => request
+        version:    "1.1",
+        status:     200,
+        connection: connection,
+        request:    request
       )
     end
 
@@ -203,11 +203,11 @@ RSpec.describe HTTP::Response do
     context "with no :verb" do
       subject(:response) do
         HTTP::Response.new(
-          :status  => 200,
-          :version => "1.1",
-          :headers => headers,
-          :body    => body,
-          :uri     => uri
+          status:  200,
+          version: "1.1",
+          headers: headers,
+          body:    body,
+          uri:     uri
         )
       end
 
@@ -223,12 +223,12 @@ RSpec.describe HTTP::Response do
     context "with both a :request and :uri" do
       subject(:response) do
         HTTP::Response.new(
-          :status  => 200,
-          :version => "1.1",
-          :headers => headers,
-          :body    => body,
-          :uri     => uri,
-          :request => request
+          status:  200,
+          version: "1.1",
+          headers: headers,
+          body:    body,
+          uri:     uri,
+          request: request
         )
       end
 
@@ -241,15 +241,15 @@ RSpec.describe HTTP::Response do
   describe "#body" do
     subject(:response) do
       HTTP::Response.new(
-        :status     => 200,
-        :version    => "1.1",
-        :headers    => headers,
-        :request    => request,
-        :connection => connection
+        status:     200,
+        version:    "1.1",
+        headers:    headers,
+        request:    request,
+        connection: connection
       )
     end
 
-    let(:connection) { double(:sequence_id => 0) }
+    let(:connection) { double(sequence_id: 0) }
     let(:chunks)     { ["Hello, ", "World!"] }
 
     before do

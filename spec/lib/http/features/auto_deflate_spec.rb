@@ -4,22 +4,22 @@ RSpec.describe HTTP::Features::AutoDeflate do
   subject { HTTP::Features::AutoDeflate.new }
 
   it "raises error for wrong type" do
-    expect { HTTP::Features::AutoDeflate.new(:method => :wrong) }.
+    expect { HTTP::Features::AutoDeflate.new(method: :wrong) }.
       to raise_error(HTTP::Error) { |error|
         expect(error.message).to eq("Only gzip and deflate methods are supported")
       }
   end
 
   it "accepts gzip method" do
-    expect(HTTP::Features::AutoDeflate.new(:method => :gzip).method).to eq "gzip"
+    expect(HTTP::Features::AutoDeflate.new(method: :gzip).method).to eq "gzip"
   end
 
   it "accepts deflate method" do
-    expect(HTTP::Features::AutoDeflate.new(:method => :deflate).method).to eq "deflate"
+    expect(HTTP::Features::AutoDeflate.new(method: :deflate).method).to eq "deflate"
   end
 
   it "accepts string as method" do
-    expect(HTTP::Features::AutoDeflate.new(:method => "gzip").method).to eq "gzip"
+    expect(HTTP::Features::AutoDeflate.new(method: "gzip").method).to eq "gzip"
   end
 
   it "uses gzip by default" do
@@ -31,7 +31,7 @@ RSpec.describe HTTP::Features::AutoDeflate do
     let(:deflated_body) { subject.deflated_body(body) }
 
     context "when method is gzip" do
-      subject { HTTP::Features::AutoDeflate.new(:method => :gzip) }
+      subject { HTTP::Features::AutoDeflate.new(method: :gzip) }
 
       it "returns object which yields gzipped content of the given body" do
         io = StringIO.new
@@ -58,7 +58,7 @@ RSpec.describe HTTP::Features::AutoDeflate do
     end
 
     context "when method is deflate" do
-      subject { HTTP::Features::AutoDeflate.new(:method => :deflate) }
+      subject { HTTP::Features::AutoDeflate.new(method: :deflate) }
 
       it "returns object which yields deflated content of the given body" do
         deflated = Zlib::Deflate.deflate("beescows")

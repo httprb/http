@@ -7,6 +7,7 @@ inherit_from:
   - .rubocop_todo.yml
   - .rubocop/layout.yml
   - .rubocop/metrics.yml
+  - .rubocop/rspec.yml
   - .rubocop/style.yml
 
 AllCops:

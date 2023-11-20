@@ -43,14 +43,14 @@ module HTTP
       headers = make_request_headers(opts)
       body    = make_request_body(opts, headers)
 
-      req = HTTP::Request.new(
-        :verb           => verb,
-        :uri            => uri,
-        :uri_normalizer => opts.feature(:normalize_uri)&.normalizer,
-        :proxy          => opts.proxy,
-        :headers        => headers,
-        :body           => body
-      )
+      req = HTTP::Request.new({
+        verb:           verb,
+        uri:            uri,
+        uri_normalizer: opts.feature(:normalize_uri)&.normalizer,
+        proxy:          opts.proxy,
+        headers:        headers,
+        body:           body
+      })
 
       wrap_request(req, opts)
     end
@@ -110,13 +110,13 @@ module HTTP
 
     def build_response(req, options)
       Response.new(
-        :status        => @connection.status_code,
-        :version       => @connection.http_version,
-        :headers       => @connection.headers,
-        :proxy_headers => @connection.proxy_response_headers,
-        :connection    => @connection,
-        :encoding      => options.encoding,
-        :request       => req
+        status:        @connection.status_code,
+        version:       @connection.http_version,
+        headers:       @connection.headers,
+        proxy_headers: @connection.proxy_response_headers,
+        connection:    @connection,
+        encoding:      options.encoding,
+        request:       req
       )
     end
 

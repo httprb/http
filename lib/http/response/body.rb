@@ -29,7 +29,7 @@ module HTTP
         stream!
         chunk = @stream.readpartial(*args)
 
-        String.new(chunk, :encoding => @encoding) if chunk
+        String.new(chunk, encoding: @encoding) if chunk
       end
 
       # Iterate over the body, allowing it to be enumerable
@@ -47,10 +47,10 @@ module HTTP
 
         begin
           @streaming  = false
-          @contents   = String.new("", :encoding => @encoding)
+          @contents   = String.new("", encoding: @encoding)
 
           while (chunk = @stream.readpartial)
-            @contents << String.new(chunk, :encoding => @encoding)
+            @contents << String.new(chunk, encoding: @encoding)
             chunk = nil # deallocate string
           end
         rescue

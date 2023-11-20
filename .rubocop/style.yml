@@ -12,7 +12,7 @@ Style/FormatStringToken:
 
 Style/HashSyntax:
   Enabled: true
-  EnforcedStyle: hash_rockets
+  EnforcedStyle: ruby19_no_mixed_keys
 
 Style/OptionHash:
   Enabled: true

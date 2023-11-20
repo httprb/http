@@ -38,7 +38,7 @@ module HTTP
       def readpartial(size, buffer = nil)
         timeout = false
         loop do
-          result = @socket.read_nonblock(size, buffer, :exception => false)
+          result = @socket.read_nonblock(size, buffer, exception: false)
 
           return :eof   if result.nil?
           return result if result != :wait_readable
@@ -63,7 +63,7 @@ module HTTP
       def write(data)
         timeout = false
         loop do
-          result = @socket.write_nonblock(data, :exception => false)
+          result = @socket.write_nonblock(data, exception: false)
           return result unless result == :wait_writable
 
           raise TimeoutError, "Write timed out after #{@write_timeout} seconds" if timeout
