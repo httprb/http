@@ -3,7 +3,6 @@
 [![Gem Version][gem-image]][gem-link]
 [![MIT licensed][license-image]][license-link]
 [![Build Status][build-image]][build-link]
-[![Code Climate][codeclimate-image]][codeclimate-link]
 
 [Documentation]
 
@@ -153,8 +152,6 @@ See LICENSE.txt for further details.
 [license-link]: https://github.com/httprb/http/blob/main/LICENSE.txt
 [build-image]: https://github.com/httprb/http/workflows/CI/badge.svg
 [build-link]: https://github.com/httprb/http/actions/workflows/ci.yml
-[codeclimate-image]: https://codeclimate.com/github/httprb/http.svg?branch=main
-[codeclimate-link]: https://codeclimate.com/github/httprb/http
 
 [//]: # (links)
 
