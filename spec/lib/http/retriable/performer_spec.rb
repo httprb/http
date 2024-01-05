@@ -8,30 +8,30 @@ RSpec.describe HTTP::Retriable::Performer do
 
   let(:response) do
     HTTP::Response.new(
-      :status  => 200,
-      :version => "1.1",
-      :headers => {},
-      :body    => "Hello world!",
-      :uri     => "http://example.com/",
-      :request => request
+      status:  200,
+      version: "1.1",
+      headers: {},
+      body:    "Hello world!",
+      uri:     "http://example.com/",
+      request: request
     )
   end
 
   let(:request) do
     HTTP::Request.new(
-      :verb => :get,
-      :uri  => "http://example.com"
+      verb: :get,
+      uri:  "http://example.com"
     )
   end
 
   CustomException = Class.new(StandardError)
 
-  let(:perform_spy) { {:counter => 0} }
+  let(:perform_spy) { {counter: 0} }
   let(:counter_spy) { perform_spy[:counter] }
 
   def perform(options = {}, client_arg = client, request_arg = request, &block)
     # by explicitly overwriting the default delay, we make a much faster test suite
-    default_options = {:delay => 0}
+    default_options = {delay: 0}
     options = default_options.merge(options)
 
     HTTP::Retriable::Performer.
@@ -53,7 +53,7 @@ RSpec.describe HTTP::Retriable::Performer do
     describe "expected exception" do
       it "retries the request" do
         expect do
-          perform(:exceptions => [CustomException], :tries => 2) do
+          perform(exceptions: [CustomException], tries: 2) do
             raise CustomException
           end
         end.to raise_error HTTP::OutOfRetriesError
@@ -65,7 +65,7 @@ RSpec.describe HTTP::Retriable::Performer do
     describe "unexpected exception" do
       it "does not retry the request" do
         expect do
-          perform(:exceptions => [], :tries => 2) do
+          perform(exceptions: [], tries: 2) do
             raise CustomException
           end
         end.to raise_error CustomException
@@ -78,19 +78,19 @@ RSpec.describe HTTP::Retriable::Performer do
       def response(**options)
         HTTP::Response.new(
           {
-            :status  => 200,
-            :version => "1.1",
-            :headers => {},
-            :body    => "Hello world!",
-            :uri     => "http://example.com/",
-            :request => request
+            status:  200,
+            version: "1.1",
+            headers: {},
+            body:    "Hello world!",
+            uri:     "http://example.com/",
+            request: request
           }.merge(options)
         )
       end
 
       it "retries the request" do
         expect do
-          perform(:retry_statuses => [200], :tries => 2)
+          perform(retry_statuses: [200], tries: 2)
         end.to raise_error HTTP::OutOfRetriesError
 
         expect(counter_spy).to eq 2
@@ -107,8 +107,8 @@ RSpec.describe HTTP::Retriable::Performer do
         ].each do |retry_statuses|
           it retry_statuses.to_s do
             expect do
-              perform(:retry_statuses => retry_statuses, :tries => 2) do
-                response(:status => 301)
+              perform(retry_statuses: retry_statuses, tries: 2) do
+                response(status: 301)
               end
             end.to raise_error HTTP::OutOfRetriesError
           end
@@ -119,7 +119,7 @@ RSpec.describe HTTP::Retriable::Performer do
     describe "unexpected status code" do
       it "does not retry the request" do
         expect(
-          perform(:retry_statuses => [], :tries => 2)
+          perform(retry_statuses: [], tries: 2)
         ).to eq response
 
         expect(counter_spy).to eq 1
@@ -138,7 +138,7 @@ RSpec.describe HTTP::Retriable::Performer do
         end
 
         expect do
-          perform(:tries => 3, :on_retry => callback_spy) do
+          perform(tries: 3, on_retry: callback_spy) do
             raise HTTP::TimeoutError
           end
         end.to raise_error HTTP::OutOfRetriesError
@@ -157,7 +157,7 @@ RSpec.describe HTTP::Retriable::Performer do
         end
 
         expect do
-          perform(:retry_statuses => [200], :tries => 3, :on_retry => callback_spy)
+          perform(retry_statuses: [200], tries: 3, on_retry: callback_spy)
         end.to raise_error HTTP::OutOfRetriesError
 
         expect(callback_call_spy).to eq 2
@@ -170,7 +170,7 @@ RSpec.describe HTTP::Retriable::Performer do
       it "can be a positive number" do
         time, = measure_wait do
           begin
-            perform(:delay => 0.1, :tries => 3, :should_retry => ->(*) { true })
+            perform(delay: 0.1, tries: 3, should_retry: ->(*) { true })
           rescue HTTP::OutOfRetriesError
           end
         end
@@ -180,7 +180,7 @@ RSpec.describe HTTP::Retriable::Performer do
       it "can be a proc number" do
         time, = measure_wait do
           begin
-            perform(:delay => ->(attempt) { attempt / 10.0 }, :tries => 3, :should_retry => ->(*) { true })
+            perform(delay: ->(attempt) { attempt / 10.0 }, tries: 3, should_retry: ->(*) { true })
           rescue HTTP::OutOfRetriesError
           end
         end
@@ -194,7 +194,7 @@ RSpec.describe HTTP::Retriable::Performer do
           0
         }
         begin
-          perform(:delay => retry_proc, :should_retry => ->(*) { true }) do
+          perform(delay: retry_proc, should_retry: ->(*) { true }) do
             retry_count += 1
             response
           end
@@ -219,7 +219,7 @@ RSpec.describe HTTP::Retriable::Performer do
         end
 
         begin
-          perform(:should_retry => retry_proc) do
+          perform(should_retry: retry_proc) do
             rand < 0.5 ? response : raise(CustomException)
           end
         rescue CustomException
@@ -232,7 +232,7 @@ RSpec.describe HTTP::Retriable::Performer do
         retry_proc = ->(*) { false }
 
         expect do
-          perform(:should_retry => retry_proc) do
+          perform(should_retry: retry_proc) do
             raise CustomException
           end
         end.to raise_error CustomException
@@ -244,7 +244,7 @@ RSpec.describe HTTP::Retriable::Performer do
         retry_proc = ->(*) { true }
 
         expect do
-          perform(:should_retry => retry_proc) do
+          perform(should_retry: retry_proc) do
             raise CustomException
           end
         end.to raise_error HTTP::OutOfRetriesError
@@ -265,7 +265,7 @@ RSpec.describe HTTP::Retriable::Performer do
     it "closes the connection after each raiseed attempt" do
       expect(client).to receive(:close).exactly(3).times
       begin
-        perform(:should_retry => ->(*) { true }, :tries => 3)
+        perform(should_retry: ->(*) { true }, tries: 3)
       rescue HTTP::OutOfRetriesError
       end
     end
@@ -285,7 +285,7 @@ RSpec.describe HTTP::Retriable::Performer do
     it "has the original exception as a cause if available" do
       err = nil
       begin
-        perform(:exceptions => [CustomException]) do
+        perform(exceptions: [CustomException]) do
           raise CustomException
         end
       rescue HTTP::OutOfRetriesError => e
@@ -297,7 +297,7 @@ RSpec.describe HTTP::Retriable::Performer do
     it "has the last raiseed response as an attribute" do
       err = nil
       begin
-        perform(:should_retry => ->(*) { true })
+        perform(should_retry: ->(*) { true })
       rescue HTTP::OutOfRetriesError => e
         err = e
       end

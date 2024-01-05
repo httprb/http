@@ -3,19 +3,19 @@
 RSpec.describe HTTP::Retriable::DelayCalculator do
   let(:response) do
     HTTP::Response.new(
-      :status  => 200,
-      :version => "1.1",
-      :headers => {},
-      :body    => "Hello world!",
-      :uri     => "http://example.com/",
-      :request => request
+      status:  200,
+      version: "1.1",
+      headers: {},
+      body:    "Hello world!",
+      uri:     "http://example.com/",
+      request: request
     )
   end
 
   let(:request) do
     HTTP::Request.new(
-      :verb => :get,
-      :uri  => "http://example.com"
+      verb: :get,
+      uri:  "http://example.com"
     )
   end
 
@@ -29,7 +29,7 @@ RSpec.describe HTTP::Retriable::DelayCalculator do
   end
 
   it "prevents negative sleep time" do
-    expect(call_delay(20, :delay => -20)).to eq 0
+    expect(call_delay(20, delay: -20)).to eq 0
   end
 
   it "backs off exponentially" do
@@ -41,22 +41,22 @@ RSpec.describe HTTP::Retriable::DelayCalculator do
   end
 
   it "can have a maximum wait time" do
-    expect(call_delay(1, :max_delay => 5)).to be_between 0, 1
-    expect(call_delay(5, :max_delay => 5)).to eq 5
+    expect(call_delay(1, max_delay: 5)).to be_between 0, 1
+    expect(call_delay(5, max_delay: 5)).to eq 5
   end
 
   it "respects Retry-After headers as integer" do
     delay_time = rand(6...2500)
     header_value = delay_time.to_s
     expect(call_retry_header(header_value)).to eq delay_time
-    expect(call_retry_header(header_value, :max_delay => 5)).to eq 5
+    expect(call_retry_header(header_value, max_delay: 5)).to eq 5
   end
 
   it "respects Retry-After headers as rfc2822 timestamp" do
     delay_time = rand(6...2500)
     header_value = (Time.now.gmtime + delay_time).to_datetime.rfc2822.sub("+0000", "GMT")
     expect(call_retry_header(header_value)).to be_within(1).of(delay_time)
-    expect(call_retry_header(header_value, :max_delay => 5)).to eq 5
+    expect(call_retry_header(header_value, max_delay: 5)).to eq 5
   end
 
   it "respects Retry-After headers as rfc2822 timestamp in the past" do
