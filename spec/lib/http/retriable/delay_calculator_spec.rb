@@ -7,15 +7,7 @@ RSpec.describe HTTP::Retriable::DelayCalculator do
       version: "1.1",
       headers: {},
       body:    "Hello world!",
-      uri:     "http://example.com/",
-      request: request
-    )
-  end
-
-  let(:request) do
-    HTTP::Request.new(
-      verb: :get,
-      uri:  "http://example.com"
+      request: HTTP::Request.new(verb: :get, uri: "http://example.com")
     )
   end
 

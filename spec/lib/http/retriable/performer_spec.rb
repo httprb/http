@@ -11,7 +11,6 @@ RSpec.describe HTTP::Retriable::Performer do
       version: "1.1",
       headers: {},
       body:    "Hello world!",
-      uri:     "http://example.com/",
       request: request
     )
   end
@@ -83,7 +82,6 @@ RSpec.describe HTTP::Retriable::Performer do
             version: "1.1",
             headers: {},
             body:    "Hello world!",
-            uri:     "http://example.com/",
             request: request
           }.merge(options)
         )
