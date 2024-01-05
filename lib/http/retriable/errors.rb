@@ -5,9 +5,7 @@ module HTTP
   class OutOfRetriesError < Error
     attr_accessor :response
 
-    def cause=(exception)
-      @cause = exception
-    end
+    attr_writer :cause
 
     def cause
       @cause || super

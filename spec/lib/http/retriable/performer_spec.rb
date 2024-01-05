@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-# rubocop:disable Lint/HandleExceptions
 RSpec.describe HTTP::Retriable::Performer do
   let(:client) do
     HTTP::Client.new
@@ -24,19 +23,21 @@ RSpec.describe HTTP::Retriable::Performer do
     )
   end
 
-  CustomException = Class.new(StandardError)
-
-  let(:perform_spy) { {counter: 0} }
+  let(:perform_spy) { { counter: 0 } }
   let(:counter_spy) { perform_spy[:counter] }
+
+  before do
+    stub_const("CustomException", Class.new(StandardError))
+  end
 
   def perform(options = {}, client_arg = client, request_arg = request, &block)
     # by explicitly overwriting the default delay, we make a much faster test suite
-    default_options = {delay: 0}
+    default_options = { delay: 0 }
     options = default_options.merge(options)
 
-    HTTP::Retriable::Performer.
-      new(options).
-      perform(client_arg, request_arg) do
+    HTTP::Retriable::Performer
+      .new(options)
+      .perform(client_arg, request_arg) do
         perform_spy[:counter] += 1
         block ? yield : response
       end
@@ -130,10 +131,10 @@ RSpec.describe HTTP::Retriable::Performer do
       it "calls the on_retry callback on each retry with exception" do
         callback_call_spy = 0
 
-        callback_spy = ->(request, error, response) do
-          expect(request).to eq request
+        callback_spy = proc do |callback_request, error, callback_response|
+          expect(callback_request).to eq request
           expect(error).to be_a HTTP::TimeoutError
-          expect(response).to be_nil
+          expect(callback_response).to be_nil
           callback_call_spy += 1
         end
 
@@ -149,10 +150,10 @@ RSpec.describe HTTP::Retriable::Performer do
       it "calls the on_retry callback on each retry with response" do
         callback_call_spy = 0
 
-        callback_spy = ->(request, error, response) do
-          expect(request).to eq request
+        callback_spy = proc do |callback_request, error, callback_response|
+          expect(callback_request).to eq request
           expect(error).to be_nil
-          expect(response).to be response
+          expect(callback_response).to be response
           callback_call_spy += 1
         end
 
@@ -169,30 +170,26 @@ RSpec.describe HTTP::Retriable::Performer do
 
       it "can be a positive number" do
         time, = measure_wait do
-          begin
-            perform(delay: 0.1, tries: 3, should_retry: ->(*) { true })
-          rescue HTTP::OutOfRetriesError
-          end
+          perform(delay: 0.1, tries: 3, should_retry: ->(*) { true })
+        rescue HTTP::OutOfRetriesError
         end
         expect(time).to be_within(timing_slack).of(0.2)
       end
 
       it "can be a proc number" do
         time, = measure_wait do
-          begin
-            perform(delay: ->(attempt) { attempt / 10.0 }, tries: 3, should_retry: ->(*) { true })
-          rescue HTTP::OutOfRetriesError
-          end
+          perform(delay: ->(attempt) { attempt / 10.0 }, tries: 3, should_retry: ->(*) { true })
+        rescue HTTP::OutOfRetriesError
         end
         expect(time).to be_within(timing_slack).of(0.3)
       end
 
       it "receives correct retry number when a proc" do
         retry_count = 0
-        retry_proc = ->(attempt) {
+        retry_proc = proc do |attempt|
           expect(attempt).to eq(retry_count).and(be > 0)
           0
-        }
+        end
         begin
           perform(delay: retry_proc, should_retry: ->(*) { true }) do
             retry_count += 1
@@ -205,7 +202,7 @@ RSpec.describe HTTP::Retriable::Performer do
 
     describe "should_retry option" do
       it "decides if the request should be retried" do
-        retry_proc = ->(req, err, res, attempt) do
+        retry_proc = proc do |req, err, res, attempt|
           expect(req).to eq request
           if res
             expect(err).to be_nil
@@ -258,7 +255,7 @@ RSpec.describe HTTP::Retriable::Performer do
     let(:client) { double(:client) }
 
     it "does not close the connection if we get a propper response" do
-      expect(client).to_not receive(:close)
+      expect(client).not_to receive(:close)
       perform
     end
 
@@ -288,7 +285,7 @@ RSpec.describe HTTP::Retriable::Performer do
         perform(exceptions: [CustomException]) do
           raise CustomException
         end
-      rescue HTTP::OutOfRetriesError => e
+      rescue described_class => e
         err = e
       end
       expect(err.cause).to be_a CustomException
@@ -298,11 +295,10 @@ RSpec.describe HTTP::Retriable::Performer do
       err = nil
       begin
         perform(should_retry: ->(*) { true })
-      rescue HTTP::OutOfRetriesError => e
+      rescue described_class => e
         err = e
       end
       expect(err.response).to be response
     end
   end
 end
-# rubocop:enable Lint/HandleExceptions

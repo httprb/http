@@ -165,9 +165,7 @@ RSpec.describe HTTP do
 
     it "retries the request and gives us access to the failed requests" do
       err = nil
-      retry_callback = ->(_, _, res) {
-        expect(res.to_s).to match(/^retried \dx$/)
-      }
+      retry_callback = ->(_, _, res) { expect(res.to_s).to match(/^retried \dx$/) }
       begin
         HTTP.retriable(
           should_retry: ->(*) { true },

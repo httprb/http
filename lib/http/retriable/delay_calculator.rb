@@ -30,7 +30,7 @@ module HTTP
         (?:19[0-9]{2}|[2-9][0-9]{3})\s+
         (?:2[0-3]|[0-1][0-9]):(?:[0-5][0-9]):(?:60|[0-5][0-9])\s+
         GMT
-      $/x.freeze
+      $/x
 
       # Spec for Retry-After header
       # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
@@ -50,14 +50,14 @@ module HTTP
         elsif @delay
           @delay
         else
-          delay = 2**(iteration - 1) - 1
+          delay = (2**(iteration - 1)) - 1
           delay_noise = rand
           delay + delay_noise
         end
       end
 
       def ensure_dealy_in_bounds(delay)
-        [0, [delay, @max_delay].min].max
+        delay.clamp(0, @max_delay)
       end
     end
   end

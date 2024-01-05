@@ -49,9 +49,9 @@ module HTTP
       #
       # @see #initialize
       # @api private
-      def perform(client, req)
+      def perform(client, req, &block)
         1.upto(Float::INFINITY) do |attempt| # infinite loop with index
-          err, res = try_request { yield }
+          err, res = try_request(&block)
 
           if retry_request?(req, err, res, attempt)
             begin
