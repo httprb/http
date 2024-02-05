@@ -20,7 +20,7 @@ jobs:
         os: [ ubuntu-latest ]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: ruby/setup-ruby@v1
         with:
@@ -29,14 +29,6 @@ jobs:
 
       - name: bundle exec rspec
         run: bundle exec rspec --format progress --force-colour
-
-      - name: Prepare Coveralls test coverage report
-        uses: coverallsapp/github-action@v1.1.2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          flag-name: "${{ matrix.ruby }} @${{ matrix.os }}"
-          path-to-lcov: ./coverage/lcov/lcov.info
-          parallel: true
 
   test-flaky:
     runs-on: ${{ matrix.os }}
@@ -47,7 +39,7 @@ jobs:
         os: [ ubuntu-latest ]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: ruby/setup-ruby@v1
         with:
@@ -58,21 +50,11 @@ jobs:
         continue-on-error: true
         run: bundle exec rspec --format progress --force-colour
 
-  coveralls:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Finalize Coveralls test coverage report
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          parallel-finished: true
-
   lint:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: ruby/setup-ruby@v1
         with:
