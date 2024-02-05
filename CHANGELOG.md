@@ -7,12 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed
-
-- **BREAKING** Process features in reverse order (#766)
-
 ### Removed
 
 - **BREAKING** Drop Ruby 2.x support
 
-[unreleased]: https://github.com/httprb/http/compare/v5.1.1...HEAD
+[unreleased]: https://github.com/httprb/http/compare/v5.2.0...main
