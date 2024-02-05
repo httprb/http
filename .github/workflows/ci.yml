@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, 5-x-stable ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, 5-x-stable ]
 
 env:
   BUNDLE_WITHOUT: "development"
@@ -16,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        ruby: [ ruby-2.6, ruby-2.7, ruby-3.0, ruby-3.1, ruby-3.2 ]
+        ruby: [ ruby-2.6, ruby-2.7, ruby-3.0, ruby-3.1, ruby-3.2, ruby-3.3 ]
         os: [ ubuntu-latest ]
 
     steps:
