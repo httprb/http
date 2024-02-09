@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
-require "base64"
-
+require "http/base64"
 require "http/headers"
 
 module HTTP
   module Chainable
+    include HTTP::Base64
+
     # Request a get sans response body
     # @param uri
     # @option options [Hash]
@@ -215,7 +216,7 @@ module HTTP
       pass  = opts.fetch(:pass)
       creds = "#{user}:#{pass}"
 
-      auth("Basic #{Base64.strict_encode64(creds)}")
+      auth("Basic #{encode64(creds)}")
     end
 
     # Get options for HTTP
