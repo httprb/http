@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require "forwardable"
-require "base64"
 require "time"
 
+require "http/base64"
 require "http/errors"
 require "http/headers"
 require "http/request/body"
@@ -15,6 +15,7 @@ module HTTP
   class Request
     extend Forwardable
 
+    include HTTP::Base64
     include HTTP::Headers::Mixin
 
     # The method given was not understood
@@ -159,7 +160,7 @@ module HTTP
     end
 
     def proxy_authorization_header
-      digest = Base64.strict_encode64("#{proxy[:proxy_username]}:#{proxy[:proxy_password]}")
+      digest = encode64("#{proxy[:proxy_username]}:#{proxy[:proxy_password]}")
       "Basic #{digest}"
     end
 
