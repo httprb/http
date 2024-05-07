@@ -6,6 +6,8 @@ module HTTP
 
   # Generic Connection error
   class ConnectionError < Error; end
+
+  # Types of Connection errors
   class ResponseHeaderError < ConnectionError; end
   class SocketReadError < ConnectionError; end
   class SocketWriteError < ConnectionError; end
