@@ -26,7 +26,8 @@ class DummyServer < WEBrick::HTTPServer
 
   def initialize(options = {})
     super(options[:ssl] ? SSL_CONFIG : CONFIG)
-    mount("/", Servlet)
+    @memo = {}
+    mount("/", Servlet, @memo)
   end
 
   def endpoint
