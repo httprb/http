@@ -105,10 +105,11 @@ module HTTP
 
     # Reads data from socket up until headers are loaded
     # @return [void]
+    # @raise [ResponseHeaderError] when unable to read response headers
     def read_headers!
       until @parser.headers?
         result = read_more(BUFFER_SIZE)
-        raise ConnectionError, "couldn't read response headers" if result == :eof
+        raise ResponseHeaderError, "couldn't read response headers" if result == :eof
       end
 
       set_keep_alive
@@ -217,6 +218,7 @@ module HTTP
 
     # Feeds some more data into parser
     # @return [void]
+    # @raise [SocketReadError] when unable to read from socket
     def read_more(size)
       return if @parser.finished?
 
@@ -228,7 +230,7 @@ module HTTP
         @parser << value
       end
     rescue IOError, SocketError, SystemCallError => e
-      raise ConnectionError, "error reading from socket: #{e}", e.backtrace
+      raise SocketReadError, "error reading from socket: #{e}", e.backtrace
     end
   end
 end
