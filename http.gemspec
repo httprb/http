@@ -28,7 +28,6 @@ Gem::Specification.new do |gem|
   gem.required_ruby_version = ">= 3.0"
 
   gem.add_runtime_dependency "addressable",    "~> 2.8"
-  gem.add_runtime_dependency "base64",         "~> 0.2"
   gem.add_runtime_dependency "http-cookie",    "~> 1.0"
   gem.add_runtime_dependency "http-form_data", "~> 2.2"
   gem.add_runtime_dependency "llhttp-ffi",     "~> 0.5.0"
