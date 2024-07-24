@@ -102,7 +102,7 @@ module HTTP
       %i[global read write connect].each do |k|
         next unless options.key? k
 
-        options["#{k}_timeout".to_sym] = options.delete k
+        options[:"#{k}_timeout"] = options.delete k
       end
 
       branch default_options.merge(

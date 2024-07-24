@@ -18,7 +18,7 @@ class ProxyServer < WEBrick::HTTPProxyServer
   }.freeze
 
   def initialize
-    super CONFIG
+    super(CONFIG)
   end
 end
 
@@ -34,6 +34,6 @@ class AuthProxyServer < WEBrick::HTTPProxyServer
   CONFIG = ProxyServer::CONFIG.merge ProxyAuthProc: AUTHENTICATOR
 
   def initialize
-    super CONFIG
+    super(CONFIG)
   end
 end
