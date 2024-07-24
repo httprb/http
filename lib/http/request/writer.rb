@@ -108,6 +108,7 @@ module HTTP
 
       private
 
+      # @raise [SocketWriteError] when unable to write to socket
       def write(data)
         until data.empty?
           length = @socket.write(data)
@@ -118,7 +119,7 @@ module HTTP
       rescue Errno::EPIPE
         raise
       rescue IOError, SocketError, SystemCallError => e
-        raise ConnectionError, "error writing to socket: #{e}", e.backtrace
+        raise SocketWriteError, "error writing to socket: #{e}", e.backtrace
       end
     end
   end
