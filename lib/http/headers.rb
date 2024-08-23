@@ -5,19 +5,13 @@ require "forwardable"
 require "http/errors"
 require "http/headers/mixin"
 require "http/headers/known"
+require "http/header_normalizer"
 
 module HTTP
   # HTTP Headers container.
   class Headers
     extend Forwardable
     include Enumerable
-
-    # Matches HTTP header names when in "Canonical-Http-Format"
-    CANONICAL_NAME_RE = /\A[A-Z][a-z]*(?:-[A-Z][a-z]*)*\z/
-
-    # Matches valid header field name according to RFC.
-    # @see http://tools.ietf.org/html/rfc7230#section-3.2
-    COMPLIANT_NAME_RE = /\A[A-Za-z0-9!#$%&'*+\-.^_`|~]+\z/
 
     # Class constructor.
     def initialize
@@ -219,20 +213,15 @@ module HTTP
 
     private
 
+    class << self
+      def header_normalizer
+        @header_normalizer ||= HeaderNormalizer.new
+      end
+    end
+
     # Transforms `name` to canonical HTTP header capitalization
-    #
-    # @param [String] name
-    # @raise [HeaderError] if normalized name does not
-    #   match {HEADER_NAME_RE}
-    # @return [String] canonical HTTP header name
     def normalize_header(name)
-      return name if CANONICAL_NAME_RE.match?(name)
-
-      normalized = name.split(/[\-_]/).each(&:capitalize!).join("-")
-
-      return normalized if COMPLIANT_NAME_RE.match?(normalized)
-
-      raise HeaderError, "Invalid HTTP header field name: #{name.inspect}"
+      self.class.header_normalizer.normalize(name)
     end
 
     # Ensures there is no new line character in the header value
