@@ -4,8 +4,8 @@ require "forwardable"
 
 require "http/errors"
 require "http/headers/mixin"
+require "http/headers/normalizer"
 require "http/headers/known"
-require "http/header_normalizer"
 
 module HTTP
   # HTTP Headers container.
@@ -215,7 +215,7 @@ module HTTP
 
     class << self
       def header_normalizer
-        @header_normalizer ||= HeaderNormalizer.new
+        @header_normalizer ||= Headers::Normalizer.new
       end
     end
 

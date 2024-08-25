@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe HTTP::HeaderNormalizer do
+RSpec.describe HTTP::Headers::Normalizer do
   subject(:normalizer) { described_class.new }
 
   describe "#normalize" do
