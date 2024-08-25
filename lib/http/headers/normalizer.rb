@@ -13,7 +13,7 @@ module HTTP
       MAX_CACHE_SIZE = 200
 
       def initialize
-        @cache = LRUCache.new(MAX_CACHE_SIZE)
+        @cache = Cache.new(MAX_CACHE_SIZE)
       end
 
       # Transforms `name` to canonical HTTP header capitalization
@@ -39,31 +39,24 @@ module HTTP
         raise HeaderError, "Invalid HTTP header field name: #{name.inspect}"
       end
 
-      class LRUCache
+      class Cache
         def initialize(max_size)
           @max_size = max_size
           @cache = {}
-          @order = []
         end
 
         def get(key)
-          return unless @cache.key?(key)
-
-          # Move the accessed item to the end of the order array
-          @order.delete(key)
-          @order.push(key)
           @cache[key]
         end
 
         def set(key, value)
           @cache[key] = value
-          @order.push(key)
 
           # Maintain cache size
-          return unless @order.size > @max_size
+          return unless @cache.size > @max_size
 
-          oldest = @order.shift
-          @cache.delete(oldest)
+          oldest_key = @cache.keys.first
+          @cache.delete(oldest_key)
         end
 
         def size
@@ -83,7 +76,7 @@ module HTTP
         end
       end
 
-      private_constant :LRUCache
+      private_constant :Cache
     end
   end
 end
