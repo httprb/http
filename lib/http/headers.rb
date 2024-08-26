@@ -4,6 +4,7 @@ require "forwardable"
 
 require "http/errors"
 require "http/headers/mixin"
+require "http/headers/normalizer"
 require "http/headers/known"
 
 module HTTP
@@ -12,12 +13,32 @@ module HTTP
     extend Forwardable
     include Enumerable
 
-    # Matches HTTP header names when in "Canonical-Http-Format"
-    CANONICAL_NAME_RE = /\A[A-Z][a-z]*(?:-[A-Z][a-z]*)*\z/
+    class << self
+      # Coerces given `object` into Headers.
+      #
+      # @raise [Error] if object can't be coerced
+      # @param [#to_hash, #to_h, #to_a] object
+      # @return [Headers]
+      def coerce(object)
+        unless object.is_a? self
+          object = case
+                   when object.respond_to?(:to_hash) then object.to_hash
+                   when object.respond_to?(:to_h)    then object.to_h
+                   when object.respond_to?(:to_a)    then object.to_a
+                   else raise Error, "Can't coerce #{object.inspect} to Headers"
+                   end
+        end
 
-    # Matches valid header field name according to RFC.
-    # @see http://tools.ietf.org/html/rfc7230#section-3.2
-    COMPLIANT_NAME_RE = /\A[A-Za-z0-9!#$%&'*+\-.^_`|~]+\z/
+        headers = new
+        object.each { |k, v| headers.add k, v }
+        headers
+      end
+      alias [] coerce
+
+      def normalizer
+        @normalizer ||= Headers::Normalizer.new
+      end
+    end
 
     # Class constructor.
     def initialize
@@ -194,45 +215,11 @@ module HTTP
       dup.tap { |dupped| dupped.merge! other }
     end
 
-    class << self
-      # Coerces given `object` into Headers.
-      #
-      # @raise [Error] if object can't be coerced
-      # @param [#to_hash, #to_h, #to_a] object
-      # @return [Headers]
-      def coerce(object)
-        unless object.is_a? self
-          object = case
-                   when object.respond_to?(:to_hash) then object.to_hash
-                   when object.respond_to?(:to_h)    then object.to_h
-                   when object.respond_to?(:to_a)    then object.to_a
-                   else raise Error, "Can't coerce #{object.inspect} to Headers"
-                   end
-        end
-
-        headers = new
-        object.each { |k, v| headers.add k, v }
-        headers
-      end
-      alias [] coerce
-    end
-
     private
 
     # Transforms `name` to canonical HTTP header capitalization
-    #
-    # @param [String] name
-    # @raise [HeaderError] if normalized name does not
-    #   match {HEADER_NAME_RE}
-    # @return [String] canonical HTTP header name
     def normalize_header(name)
-      return name if CANONICAL_NAME_RE.match?(name)
-
-      normalized = name.split(/[\-_]/).each(&:capitalize!).join("-")
-
-      return normalized if COMPLIANT_NAME_RE.match?(normalized)
-
-      raise HeaderError, "Invalid HTTP header field name: #{name.inspect}"
+      self.class.normalizer.call(name)
     end
 
     # Ensures there is no new line character in the header value

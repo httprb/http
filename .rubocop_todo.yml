@@ -267,30 +267,6 @@ RSpec/InstanceVariable:
 RSpec/MessageSpies:
   EnforcedStyle: receive
 
-# Offense count: 74
-# Configuration parameters: Max.
-RSpec/MultipleExpectations:
-  Exclude:
-    - 'spec/lib/http/client_spec.rb'
-    - 'spec/lib/http/connection_spec.rb'
-    - 'spec/lib/http/features/auto_deflate_spec.rb'
-    - 'spec/lib/http/headers_spec.rb'
-    - 'spec/lib/http/options/body_spec.rb'
-    - 'spec/lib/http/options/features_spec.rb'
-    - 'spec/lib/http/options/form_spec.rb'
-    - 'spec/lib/http/options/headers_spec.rb'
-    - 'spec/lib/http/options/json_spec.rb'
-    - 'spec/lib/http/options/merge_spec.rb'
-    - 'spec/lib/http/options/proxy_spec.rb'
-    - 'spec/lib/http/redirector_spec.rb'
-    - 'spec/lib/http/response/body_spec.rb'
-    - 'spec/lib/http/response/parser_spec.rb'
-    - 'spec/lib/http/retriable/delay_calculator_spec.rb'
-    - 'spec/lib/http/retriable/performer_spec.rb'
-    - 'spec/lib/http/uri_spec.rb'
-    - 'spec/lib/http_spec.rb'
-    - 'spec/support/http_handling_shared.rb'
-
 # Offense count: 9
 # Configuration parameters: AllowSubject, Max.
 RSpec/MultipleMemoizedHelpers:
