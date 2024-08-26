@@ -22,39 +22,31 @@ RSpec.describe HTTP::Headers::Normalizer do
       expect(cache_store.keys).to eq(max_headers[1..] + ["New-Header"])
     end
 
-    describe "multiple invocations with the same input" do
-      let(:normalized_values) { Array.new(3) { normalizer.call("content_type") } }
+    it "retuns mutable strings" do
+      normalized_headers = Array.new(3) { normalizer.call("content_type") }
 
-      it "returns the same result each time" do
-        expect(normalized_values.uniq.size).to eq 1
-      end
-
-      it "returns different string objects each time" do
-        expect(normalized_values.map(&:object_id).uniq.size).to eq normalized_values.size
-      end
+      expect(normalized_headers)
+        .to satisfy { |arr| arr.uniq.size == 1 }
+        .and satisfy { |arr| arr.map(&:object_id).uniq.size == normalized_headers.size }
+        .and satisfy { |arr| arr.none?(&:frozen?) }
     end
 
-    it "limits allocation counts for first normalization of a header" do
-      expected_allocations = {
-        Array                  => 1,
-        described_class        => 1,
-        Hash                   => 1,
-        described_class::Cache => 1,
-        MatchData              => 1,
-        String                 => 6
-      }
+    it "allocates minimal memory for normalization of the same header" do
+      normalizer.call("accept") # XXX: Ensure normalizer is pre-allocated
 
-      expect do
-        normalizer.call("content_type")
-      end.to limit_allocations(**expected_allocations)
-    end
+      # On first call it is expected to allocate during normalization
+      expect { normalizer.call("content_type") }.to limit_allocations(
+        Array     => 1,
+        MatchData => 1,
+        String    => 6
+      )
 
-    it "allocates minimal memory for subsequent normalization of the same header" do
-      normalizer.call("content_type")
-
-      expect do
-        normalizer.call("content_type")
-      end.to limit_allocations(String => 1)
+      # On subsequent call it is expected to only allocate copy of a cached string
+      expect { normalizer.call("content_type") }.to limit_allocations(
+        Array     => 0,
+        MatchData => 0,
+        String    => 1
+      )
     end
   end
 end

@@ -41,8 +41,9 @@ module HTTP
 
       # Transforms `name` to canonical HTTP header capitalization
       def call(name)
-        name = -name.to_s
+        name  = -name.to_s
         value = (@cache[name] ||= -normalize_header(name))
+
         value.dup
       end
 
