@@ -27,8 +27,8 @@ RSpec.describe HTTP::Headers::Normalizer do
 
       expect(normalized_headers)
         .to satisfy { |arr| arr.uniq.size == 1 }
-        .and satisfy { |arr| arr.map(&:object_id).uniq.size == normalized_headers.size }
-        .and satisfy { |arr| arr.none?(&:frozen?) }
+        .and(satisfy { |arr| arr.map(&:object_id).uniq.size == normalized_headers.size })
+        .and(satisfy { |arr| arr.none?(&:frozen?) })
     end
 
     it "allocates minimal memory for normalization of the same header" do

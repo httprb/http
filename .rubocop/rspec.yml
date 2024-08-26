@@ -4,3 +4,6 @@ RSpec/ExampleLength:
     - hash
     - heredoc
     - method_call
+
+RSpec/MultipleExpectations:
+  Max: 5
