@@ -199,7 +199,7 @@ RSpec.describe HTTP::Retriable::Performer do
     end
 
     describe "should_retry option" do
-      it "decides if the request should be retried" do
+      it "decides if the request should be retried" do # rubocop:disable RSpec/MultipleExpectations
         retry_proc = proc do |req, err, res, attempt|
           expect(req).to eq request
           if res

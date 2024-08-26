@@ -5,6 +5,7 @@ require_relative "./support/fuubar" unless ENV["CI"]
 
 require "http"
 require "rspec/its"
+require "rspec/memory"
 require "support/capture_warning"
 require "support/fakeio"
 

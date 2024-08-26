@@ -115,12 +115,13 @@ RSpec.describe HTTP::Redirector do
         expect(req_cookie).to eq request_cookies.shift
         hops.shift
       end
+
       expect(res.to_s).to eq "bar"
-      cookies = res.cookies.cookies.to_h { |c| [c.name, c.value] }
-      expect(cookies["foo"]).to eq "42"
-      expect(cookies["bar"]).to eq "53"
-      expect(cookies["baz"]).to eq "65"
-      expect(cookies["deleted"]).to eq nil
+      expect(res.cookies.cookies.to_h { |c| [c.name, c.value] }).to eq({
+        "foo" => "42",
+        "bar" => "53",
+        "baz" => "65"
+      })
     end
 
     it "returns original cookies in response" do
