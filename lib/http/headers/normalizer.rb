@@ -10,15 +10,40 @@ module HTTP
       # @see http://tools.ietf.org/html/rfc7230#section-3.2
       COMPLIANT_NAME_RE = /\A[A-Za-z0-9!#$%&'*+\-.^_`|~]+\z/
 
-      MAX_CACHE_SIZE = 200
+      NAME_PARTS_SEPARATOR_RE = /[\-_]/
+
+      # @private
+      # Normalized header names cache
+      class Cache
+        MAX_SIZE = 200
+
+        def initialize
+          @store = {}
+        end
+
+        def get(key)
+          @store[key]
+        end
+        alias [] get
+
+        def set(key, value)
+          # Maintain cache size
+          @store.delete(@store.each_key.first) while MAX_SIZE <= @store.size
+
+          @store[key] = value
+        end
+        alias []= set
+      end
 
       def initialize
-        @cache = Cache.new(MAX_CACHE_SIZE)
+        @cache = Cache.new
       end
 
       # Transforms `name` to canonical HTTP header capitalization
-      def normalize(name)
-        @cache[name] ||= normalize_header(name)
+      def call(name)
+        name = -name.to_s
+        value = (@cache[name] ||= -normalize_header(name))
+        value.dup
       end
 
       private
@@ -32,51 +57,12 @@ module HTTP
       def normalize_header(name)
         return name if CANONICAL_NAME_RE.match?(name)
 
-        normalized = name.split(/[\-_]/).each(&:capitalize!).join("-")
+        normalized = name.split(NAME_PARTS_SEPARATOR_RE).each(&:capitalize!).join("-")
 
         return normalized if COMPLIANT_NAME_RE.match?(normalized)
 
         raise HeaderError, "Invalid HTTP header field name: #{name.inspect}"
       end
-
-      class Cache
-        def initialize(max_size)
-          @max_size = max_size
-          @cache = {}
-        end
-
-        def get(key)
-          @cache[key]
-        end
-
-        def set(key, value)
-          @cache[key] = value
-
-          # Maintain cache size
-          return unless @cache.size > @max_size
-
-          oldest_key = @cache.keys.first
-          @cache.delete(oldest_key)
-        end
-
-        def size
-          @cache.size
-        end
-
-        def key?(key)
-          @cache.key?(key)
-        end
-
-        def [](key)
-          get(key)
-        end
-
-        def []=(key, value)
-          set(key, value)
-        end
-      end
-
-      private_constant :Cache
     end
   end
 end

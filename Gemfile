@@ -37,6 +37,7 @@ group :test do
 
   gem "rspec", "~> 3.10"
   gem "rspec-its"
+  gem "rspec-memory"
 
   gem "yardstick"
 end

@@ -13,6 +13,33 @@ module HTTP
     extend Forwardable
     include Enumerable
 
+    class << self
+      # Coerces given `object` into Headers.
+      #
+      # @raise [Error] if object can't be coerced
+      # @param [#to_hash, #to_h, #to_a] object
+      # @return [Headers]
+      def coerce(object)
+        unless object.is_a? self
+          object = case
+                   when object.respond_to?(:to_hash) then object.to_hash
+                   when object.respond_to?(:to_h)    then object.to_h
+                   when object.respond_to?(:to_a)    then object.to_a
+                   else raise Error, "Can't coerce #{object.inspect} to Headers"
+                   end
+        end
+
+        headers = new
+        object.each { |k, v| headers.add k, v }
+        headers
+      end
+      alias [] coerce
+
+      def normalizer
+        @normalizer ||= Headers::Normalizer.new
+      end
+    end
+
     # Class constructor.
     def initialize
       # The @pile stores each header value using a three element array:
@@ -188,40 +215,11 @@ module HTTP
       dup.tap { |dupped| dupped.merge! other }
     end
 
-    class << self
-      # Coerces given `object` into Headers.
-      #
-      # @raise [Error] if object can't be coerced
-      # @param [#to_hash, #to_h, #to_a] object
-      # @return [Headers]
-      def coerce(object)
-        unless object.is_a? self
-          object = case
-                   when object.respond_to?(:to_hash) then object.to_hash
-                   when object.respond_to?(:to_h)    then object.to_h
-                   when object.respond_to?(:to_a)    then object.to_a
-                   else raise Error, "Can't coerce #{object.inspect} to Headers"
-                   end
-        end
-
-        headers = new
-        object.each { |k, v| headers.add k, v }
-        headers
-      end
-      alias [] coerce
-    end
-
     private
-
-    class << self
-      def header_normalizer
-        @header_normalizer ||= Headers::Normalizer.new
-      end
-    end
 
     # Transforms `name` to canonical HTTP header capitalization
     def normalize_header(name)
-      self.class.header_normalizer.normalize(name)
+      self.class.normalizer.call(name)
     end
 
     # Ensures there is no new line character in the header value
