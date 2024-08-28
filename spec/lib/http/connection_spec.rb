@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "stringio"
+
 RSpec.describe HTTP::Connection do
   let(:req) do
     HTTP::Request.new(
@@ -77,10 +79,15 @@ RSpec.describe HTTP::Connection do
     it "reads data in parts" do
       connection.read_headers!
       buffer = String.new
-      while (s = connection.readpartial(3))
-        expect(connection.finished_request?).to be false if s != ""
-        buffer << s
+
+      begin
+        while (s = connection.readpartial(3))
+          expect(connection.finished_request?).to be false if s != ""
+          buffer << s
+        end
+      rescue EOFError
       end
+
       expect(buffer).to eq "1234567890"
       expect(connection.finished_request?).to be true
     end
@@ -89,8 +96,21 @@ RSpec.describe HTTP::Connection do
       connection.read_headers!
       outbuf = String.new
       buffer = String.new
-      buffer << outbuf while connection.readpartial(2, outbuf)
+
+      begin
+        buffer << outbuf while connection.readpartial(2, outbuf)
+      rescue EOFError
+      end
+
       expect(buffer).to eq "1234567890"
+    end
+
+    it "can be used with IO.copy_stream" do
+      output = StringIO.new
+
+      IO.copy_stream(connection, output)
+
+      expect(output.string).to eq "1234567890"
     end
   end
 end
