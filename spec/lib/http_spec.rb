@@ -335,8 +335,50 @@ RSpec.describe HTTP do
       end
 
       it "sets given timeout options" do
+        client = HTTP.timeout :read => 125
+
         expect(client.default_options.timeout_options).
-          to eq read_timeout: 123
+          to eq read_timeout: 125
+      end
+
+      it "sets given timeout options" do
+        client = HTTP.timeout :read_timeout => 321
+
+        expect(client.default_options.timeout_options).
+          to eq :read_timeout => 321
+      end
+
+      it "sets all available options" do
+        client = HTTP.timeout :read => 123, :write => 12, :connect => 1
+
+        expect(client.default_options.timeout_options).
+          to eq(:connect_timeout => 1, :write_timeout => 12, :read_timeout => 123)
+      end
+
+      it "raises an error is empty hash is passed" do
+        expect { HTTP.timeout({}) }
+          .to raise_error(ArgumentError)
+      end
+
+      it "raises if an invalid key is passed" do
+        expect { HTTP.timeout({:timeout => 2}) }
+          .to raise_error(ArgumentError)
+      end
+
+      it "raises if both read and read_timeout is passed" do
+        expect { HTTP.timeout({:read => 2, :read_timeout => 2}) }
+          .to raise_error(ArgumentError)
+      end
+
+      it "raises if a string is passed as read timeout" do
+        expect { HTTP.timeout({:connect => 1, :read => "2"}) }
+          .to raise_error(ArgumentError)
+      end
+
+      it "don't accept string keys" do
+        expect { HTTP.timeout({:connect => 1, "read" => 2}) }
+          .to raise_error(ArgumentError)
+>>>>>>> 0b150cb (Be stricter of allowed values for timeout)
       end
     end
 
@@ -361,6 +403,18 @@ RSpec.describe HTTP do
       it "sets given timeout option" do
         expect(client.default_options.timeout_options).
           to eq global_timeout: 123
+      end
+
+      it "accepts floats argument" do
+        client = HTTP.timeout 2.5
+
+        expect(client.default_options.timeout_options).
+          to eq(:global_timeout => 2.5)
+      end
+
+      it "raises expect if a string is passed" do
+        expect { HTTP.timeout "1" }
+          .to raise_error(ArgumentError)
       end
     end
   end
