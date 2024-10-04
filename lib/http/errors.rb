@@ -21,6 +21,9 @@ module HTTP
   # Requested to do something when we're in the wrong state
   class StateError < ResponseError; end
 
+  # When status code indicates an error
+  class StatusError < ResponseError; end
+
   # Generic Timeout error
   class TimeoutError < Error; end
 
