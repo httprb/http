@@ -13,7 +13,7 @@ RSpec.describe HTTP::Features::Acceptable do
       HTTP::Request.new(
         verb:    :get,
         uri:     "https://example.com/",
-        headers: headers,
+        headers: headers
       )
     end
     let(:response) do
