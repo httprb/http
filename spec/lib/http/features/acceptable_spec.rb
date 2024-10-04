@@ -6,7 +6,7 @@ RSpec.describe HTTP::Features::Acceptable do
   let(:connection) { double }
   let(:headers)    { {} }
 
-  describe "#accepted?" do
+  describe "#wrap_response" do
     subject(:result) { feature.wrap_response(response) }
 
     let(:request) do
@@ -14,7 +14,6 @@ RSpec.describe HTTP::Features::Acceptable do
         verb:    :get,
         uri:     "https://example.com/",
         headers: headers,
-        body:    "Hello world"
       )
     end
     let(:response) do
