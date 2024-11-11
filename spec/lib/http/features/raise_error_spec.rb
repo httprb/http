@@ -52,10 +52,10 @@ RSpec.describe HTTP::Features::RaiseError do
 
     context "when error status is ignored" do
       let(:status) { 500 }
-      let(:ignored) { [500] }
+      let(:ignore) { [500] }
 
-      it "raises" do
-        expect { result }.to raise_error(HTTP::StatusError, "Unexpected status code 500")
+      it "returns original request" do
+        expect(result).to be response
       end
     end
   end
