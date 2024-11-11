@@ -10,11 +10,10 @@ module HTTP
       end
 
       def wrap_response(response)
-        if response.code >= 400 && !@ignore.include?(response.code)
-          raise HTTP::StatusError, "Unexpected status code #{response.code}"
-        end
+        return response if response.code < 400
+        return response if @ignore.include?(response.code)
 
-        response
+        raise HTTP::StatusError, response
       end
 
       HTTP::Options.register_feature(:raise_error, self)

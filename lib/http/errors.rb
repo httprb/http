@@ -22,7 +22,15 @@ module HTTP
   class StateError < ResponseError; end
 
   # When status code indicates an error
-  class StatusError < ResponseError; end
+  class StatusError < ResponseError
+    attr_reader :response
+
+    def initialize(response)
+      @response = response
+
+      super("Unexpected status code #{response.code}")
+    end
+  end
 
   # Generic Timeout error
   class TimeoutError < Error; end
