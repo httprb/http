@@ -244,6 +244,7 @@ module HTTP
     # * instrumentation
     # * logging
     # * normalize_uri
+    # * raise_error
     # @param features
     def use(*features)
       branch default_options.with_features(features)
