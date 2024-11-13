@@ -2,12 +2,12 @@
 
 require "http/headers"
 require "openssl"
-require "socket"
+require "http/network/tcp_socket"
 require "http/uri"
 
 module HTTP
   class Options # rubocop:disable Metrics/ClassLength
-    @default_socket_class     = TCPSocket
+    @default_socket_class     = Network::TCPSocket
     @default_ssl_socket_class = OpenSSL::SSL::SSLSocket
     @default_timeout_class    = HTTP::Timeout::Null
     @available_features       = {}
