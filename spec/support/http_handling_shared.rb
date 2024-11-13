@@ -73,7 +73,7 @@ RSpec.shared_context "HTTP handling" do
     let(:response) { client.get(server.endpoint).body.to_s }
 
     it "errors if connecting takes too long" do
-      expect(TCPSocket).to receive(:open) do
+      expect(HTTP::Network::TCPSocket).to receive(:open) do
         sleep 1.25
       end
 

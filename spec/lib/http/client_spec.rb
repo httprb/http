@@ -385,7 +385,7 @@ RSpec.describe HTTP::Client do
       end
 
       it "is given a chance to handle a connection timeout error" do
-        allow(TCPSocket).to receive(:open) { sleep 1 }
+        allow(HTTP::Network::TCPSocket).to receive(:open) { sleep 1 }
         sleep_url = "#{dummy.endpoint}/sleep"
         feature_instance = feature_class.new
 
@@ -570,7 +570,7 @@ RSpec.describe HTTP::Client do
         allow(socket_spy).to receive(:readpartial) { chunks.shift || :eof }
         allow(socket_spy).to receive(:write) { chunks[0].length }
 
-        allow(TCPSocket).to receive(:open) { socket_spy }
+        allow(HTTP::Network::TCPSocket).to receive(:open) { socket_spy }
       end
 
       it "properly reads body" do
