@@ -11,6 +11,28 @@ module HTTP
       WRITE_TIMEOUT = 0.25
       READ_TIMEOUT = 0.25
 
+      KEYS = %i[read write connect].to_h { |k| [k, :"#{k}_timeout"] }.freeze
+
+      class << self
+        def normalize_options(options)
+          normalized = {}
+          original   = options.dup
+
+          KEYS.each do |short, long|
+            next if !original.key?(short) && !original.key?(long)
+            raise ArgumentError, "can't pass both #{short} and #{long}" if original.key?(short) && original.key?(long)
+
+            normalized[long] = original.key?(long) ? original.delete(long) : original.delete(short)
+            raise ArgumentError, "#{long} must be numeric" unless normalized[long].is_a?(Numeric)
+          end
+
+          raise ArgumentError, "unknown timeout options: #{original.keys.join(', ')}" if original.size.positive?
+          raise ArgumentError, "no timeout options given" if normalized.empty?
+
+          normalized
+        end
+      end
+
       def initialize(*args)
         super
 
