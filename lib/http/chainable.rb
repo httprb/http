@@ -258,13 +258,13 @@ module HTTP
     #   HTTP.retriable.get(url)
     #
     #   # Retry max 3 times with randomly growing delay between retries
-    #   HTTP.retriable(times: 3).get(url)
+    #   HTTP.retriable(tries: 3).get(url)
     #
     #   # Retry max 3 times with 1 sec delay between retries
-    #   HTTP.retriable(times: 3, delay: proc { 1 }).get(url)
+    #   HTTP.retriable(tries: 3, delay: proc { 1 }).get(url)
     #
     #   # Retry max 3 times with geometrically progressed delay between retries
-    #   HTTP.retriable(times: 3, delay: proc { |i| 1 + i*i }).get(url)
+    #   HTTP.retriable(tries: 3, delay: proc { |i| 1 + i*i }).get(url)
     #
     # @param (see Performer#initialize)
     def retriable(**options)
