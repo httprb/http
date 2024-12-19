@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "date"
-require "http"
 require "http/retriable/errors"
 require "http/retriable/delay_calculator"
 require "openssl"
