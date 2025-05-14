@@ -96,9 +96,13 @@ RSpec.describe HTTP::Request::Body do
   end
 
   describe "#each" do
+    # rubocop:disable all
     let(:chunks) do
-      subject.map(&:dup)
+      chunks = []
+      subject.each { |chunk| chunks << chunk.dup }
+      chunks
     end
+    # rubocop:enable all
 
     context "when body is nil" do
       let(:body) { nil }
