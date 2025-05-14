@@ -97,9 +97,7 @@ RSpec.describe HTTP::Request::Body do
 
   describe "#each" do
     let(:chunks) do
-      chunks = []
-      subject.each { |chunk| chunks << chunk.dup }
-      chunks
+      subject.map(&:dup)
     end
 
     context "when body is nil" do

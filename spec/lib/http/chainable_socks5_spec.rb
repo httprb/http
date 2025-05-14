@@ -11,19 +11,19 @@ RSpec.describe HTTP::Chainable do
       client = HTTP.via_socks5(proxy_address, proxy_port)
       expect(client.default_options.proxy).to eq(
         proxy_address: proxy_address,
-        proxy_port: proxy_port,
-        proxy_type: :socks5
+        proxy_port:    proxy_port,
+        proxy_type:    :socks5
       )
     end
 
     it "creates a client with authenticated SOCKS5 proxy" do
       client = HTTP.via_socks5(proxy_address, proxy_port, proxy_username, proxy_password)
       expect(client.default_options.proxy).to eq(
-        proxy_address: proxy_address,
-        proxy_port: proxy_port,
+        proxy_address:  proxy_address,
+        proxy_port:     proxy_port,
         proxy_username: proxy_username,
         proxy_password: proxy_password,
-        proxy_type: :socks5
+        proxy_type:     :socks5
       )
     end
 

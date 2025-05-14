@@ -156,6 +156,21 @@ module HTTP
     # @param [Array] proxy
     # @raise [Request::Error] if HTTP proxy is invalid
     def via(*proxy)
+      proxy_hash = build_proxy_hash(*proxy, type: :http)
+
+      # Validate that we have at least an address and port
+      if !proxy_hash[:proxy_address] || !proxy_hash[:proxy_port]
+        raise(RequestError, "invalid HTTP proxy: must provide both address and port")
+      end
+
+      branch default_options.with_proxy(proxy_hash)
+    end
+
+    # Build a proxy hash from the given arguments
+    # @param [Array] proxy
+    # @param [Symbol] type The proxy type (:http or :socks5)
+    # @return [Hash] The proxy hash
+    def build_proxy_hash(*proxy, type:)
       proxy_hash = {}
       proxy_hash[:proxy_address]  = proxy[0] if proxy[0].is_a?(String)
       proxy_hash[:proxy_port]     = proxy[1] if proxy[1].is_a?(Integer)
@@ -163,11 +178,9 @@ module HTTP
       proxy_hash[:proxy_password] = proxy[3] if proxy[3].is_a?(String)
       proxy_hash[:proxy_headers]  = proxy[2] if proxy[2].is_a?(Hash)
       proxy_hash[:proxy_headers]  = proxy[4] if proxy[4].is_a?(Hash)
-      proxy_hash[:proxy_type]     = :http
+      proxy_hash[:proxy_type]     = type
 
-      raise(RequestError, "invalid HTTP proxy: #{proxy_hash}") unless (2..5).cover?(proxy_hash.keys.size)
-
-      branch default_options.with_proxy(proxy_hash)
+      proxy_hash
     end
     alias through via
 
@@ -175,14 +188,12 @@ module HTTP
     # @param [Array] proxy
     # @raise [Request::Error] if SOCKS5 proxy is invalid
     def via_socks5(*proxy)
-      proxy_hash = {}
-      proxy_hash[:proxy_address]  = proxy[0] if proxy[0].is_a?(String)
-      proxy_hash[:proxy_port]     = proxy[1] if proxy[1].is_a?(Integer)
-      proxy_hash[:proxy_username] = proxy[2] if proxy[2].is_a?(String)
-      proxy_hash[:proxy_password] = proxy[3] if proxy[3].is_a?(String)
-      proxy_hash[:proxy_type]     = :socks5
+      proxy_hash = build_proxy_hash(*proxy, type: :socks5)
 
-      raise(RequestError, "invalid SOCKS5 proxy: #{proxy_hash}") unless (2..4).cover?(proxy_hash.keys.size)
+      # Validate that we have at least an address and port
+      if !proxy_hash[:proxy_address] || !proxy_hash[:proxy_port]
+        raise(RequestError, "invalid SOCKS5 proxy: must provide both address and port")
+      end
 
       branch default_options.with_proxy(proxy_hash)
     end

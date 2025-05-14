@@ -3,6 +3,7 @@
 require "forwardable"
 
 require "http/headers"
+require "http/socks5_proxy"
 
 module HTTP
   # A connection to the HTTP server
@@ -204,106 +205,13 @@ module HTTP
 
     # Connect via SOCKS5 proxy
     def connect_via_socks5(req)
-      # SOCKS5 protocol implementation
-      # See RFC 1928: https://tools.ietf.org/html/rfc1928
-
-      # Initial handshake
-      auth_methods = [0x00] # No authentication
-      if req.using_authenticated_proxy?
-        auth_methods << 0x02 # Username/Password authentication
-      end
-
-      # Send handshake request
-      handshake = [0x05, auth_methods.size, *auth_methods].pack("C*")
-      @socket.write(handshake)
-
-      # Read handshake response
-      response = @socket.read(2)
-      version, auth_method = response.unpack("C*")
-
-      if version != 0x05
+      socks5_proxy = SOCKS5Proxy.new(@socket)
+      begin
+        socks5_proxy.connect(req)
+      rescue ConnectionError
         @failed_proxy_connect = true
-        raise ConnectionError, "SOCKS5 proxy server returned invalid version: #{version}"
+        raise
       end
-
-      if auth_method == 0xFF
-        @failed_proxy_connect = true
-        raise ConnectionError, "SOCKS5 proxy server doesn't support any of our authentication methods"
-      end
-
-      # Handle authentication if required
-      if auth_method == 0x02 && req.using_authenticated_proxy?
-        # Username/Password authentication (RFC 1929)
-        username = req.proxy[:proxy_username].to_s
-        password = req.proxy[:proxy_password].to_s
-
-        auth_request = [0x01, username.bytesize, username, password.bytesize, password].pack("CCA*CA*")
-        @socket.write(auth_request)
-
-        auth_response = @socket.read(2)
-        auth_version, auth_status = auth_response.unpack("C*")
-
-        if auth_version != 0x01 || auth_status != 0x00
-          @failed_proxy_connect = true
-          raise ConnectionError, "SOCKS5 proxy authentication failed"
-        end
-      end
-
-      # Send connection request
-      host = req.uri.host
-      port = req.uri.port || req.uri.default_port
-
-      # Determine address type and format
-      if host =~ /^\d+\.\d+\.\d+\.\d+$/
-        # IPv4 address
-        atyp = 0x01
-        addr = host.split(".").map(&:to_i).pack("C*")
-      else
-        # Domain name
-        atyp = 0x03
-        addr = [host.bytesize, host].pack("CA*")
-      end
-
-      connect_request = [0x05, 0x01, 0x00, atyp, addr, port].pack("CCCCA*n")
-      @socket.write(connect_request)
-
-      # Read connection response
-      response = @socket.read(4)
-      version, reply, reserved, atyp = response.unpack("C*")
-
-      if version != 0x05
-        @failed_proxy_connect = true
-        raise ConnectionError, "SOCKS5 proxy server returned invalid version: #{version}"
-      end
-
-      if reply != 0x00
-        @failed_proxy_connect = true
-        error_message = case reply
-                        when 0x01 then "general SOCKS server failure"
-                        when 0x02 then "connection not allowed by ruleset"
-                        when 0x03 then "Network unreachable"
-                        when 0x04 then "Host unreachable"
-                        when 0x05 then "Connection refused"
-                        when 0x06 then "TTL expired"
-                        when 0x07 then "Command not supported"
-                        when 0x08 then "Address type not supported"
-                        else "Unknown error (code: #{reply})"
-                        end
-        raise ConnectionError, "SOCKS5 proxy connection failed: #{error_message}"
-      end
-
-      # Skip the bound address and port in the response
-      case atyp
-      when 0x01 # IPv4
-        @socket.read(4 + 2) # 4 bytes for IPv4 + 2 bytes for port
-      when 0x03 # Domain name
-        domain_len = @socket.read(1).unpack1("C")
-        @socket.read(domain_len + 2) # domain length + 2 bytes for port
-      when 0x04 # IPv6
-        @socket.read(16 + 2) # 16 bytes for IPv6 + 2 bytes for port
-      end
-
-      # Connection established successfully
     end
 
     # Resets expiration of persistent connection.

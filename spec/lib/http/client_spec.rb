@@ -15,7 +15,7 @@ RSpec.describe HTTP::Client do
     stubbed_client = Class.new(HTTP::Client) do
       def perform(request, options)
         stubbed = stubs[HTTP::URI::NORMALIZER.call(request.uri).to_s]
-        stubbed ? stubbed.call(request) : super(request, options)
+        stubbed ? stubbed.call(request) : super
       end
 
       def stubs
