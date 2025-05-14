@@ -163,12 +163,29 @@ module HTTP
       proxy_hash[:proxy_password] = proxy[3] if proxy[3].is_a?(String)
       proxy_hash[:proxy_headers]  = proxy[2] if proxy[2].is_a?(Hash)
       proxy_hash[:proxy_headers]  = proxy[4] if proxy[4].is_a?(Hash)
+      proxy_hash[:proxy_type]     = :http
 
       raise(RequestError, "invalid HTTP proxy: #{proxy_hash}") unless (2..5).cover?(proxy_hash.keys.size)
 
       branch default_options.with_proxy(proxy_hash)
     end
     alias through via
+
+    # Make a request through a SOCKS5 proxy
+    # @param [Array] proxy
+    # @raise [Request::Error] if SOCKS5 proxy is invalid
+    def via_socks5(*proxy)
+      proxy_hash = {}
+      proxy_hash[:proxy_address]  = proxy[0] if proxy[0].is_a?(String)
+      proxy_hash[:proxy_port]     = proxy[1] if proxy[1].is_a?(Integer)
+      proxy_hash[:proxy_username] = proxy[2] if proxy[2].is_a?(String)
+      proxy_hash[:proxy_password] = proxy[3] if proxy[3].is_a?(String)
+      proxy_hash[:proxy_type]     = :socks5
+
+      raise(RequestError, "invalid SOCKS5 proxy: #{proxy_hash}") unless (2..4).cover?(proxy_hash.keys.size)
+
+      branch default_options.with_proxy(proxy_hash)
+    end
 
     # Make client follow redirects.
     # @param options

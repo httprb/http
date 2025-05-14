@@ -27,6 +27,9 @@ protocol natively and outsources the parsing to native extensions.
 - **Performance**: using native parsers and a clean, lightweight implementation,
    http.rb achieves high performance while implementing HTTP in Ruby instead of C.
 
+- **Proxy Support**: http.rb supports both HTTP and SOCKS5 proxies, with or without
+   authentication.
+
 
 ## Installation
 
@@ -102,6 +105,30 @@ and call `#readpartial` on it repeatedly until it returns `nil`:
 # ...
 >> body.readpartial
 => nil
+```
+
+### Using Proxies
+
+HTTP.rb supports both HTTP and SOCKS5 proxies, with or without authentication.
+
+#### HTTP Proxy
+
+```ruby
+# Using an HTTP proxy without authentication
+response = HTTP.via("proxy.example.com", 8080).get("https://github.com")
+
+# Using an HTTP proxy with authentication
+response = HTTP.via("proxy.example.com", 8080, "username", "password").get("https://github.com")
+```
+
+#### SOCKS5 Proxy
+
+```ruby
+# Using a SOCKS5 proxy without authentication
+response = HTTP.via_socks5("proxy.example.com", 1080).get("https://github.com")
+
+# Using a SOCKS5 proxy with authentication
+response = HTTP.via_socks5("proxy.example.com", 1080, "username", "password").get("https://github.com")
 ```
 
 ## Supported Ruby Versions

@@ -13,3 +13,4 @@ pkg
 spec/examples.txt
 tmp
 Gemfile.lock
+.idea/
