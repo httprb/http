@@ -159,7 +159,7 @@ module HTTP
 
     # Inspect a response
     def inspect
-      "#<#{self.class}/#{@version} #{code} #{reason} #{headers.to_h.inspect}>"
+      "#<#{self.class}/#{@version} #{code} #{reason} #{headers.to_h.to_json}>"
     end
 
     private
