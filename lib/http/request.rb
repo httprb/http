@@ -144,6 +144,16 @@ module HTTP
       proxy && proxy.keys.size >= 2
     end
 
+    # Is this request using an HTTP proxy?
+    def using_http_proxy?
+      using_proxy? && (!proxy.key?(:proxy_type) || proxy[:proxy_type] == :http)
+    end
+
+    # Is this request using a SOCKS5 proxy?
+    def using_socks5_proxy?
+      using_proxy? && proxy[:proxy_type] == :socks5
+    end
+
     # Is this request using an authenticated proxy?
     def using_authenticated_proxy?
       proxy && proxy.keys.size >= 4

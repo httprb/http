@@ -3,6 +3,7 @@
 require "forwardable"
 
 require "http/headers"
+require "http/socks5_proxy"
 
 module HTTP
   # A connection to the HTTP server
@@ -172,8 +173,17 @@ module HTTP
 
     # Open tunnel through proxy
     def send_proxy_connect_request(req)
-      return unless req.uri.https? && req.using_proxy?
+      return unless req.using_proxy?
 
+      if req.using_socks5_proxy?
+        connect_via_socks5(req)
+      elsif req.uri.https? && req.using_http_proxy?
+        connect_via_http_proxy(req)
+      end
+    end
+
+    # Connect via HTTP proxy
+    def connect_via_http_proxy(req)
       @pending_request = true
 
       req.connect_using_proxy @socket
@@ -191,6 +201,17 @@ module HTTP
 
       @parser.reset
       @pending_response = false
+    end
+
+    # Connect via SOCKS5 proxy
+    def connect_via_socks5(req)
+      socks5_proxy = SOCKS5Proxy.new(@socket)
+      begin
+        socks5_proxy.connect(req)
+      rescue ConnectionError
+        @failed_proxy_connect = true
+        raise
+      end
     end
 
     # Resets expiration of persistent connection.

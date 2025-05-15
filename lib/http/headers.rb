@@ -147,7 +147,7 @@ module HTTP
     #
     # @return [String]
     def inspect
-      "#<#{self.class} #{to_h.inspect}>"
+      "#<#{self.class} #{to_h.to_json}>"
     end
 
     # Returns list of header names.

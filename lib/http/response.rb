@@ -113,11 +113,7 @@ module HTTP
       value = @headers[Headers::CONTENT_LENGTH]
       return nil unless value
 
-      begin
-        Integer(value)
-      rescue ArgumentError
-        nil
-      end
+      Integer(value, exception: false)
     end
 
     # Parsed Content-Type header
@@ -163,7 +159,7 @@ module HTTP
 
     # Inspect a response
     def inspect
-      "#<#{self.class}/#{@version} #{code} #{reason} #{headers.to_h.inspect}>"
+      "#<#{self.class}/#{@version} #{code} #{reason} #{headers.to_h.to_json}>"
     end
 
     private
