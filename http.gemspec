@@ -26,11 +26,18 @@ Gem::Specification.new do |gem|
   gem.version       = HTTP::VERSION
 
   gem.required_ruby_version = ">= 3.0"
-
+  
   gem.add_dependency "addressable",    "~> 2.8"
   gem.add_dependency "http-cookie",    "~> 1.0"
   gem.add_dependency "http-form_data", "~> 2.2"
   gem.add_dependency "llhttp-ffi",     "~> 0.5.0"
+  
+  # Use native llhttp for MRI (more performant) and llhttp-ffi for other interpreters (better compatibility)
+  if RUBY_ENGINE == "ruby"
+    gem.add_dependency "llhttp",     "~> 0.5.0"
+  else
+    gem.add_dependency "llhttp-ffi", "~> 0.5.0"
+  end
 
   gem.metadata = {
     "source_code_uri"       => "https://github.com/httprb/http",
