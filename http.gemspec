@@ -26,7 +26,7 @@ Gem::Specification.new do |gem|
   gem.version       = HTTP::VERSION
 
   gem.required_ruby_version = ">= 3.0"
-  
+
   gem.add_dependency "addressable",    "~> 2.8"
   gem.add_dependency "http-cookie",    "~> 1.0"
   gem.add_dependency "http-form_data", "~> 2.2"
