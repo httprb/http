@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Use native llhttp gem for MRI Ruby and llhttp-ffi for other interpreters for better performance
+
 ### Removed
 
 - **BREAKING** Drop Ruby 2.x support
