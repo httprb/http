@@ -238,6 +238,7 @@ module HTTP
     end
 
     # Turn on given features. Available features are:
+    # * acceptable
     # * auto_inflate
     # * auto_deflate
     # * instrumentation

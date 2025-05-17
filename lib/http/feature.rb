@@ -14,6 +14,7 @@ module HTTP
   end
 end
 
+require "http/features/acceptable"
 require "http/features/auto_inflate"
 require "http/features/auto_deflate"
 require "http/features/instrumentation"
