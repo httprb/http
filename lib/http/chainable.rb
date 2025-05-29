@@ -93,18 +93,14 @@ module HTTP
     #   @param [Numeric] global_timeout
     def timeout(options)
       klass, options = case options
-                       when Numeric then [HTTP::Timeout::Global, {global: options}]
-                       when Hash    then [HTTP::Timeout::PerOperation, options.dup]
-                       when :null   then [HTTP::Timeout::Null, {}]
-                       else raise ArgumentError, "Use `.timeout(global_timeout_in_seconds)` or `.timeout(connect: x, write: y, read: z)`."
-
+                       when Numeric then [HTTP::Timeout::Global, {:global_timeout => options}]
+                       when Hash
+                         [HTTP::Timeout::PerOperation, HTTP::Timeout::PerOperation.normalize_options(options)]
+                       when :null then [HTTP::Timeout::Null, {}]
+                       else raise ArgumentError, "Use `.timeout(:null)`, " \
+                                                 "`.timeout(global_timeout_in_seconds)` or " \
+                                                 "`.timeout(connect: x, write: y, read: z)`."
                        end
-
-      %i[global read write connect].each do |k|
-        next unless options.key? k
-
-        options[:"#{k}_timeout"] = options.delete k
-      end
 
       branch default_options.merge(
         timeout_class:   klass,
