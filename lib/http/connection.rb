@@ -34,7 +34,7 @@ module HTTP
       @pending_request      = false
       @pending_response     = false
       @failed_proxy_connect = false
-      @buffer               = "".b
+      @buffer               = String.new(capacity: BUFFER_SIZE, encoding: Encoding::BINARY)
 
       @parser = Response::Parser.new
 
@@ -89,18 +89,19 @@ module HTTP
     # Read a chunk of the body
     #
     # @return [String] data chunk
-    # @return [nil] when no more data left
-    def readpartial(size = BUFFER_SIZE)
-      return unless @pending_response
+    # @raise [EOFError] when there's no more data left
+    def readpartial(size = BUFFER_SIZE, outbuf = nil)
+      raise EOFError unless @pending_response
 
       chunk = @parser.read(size)
-      return chunk if chunk
 
-      finished = (read_more(size) == :eof) || @parser.finished?
-      chunk    = @parser.read(size)
-      finish_response if finished
+      unless chunk
+        finished = (read_more(size) == :eof) || @parser.finished?
+        chunk    = @parser.read(size) || String.new(encoding: Encoding::BINARY)
+        finish_response if finished
+      end
 
-      chunk || "".b
+      outbuf ? outbuf.replace(chunk) : chunk
     end
 
     # Reads data from socket up until headers are loaded
