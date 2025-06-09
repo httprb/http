@@ -31,12 +31,7 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency "http-cookie",    "~> 1.0"
   gem.add_runtime_dependency "http-form_data", "~> 2.2"
 
-  # Use native llhttp for MRI (more performant) and llhttp-ffi for other interpreters (better compatibility)
-  if RUBY_ENGINE == "ruby"
-    gem.add_runtime_dependency "llhttp",     "~> 0.5.0"
-  else
-    gem.add_runtime_dependency "llhttp-ffi", "~> 0.5.0"
-  end
+  gem.add_runtime_dependency "llhttp-ffi", "~> 0.5.0"
 
   gem.add_development_dependency "bundler", "~> 2.0"
 

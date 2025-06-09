@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [5.3.1] - 2025-06-09
+
+### Changed
+
+- Revert switch to the native llhttp on MRI, as it's not compatible with
+  standalone bundles
+  ([#802](https://github.com/httprb/http/issues/802))
+
+
 ## [5.3.0] - 2025-06-09
 
 ### Added
