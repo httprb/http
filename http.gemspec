@@ -35,7 +35,7 @@ Gem::Specification.new do |gem|
   if RUBY_ENGINE == "ruby"
     gem.add_dependency "llhttp",     "~> 0.6.1"
   else
-    gem.add_dependency "llhttp-ffi", "~> 0.6.1"
+    gem.add_dependency "llhttp-ffi", "~> 0.5.1"
   end
 
   gem.metadata = {
