@@ -9,10 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Use native llhttp gem for MRI Ruby and llhttp-ffi for other interpreters for better performance
+- Bumped min llhttp dependency version
+- **BREAKING** Handle responses in the reverse order from the requests (#776)
 
 ### Removed
 
 - **BREAKING** Drop Ruby 2.x support
 
-[unreleased]: https://github.com/httprb/http/compare/v5.2.0...main
+[unreleased]: https://github.com/httprb/http/compare/v5.3.0...main
