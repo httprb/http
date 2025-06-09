@@ -15,4 +15,4 @@ AllCops:
   DisplayCopNames: true
   DisplayStyleGuide: true
   NewCops: enable
-  TargetRubyVersion: 3.0
+  TargetRubyVersion: 3.1

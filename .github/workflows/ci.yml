@@ -16,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        ruby: [ ruby-3.0, ruby-3.1, ruby-3.2, ruby-3.3 ]
+        ruby: [ ruby-3.1, ruby-3.2, ruby-3.3, ruby-3.4 ]
         os: [ ubuntu-latest ]
 
     steps:
@@ -58,7 +58,7 @@ jobs:
 
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: ruby-3.0
+          ruby-version: ruby-3.1
           bundler-cache: true
 
       - name: bundle exec rubocop

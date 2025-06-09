@@ -25,7 +25,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = HTTP::VERSION
 
-  gem.required_ruby_version = ">= 3.0"
+  gem.required_ruby_version = ">= 3.1"
 
   gem.add_dependency "addressable",    "~> 2.8"
   gem.add_dependency "http-cookie",    "~> 1.0"

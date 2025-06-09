@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- **BREAKING** Drop Ruby 3.0 support
 - **BREAKING** Drop Ruby 2.x support
 
 [unreleased]: https://github.com/httprb/http/compare/v5.3.0...main
