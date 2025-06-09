@@ -11,7 +11,7 @@ module SSLHelper
     EXTENSIONS = {"keyUsage" => {"usage" => %w[critical keyCertSign]}}.freeze
 
     def initialize
-      super()
+      super
 
       subject.common_name  = "honestachmed.com"
       serial_number.number = 1

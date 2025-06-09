@@ -98,7 +98,7 @@ RSpec.describe HTTP::Request::Body do
   describe "#each" do
     let(:chunks) do
       chunks = []
-      subject.each { |chunk| chunks << chunk.dup }
+      subject.each { |chunk| chunks << chunk.dup } # rubocop:disable Style/MapIntoArray
       chunks
     end
 

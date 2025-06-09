@@ -57,11 +57,11 @@ module HTTP
           end
         end
 
-        def start(_name, _payload)
+        def start(_name, _payload) # rubocop:disable Naming/PredicateMethod
           true
         end
 
-        def finish(_name, _payload)
+        def finish(_name, _payload) # rubocop:disable Naming/PredicateMethod
           true
         end
       end
