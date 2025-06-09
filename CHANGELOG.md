@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.3.0] - 2025-06-09
+
+### Added
+
+- (backported) Add .retriable feature to Http
+- (backported) Add more specific ConnectionError classes
+- (backported) New feature: RaiseError
+
+### Changed
+
+- (backported) Drop depenency on base64
+- (backported) Cache header normalization to reduce object allocation
+- (backported) Use native llhttp on MRI
+
+
 ## [5.2.0] - 2024-02-05
 
 ### Added
@@ -37,5 +52,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Prevent CRLF injection due to broken URL normalizer
   ([#765](https://github.com/httprb/http/pull/765))
 
-[unreleased]: https://github.com/httprb/http/compare/v5.2.0...5-x-stable
+[unreleased]: https://github.com/httprb/http/compare/v5.3.0...5-x-stable
+[5.3.0]: https://github.com/httprb/http/compare/v5.2.0...v5.3.0
 [5.2.0]: https://github.com/httprb/http/compare/v5.1.1...v5.2.0
