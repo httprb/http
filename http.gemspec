@@ -33,9 +33,9 @@ Gem::Specification.new do |gem|
 
   # Use native llhttp for MRI (more performant) and llhttp-ffi for other interpreters (better compatibility)
   if RUBY_ENGINE == "ruby"
-    gem.add_runtime_dependency "llhttp",     "~> 0.5.0"
+    gem.add_runtime_dependency "llhttp",     "~> 0.6.1"
   else
-    gem.add_runtime_dependency "llhttp-ffi", "~> 0.5.0"
+    gem.add_runtime_dependency "llhttp-ffi", "~> 0.6.1"
   end
 
   gem.metadata = {
