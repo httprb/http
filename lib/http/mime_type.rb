@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "http/errors"
+
 module HTTP
   # MIME type encode/decode adapters
   module MimeType
@@ -35,7 +37,7 @@ module HTTP
       # @raise [Error] if no adapter found
       # @return [Class]
       def [](type)
-        adapters[normalize type] || raise(Error, "Unknown MIME type: #{type}")
+        adapters[normalize type] || raise(UnsupportedMimeTypeError, "Unknown MIME type: #{type}")
       end
 
       # Register a shortcut for MIME type
