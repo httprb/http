@@ -109,8 +109,8 @@ RSpec.describe HTTP::Response do
     context "with unknown content type" do
       let(:content_type) { "application/deadbeef" }
 
-      it "raises HTTP::Error" do
-        expect { response.parse }.to raise_error HTTP::Error
+      it "raises HTTP::Response::UnexpectedMimeTypeError" do
+        expect { response.parse }.to raise_error HTTP::Response::UnexpectedMimeTypeError
       end
     end
 

@@ -12,6 +12,9 @@ require "time"
 
 module HTTP
   class Response
+    class ParseError < Error; end
+    class UnexpectedMimeTypeError < ParseError; end
+
     extend Forwardable
 
     include HTTP::Headers::Mixin

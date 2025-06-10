@@ -35,7 +35,7 @@ module HTTP
       # @raise [Error] if no adapter found
       # @return [Class]
       def [](type)
-        adapters[normalize type] || raise(Error, "Unknown MIME type: #{type}")
+        adapters[normalize type] || raise(HTTP::Response::UnexpectedMimeTypeError, "Unknown MIME type: #{type}")
       end
 
       # Register a shortcut for MIME type
