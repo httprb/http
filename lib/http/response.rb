@@ -2,6 +2,7 @@
 
 require "forwardable"
 
+require "http/errors"
 require "http/headers"
 require "http/content_type"
 require "http/mime_type"
@@ -12,9 +13,6 @@ require "time"
 
 module HTTP
   class Response
-    class ParseError < Error; end
-    class UnexpectedMimeTypeError < ParseError; end
-
     extend Forwardable
 
     include HTTP::Headers::Mixin
@@ -158,6 +156,8 @@ module HTTP
     # @return [Object]
     def parse(type = nil)
       MimeType[type || mime_type].decode to_s
+    rescue => e
+      raise ParseError, e.message
     end
 
     # Inspect a response

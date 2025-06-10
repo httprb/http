@@ -109,8 +109,8 @@ RSpec.describe HTTP::Response do
     context "with unknown content type" do
       let(:content_type) { "application/deadbeef" }
 
-      it "raises HTTP::Response::UnexpectedMimeTypeError" do
-        expect { response.parse }.to raise_error HTTP::Response::UnexpectedMimeTypeError
+      it "raises HTTP::ParseError" do
+        expect { response.parse }.to raise_error HTTP::ParseError
       end
     end
 
@@ -123,6 +123,15 @@ RSpec.describe HTTP::Response do
 
       it "supports mime type aliases" do
         expect(response.parse(:json)).to eq "foo" => "bar"
+      end
+    end
+
+    context "when underlying parser fails" do
+      let(:content_type) { "application/deadbeef" }
+      let(:body)         { "" }
+
+      it "raises HTTP::ParseError" do
+        expect { response.parse }.to raise_error HTTP::ParseError
       end
     end
   end

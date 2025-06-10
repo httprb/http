@@ -32,6 +32,13 @@ module HTTP
     end
   end
 
+  # Raised when `Response#parse` fails due to any underlying reason (unexpected
+  # MIME type, or decoder fails). See `Exception#cause` for the original exception.
+  class ParseError < ResponseError; end
+
+  # Requested MimeType adapter not found.
+  class UnsupportedMimeTypeError < Error; end
+
   # Generic Timeout error
   class TimeoutError < Error; end
 
