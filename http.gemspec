@@ -1,48 +1,52 @@
 # frozen_string_literal: true
 
-lib = File.expand_path("lib", __dir__)
-$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "http/version"
+require_relative "./lib/http/version"
 
-Gem::Specification.new do |gem|
-  gem.authors       = ["Tony Arcieri", "Erik Michaels-Ober", "Alexey V. Zapparov", "Zachary Anker"]
-  gem.email         = ["bascule@gmail.com"]
+Gem::Specification.new do |spec|
+  spec.name          = "http"
+  spec.version       = HTTP::VERSION
+  spec.authors       = ["Tony Arcieri", "Erik Michaels-Ober", "Alexey V. Zapparov", "Zachary Anker"]
+  spec.email         = ["bascule@gmail.com"]
 
-  gem.description   = <<-DESCRIPTION.strip.gsub(/\s+/, " ")
+  spec.summary       = "HTTP should be easy"
+  spec.homepage      = "https://github.com/httprb/http"
+  spec.license       = "MIT"
+
+  spec.description   = <<~DESCRIPTION.strip.gsub(/\s+/, " ")
     An easy-to-use client library for making requests from Ruby.
     It uses a simple method chaining system for building requests,
     similar to Python's Requests.
   DESCRIPTION
 
-  gem.summary       = "HTTP should be easy"
-  gem.homepage      = "https://github.com/httprb/http"
-  gem.licenses      = ["MIT"]
+  spec.metadata["homepage_uri"]          = spec.homepage
+  spec.metadata["source_code_uri"]       = "#{spec.homepage}/tree/v#{spec.version}"
+  spec.metadata["bug_tracker_uri"]       = "#{spec.homepage}/issues"
+  spec.metadata["changelog_uri"]         = "#{spec.homepage}/blob/v#{spec.version}/CHANGELOG.md"
+  spec.metadata["rubygems_mfa_required"] = "true"
 
-  gem.executables   = `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) }
-  gem.files         = `git ls-files`.split("\n")
-  gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
-  gem.name          = "http"
-  gem.require_paths = ["lib"]
-  gem.version       = HTTP::VERSION
+  spec.files = IO.popen(%w[git ls-files -z], chdir: __dir__, err: IO::NULL) do |ls|
+    extras = %w[CHANGELOG.md LICENSE.txt README.md SECURITY.md] << File.basename(__FILE__)
 
-  gem.required_ruby_version = ">= 3.0"
+    ls.readlines("\x0", chomp: true).select do |f|
+      f.start_with?("lib/", "spec/") || extras.include?(f)
+    end
+  end
 
-  gem.add_dependency "addressable",    "~> 2.8"
-  gem.add_dependency "http-cookie",    "~> 1.0"
-  gem.add_dependency "http-form_data", "~> 2.2"
+  spec.bindir        = "exe"
+  spec.executables   = spec.files.filter_map { |f| File.basename(f) if f.start_with?("exe/") }
+  spec.test_files    = spec.files.select { |f| f.start_with?("spec/") }
+  spec.require_paths = ["lib"]
+
+  spec.required_ruby_version = ">= 3.0"
+
+  spec.add_dependency "addressable",    "~> 2.8"
+  spec.add_dependency "http-cookie",    "~> 1.0"
+  spec.add_dependency "http-form_data", "~> 2.2"
 
   # Use native llhttp for MRI (more performant) and llhttp-ffi for other interpreters (better compatibility)
   if RUBY_ENGINE == "ruby"
-    gem.add_dependency "llhttp",     "~> 0.6.1"
+    spec.add_dependency "llhttp", "~> 0.6.1"
   else
-    gem.add_dependency "llhttp-ffi", "~> 0.5.1"
+    spec.add_dependency "llhttp-ffi", "~> 0.5.1"
   end
-
-  gem.metadata = {
-    "source_code_uri"       => "https://github.com/httprb/http",
-    "wiki_uri"              => "https://github.com/httprb/http/wiki",
-    "bug_tracker_uri"       => "https://github.com/httprb/http/issues",
-    "changelog_uri"         => "https://github.com/httprb/http/blob/v#{HTTP::VERSION}/CHANGELOG.md",
-    "rubygems_mfa_required" => "true"
-  }
 end
