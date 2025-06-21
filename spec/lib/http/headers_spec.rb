@@ -282,7 +282,7 @@ RSpec.describe HTTP::Headers do
 
     before  { headers.set :set_cookie, %w[hoo=ray woo=hoo] }
 
-    it { is_expected.to eq '#<HTTP::Headers {"Set-Cookie"=>["hoo=ray", "woo=hoo"]}>' }
+    it { is_expected.to eq "#<HTTP::Headers>" }
   end
 
   describe "#keys" do
