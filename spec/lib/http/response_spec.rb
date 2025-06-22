@@ -155,7 +155,7 @@ RSpec.describe HTTP::Response do
     let(:headers) { {content_type: "text/plain"} }
     let(:body)    { double to_s: "foobar" }
 
-    it { is_expected.to eq '#<HTTP::Response/1.1 200 OK {"Content-Type"=>"text/plain"}>' }
+    it { is_expected.to eq "#<HTTP::Response/1.1 200 OK text/plain>" }
   end
 
   describe "#cookies" do

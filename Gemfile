@@ -10,16 +10,13 @@ gem "rake"
 gem "webrick"
 
 group :development do
+  gem "debug", platform: :mri
+
   gem "guard-rspec", require: false
   gem "nokogiri",    require: false
-  gem "pry",         require: false
 
   # RSpec formatter
   gem "fuubar", require: false
-
-  platform :mri do
-    gem "pry-byebug"
-  end
 end
 
 group :test do
