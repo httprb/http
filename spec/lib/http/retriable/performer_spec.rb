@@ -247,10 +247,24 @@ RSpec.describe HTTP::Retriable::Performer do
         expect(counter_spy).to eq 5
       end
     end
+
+    describe "when client has other features enabled" do
+      let(:client) { HTTP.retriable.use(:dummy) }
+
+      it "retries them as well" do
+        expect do
+          perform({ retry_statuses: [200], tries: 5 }, client) do
+            response
+          end
+        end.to raise_error(HTTP::OutOfRetriesError)
+
+        expect(DummyFeature.instance.wrap_request_called_with.length).to eq(4)
+      end
+    end
   end
 
   describe "connection closing" do
-    let(:client) { double(:client) }
+    let(:client) { double(:client, default_options: double(:options, features: {})) }
 
     it "does not close the connection if we get a propper response" do
       expect(client).not_to receive(:close)

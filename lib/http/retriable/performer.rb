@@ -70,6 +70,11 @@ module HTTP
           elsif res
             return res
           end
+
+          # re-trigger each feature, we are about to start the request again
+          client.default_options.features.each_value do |feature|
+            feature.wrap_request(req)
+          end
         end
       end
 
