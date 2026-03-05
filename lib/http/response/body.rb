@@ -9,6 +9,7 @@ module HTTP
     class Body
       extend Forwardable
       include Enumerable
+
       def_delegator :to_s, :empty?
 
       # The connection object used to make the corresponding request.

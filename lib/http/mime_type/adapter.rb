@@ -11,6 +11,7 @@ module HTTP
 
       class << self
         extend Forwardable
+
         def_delegators :instance, :encode, :decode
       end
 

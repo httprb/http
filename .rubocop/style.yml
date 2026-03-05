@@ -1,6 +1,10 @@
 Style/Documentation:
   Enabled: false
 
+Style/OneClassPerFile:
+  Exclude:
+    - 'spec/**/*.rb'
+
 Style/DocumentDynamicEvalDefinition:
   Enabled: true
   Exclude:

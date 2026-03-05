@@ -10,7 +10,7 @@ module HTTP
       # @see http://tools.ietf.org/html/rfc7230#section-3.2
       COMPLIANT_NAME_RE = /\A[A-Za-z0-9!#$%&'*+\-.^_`|~]+\z/
 
-      NAME_PARTS_SEPARATOR_RE = /[\-_]/
+      NAME_PARTS_SEPARATOR_RE = /[-_]/
 
       # @private
       # Normalized header names cache
