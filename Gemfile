@@ -12,8 +12,7 @@ gem "webrick"
 group :development do
   gem "debug", platform: :mri
 
-  gem "guard-rspec", require: false
-  gem "nokogiri",    require: false
+  gem "nokogiri", require: false
 
   # RSpec formatter
   gem "fuubar", require: false
