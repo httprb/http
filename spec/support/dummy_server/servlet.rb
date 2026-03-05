@@ -1,7 +1,7 @@
 # encoding: UTF-8
 # frozen_string_literal: true
 
-require "cgi"
+require "uri"
 
 class DummyServer < WEBrick::HTTPServer
   class Servlet < WEBrick::HTTPServlet::AbstractServlet # rubocop:disable Metrics/ClassLength
@@ -80,7 +80,7 @@ class DummyServer < WEBrick::HTTPServer
     end
 
     get "/multiple-params" do |req, res|
-      params = CGI.parse req.query_string
+      params = URI.decode_www_form(req.query_string).group_by(&:first).transform_values { |v| v.map(&:last) }
 
       next not_found(req, res) unless {"foo" => ["bar"], "baz" => ["quux"]} == params
 

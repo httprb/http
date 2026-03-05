@@ -1,7 +1,7 @@
 # coding: utf-8
 # frozen_string_literal: true
 
-require "cgi"
+require "uri"
 require "logger"
 
 require "support/http_handling_shared"
@@ -156,9 +156,13 @@ RSpec.describe HTTP::Client do
 
     before { allow(client).to receive :perform }
 
+    def parse_query(str)
+      URI.decode_www_form(str).group_by(&:first).transform_values { |v| v.map(&:last) }
+    end
+
     it "accepts params within the provided URL" do
       expect(HTTP::Request).to receive(:new) do |opts|
-        expect(CGI.parse(opts[:uri].query)).to eq("foo" => %w[bar])
+        expect(parse_query(opts[:uri].query)).to eq("foo" => %w[bar])
       end
 
       client.get("http://example.com/?foo=bar")
@@ -166,7 +170,7 @@ RSpec.describe HTTP::Client do
 
     it "combines GET params from the URI with the passed in params" do
       expect(HTTP::Request).to receive(:new) do |opts|
-        expect(CGI.parse(opts[:uri].query)).to eq("foo" => %w[bar], "baz" => %w[quux])
+        expect(parse_query(opts[:uri].query)).to eq("foo" => %w[bar], "baz" => %w[quux])
       end
 
       client.get("http://example.com/?foo=bar", params: {baz: "quux"})
@@ -190,7 +194,7 @@ RSpec.describe HTTP::Client do
 
     it "does not corrupts index-less arrays" do
       expect(HTTP::Request).to receive(:new) do |opts|
-        expect(CGI.parse(opts[:uri].query)).to eq "a[]" => %w[b c], "d" => %w[e]
+        expect(parse_query(opts[:uri].query)).to eq "a[]" => %w[b c], "d" => %w[e]
       end
 
       client.get("http://example.com/?a[]=b&a[]=c", params: {d: "e"})
