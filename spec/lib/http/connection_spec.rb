@@ -164,6 +164,42 @@ RSpec.describe HTTP::Connection do
     end
   end
 
+  describe "#close" do
+    context "when socket is nil" do
+      it "raises NoMethodError" do
+        conn = HTTP::Connection.allocate
+        conn.instance_variable_set(:@socket, nil)
+        conn.instance_variable_set(:@pending_response, false)
+        conn.instance_variable_set(:@pending_request, false)
+        expect { conn.close }.to raise_error(NoMethodError)
+      end
+    end
+  end
+
+  describe "start_tls with ssl_context option" do
+    it "uses provided ssl_context" do
+      ssl_ctx = OpenSSL::SSL::SSLContext.new
+      https_req = HTTP::Request.new(verb: :get, uri: "https://example.com/", headers: {})
+      opts = HTTP::Options.new(timeout_class: timeout_class, ssl_context: ssl_ctx)
+      expect(socket).to receive(:start_tls).with("example.com", anything, ssl_ctx)
+      HTTP::Connection.new(https_req, opts)
+    end
+  end
+
+  describe "read_more with nil value" do
+    before do
+      connection.instance_variable_set(:@pending_response, true)
+      response = "HTTP/1.1 200 OK\r\nContent-Length: 5\r\n\r\n"
+      allow(socket).to receive(:readpartial).and_return(response, nil, :eof)
+    end
+
+    it "handles nil from readpartial" do
+      connection.read_headers!
+      result = connection.readpartial
+      expect(result).to eq ""
+    end
+  end
+
   describe "read_more error handling" do
     before do
       connection.instance_variable_set(:@pending_response, true)

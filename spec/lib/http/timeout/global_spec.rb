@@ -10,6 +10,22 @@ RSpec.describe HTTP::Timeout::Global do
     timeout.instance_variable_set(:@socket, socket)
   end
 
+  describe "#connect" do
+    let(:socket_class) { double }
+    let(:tcp_socket) { double }
+
+    before do
+      allow(socket_class).to receive(:open).and_return(tcp_socket)
+    end
+
+    it "sets TCP_NODELAY when nodelay is true" do
+      expect(tcp_socket).to receive(:setsockopt).with(
+        Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1
+      )
+      timeout.connect(socket_class, "example.com", 80, true)
+    end
+  end
+
   describe "#connect_ssl" do
     before { allow(socket).to receive(:connect_nonblock).and_return(socket) }
 

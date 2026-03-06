@@ -62,6 +62,20 @@ RSpec.describe HTTP::Response::Body do
     end
   end
 
+  describe "#to_s when streaming" do
+    it "raises StateError if body is being streamed" do
+      body.readpartial
+      expect { body.to_s }.to raise_error(HTTP::StateError, /body is being streamed/)
+    end
+  end
+
+  describe "#stream! after consumption" do
+    it "raises StateError if body has already been consumed" do
+      body.to_s
+      expect { body.readpartial }.to raise_error(HTTP::StateError, /body has already been consumed/)
+    end
+  end
+
   describe "#to_s" do
     context "when an error occurs during reading" do
       before do
@@ -115,6 +129,16 @@ RSpec.describe HTTP::Response::Body do
           expect(subject.readpartial).to eq(part)
         end
       end
+    end
+  end
+
+  context "when inflater receives nil chunk without prior data" do
+    it "closes the zstream and handles subsequent nil" do
+      conn = double(sequence_id: 0)
+      allow(conn).to receive_messages(readpartial: nil, body_completed?: true)
+      inflater = HTTP::Response::Inflater.new(conn)
+      inflater.readpartial
+      expect(inflater.readpartial).to be_nil
     end
   end
 end

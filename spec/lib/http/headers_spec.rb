@@ -408,6 +408,11 @@ RSpec.describe HTTP::Headers do
 
       expect(left).not_to eq right
     end
+
+    it "returns false when compared to object without #to_a" do
+      left.add :accept, "text/plain"
+      expect(left).not_to eq 42
+    end
   end
 
   describe "#dup" do

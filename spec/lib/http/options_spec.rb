@@ -23,4 +23,11 @@ RSpec.describe HTTP::Options do
       expect { subject.with_follow(42) }.to raise_error(HTTP::Error, /Unsupported follow/)
     end
   end
+
+  describe "#dup" do
+    it "returns a duplicate without a block" do
+      dupped = subject.dup
+      expect(dupped.response).to eq :body
+    end
+  end
 end

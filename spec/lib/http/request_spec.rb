@@ -24,6 +24,11 @@ RSpec.describe HTTP::Request do
       raise_error(HTTP::Request::UnsupportedSchemeError)
   end
 
+  it "raises UnsupportedMethodError for unknown verbs" do
+    expect { HTTP::Request.new(verb: :foobar, uri: "http://example.com/") }.to \
+      raise_error(HTTP::Request::UnsupportedMethodError, /unknown method/)
+  end
+
   it "provides a #scheme accessor" do
     expect(request.scheme).to eq(:http)
   end
@@ -291,6 +296,22 @@ RSpec.describe HTTP::Request do
         headers = request.send(:proxy_connect_headers)
         expect(headers["X-Custom"]).to eq "value"
       end
+    end
+  end
+
+  describe "#stream with proxy headers" do
+    let(:proxy) do
+      {
+        proxy_address: "proxy.example.com",
+        proxy_port:    8080,
+        proxy_headers: {"X-Proxy" => "value"}
+      }
+    end
+
+    it "merges proxy headers when streaming via HTTP proxy" do
+      io = StringIO.new
+      request.stream(io)
+      expect(io.string).to include("X-Proxy: value")
     end
   end
 

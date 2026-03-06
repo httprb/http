@@ -242,8 +242,8 @@ RSpec.describe HTTP::Client do
       client.get("http://example.com/", form: {foo: HTTP::FormData::Part.new("content")})
     end
 
-    context "when passing an HTTP::FormData object directly" do
-      it "creates url encoded form data object" do
+    context "when passing an HTTP::FormData::Multipart object directly" do
+      it "passes it through unchanged" do
         client    = HTTP::Client.new
         form_data = HTTP::FormData::Multipart.new({ foo: "bar" })
 
@@ -252,6 +252,21 @@ RSpec.describe HTTP::Client do
         expect(HTTP::Request).to receive(:new) do |opts|
           expect(opts[:body]).to be form_data
           expect(opts[:body].to_s).to match(/^Content-Disposition: form-data; name="foo"\r\n\r\nbar\r\n/m)
+        end
+
+        client.get("http://example.com/", form: form_data)
+      end
+    end
+
+    context "when passing an HTTP::FormData::Urlencoded object directly" do
+      it "passes it through unchanged" do
+        client    = HTTP::Client.new
+        form_data = HTTP::FormData::Urlencoded.new({ foo: "bar" })
+
+        allow(client).to receive(:perform)
+
+        expect(HTTP::Request).to receive(:new) do |opts|
+          expect(opts[:body]).to be form_data
         end
 
         client.get("http://example.com/", form: form_data)
@@ -594,6 +609,29 @@ RSpec.describe HTTP::Client do
           expect { client.get(dummy.endpoint).to_s }.to raise_error(HTTP::ConnectionError)
         end
       end
+    end
+  end
+
+  describe "#perform with failed proxy connect" do
+    it "skips sending request when proxy connect fails" do
+      client = HTTP::Client.new
+      conn = double
+      allow(conn).to receive_messages(
+        failed_proxy_connect?:  true,
+        proxy_response_headers: {},
+        status_code:            407,
+        http_version:           "1.1",
+        headers:                HTTP::Headers.new,
+        finish_response:        nil,
+        keep_alive?:            true,
+        expired?:               false,
+        close:                  nil
+      )
+      client.instance_variable_set(:@connection, conn)
+      client.instance_variable_set(:@state, :clean)
+      req = HTTP::Request.new(verb: :get, uri: "http://example.com/", headers: {})
+      response = client.perform(req, HTTP::Options.new)
+      expect(response.status).to eq 407
     end
   end
 end

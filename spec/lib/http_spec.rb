@@ -150,6 +150,31 @@ RSpec.describe HTTP do
         end
       end
     end
+
+    context "with proxy headers as third argument" do
+      it "sets proxy_headers from hash in position 3" do
+        client = HTTP.via("proxy.example.com", 8080, {"X-Custom" => "val"})
+        proxy = client.default_options.proxy
+        expect(proxy[:proxy_headers]).to eq("X-Custom" => "val")
+      end
+    end
+
+    context "with proxy headers as fifth argument" do
+      it "sets proxy_headers from hash in position 5" do
+        hdrs = {"X-Custom" => "val"}
+        client = HTTP.via("proxy.example.com", 8080, "user", "pass", hdrs)
+        proxy = client.default_options.proxy
+        expect(proxy[:proxy_headers]).to eq("X-Custom" => "val")
+      end
+    end
+
+    context "with non-string first argument" do
+      it "skips proxy_address when first arg is not a String" do
+        client = HTTP.via(nil, 8080, {"X-Custom" => "val"})
+        proxy = client.default_options.proxy
+        expect(proxy).not_to have_key(:proxy_address)
+      end
+    end
   end
 
   describe ".retry" do
@@ -303,6 +328,15 @@ RSpec.describe HTTP do
           expect(client).to receive(:close).and_call_original
           client.get("/repos/httprb/http.rb")
         end
+      end
+    end
+
+    context "when initialization raises" do
+      it "handles nil client in ensure" do
+        opts = HTTP.default_options
+        allow(opts).to receive(:merge).and_raise(RuntimeError, "boom")
+        allow(HTTP).to receive(:default_options).and_return(opts)
+        expect { HTTP.persistent(host) { nil } }.to raise_error(RuntimeError, "boom")
       end
     end
 

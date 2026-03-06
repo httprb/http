@@ -26,9 +26,35 @@ RSpec.describe HTTP::Features::AutoDeflate do
     expect(subject.method).to eq("gzip")
   end
 
+  describe "#wrap_request" do
+    let(:request) do
+      HTTP::Request.new(
+        verb: :post,
+        uri:  "http://example.com/",
+        body: "data"
+      )
+    end
+
+    context "when method is nil" do
+      before { subject.instance_variable_set(:@method, nil) }
+
+      it "returns the original request" do
+        expect(subject.wrap_request(request)).to be request
+      end
+    end
+  end
+
   describe "#deflated_body" do
     let(:body)          { %w[bees cows] }
     let(:deflated_body) { subject.deflated_body(body) }
+
+    context "when method is unknown" do
+      before { subject.instance_variable_set(:@method, "unknown") }
+
+      it "returns nil" do
+        expect(subject.deflated_body(body)).to be_nil
+      end
+    end
 
     context "when method is gzip" do
       subject { HTTP::Features::AutoDeflate.new(method: :gzip) }
@@ -54,6 +80,11 @@ RSpec.describe HTTP::Features::AutoDeflate do
 
         expect(deflated_body.size).to eq gzipped.bytesize
         expect(deflated_body.each.to_a.join).to eq gzipped
+      end
+
+      it "reuses cached compression on subsequent size calls" do
+        first_size = deflated_body.size
+        expect(deflated_body.size).to eq first_size
       end
     end
 

@@ -48,6 +48,12 @@ RSpec.describe HTTP::Response do
 
       it { is_expected.to be_nil }
     end
+
+    context "with Transfer-Encoding header" do
+      let(:headers) { {"Transfer-Encoding" => "chunked", "Content-Length" => "5"} }
+
+      it { is_expected.to be_nil }
+    end
   end
 
   describe "mime_type" do

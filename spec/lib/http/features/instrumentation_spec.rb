@@ -70,6 +70,11 @@ RSpec.describe HTTP::Features::Instrumentation do
     it "#finish returns true" do
       expect(null_instrumenter.finish("test", {})).to be true
     end
+
+    it "#instrument yields the block when given" do
+      result = null_instrumenter.instrument("test") { :yielded }
+      expect(result).to eq :yielded
+    end
   end
 
   describe "logging errors" do

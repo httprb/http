@@ -249,6 +249,17 @@ RSpec.describe HTTP::Retriable::Performer do
     end
   end
 
+  describe "when block returns nil" do
+    it "continues iterating" do
+      call_count = 0
+      perform(tries: 3) do
+        call_count += 1
+        call_count < 2 ? nil : response
+      end
+      expect(call_count).to eq 2
+    end
+  end
+
   describe "connection closing" do
     let(:client) { double(:client) }
 
