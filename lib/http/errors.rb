@@ -23,8 +23,23 @@ module HTTP
 
   # When status code indicates an error
   class StatusError < ResponseError
+    # The HTTP response that caused the error
+    #
+    # @example
+    #   error.response
+    #
+    # @return [HTTP::Response]
+    # @api public
     attr_reader :response
 
+    # Create a new StatusError from a response
+    #
+    # @example
+    #   HTTP::StatusError.new(response)
+    #
+    # @param [HTTP::Response] response the response with error status
+    # @return [StatusError]
+    # @api public
     def initialize(response)
       @response = response
 

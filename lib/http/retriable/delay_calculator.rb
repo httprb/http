@@ -4,6 +4,11 @@ module HTTP
   module Retriable
     # @api private
     class DelayCalculator
+      # Initializes the delay calculator
+      #
+      # @param [Hash] opts
+      # @api private
+      # @return [HTTP::Retriable::DelayCalculator]
       def initialize(opts)
         @max_delay = opts.fetch(:max_delay, Float::MAX).to_f
         if (delay = opts[:delay]).respond_to?(:call)
@@ -13,6 +18,12 @@ module HTTP
         end
       end
 
+      # Calculates delay for the given iteration
+      #
+      # @param [Integer] iteration
+      # @param [HTTP::Response, nil] response
+      # @api private
+      # @return [Numeric]
       def call(iteration, response)
         delay = if response && (retry_header = response.headers["Retry-After"])
                   delay_from_retry_header(retry_header)
@@ -32,8 +43,11 @@ module HTTP
         GMT
       $/x
 
-      # Spec for Retry-After header
-      # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
+      # Parses delay from Retry-After header value
+      #
+      # @param [String] value
+      # @api private
+      # @return [Numeric]
       def delay_from_retry_header(value)
         value = value.to_s.strip
 
@@ -44,6 +58,11 @@ module HTTP
         end
       end
 
+      # Calculates delay based on iteration number
+      #
+      # @param [Integer] iteration
+      # @api private
+      # @return [Numeric]
       def calculate_delay_from_iteration(iteration)
         if @delay_proc
           @delay_proc.call(iteration)
@@ -56,6 +75,11 @@ module HTTP
         end
       end
 
+      # Clamps delay to configured bounds
+      #
+      # @param [Numeric] delay
+      # @api private
+      # @return [Numeric]
       def ensure_dealy_in_bounds(delay)
         delay.clamp(0, @max_delay)
       end

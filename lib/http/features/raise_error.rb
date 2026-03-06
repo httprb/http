@@ -3,12 +3,28 @@
 module HTTP
   module Features
     class RaiseError < Feature
+      # Initializes the RaiseError feature
+      #
+      # @example
+      #   RaiseError.new(ignore: [404])
+      #
+      # @param ignore [Array<Integer>] status codes to ignore
+      # @return [RaiseError]
+      # @api public
       def initialize(ignore: [])
         super()
 
         @ignore = ignore
       end
 
+      # Raises an error for non-successful responses
+      #
+      # @example
+      #   feature.wrap_response(response)
+      #
+      # @param response [HTTP::Response]
+      # @return [HTTP::Response]
+      # @api public
       def wrap_response(response)
         return response if response.code < 400
         return response if @ignore.include?(response.code)

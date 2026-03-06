@@ -9,6 +9,7 @@ _yardoc
 .ruby-version
 doc
 coverage
+measurement
 pkg
 spec/examples.txt
 tmp

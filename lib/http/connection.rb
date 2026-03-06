@@ -23,11 +23,24 @@ module HTTP
     HTTP_1_1 = "1.1"
 
     # Returned after HTTP CONNECT (via proxy)
+    #
+    # @example
+    #   connection.proxy_response_headers
+    #
+    # @return [HTTP::Headers, nil]
+    # @api public
     attr_reader :proxy_response_headers
 
+    # Initialize a new connection to an HTTP server
+    #
+    # @example
+    #   Connection.new(req, options)
+    #
     # @param [HTTP::Request] req
     # @param [HTTP::Options] options
+    # @return [Connection]
     # @raise [HTTP::ConnectionError] when failed to connect
+    # @api public
     def initialize(req, options)
       @persistent           = options.persistent?
       @keep_alive_timeout   = options.keep_alive_timeout.to_f
@@ -60,15 +73,25 @@ module HTTP
     # @see (HTTP::Response::Parser#headers)
     def_delegator :@parser, :headers
 
+    # Whether the proxy CONNECT request failed
+    #
+    # @example
+    #   connection.failed_proxy_connect?
+    #
     # @return [Boolean] whenever proxy connect failed
+    # @api public
     def failed_proxy_connect?
       @failed_proxy_connect
     end
 
     # Send a request to the server
     #
+    # @example
+    #   connection.send_request(req)
+    #
     # @param [Request] req Request to send to the server
     # @return [nil]
+    # @api public
     def send_request(req)
       if @pending_response
         raise StateError, "Tried to send a request while one is pending already. Make sure you read off the body."
@@ -88,8 +111,12 @@ module HTTP
 
     # Read a chunk of the body
     #
+    # @example
+    #   connection.readpartial
+    #
     # @return [String] data chunk
     # @return [nil] when no more data left
+    # @api public
     def readpartial(size = BUFFER_SIZE)
       return unless @pending_response
 
@@ -104,8 +131,13 @@ module HTTP
     end
 
     # Reads data from socket up until headers are loaded
+    #
+    # @example
+    #   connection.read_headers!
+    #
     # @return [void]
     # @raise [ResponseHeaderError] when unable to read response headers
+    # @api public
     def read_headers!
       until @parser.headers?
         result = read_more(BUFFER_SIZE)
@@ -116,7 +148,12 @@ module HTTP
     end
 
     # Callback for when we've reached the end of a response
+    #
+    # @example
+    #   connection.finish_response
+    #
     # @return [void]
+    # @api public
     def finish_response
       close unless keep_alive?
 
@@ -128,7 +165,12 @@ module HTTP
     end
 
     # Close the connection
+    #
+    # @example
+    #   connection.close
+    #
     # @return [void]
+    # @api public
     def close
       @socket.close unless @socket&.closed?
 
@@ -136,27 +178,45 @@ module HTTP
       @pending_request  = false
     end
 
+    # Whether there are no pending requests or responses
+    #
+    # @example
+    #   connection.finished_request?
+    #
+    # @return [Boolean]
+    # @api public
     def finished_request?
       !@pending_request && !@pending_response
     end
 
     # Whether we're keeping the conn alive
+    #
+    # @example
+    #   connection.keep_alive?
+    #
     # @return [Boolean]
+    # @api public
     def keep_alive?
       !!@keep_alive && !@socket.closed?
     end
 
     # Whether our connection has expired
+    #
+    # @example
+    #   connection.expired?
+    #
     # @return [Boolean]
+    # @api public
     def expired?
       !@conn_expires_at || @conn_expires_at < Time.now
     end
 
     private
 
-    # Sets up SSL context and starts TLS if needed.
+    # Sets up SSL context and starts TLS if needed
     # @param (see #initialize)
     # @return [void]
+    # @api private
     def start_tls(req, options)
       return unless req.uri.https? && !failed_proxy_connect?
 
@@ -171,6 +231,8 @@ module HTTP
     end
 
     # Open tunnel through proxy
+    # @return [void]
+    # @api private
     def send_proxy_connect_request(req)
       return unless req.uri.https? && req.using_proxy?
 
@@ -193,15 +255,16 @@ module HTTP
       @pending_response = false
     end
 
-    # Resets expiration of persistent connection.
+    # Resets expiration of persistent connection
     # @return [void]
+    # @api private
     def reset_timer
       @conn_expires_at = Time.now + @keep_alive_timeout if @persistent
     end
 
-    # Store whether the connection should be kept alive.
-    # Once we reset the parser, we lose all of this state.
+    # Store keep-alive state from parser
     # @return [void]
+    # @api private
     def set_keep_alive
       return @keep_alive = false unless @persistent
 
@@ -219,6 +282,7 @@ module HTTP
     # Feeds some more data into parser
     # @return [void]
     # @raise [SocketReadError] when unable to read from socket
+    # @api private
     def read_more(size)
       return if @parser.finished?
 

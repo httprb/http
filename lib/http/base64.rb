@@ -4,7 +4,16 @@ module HTTP
   module Base64
     module_function
 
-    # Equivalent to Base64.strict_encode64
+    # Encode data using strict Base64 encoding
+    #
+    # @example
+    #   HTTP::Base64.encode64("hello")
+    #
+    # @param input [String] data to encode
+    #
+    # @return [String]
+    #
+    # @api private
     def encode64(input)
       [input].pack("m0")
     end

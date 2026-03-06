@@ -19,15 +19,35 @@ module HTTP
     module Mixin
       extend Forwardable
 
+      # The HTTP headers collection
+      #
+      # @example
+      #   request.headers
+      #
       # @return [HTTP::Headers]
+      # @api public
       attr_reader :headers
 
-      # @!method []
+      # @!method [](name)
+      #   Returns header value by name
+      #
+      #   @example
+      #     request["Content-Type"]
+      #
       #   (see HTTP::Headers#[])
+      #   @return [String, Array<String>, nil]
+      #   @api public
       def_delegator :headers, :[]
 
-      # @!method []=
+      # @!method []=(name, value)
+      #   Sets header value by name
+      #
+      #   @example
+      #     request["Content-Type"] = "text/plain"
+      #
       #   (see HTTP::Headers#[]=)
+      #   @return [void]
+      #   @api public
       def_delegator :headers, :[]=
     end
   end

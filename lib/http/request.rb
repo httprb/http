@@ -67,19 +67,71 @@ module HTTP
       wss:   443
     }.freeze
 
-    # Method is given as a lowercase symbol e.g. :get, :post
+    # HTTP method as a lowercase symbol
+    #
+    # @example
+    #   request.verb # => :get
+    #
+    # @return [Symbol]
+    # @api public
     attr_reader :verb
 
-    # Scheme is normalized to be a lowercase symbol e.g. :http, :https
+    # URI scheme as a lowercase symbol
+    #
+    # @example
+    #   request.scheme # => :https
+    #
+    # @return [Symbol]
+    # @api public
     attr_reader :scheme
 
+    # URI normalizer callable
+    #
+    # @example
+    #   request.uri_normalizer
+    #
+    # @return [#call]
+    # @api public
     attr_reader :uri_normalizer
 
-    # "Request URI" as per RFC 2616
-    # http://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html
+    # Request URI
+    #
+    # @example
+    #   request.uri # => #<HTTP::URI ...>
+    #
+    # @return [HTTP::URI]
+    # @api public
     attr_reader :uri
-    attr_reader :proxy, :body, :version
 
+    # Proxy configuration hash
+    #
+    # @example
+    #   request.proxy
+    #
+    # @return [Hash]
+    # @api public
+    attr_reader :proxy
+
+    # Request body object
+    #
+    # @example
+    #   request.body
+    #
+    # @return [HTTP::Request::Body]
+    # @api public
+    attr_reader :body
+
+    # HTTP version string
+    #
+    # @example
+    #   request.version # => "1.1"
+    #
+    # @return [String]
+    # @api public
+    attr_reader :version
+
+    # Create a new HTTP request
+    #
     # @option opts [String] :version
     # @option opts [#to_s] :verb HTTP request method
     # @option opts [#call] :uri_normalizer (HTTP::URI::NORMALIZER)
@@ -87,6 +139,12 @@ module HTTP
     # @option opts [Hash] :headers
     # @option opts [Hash] :proxy
     # @option opts [String, Enumerable, IO, nil] :body
+    #
+    # @example
+    #   Request.new(verb: :get, uri: "https://example.com")
+    #
+    # @return [HTTP::Request]
+    # @api public
     def initialize(opts)
       @verb           = opts.fetch(:verb).to_s.downcase.to_sym
       @uri_normalizer = opts[:uri_normalizer] || HTTP::URI::NORMALIZER
@@ -104,6 +162,12 @@ module HTTP
     end
 
     # Returns new Request with updated uri
+    #
+    # @example
+    #   request.redirect("https://example.com/new")
+    #
+    # @return [HTTP::Request]
+    # @api public
     def redirect(uri, verb = @verb)
       headers = self.headers.dup
       headers.delete(Headers::HOST)
@@ -134,42 +198,92 @@ module HTTP
     end
 
     # Stream the request to a socket
+    #
+    # @example
+    #   request.stream(socket)
+    #
+    # @return [void]
+    # @api public
     def stream(socket)
       include_proxy_headers if using_proxy? && !@uri.https?
       Request::Writer.new(socket, body, headers, headline).stream
     end
 
     # Is this request using a proxy?
+    #
+    # @example
+    #   request.using_proxy?
+    #
+    # @return [Boolean]
+    # @api public
     def using_proxy?
       proxy && proxy.keys.size >= 2
     end
 
     # Is this request using an authenticated proxy?
+    #
+    # @example
+    #   request.using_authenticated_proxy?
+    #
+    # @return [Boolean]
+    # @api public
     def using_authenticated_proxy?
       proxy && proxy.keys.size >= 4
     end
 
+    # Merges proxy headers into the request headers
+    #
+    # @example
+    #   request.include_proxy_headers
+    #
+    # @return [void]
+    # @api public
     def include_proxy_headers
       headers.merge!(proxy[:proxy_headers]) if proxy.key?(:proxy_headers)
       include_proxy_authorization_header if using_authenticated_proxy?
     end
 
     # Compute and add the Proxy-Authorization header
+    #
+    # @example
+    #   request.include_proxy_authorization_header
+    #
+    # @return [void]
+    # @api public
     def include_proxy_authorization_header
       headers[Headers::PROXY_AUTHORIZATION] = proxy_authorization_header
     end
 
+    # Build the Proxy-Authorization header value
+    #
+    # @example
+    #   request.proxy_authorization_header
+    #
+    # @return [String]
+    # @api public
     def proxy_authorization_header
       digest = encode64("#{proxy[:proxy_username]}:#{proxy[:proxy_password]}")
       "Basic #{digest}"
     end
 
     # Setup tunnel through proxy for SSL request
+    #
+    # @example
+    #   request.connect_using_proxy(socket)
+    #
+    # @return [void]
+    # @api public
     def connect_using_proxy(socket)
       Request::Writer.new(socket, nil, proxy_connect_headers, proxy_connect_header).connect_through_proxy
     end
 
     # Compute HTTP request header for direct or proxy request
+    #
+    # @example
+    #   request.headline
+    #
+    # @return [String]
+    # @api public
     def headline
       request_uri =
         if using_proxy? && !uri.https?
@@ -184,11 +298,23 @@ module HTTP
     end
 
     # Compute HTTP request header SSL proxy connection
+    #
+    # @example
+    #   request.proxy_connect_header
+    #
+    # @return [String]
+    # @api public
     def proxy_connect_header
       "CONNECT #{host}:#{port} HTTP/#{version}"
     end
 
     # Headers to send with proxy connect request
+    #
+    # @example
+    #   request.proxy_connect_headers
+    #
+    # @return [HTTP::Headers]
+    # @api public
     def proxy_connect_headers
       connect_headers = HTTP::Headers.coerce(
         Headers::HOST       => headers[Headers::HOST],
@@ -201,16 +327,28 @@ module HTTP
     end
 
     # Host for tcp socket
+    #
+    # @example
+    #   request.socket_host
+    #
+    # @return [String]
+    # @api public
     def socket_host
       using_proxy? ? proxy[:proxy_address] : host
     end
 
     # Port for tcp socket
+    #
+    # @example
+    #   request.socket_port
+    #
+    # @return [Integer]
+    # @api public
     def socket_port
       using_proxy? ? proxy[:proxy_port] : port
     end
 
-    # Human-readable representation of base request info.
+    # Human-readable representation of base request info
     #
     # @example
     #
@@ -218,6 +356,7 @@ module HTTP
     #     # => #<HTTP::Request/1.1 GET https://example.com>
     #
     # @return [String]
+    # @api public
     def inspect
       "#<#{self.class}/#{@version} #{verb.to_s.upcase} #{uri}>"
     end
@@ -225,16 +364,21 @@ module HTTP
     private
 
     # @!attribute [r] host
+    #   Host from the URI
     #   @return [String]
+    #   @api private
     def_delegator :@uri, :host
 
-    # @!attribute [r] port
-    #   @return [Fixnum]
+    # Return the port for the request URI
+    # @return [Fixnum]
+    # @api private
     def port
       @uri.port || @uri.default_port
     end
 
-    # @return [String] Default host (with port if needed) header value.
+    # Build default Host header value
+    # @return [String]
+    # @api private
     def default_host_header_value
       value = PORTS[@scheme] == port ? host : "#{host}:#{port}"
 
@@ -243,10 +387,16 @@ module HTTP
       value
     end
 
+    # Coerce input into a Body object
+    # @return [HTTP::Request::Body]
+    # @api private
     def prepare_body(body)
       body.is_a?(Request::Body) ? body : Request::Body.new(body)
     end
 
+    # Build headers with default values
+    # @return [HTTP::Headers]
+    # @api private
     def prepare_headers(headers)
       headers = HTTP::Headers.coerce(headers || {})
 

@@ -8,6 +8,14 @@ module HTTP
       SUPPORTED_ENCODING = Set.new(%w[deflate gzip x-gzip]).freeze
       private_constant :SUPPORTED_ENCODING
 
+      # Wraps a response with an auto-inflating body
+      #
+      # @example
+      #   feature.wrap_response(response)
+      #
+      # @param response [HTTP::Response]
+      # @return [HTTP::Response]
+      # @api public
       def wrap_response(response)
         return response unless supported_encoding?(response)
 
@@ -24,12 +32,22 @@ module HTTP
         Response.new(options)
       end
 
+      # Returns an inflating body stream for a connection
+      #
+      # @example
+      #   feature.stream_for(connection)
+      #
+      # @param connection [HTTP::Connection]
+      # @return [HTTP::Response::Body]
+      # @api public
       def stream_for(connection)
         Response::Body.new(Response::Inflater.new(connection))
       end
 
       private
 
+      # Check if the response encoding is supported
+      # @api private
       def supported_encoding?(response)
         content_encoding = response.headers.get(Headers::CONTENT_ENCODING).first
         content_encoding && SUPPORTED_ENCODING.include?(content_encoding)

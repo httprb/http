@@ -17,22 +17,55 @@ module HTTP
 
     include HTTP::Headers::Mixin
 
-    # @return [Status]
+    # The response status
+    #
+    # @example
+    #   response.status # => #<HTTP::Response::Status 200>
+    #
+    # @return [Status] the response status
+    # @api public
     attr_reader :status
 
-    # @return [String]
+    # The HTTP version
+    #
+    # @example
+    #   response.version # => "1.1"
+    #
+    # @return [String] the HTTP version
+    # @api public
     attr_reader :version
 
-    # @return [Body]
+    # The response body
+    #
+    # @example
+    #   response.body
+    #
+    # @return [Body] the response body
+    # @api public
     attr_reader :body
 
-    # @return [Request]
+    # The original request
+    #
+    # @example
+    #   response.request
+    #
+    # @return [Request] the original request
+    # @api public
     attr_reader :request
 
-    # @return [Hash]
+    # The proxy headers
+    #
+    # @example
+    #   response.proxy_headers
+    #
+    # @return [Hash] the proxy headers
+    # @api public
     attr_reader :proxy_headers
 
-    # Inits a new instance
+    # Create a new Response instance
+    #
+    # @example
+    #   Response.new(status: 200, version: "1.1", request: req)
     #
     # @option opts [Integer] :status Status code
     # @option opts [String] :version HTTP version
@@ -43,6 +76,8 @@ module HTTP
     # @option opts [String] :body
     # @option opts [HTTP::Request] request The request this is in response to.
     # @option opts [String] :uri (DEPRECATED) used to populate a missing request
+    # @return [Response]
+    # @api public
     def initialize(opts)
       @version       = opts.fetch(:version)
       @request       = init_request(opts)
@@ -61,50 +96,86 @@ module HTTP
     end
 
     # @!method reason
-    #   @return (see HTTP::Response::Status#reason)
+    #   Return the reason phrase for the response status
+    #   @example
+    #     response.reason # => "OK"
+    #   @return [String, nil]
+    #   @api public
     def_delegator :@status, :reason
 
     # @!method code
-    #   @return (see HTTP::Response::Status#code)
+    #   Return the numeric status code
+    #   @example
+    #     response.code # => 200
+    #   @return [Integer]
+    #   @api public
     def_delegator :@status, :code
 
     # @!method to_s
-    #   (see HTTP::Response::Body#to_s)
+    #   Consume the response body as a string
+    #   @example
+    #     response.to_s # => "<html>...</html>"
+    #   @return [String]
+    #   @api public
     def_delegator :@body, :to_s
     alias to_str to_s
 
     # @!method readpartial
-    #   (see HTTP::Response::Body#readpartial)
+    #   Read a chunk of the response body
+    #   @example
+    #     response.readpartial # => "chunk"
+    #   @return [String, nil]
+    #   @api public
     def_delegator :@body, :readpartial
 
     # @!method connection
-    #   (see HTTP::Response::Body#connection)
+    #   Return the underlying connection object
+    #   @example
+    #     response.connection
+    #   @return [HTTP::Connection]
+    #   @api public
     def_delegator :@body, :connection
 
     # @!method uri
+    #   Return the URI of the original request
+    #   @example
+    #     response.uri # => #<HTTP::URI ...>
     #   @return (see HTTP::Request#uri)
+    #   @api public
     def_delegator :@request, :uri
 
     # Returns an Array ala Rack: `[status, headers, body]`
     #
+    # @example
+    #   response.to_a # => [200, {"Content-Type" => "text/html"}, "body"]
+    #
     # @return [Array(Fixnum, Hash, String)]
+    # @api public
     def to_a
       [status.to_i, headers.to_h, body.to_s]
     end
 
     # Flushes body and returns self-reference
     #
+    # @example
+    #   response.flush # => #<HTTP::Response ...>
+    #
     # @return [Response]
+    # @api public
     def flush
       body.to_s
       self
     end
 
-    # Value of the Content-Length header.
+    # Value of the Content-Length header
+    #
+    # @example
+    #   response.content_length # => 438
     #
     # @return [nil] if Content-Length was not given, or it's value was invalid
     #   (not an integer, e.g. empty string or string with non-digits).
     # @return [Integer] otherwise
+    # @api public
     def content_length
       # http://greenbytes.de/tech/webdav/rfc7230.html#rfc.section.3.3.3
       # Clause 3: "If a message is received with both a Transfer-Encoding
@@ -119,27 +190,51 @@ module HTTP
 
     # Parsed Content-Type header
     #
+    # @example
+    #   response.content_type # => #<HTTP::ContentType ...>
+    #
     # @return [HTTP::ContentType]
+    # @api public
     def content_type
       @content_type ||= ContentType.parse headers[Headers::CONTENT_TYPE]
     end
 
     # @!method mime_type
     #   MIME type of response (if any)
+    #   @example
+    #     response.mime_type # => "text/html"
     #   @return [String, nil]
+    #   @api public
     def_delegator :content_type, :mime_type
 
     # @!method charset
     #   Charset of response (if any)
+    #   @example
+    #     response.charset # => "utf-8"
     #   @return [String, nil]
+    #   @api public
     def_delegator :content_type, :charset
 
+    # Cookies from Set-Cookie headers
+    #
+    # @example
+    #   response.cookies # => #<HTTP::CookieJar ...>
+    #
+    # @return [HTTP::CookieJar]
+    # @api public
     def cookies
       @cookies ||= headers.get(Headers::SET_COOKIE).each_with_object CookieJar.new do |v, jar|
         jar.parse(v, uri)
       end
     end
 
+    # Check if the response uses chunked transfer encoding
+    #
+    # @example
+    #   response.chunked? # => true
+    #
+    # @return [Boolean]
+    # @api public
     def chunked?
       return false unless @headers.include?(Headers::TRANSFER_ENCODING)
 
@@ -149,11 +244,15 @@ module HTTP
       encoding.last == "chunked"
     end
 
-    # Parse response body with corresponding MIME type adapter.
+    # Parse response body with corresponding MIME type adapter
+    #
+    # @example
+    #   response.parse("application/json") # => {"key" => "value"}
     #
     # @param type [#to_s] Parse as given MIME type.
     # @raise (see MimeType.[])
     # @return [Object]
+    # @api public
     def parse(type = nil)
       MimeType[type || mime_type].decode to_s
     rescue => e
@@ -161,21 +260,31 @@ module HTTP
     end
 
     # Inspect a response
+    #
+    # @example
+    #   response.inspect # => "#<HTTP::Response/1.1 200 OK text/html>"
+    #
+    # @return [String]
+    # @api public
     def inspect
       "#<#{self.class}/#{@version} #{code} #{reason} #{mime_type}>"
     end
 
     private
 
+    # Determine the default encoding for the body
+    # @return [Encoding]
+    # @api private
     def default_encoding
       return Encoding::UTF_8 if mime_type == "application/json"
 
       Encoding::BINARY
     end
 
-    # Initialize an HTTP::Request from options.
+    # Initialize an HTTP::Request from options
     #
     # @return [HTTP::Request]
+    # @api private
     def init_request(opts)
       raise ArgumentError, ":uri is for backwards compatibilty and conflicts with :request" \
         if opts[:request] && opts[:uri]

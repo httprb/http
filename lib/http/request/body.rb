@@ -3,17 +3,35 @@
 module HTTP
   class Request
     class Body
+      # The source data for this body
+      #
+      # @example
+      #   body.source # => "hello world"
+      #
+      # @return [String, Enumerable, IO, nil]
+      # @api public
       attr_reader :source
 
+      # Initialize a new request body
+      #
+      # @example
+      #   Body.new("hello world")
+      #
+      # @return [HTTP::Request::Body]
+      # @api public
       def initialize(source)
         @source = source
 
         validate_source_type!
       end
 
-      # Returns size which should be used for the "Content-Length" header.
+      # Returns size for the "Content-Length" header
+      #
+      # @example
+      #   body.size
       #
       # @return [Integer]
+      # @api public
       def size
         if @source.is_a?(String)
           @source.bytesize
@@ -28,9 +46,14 @@ module HTTP
         end
       end
 
-      # Yields chunks of content to be streamed to the request body.
+      # Yields chunks of content to be streamed
+      #
+      # @example
+      #   body.each { |chunk| socket.write(chunk) }
       #
       # @yieldparam [String]
+      # @return [self]
+      # @api public
       def each(&block)
         if @source.is_a?(String)
           yield @source
@@ -44,13 +67,22 @@ module HTTP
         self
       end
 
-      # Request bodies are equivalent when they have the same source.
+      # Check equality based on source
+      #
+      # @example
+      #   body == other_body
+      #
+      # @return [Boolean]
+      # @api public
       def ==(other)
         self.class == other.class && self.source == other.source # rubocop:disable Style/RedundantSelf
       end
 
       private
 
+      # Rewind an IO source if possible
+      # @return [void]
+      # @api private
       def rewind(io)
         io.rewind if io.respond_to? :rewind
       rescue Errno::ESPIPE, Errno::EPIPE
@@ -73,6 +105,9 @@ module HTTP
         nil
       end
 
+      # Validate that source is a supported type
+      # @return [void]
+      # @api private
       def validate_source_type!
         return if @source.is_a?(String)
         return if @source.respond_to?(:read)
@@ -86,10 +121,24 @@ module HTTP
       # #write simply calling the proc, which we can pass in as the
       # "destination IO" in IO.copy_stream.
       class ProcIO
+        # Initialize a new ProcIO wrapper
+        #
+        # @example
+        #   ProcIO.new(block)
+        #
+        # @return [ProcIO]
+        # @api public
         def initialize(block)
           @block = block
         end
 
+        # Write data by calling the wrapped proc
+        #
+        # @example
+        #   proc_io.write("hello")
+        #
+        # @return [Integer]
+        # @api public
         def write(data)
           @block.call(data)
           data.bytesize

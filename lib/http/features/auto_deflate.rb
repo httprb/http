@@ -11,8 +11,23 @@ module HTTP
     class AutoDeflate < Feature
       VALID_METHODS = Set.new(%w[gzip deflate]).freeze
 
+      # Compression method name
+      #
+      # @example
+      #   feature.method # => "gzip"
+      #
+      # @return [String] compression method name
+      # @api public
       attr_reader :method
 
+      # Initializes the AutoDeflate feature
+      #
+      # @example
+      #   AutoDeflate.new(method: "gzip")
+      #
+      # @param method [String] compression method ("gzip" or "deflate")
+      # @return [AutoDeflate]
+      # @api public
       def initialize(method: "gzip")
         super()
 
@@ -21,6 +36,14 @@ module HTTP
         raise Error, "Only gzip and deflate methods are supported" unless VALID_METHODS.include?(@method)
       end
 
+      # Wraps a request with compressed body
+      #
+      # @example
+      #   feature.wrap_request(request)
+      #
+      # @param request [HTTP::Request]
+      # @return [HTTP::Request]
+      # @api public
       def wrap_request(request)
         return request unless method
         return request if request.body.size.zero?
@@ -40,6 +63,14 @@ module HTTP
         )
       end
 
+      # Returns a compressed body for the given body
+      #
+      # @example
+      #   feature.deflated_body(body)
+      #
+      # @param body [HTTP::Request::Body]
+      # @return [GzippedBody, DeflatedBody, nil]
+      # @api public
       def deflated_body(body)
         case method
         when "gzip"
@@ -52,16 +83,38 @@ module HTTP
       HTTP::Options.register_feature(:auto_deflate, self)
 
       class CompressedBody < HTTP::Request::Body
+        # Initializes a compressed body wrapper
+        #
+        # @example
+        #   CompressedBody.new(uncompressed_body)
+        #
+        # @param uncompressed_body [HTTP::Request::Body]
+        # @return [CompressedBody]
+        # @api public
         def initialize(uncompressed_body)
           @body       = uncompressed_body
           @compressed = nil
         end
 
+        # Returns the size of the compressed body
+        #
+        # @example
+        #   compressed_body.size
+        #
+        # @return [Integer]
+        # @api public
         def size
           compress_all! unless @compressed
           @compressed.size
         end
 
+        # Yields each chunk of compressed data
+        #
+        # @example
+        #   compressed_body.each { |chunk| io.write(chunk) }
+        #
+        # @return [self, Enumerator]
+        # @api public
         def each(&block)
           return to_enum __method__ unless block
 
@@ -76,6 +129,9 @@ module HTTP
 
         private
 
+        # Yield each chunk from compressed data
+        # @return [void]
+        # @api private
         def compressed_each
           while (data = @compressed.read(Connection::BUFFER_SIZE))
             yield data
@@ -84,6 +140,9 @@ module HTTP
           @compressed.close!
         end
 
+        # Compress all data to a tempfile
+        # @return [void]
+        # @api private
         def compress_all!
           @compressed = Tempfile.new("http-compressed_body", binmode: true)
           compress { |data| @compressed.write(data) }
@@ -92,6 +151,13 @@ module HTTP
       end
 
       class GzippedBody < CompressedBody
+        # Compresses data using gzip
+        #
+        # @example
+        #   gzipped_body.compress { |data| io.write(data) }
+        #
+        # @return [nil]
+        # @api public
         def compress(&block)
           gzip = Zlib::GzipWriter.new(BlockIO.new(block))
           @body.each { |chunk| gzip.write(chunk) }
@@ -100,10 +166,26 @@ module HTTP
         end
 
         class BlockIO
+          # Initializes a block-based IO adapter
+          #
+          # @example
+          #   BlockIO.new(block)
+          #
+          # @param block [Proc]
+          # @return [BlockIO]
+          # @api public
           def initialize(block)
             @block = block
           end
 
+          # Writes data by calling the block
+          #
+          # @example
+          #   block_io.write("data")
+          #
+          # @param data [String]
+          # @return [Object]
+          # @api public
           def write(data)
             @block.call(data)
           end
@@ -111,6 +193,13 @@ module HTTP
       end
 
       class DeflatedBody < CompressedBody
+        # Compresses data using deflate
+        #
+        # @example
+        #   deflated_body.compress { |data| io.write(data) }
+        #
+        # @return [nil]
+        # @api public
         def compress
           deflater = Zlib::Deflate.new
 

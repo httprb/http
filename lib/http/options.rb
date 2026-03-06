@@ -13,23 +13,86 @@ module HTTP
     @available_features       = {}
 
     class << self
-      attr_accessor :default_socket_class, :default_ssl_socket_class, :default_timeout_class
+      # Default TCP socket class
+      #
+      # @example
+      #   HTTP::Options.default_socket_class # => TCPSocket
+      #
+      # @return [Class] default socket class
+      # @api public
+      attr_accessor :default_socket_class
+
+      # Default SSL socket class
+      #
+      # @example
+      #   HTTP::Options.default_ssl_socket_class
+      #
+      # @return [Class] default SSL socket class
+      # @api public
+      attr_accessor :default_ssl_socket_class
+
+      # Default timeout handler class
+      #
+      # @example
+      #   HTTP::Options.default_timeout_class
+      #
+      # @return [Class] default timeout class
+      # @api public
+      attr_accessor :default_timeout_class
+
+      # Registered feature implementations
+      #
+      # @example
+      #   HTTP::Options.available_features
+      #
+      # @return [Hash] registered feature implementations
+      # @api public
       attr_reader :available_features
 
+      # Returns existing Options or creates new one
+      #
+      # @example
+      #   HTTP::Options.new(response: :auto)
+      #
+      # @param [Hash] options
+      # @api public
+      # @return [HTTP::Options]
       def new(options = {})
         options.is_a?(self) ? options : super
       end
 
+      # Returns list of defined option names
+      #
+      # @example
+      #   HTTP::Options.defined_options
+      #
+      # @api semipublic
+      # @return [Array<Symbol>]
       def defined_options
         @defined_options ||= []
       end
 
+      # Registers a feature by name and implementation
+      #
+      # @example
+      #   HTTP::Options.register_feature(:auto_inflate, AutoInflate)
+      #
+      # @param [Symbol] name
+      # @param [Class] impl
+      # @api public
+      # @return [Class]
       def register_feature(name, impl)
         @available_features[name] = impl
       end
 
       protected
 
+      # Defines an option with accessor and with_ method
+      #
+      # @param [Symbol] name
+      # @param [Boolean] reader_only
+      # @api private
+      # @return [void]
       def def_option(name, reader_only: false, &interpreter)
         defined_options << name.to_sym
         interpreter ||= ->(v) { v }
@@ -47,6 +110,14 @@ module HTTP
       end
     end
 
+    # Initializes options with defaults
+    #
+    # @example
+    #   HTTP::Options.new(response: :auto, follow: true)
+    #
+    # @param [Hash] options
+    # @api public
+    # @return [HTTP::Options]
     def initialize(options = {})
       defaults = {
         response:           :auto,
@@ -103,6 +174,11 @@ module HTTP
       features.merge(normalized_features)
     end
 
+    # Sets and normalizes features hash
+    #
+    # @param [Hash] features
+    # @api private
+    # @return [Hash]
     def features=(features)
       @features = features.each_with_object({}) do |(name, opts_or_feature), h|
         h[name] = if opts_or_feature.is_a?(Feature)
@@ -126,6 +202,11 @@ module HTTP
 
     def_option :follow, reader_only: true
 
+    # Sets follow redirect options
+    #
+    # @param [Boolean, Hash, nil] value
+    # @api private
+    # @return [Hash, nil]
     def follow=(value)
       @follow =
         case
@@ -138,14 +219,35 @@ module HTTP
 
     def_option :persistent, reader_only: true
 
+    # Sets persistent connection origin
+    #
+    # @param [String, nil] value
+    # @api private
+    # @return [String, nil]
     def persistent=(value)
       @persistent = value ? HTTP::URI.parse(value).origin : nil
     end
 
+    # Checks whether persistent connection is enabled
+    #
+    # @example
+    #   opts = HTTP::Options.new(persistent: "http://example.com")
+    #   opts.persistent?
+    #
+    # @api public
+    # @return [Boolean]
     def persistent?
       !persistent.nil?
     end
 
+    # Merges two Options objects
+    #
+    # @example
+    #   opts = HTTP::Options.new.merge(HTTP::Options.new(response: :body))
+    #
+    # @param [HTTP::Options] other
+    # @api public
+    # @return [HTTP::Options]
     def merge(other)
       h1 = to_hash
       h2 = other.to_hash
@@ -162,6 +264,13 @@ module HTTP
       self.class.new(merged)
     end
 
+    # Converts options to a Hash
+    #
+    # @example
+    #   HTTP::Options.new.to_hash
+    #
+    # @api public
+    # @return [Hash]
     def to_hash
       hash_pairs = self.class
                        .defined_options
@@ -169,24 +278,51 @@ module HTTP
       Hash[*hash_pairs]
     end
 
+    # Duplicates the options object
+    #
+    # @example
+    #   opts = HTTP::Options.new
+    #   opts.dup
+    #
+    # @api public
+    # @return [HTTP::Options]
     def dup
       dupped = super
       yield(dupped) if block_given?
       dupped
     end
 
+    # Returns a feature by name
+    #
+    # @example
+    #   opts = HTTP::Options.new
+    #   opts.feature(:auto_inflate)
+    #
+    # @param [Symbol] name
+    # @api public
+    # @return [Feature, nil]
     def feature(name)
       features[name]
     end
 
     protected
 
+    # Sets an option by name
+    #
+    # @param [Symbol] option
+    # @param [Object] val
+    # @api private
+    # @return [Object]
     def []=(option, val)
       send(:"#{option}=", val)
     end
 
     private
 
+    # Raises an argument error with adjusted backtrace
+    #
+    # @api private
+    # @return [void]
     def argument_error!(message)
       raise(Error, message, caller(1..-1))
     end

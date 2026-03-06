@@ -31,6 +31,9 @@ module HTTP
       # @option opts [#call] :on_retry
       # @option opts [#to_f] :max_delay (Float::MAX)
       # @option opts [#call] :should_retry
+      # Create a new retry performer
+      # @api private
+      # @return [HTTP::Retriable::Performer]
       def initialize(opts)
         @exception_classes = opts.fetch(:exceptions, RETRIABLE_ERRORS)
         @retry_statuses = opts[:retry_statuses]
@@ -40,13 +43,10 @@ module HTTP
         @delay_calculator = DelayCalculator.new(opts)
       end
 
-      # Watches request/response execution.
-      #
-      # If any of {RETRIABLE_ERRORS} occur or response status is `5xx`, retries
-      # up to `:tries` amount of times. Sleeps for amount of seconds calculated
-      # with `:delay` proc before each retry.
+      # Execute request with retry logic
       #
       # @see #initialize
+      # @return [HTTP::Response]
       # @api private
       def perform(client, req, &block)
         1.upto(Float::INFINITY) do |attempt| # infinite loop with index
@@ -73,12 +73,22 @@ module HTTP
         end
       end
 
+      # Calculates delay between retries
+      #
+      # @param [Integer] iteration
+      # @param [HTTP::Response, nil] response
+      # @api private
+      # @return [Numeric]
       def calculate_delay(iteration, response)
         @delay_calculator.call(iteration, response)
       end
 
       private
 
+      # Attempts to execute the request block
+      #
+      # @api private
+      # @return [Array]
       # rubocop:disable Lint/RescueException
       def try_request
         err, res = nil
@@ -93,6 +103,10 @@ module HTTP
       end
       # rubocop:enable Lint/RescueException
 
+      # Checks whether the request should be retried
+      #
+      # @api private
+      # @return [Boolean]
       def retry_request?(req, err, res, attempt)
         if @should_retry_proc
           @should_retry_proc.call(req, err, res, attempt)
@@ -103,10 +117,18 @@ module HTTP
         end
       end
 
+      # Checks whether the exception is retriable
+      #
+      # @api private
+      # @return [Boolean]
       def retry_exception?(err)
         @exception_classes.any? { |e| err.is_a?(e) }
       end
 
+      # Checks whether the response status warrants retry
+      #
+      # @api private
+      # @return [Boolean]
       def retry_response?(res)
         return false unless @retry_statuses
 
@@ -122,6 +144,10 @@ module HTTP
         end
       end
 
+      # Waits for retry delay or raises if out of attempts
+      #
+      # @api private
+      # @return [void]
       def wait_for_retry_or_raise(req, err, res, attempt)
         if attempt < @tries
           @on_retry.call(req, err, res)
@@ -135,8 +161,10 @@ module HTTP
       # Builds OutOfRetriesError
       #
       # @param request [HTTP::Request]
-      # @param status [HTTP::Response, nil]
+      # @param response [HTTP::Response, nil]
       # @param exception [Exception, nil]
+      # @api private
+      # @return [HTTP::OutOfRetriesError]
       def out_of_retries_error(request, response, exception)
         message = "#{request.verb.to_s.upcase} <#{request.uri}> failed"
 

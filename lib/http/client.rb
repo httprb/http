@@ -18,6 +18,14 @@ module HTTP
 
     HTTP_OR_HTTPS_RE = %r{^https?://}i
 
+    # Initialize a new HTTP Client
+    #
+    # @example
+    #   client = HTTP::Client.new(headers: {"Accept" => "application/json"})
+    #
+    # @param default_options [Hash] default options for requests
+    # @return [HTTP::Client] a new client instance
+    # @api public
     def initialize(default_options = {})
       @default_options = HTTP::Options.new(default_options)
       @connection = nil
@@ -25,6 +33,15 @@ module HTTP
     end
 
     # Make an HTTP request
+    #
+    # @example
+    #   client.request(:get, "https://example.com")
+    #
+    # @param verb [Symbol] the HTTP method
+    # @param uri [#to_s] the URI to request
+    # @param opts [Hash] request options
+    # @return [HTTP::Response] the response
+    # @api public
     def request(verb, uri, opts = {})
       opts = @default_options.merge(opts)
       req = build_request(verb, uri, opts)
@@ -37,6 +54,15 @@ module HTTP
     end
 
     # Prepare an HTTP request
+    #
+    # @example
+    #   client.build_request(:get, "https://example.com")
+    #
+    # @param verb [Symbol] the HTTP method
+    # @param uri [#to_s] the URI to request
+    # @param opts [Hash] request options
+    # @return [HTTP::Request] the built request object
+    # @api public
     def build_request(verb, uri, opts = {})
       opts    = @default_options.merge(opts)
       uri     = make_request_uri(uri, opts)
@@ -56,11 +82,25 @@ module HTTP
     end
 
     # @!method persistent?
+    #   Indicate whether the client has persistent connections
+    #
+    #   @example
+    #     client.persistent?
+    #
     #   @see Options#persistent?
     #   @return [Boolean] whenever client is persistent
+    #   @api public
     def_delegator :default_options, :persistent?
 
     # Perform a single (no follow) HTTP request
+    #
+    # @example
+    #   client.perform(request, options)
+    #
+    # @param req [HTTP::Request] the request to perform
+    # @param options [HTTP::Options] request options
+    # @return [HTTP::Response] the response
+    # @api public
     def perform(req, options)
       verify_connection!(req.uri)
 
@@ -94,6 +134,13 @@ module HTTP
       raise
     end
 
+    # Close the connection and reset state
+    #
+    # @example
+    #   client.close
+    #
+    # @return [void]
+    # @api public
     def close
       @connection&.close
       @connection = nil
@@ -102,12 +149,18 @@ module HTTP
 
     private
 
+    # Wrap request through feature middleware
+    # @return [HTTP::Request] the wrapped request
+    # @api private
     def wrap_request(req, opts)
       opts.features.inject(req) do |request, (_name, feature)|
         feature.wrap_request(request)
       end
     end
 
+    # Build a response from the current connection
+    # @return [HTTP::Response] the built response
+    # @api private
     def build_response(req, options)
       Response.new(
         status:        @connection.status_code,
@@ -121,6 +174,9 @@ module HTTP
     end
 
     # Verify our request isn't going to be made against another URI
+    #
+    # @return [void]
+    # @api private
     def verify_connection!(uri)
       if default_options.persistent? && uri.origin != default_options.persistent
         raise StateError, "Persistence is enabled for #{default_options.persistent}, but we got #{uri.origin}"
@@ -137,8 +193,10 @@ module HTTP
 
     # Merges query params if needed
     #
-    # @param [#to_s] uri
-    # @return [URI]
+    # @param uri [#to_s] the URI to process
+    # @param opts [HTTP::Options] request options
+    # @return [HTTP::URI] the constructed URI
+    # @api private
     def make_request_uri(uri, opts)
       uri = uri.to_s
 
@@ -157,6 +215,9 @@ module HTTP
     end
 
     # Creates request headers with cookies (if any) merged in
+    #
+    # @return [HTTP::Headers] the constructed headers
+    # @api private
     def make_request_headers(opts)
       headers = opts.headers
 
@@ -174,6 +235,9 @@ module HTTP
     end
 
     # Create the request body object to send
+    #
+    # @return [String, HTTP::FormData, nil] the request body
+    # @api private
     def make_request_body(opts, headers)
       case
       when opts.body
@@ -189,6 +253,9 @@ module HTTP
       end
     end
 
+    # Coerce form data into an HTTP::FormData object
+    # @return [HTTP::FormData::Multipart, HTTP::FormData::Urlencoded] form data
+    # @api private
     def make_form_data(form)
       return form if form.is_a? HTTP::FormData::Multipart
       return form if form.is_a? HTTP::FormData::Urlencoded

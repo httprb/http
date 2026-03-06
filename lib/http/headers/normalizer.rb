@@ -17,29 +17,66 @@ module HTTP
       class Cache
         MAX_SIZE = 200
 
+        # Creates a new empty cache
+        #
+        # @return [Cache]
+        # @api private
         def initialize
           @store = {}
         end
 
+        # Retrieves value by key from the cache
+        #
+        # @return [String, nil]
+        # @api private
         def get(key)
           @store[key]
         end
+        # @!method [](key)
+        #   Retrieves value by key from the cache
+        #
+        #   @see #get
+        #   @return [String, nil]
+        #   @api private
         alias [] get
 
+        # Stores a key/value pair in the cache
+        #
+        # @return [String]
+        # @api private
         def set(key, value)
           # Maintain cache size
           @store.delete(@store.each_key.first) while MAX_SIZE <= @store.size
 
           @store[key] = value
         end
+        # @!method []=(key, value)
+        #   Stores a key/value pair in the cache
+        #
+        #   @see #set
+        #   @return [String]
+        #   @api private
         alias []= set
       end
 
+      # Creates a new Normalizer with an empty cache
+      #
+      # @example
+      #   normalizer = HTTP::Headers::Normalizer.new
+      #
+      # @return [Normalizer]
+      # @api public
       def initialize
         @cache = Cache.new
       end
 
-      # Transforms `name` to canonical HTTP header capitalization
+      # Normalizes a header name to canonical form
+      #
+      # @example
+      #   normalizer.call("content-type")
+      #
+      # @return [String]
+      # @api public
       def call(name)
         name  = -name.to_s
         value = (@cache[name] ||= -normalize_header(name))
@@ -49,12 +86,13 @@ module HTTP
 
       private
 
-      # Transforms `name` to canonical HTTP header capitalization
+      # Transforms name to canonical HTTP header capitalization
       #
       # @param [String] name
       # @raise [HeaderError] if normalized name does not
       #   match {COMPLIANT_NAME_RE}
       # @return [String] canonical HTTP header name
+      # @api private
       def normalize_header(name)
         return name if CANONICAL_NAME_RE.match?(name)
 

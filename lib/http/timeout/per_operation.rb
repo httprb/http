@@ -11,6 +11,14 @@ module HTTP
       WRITE_TIMEOUT = 0.25
       READ_TIMEOUT = 0.25
 
+      # Initializes per-operation timeout with options
+      #
+      # @example
+      #   HTTP::Timeout::PerOperation.new(read_timeout: 5)
+      #
+      # @param [Array] args
+      # @api public
+      # @return [HTTP::Timeout::PerOperation]
       def initialize(*args)
         super
 
@@ -19,6 +27,17 @@ module HTTP
         @connect_timeout = options.fetch(:connect_timeout, CONNECT_TIMEOUT)
       end
 
+      # Connects to a socket with connect timeout
+      #
+      # @example
+      #   timeout.connect(TCPSocket, "example.com", 80)
+      #
+      # @param [Class] socket_class
+      # @param [String] host
+      # @param [Integer] port
+      # @param [Boolean] nodelay
+      # @api public
+      # @return [void]
       def connect(socket_class, host, port, nodelay = false)
         ::Timeout.timeout(@connect_timeout, ConnectTimeoutError) do
           @socket = socket_class.open(host, port)
@@ -26,6 +45,13 @@ module HTTP
         end
       end
 
+      # Starts an SSL connection with connect timeout
+      #
+      # @example
+      #   timeout.connect_ssl
+      #
+      # @api public
+      # @return [void]
       def connect_ssl
         rescue_readable(@connect_timeout) do
           rescue_writable(@connect_timeout) do
@@ -35,6 +61,14 @@ module HTTP
       end
 
       # Read data from the socket
+      #
+      # @example
+      #   timeout.readpartial(1024)
+      #
+      # @param [Integer] size
+      # @param [String, nil] buffer
+      # @api public
+      # @return [String, :eof]
       def readpartial(size, buffer = nil)
         timeout = false
         loop do
@@ -60,6 +94,13 @@ module HTTP
       end
 
       # Write data to the socket
+      #
+      # @example
+      #   timeout.write("GET / HTTP/1.1")
+      #
+      # @param [String] data
+      # @api public
+      # @return [Integer]
       def write(data)
         timeout = false
         loop do

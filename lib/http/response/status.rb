@@ -8,17 +8,15 @@ module HTTP
   class Response
     class Status < ::Delegator
       class << self
-        # Coerces given value to Status.
+        # Coerces given value to Status
         #
         # @example
-        #
         #   Status.coerce(:bad_request) # => Status.new(400)
-        #   Status.coerce("400")        # => Status.new(400)
-        #   Status.coerce(true)         # => raises HTTP::Error
         #
         # @raise [Error] if coercion is impossible
         # @param [Symbol, #to_i] object
         # @return [Status]
+        # @api public
         def coerce(object)
           code = case
                  when object.is_a?(String)  then SYMBOL_CODES[symbolize object]
@@ -36,14 +34,9 @@ module HTTP
 
         # Symbolizes given string
         #
-        # @example
-        #
-        #   symbolize "Bad Request"           # => :bad_request
-        #   symbolize "Request-URI Too Long"  # => :request_uri_too_long
-        #   symbolize "I'm a Teapot"          # => :im_a_teapot
-        #
         # @param [#to_s] str
         # @return [Symbol]
+        # @api private
         def symbolize(str)
           str.to_s.downcase.tr("-", " ").gsub(/[^a-z ]/, "").gsub(/\s+/, "_").to_sym
         end
@@ -71,62 +64,113 @@ module HTTP
       # @return [Hash<Symbol => Fixnum>]
       SYMBOL_CODES = SYMBOLS.to_h { |k, v| [v, k] }.freeze
 
+      # The numeric status code
+      #
+      # @example
+      #   status.code # => 200
+      #
       # @return [Fixnum] status code
+      # @api public
       attr_reader :code
 
+      # Return the reason phrase for the status code
+      #
+      # @example
+      #   status.reason # => "OK"
+      #
       # @see REASONS
       # @return [String, nil] status message
+      # @api public
       def reason
         REASONS[code]
       end
 
-      # @return [String] string representation of HTTP status
+      # Return string representation of HTTP status
+      #
+      # @example
+      #   status.to_s # => "200 OK"
+      #
+      # @return [String]
+      # @api public
       def to_s
         "#{code} #{reason}".strip
       end
 
       # Check if status code is informational (1XX)
+      #
+      # @example
+      #   status.informational? # => false
+      #
       # @return [Boolean]
+      # @api public
       def informational?
         100 <= code && code < 200
       end
 
       # Check if status code is successful (2XX)
+      #
+      # @example
+      #   status.success? # => true
+      #
       # @return [Boolean]
+      # @api public
       def success?
         200 <= code && code < 300
       end
 
       # Check if status code is redirection (3XX)
+      #
+      # @example
+      #   status.redirect? # => false
+      #
       # @return [Boolean]
+      # @api public
       def redirect?
         300 <= code && code < 400
       end
 
       # Check if status code is client error (4XX)
+      #
+      # @example
+      #   status.client_error? # => false
+      #
       # @return [Boolean]
+      # @api public
       def client_error?
         400 <= code && code < 500
       end
 
       # Check if status code is server error (5XX)
+      #
+      # @example
+      #   status.server_error? # => false
+      #
       # @return [Boolean]
+      # @api public
       def server_error?
         500 <= code && code < 600
       end
 
       # Symbolized {#reason}
       #
+      # @example
+      #   status.to_sym # => :ok
+      #
       # @return [nil] unless code is well-known (see REASONS)
       # @return [Symbol]
+      # @api public
       def to_sym
         SYMBOLS[code]
       end
 
-      # Printable version of HTTP Status, surrounded by quote marks,
-      # with special characters escaped.
+      # Printable version of HTTP Status
+      #
+      # @example
+      #   status.inspect # => "#<HTTP::Response::Status 200 OK>"
       #
       # (see String#inspect)
+      # @return [String]
+      # @api public
       def inspect
         "#<#{self.class} #{self}>"
       end
@@ -139,12 +183,26 @@ module HTTP
         RUBY
       end
 
+      # Set the delegate object
+      #
+      # @example
+      #   status.__setobj__(200)
+      #
+      # @return [void]
+      # @api public
       def __setobj__(obj)
         raise TypeError, "Expected #{obj.inspect} to respond to #to_i" unless obj.respond_to? :to_i
 
         @code = obj.to_i
       end
 
+      # Return the delegate object
+      #
+      # @example
+      #   status.__getobj__ # => 200
+      #
+      # @return [Fixnum]
+      # @api public
       def __getobj__
         @code
       end

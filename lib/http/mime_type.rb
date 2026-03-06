@@ -26,6 +26,7 @@ module HTTP
       #
       # @param [#to_s] type
       # @param [#encode, #decode] adapter
+      # @api public
       # @return [void]
       def register_adapter(type, adapter)
         adapters[type.to_s] = adapter
@@ -33,8 +34,12 @@ module HTTP
 
       # Returns adapter associated with MIME type
       #
+      # @example
+      #   HTTP::MimeType["application/json"]
+      #
       # @param [#to_s] type
       # @raise [Error] if no adapter found
+      # @api public
       # @return [Class]
       def [](type)
         adapters[normalize type] || raise(UnsupportedMimeTypeError, "Unknown MIME type: #{type}")
@@ -48,6 +53,7 @@ module HTTP
       #
       # @param [#to_s] type
       # @param [#to_sym] shortcut
+      # @api public
       # @return [void]
       def register_alias(type, shortcut)
         aliases[shortcut.to_sym] = type.to_s
@@ -55,7 +61,11 @@ module HTTP
 
       # Resolves type by shortcut if possible
       #
+      # @example
+      #   HTTP::MimeType.normalize(:json)
+      #
       # @param [#to_s] type
+      # @api public
       # @return [String]
       def normalize(type)
         aliases.fetch type, type.to_s
@@ -63,12 +73,18 @@ module HTTP
 
       private
 
-      # :nodoc:
+      # Returns the adapters registry hash
+      #
+      # @api private
+      # @return [Hash]
       def adapters
         @adapters ||= {}
       end
 
-      # :nodoc:
+      # Returns the aliases registry hash
+      #
+      # @api private
+      # @return [Hash]
       def aliases
         @aliases ||= {}
       end

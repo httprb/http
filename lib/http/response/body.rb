@@ -12,11 +12,24 @@ module HTTP
 
       def_delegator :to_s, :empty?
 
-      # The connection object used to make the corresponding request.
+      # The connection object for the request
+      #
+      # @example
+      #   body.connection
       #
       # @return [HTTP::Connection]
+      # @api public
       attr_reader :connection
 
+      # Create a new Body instance
+      #
+      # @example
+      #   Body.new(stream, encoding: Encoding::UTF_8)
+      #
+      # @param stream [#readpartial] the response stream
+      # @param encoding [Encoding] the encoding to use
+      # @return [Body]
+      # @api public
       def initialize(stream, encoding: Encoding::BINARY)
         @stream     = stream
         @connection = stream.is_a?(Inflater) ? stream.connection : stream
@@ -25,7 +38,14 @@ module HTTP
         @encoding   = find_encoding(encoding)
       end
 
+      # Read a chunk of the body
+      #
+      # @example
+      #   body.readpartial # => "chunk of data"
+      #
       # (see HTTP::Client#readpartial)
+      # @return [String, nil]
+      # @api public
       def readpartial(*args)
         stream!
         chunk = @stream.readpartial(*args)
@@ -34,13 +54,27 @@ module HTTP
       end
 
       # Iterate over the body, allowing it to be enumerable
+      #
+      # @example
+      #   body.each { |chunk| puts chunk }
+      #
+      # @yield [chunk] Passes each chunk to the block
+      # @yieldparam chunk [String]
+      # @return [void]
+      # @api public
       def each
         while (chunk = readpartial)
           yield chunk
         end
       end
 
-      # @return [String] eagerly consume the entire body as a string
+      # Eagerly consume the entire body as a string
+      #
+      # @example
+      #   body.to_s # => "full response body"
+      #
+      # @return [String]
+      # @api public
       def to_s
         return @contents if @contents
 
@@ -64,6 +98,12 @@ module HTTP
       alias to_str to_s
 
       # Assert that the body is actively being streamed
+      #
+      # @example
+      #   body.stream!
+      #
+      # @return [true]
+      # @api public
       def stream!
         raise StateError, "body has already been consumed" if @streaming == false
 
@@ -71,13 +111,22 @@ module HTTP
       end
 
       # Easier to interpret string inspect
+      #
+      # @example
+      #   body.inspect # => "#<HTTP::Response::Body:3ff2 @streaming=false>"
+      #
+      # @return [String]
+      # @api public
       def inspect
         "#<#{self.class}:#{object_id.to_s(16)} @streaming=#{!!@streaming}>"
       end
 
       private
 
-      # Retrieve encoding by name. If encoding cannot be found, default to binary.
+      # Retrieve encoding by name
+      #
+      # @return [Encoding]
+      # @api private
       def find_encoding(encoding)
         Encoding.find encoding
       rescue ArgumentError

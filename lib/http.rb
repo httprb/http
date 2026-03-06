@@ -21,7 +21,16 @@ module HTTP
   extend Chainable
 
   class << self
-    # HTTP[:accept => 'text/html'].get(...)
+    # Set default headers and return a chainable client instance
+    #
+    # @example
+    #   HTTP[:accept => "text/html"].get("https://example.com")
+    #
+    # @param headers [Hash] headers to set
+    #
+    # @return [HTTP::Client]
+    #
+    # @api public
     alias [] headers
   end
 end

@@ -26,19 +26,34 @@ module HTTP
     # Verbs which will remain unchanged upon See Other response.
     SEE_OTHER_ALLOWED_VERBS = %i[get head].to_set.freeze
 
-    # @!attribute [r] strict
-    #   Returns redirector policy.
-    #   @return [Boolean]
+    # Returns redirector policy
+    #
+    # @example
+    #   redirector.strict # => true
+    #
+    # @return [Boolean]
+    # @api public
     attr_reader :strict
 
-    # @!attribute [r] max_hops
-    #   Returns maximum allowed hops.
-    #   @return [Fixnum]
+    # Returns maximum allowed hops
+    #
+    # @example
+    #   redirector.max_hops # => 5
+    #
+    # @return [Fixnum]
+    # @api public
     attr_reader :max_hops
 
+    # Initializes a new Redirector
+    #
+    # @example
+    #   HTTP::Redirector.new(strict: true, max_hops: 5)
+    #
     # @param [Hash] opts
     # @option opts [Boolean] :strict (true) redirector hops policy
     # @option opts [#to_i] :max_hops (5) maximum allowed amount of hops
+    # @api public
+    # @return [HTTP::Redirector]
     def initialize(opts = {})
       @strict      = opts.fetch(:strict, true)
       @max_hops    = opts.fetch(:max_hops, 5).to_i
@@ -46,6 +61,14 @@ module HTTP
     end
 
     # Follows redirects until non-redirect response found
+    #
+    # @example
+    #   redirector.perform(request, response) { |req| client.perform(req) }
+    #
+    # @param [HTTP::Request] request
+    # @param [HTTP::Response] response
+    # @api public
+    # @return [HTTP::Response]
     def perform(request, response)
       @request  = request
       @response = response
@@ -76,13 +99,19 @@ module HTTP
 
     private
 
-    # All known cookies. On the original request, this is only the original cookies, but after that,
-    # Set-Cookie headers can add, set or delete cookies.
+    # Returns the cookie jar for tracking cookies
+    #
+    # @api private
+    # @return [HTTP::CookieJar]
     def cookie_jar
       # it seems that @response.cookies instance is reused between responses, so we have to "clone"
       @cookie_jar ||= HTTP::CookieJar.new
     end
 
+    # Collects cookies from the current request
+    #
+    # @api private
+    # @return [void]
     def collect_cookies_from_request
       request_cookie_header = @request.headers["Cookie"]
       cookies =
@@ -97,11 +126,10 @@ module HTTP
       end
     end
 
-    # Carry cookies from one response to the next. Carrying cookies to the next response ends up
-    # carrying them to the next request as well.
+    # Carries cookies from response to the next request
     #
-    # Note that this isn't part of the IETF standard, but all major browsers support setting cookies
-    # on redirect: https://blog.dubbelboer.com/2012/11/25/302-cookie.html
+    # @api private
+    # @return [void]
     def collect_cookies_from_response
       # Overwrite previous cookies
       @response.cookies.each do |cookie|
@@ -119,18 +147,24 @@ module HTTP
     end
 
     # Check if we reached max amount of redirect hops
+    #
+    # @api private
     # @return [Boolean]
     def too_many_hops?
       1 <= @max_hops && @max_hops < @visited.count
     end
 
     # Check if we got into an endless loop
+    #
+    # @api private
     # @return [Boolean]
     def endless_loop?
       2 <= @visited.count(@visited.last)
     end
 
     # Redirect policy for follow
+    #
+    # @api private
     # @return [Request]
     def redirect_to(uri)
       raise StateError, "no Location header in redirect" unless uri
