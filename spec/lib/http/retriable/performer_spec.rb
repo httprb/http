@@ -168,18 +168,18 @@ RSpec.describe HTTP::Retriable::Performer do
 
       it "can be a positive number" do
         time, = measure_wait do
-          perform(delay: 0.1, tries: 3, should_retry: ->(*) { true })
+          perform(delay: 0.02, tries: 3, should_retry: ->(*) { true })
         rescue HTTP::OutOfRetriesError
         end
-        expect(time).to be_within(timing_slack).of(0.2)
+        expect(time).to be_within(timing_slack).of(0.04)
       end
 
       it "can be a proc number" do
         time, = measure_wait do
-          perform(delay: ->(attempt) { attempt / 10.0 }, tries: 3, should_retry: ->(*) { true })
+          perform(delay: ->(attempt) { attempt / 50.0 }, tries: 3, should_retry: ->(*) { true })
         rescue HTTP::OutOfRetriesError
         end
-        expect(time).to be_within(timing_slack).of(0.3)
+        expect(time).to be_within(timing_slack).of(0.06)
       end
 
       it "receives correct retry number when a proc" do

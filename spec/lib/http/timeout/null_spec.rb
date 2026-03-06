@@ -50,6 +50,28 @@ RSpec.describe HTTP::Timeout::Null do
       end
     end
 
+    context "when verify_mode is VERIFY_PEER and verify_hostname is true" do
+      let(:ssl_socket) { double(connect: nil) }
+      let(:ssl_context) do
+        ctx = OpenSSL::SSL::SSLContext.new
+        ctx.verify_mode = OpenSSL::SSL::VERIFY_PEER
+        ctx.verify_hostname = true
+        ctx
+      end
+
+      before do
+        allow(ssl_socket_class).to receive(:new).and_return(ssl_socket)
+        allow(ssl_socket).to receive(:hostname=)
+        allow(ssl_socket).to receive(:sync_close=)
+        allow(ssl_socket).to receive(:post_connection_check)
+      end
+
+      it "calls post_connection_check" do
+        expect(ssl_socket).to receive(:post_connection_check).with("example.com")
+        timeout.start_tls("example.com", ssl_socket_class, ssl_context)
+      end
+    end
+
     context "when verify_hostname is false" do
       let(:ssl_socket) { double(connect: nil) }
       let(:ssl_context) do

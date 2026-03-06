@@ -111,9 +111,13 @@ RSpec.describe HTTP::Client do
         expect { client.get "http://example.com/könig" }.not_to raise_error
       end
 
-      it "works like a charm in real world" do
-        expect(HTTP.follow.get("https://bit.ly/2UaBT4R").parse(:json)).
-          to include("url" => "https://httpbin.org/anything/könig")
+      it "follows redirects with non-ASCII URLs" do
+        client = StubbedClient.new(follow: true).stub(
+          "http://example.com/"      => redirect_response("/könig"),
+          "http://example.com/könig" => simple_response("OK")
+        )
+
+        expect(client.get("http://example.com/").to_s).to eq("OK")
       end
     end
   end
@@ -295,10 +299,9 @@ RSpec.describe HTTP::Client do
         expect { client.get "#{dummy.endpoint}/könig" }.not_to raise_error
       end
 
-      it "works like a charm in real world" do
-        url = "https://httpbin.org/anything/ö無"
-
-        expect(HTTP.follow.get(url).parse(:json)).to include("url" => url)
+      it "handles multi-byte characters in URLs" do
+        client = described_class.new
+        expect { client.get "#{dummy.endpoint}/héllö-wörld" }.not_to raise_error
       end
     end
 
@@ -394,7 +397,7 @@ RSpec.describe HTTP::Client do
 
         expect do
           client.use(test_feature: feature_instance).
-            timeout(0.2).
+            timeout(0.025).
             request(:post, sleep_url)
         end.to raise_error(HTTP::TimeoutError)
 

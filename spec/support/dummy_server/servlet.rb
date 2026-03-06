@@ -51,14 +51,14 @@ class DummyServer < WEBrick::HTTPServer
     end
 
     get "/sleep" do |_, res|
-      sleep 2
+      sleep 0.05
 
       res.status = 200
       res.body   = "hello"
     end
 
     post "/sleep" do |_, res|
-      sleep 2
+      sleep 0.05
 
       res.status = 200
       res.body   = "hello"

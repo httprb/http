@@ -309,7 +309,7 @@ RSpec.describe HTTP do
   end
 
   describe ".persistent" do
-    let(:host) { "https://api.github.com" }
+    let(:host) { dummy.endpoint }
 
     context "with host only given" do
       subject { HTTP.persistent host }
@@ -326,7 +326,7 @@ RSpec.describe HTTP do
       it "auto-closes connection" do
         HTTP.persistent host do |client|
           expect(client).to receive(:close).and_call_original
-          client.get("/repos/httprb/http.rb")
+          client.get("/")
         end
       end
     end
@@ -594,6 +594,8 @@ RSpec.describe HTTP do
   end
 
   it "unifies socket errors into HTTP::ConnectionError" do
+    allow(TCPSocket).to receive(:open).and_call_original
+    allow(TCPSocket).to receive(:open).with("thishostshouldnotexists.com", anything).and_raise(SocketError)
     expect { HTTP.get "http://thishostshouldnotexists.com" }.
       to raise_error HTTP::ConnectionError
 

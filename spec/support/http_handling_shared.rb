@@ -22,17 +22,17 @@ RSpec.shared_context "HTTP handling" do
         }
       }
     end
-    let(:conn_timeout) { 1 }
-    let(:read_timeout) { 1 }
-    let(:write_timeout) { 1 }
+    let(:conn_timeout) { 0.1 }
+    let(:read_timeout) { 0.1 }
+    let(:write_timeout) { 0.1 }
 
     it "works" do
       expect(response).to eq("<!doctype html>")
     end
 
     context "connection" do
-      context "of 1" do
-        let(:conn_timeout) { 1 }
+      context "of 0.1" do
+        let(:conn_timeout) { 0.1 }
 
         it "does not time out" do
           expect { response }.not_to raise_error
@@ -49,8 +49,8 @@ RSpec.shared_context "HTTP handling" do
         end
       end
 
-      context "of 2.5" do
-        let(:read_timeout) { 2.5 }
+      context "of 0.1" do
+        let(:read_timeout) { 0.1 }
 
         it "does not time out", :flaky do
           expect { client.get("#{server.endpoint}/sleep").body.to_s }.not_to raise_error
@@ -68,13 +68,13 @@ RSpec.shared_context "HTTP handling" do
         }
       }
     end
-    let(:global_timeout) { 1 }
+    let(:global_timeout) { 0.025 }
 
     let(:response) { client.get(server.endpoint).body.to_s }
 
     it "errors if connecting takes too long" do
       expect(TCPSocket).to receive(:open) do
-        sleep 1.25
+        sleep 0.05
       end
 
       expect { response }.to raise_error(HTTP::ConnectTimeoutError, /execution/)
@@ -88,7 +88,7 @@ RSpec.shared_context "HTTP handling" do
     context "it resets state when reusing connections" do
       let(:extra_options) { {persistent: server.endpoint} }
 
-      let(:global_timeout) { 2.5 }
+      let(:global_timeout) { 0.15 }
 
       it "does not timeout", :flaky do
         client.get("#{server.endpoint}/sleep").body.to_s
