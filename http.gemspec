@@ -28,13 +28,13 @@ Gem::Specification.new do |spec|
     extras = %w[CHANGELOG.md LICENSE.txt README.md SECURITY.md] << File.basename(__FILE__)
 
     ls.readlines("\x0", chomp: true).select do |f|
-      f.start_with?("lib/", "spec/") || extras.include?(f)
+      f.start_with?("lib/", "test/") || extras.include?(f)
     end
   end
 
   spec.bindir        = "exe"
   spec.executables   = spec.files.filter_map { |f| File.basename(f) if f.start_with?("exe/") }
-  spec.test_files    = spec.files.select { |f| f.start_with?("spec/") }
+  spec.test_files    = spec.files.select { |f| f.start_with?("test/") }
   spec.require_paths = ["lib"]
 
   spec.required_ruby_version = ">= 3.0"

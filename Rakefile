@@ -2,8 +2,12 @@
 
 require "bundler/gem_tasks"
 
-require "rspec/core/rake_task"
-RSpec::Core::RakeTask.new
+require "minitest/test_task"
+Minitest::TestTask.create do |t|
+  t.libs << "test"
+  t.test_globs = ["test/**/*_test.rb"]
+  t.framework = 'require "test_helper"'
+end
 
 require "rubocop/rake_task"
 RuboCop::RakeTask.new
@@ -61,4 +65,4 @@ task :generate_status_codes do
   end
 end
 
-task default: %i[spec rubocop verify_measurements]
+task default: %i[test rubocop verify_measurements]

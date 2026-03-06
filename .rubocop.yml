@@ -1,17 +1,16 @@
 plugins:
   - rubocop-performance
   - rubocop-rake
-  - rubocop-rspec
+  - rubocop-minitest
 
 inherit_from:
   - .rubocop_todo.yml
   - .rubocop/layout.yml
   - .rubocop/metrics.yml
-  - .rubocop/rspec.yml
+  - .rubocop/minitest.yml
   - .rubocop/style.yml
 
 AllCops:
-  DefaultFormatter: fuubar
   DisplayCopNames: true
   DisplayStyleGuide: true
   NewCops: enable

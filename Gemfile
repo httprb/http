@@ -6,7 +6,7 @@ ruby RUBY_VERSION
 gem "rake"
 
 # Ruby 3.0 does not ship it anymore.
-# TODO: We should probably refactor specs to avoid need for it.
+# TODO: We should probably refactor tests to avoid need for it.
 gem "webrick"
 
 group :development do
@@ -22,16 +22,16 @@ group :test do
   gem "backports"
 
   gem "rubocop",             "~> 1.85"
+  gem "rubocop-minitest",    "~> 0.36"
   gem "rubocop-performance", "~> 1.26"
   gem "rubocop-rake",        "~> 0.7.1"
-  gem "rubocop-rspec",       "~> 3.9"
 
   gem "simplecov",      require: false
   gem "simplecov-lcov", require: false
 
-  gem "rspec", "~> 3.10"
-  gem "rspec-its"
-  gem "rspec-memory"
+  gem "minitest"
+  gem "minitest-memory"
+  gem "minitest-mock"
 
   gem "yardstick"
 end

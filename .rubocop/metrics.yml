@@ -4,7 +4,7 @@ Metrics/BlockLength:
     - heredoc
     - method_call
   Exclude:
-    - 'spec/**/*.rb'
+    - 'test/**/*.rb'
     - '*.gemspec'
 
 Metrics/ClassLength:

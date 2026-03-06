@@ -3,12 +3,12 @@ Style/Documentation:
 
 Style/OneClassPerFile:
   Exclude:
-    - 'spec/**/*.rb'
+    - 'test/**/*.rb'
 
 Style/DocumentDynamicEvalDefinition:
   Enabled: true
   Exclude:
-    - 'spec/**/*.rb'
+    - 'test/**/*.rb'
 
 Style/FormatStringToken:
   Enabled: true
