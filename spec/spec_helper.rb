@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require_relative "./support/simplecov"
-require_relative "./support/fuubar" unless ENV["CI"]
 
 require "http"
 require "rspec/its"

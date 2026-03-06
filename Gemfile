@@ -13,9 +13,6 @@ group :development do
   gem "debug", platform: :mri
 
   gem "nokogiri", require: false
-
-  # RSpec formatter
-  gem "fuubar", require: false
 end
 
 group :test do
