@@ -12,6 +12,22 @@ RSpec.describe HTTP::Features::Logging do
 
   let(:logdev) { StringIO.new }
 
+  describe "NullLogger" do
+    subject(:null_logger) { HTTP::Features::Logging::NullLogger.new }
+
+    it "responds to log level methods" do
+      %i[fatal error warn info debug].each do |level|
+        expect(null_logger.public_send(level, "msg")).to be_nil
+      end
+    end
+
+    it "reports all levels as enabled" do
+      %i[fatal? error? warn? info? debug?].each do |level|
+        expect(null_logger.public_send(level)).to be true
+      end
+    end
+  end
+
   describe "logging the request" do
     let(:request) do
       HTTP::Request.new(

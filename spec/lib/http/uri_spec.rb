@@ -61,6 +61,44 @@ RSpec.describe HTTP::URI do
     end
   end
 
+  describe ".form_encode" do
+    it "encodes key/value pairs" do
+      expect(described_class.form_encode(foo: "bar", baz: "quux")).to eq "foo=bar&baz=quux"
+    end
+  end
+
+  describe "#initialize" do
+    it "raises TypeError for invalid argument" do
+      expect { described_class.new(42) }.to raise_error(TypeError, /expected Hash/)
+    end
+  end
+
+  describe "#http?" do
+    it "returns true for HTTP URIs" do
+      expect(http_uri.http?).to be true
+    end
+
+    it "returns false for HTTPS URIs" do
+      expect(https_uri.http?).to be false
+    end
+  end
+
+  describe "#eql?" do
+    it "returns true for equivalent URIs" do
+      expect(http_uri.eql?(described_class.parse(example_http_uri_string))).to be true
+    end
+
+    it "returns false for non-URI objects" do
+      expect(http_uri.eql?("http://example.com")).to be false
+    end
+  end
+
+  describe "#hash" do
+    it "returns an Integer" do
+      expect(http_uri.hash).to be_a(Integer)
+    end
+  end
+
   describe "#dup" do
     it "doesn't share internal value between duplicates" do
       duplicated_uri = http_uri.dup

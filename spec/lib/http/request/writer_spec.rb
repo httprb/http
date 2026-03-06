@@ -108,6 +108,16 @@ RSpec.describe HTTP::Request::Writer do
       end
     end
 
+    context "when body is nil on a POST request" do
+      let(:headerstart) { "POST /test HTTP/1.1" }
+      let(:body)        { HTTP::Request::Body.new(nil) }
+
+      it "sets Content-Length to 0" do
+        writer.stream
+        expect(io.string).to eq "POST /test HTTP/1.1\r\nContent-Length: 0\r\n\r\n"
+      end
+    end
+
     context "when writing to socket raises an exception" do
       before do
         expect(io).to receive(:write).and_raise(Errno::ECONNRESET)
@@ -116,6 +126,13 @@ RSpec.describe HTTP::Request::Writer do
       it "raises a ConnectionError" do
         expect { writer.stream }.to raise_error(HTTP::ConnectionError)
       end
+    end
+  end
+
+  describe "#connect_through_proxy" do
+    it "writes headers without body" do
+      writer.connect_through_proxy
+      expect(io.string).to eq "GET /test HTTP/1.1\r\n\r\n"
     end
   end
 end

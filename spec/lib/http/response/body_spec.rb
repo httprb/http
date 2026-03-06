@@ -55,6 +55,40 @@ RSpec.describe HTTP::Response::Body do
     end
   end
 
+  describe "#each" do
+    it "yields each chunk" do
+      collected = body.map { |chunk| chunk }
+      expect(collected.join).to eq "Hello, World!"
+    end
+  end
+
+  describe "#to_s" do
+    context "when an error occurs during reading" do
+      before do
+        allow(connection).to receive(:readpartial).and_raise(IOError, "read error")
+      end
+
+      it "re-raises the error and resets contents" do
+        expect { body.to_s }.to raise_error(IOError, "read error")
+        # After error, contents should be nil so to_s can be retried
+      end
+    end
+  end
+
+  describe "#inspect" do
+    it "includes streaming state" do
+      expect(body.inspect).to match(/@streaming=false/)
+    end
+  end
+
+  context "with invalid encoding" do
+    subject(:body) { described_class.new(connection, encoding: "nonexistent-encoding") }
+
+    it "falls back to binary encoding" do
+      expect(body.to_s.encoding).to eq Encoding::BINARY
+    end
+  end
+
   context "when body is gzipped" do
     subject(:body) do
       inflater = HTTP::Response::Inflater.new(connection)

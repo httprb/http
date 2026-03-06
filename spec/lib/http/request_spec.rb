@@ -231,6 +231,69 @@ RSpec.describe HTTP::Request do
     end
   end
 
+  describe "#connect_using_proxy" do
+    let(:proxy) do
+      {
+        proxy_address:  "proxy.example.com",
+        proxy_port:     8080,
+        proxy_username: "user",
+        proxy_password: "pass"
+      }
+    end
+    let(:request_uri) { "https://example.com/foo" }
+    let(:io) { StringIO.new }
+
+    it "writes a CONNECT request with proxy auth headers" do
+      request.connect_using_proxy(io)
+      output = io.string
+      expect(output).to include("CONNECT example.com:443 HTTP/1.1")
+      expect(output).to include("Proxy-Authorization: Basic")
+    end
+  end
+
+  describe "#proxy_connect_header" do
+    let(:request_uri) { "https://example.com/" }
+
+    it "returns CONNECT headline" do
+      expect(request.send(:proxy_connect_header)).to eq "CONNECT example.com:443 HTTP/1.1"
+    end
+  end
+
+  describe "#proxy_connect_headers" do
+    let(:request_uri) { "https://example.com/" }
+
+    context "with authenticated proxy" do
+      let(:proxy) do
+        {
+          proxy_address:  "proxy.example.com",
+          proxy_port:     8080,
+          proxy_username: "user",
+          proxy_password: "pass"
+        }
+      end
+
+      it "includes proxy authorization" do
+        headers = request.send(:proxy_connect_headers)
+        expect(headers["Proxy-Authorization"]).to match(/^Basic /)
+      end
+    end
+
+    context "with proxy headers" do
+      let(:proxy) do
+        {
+          proxy_address: "proxy.example.com",
+          proxy_port:    8080,
+          proxy_headers: {"X-Custom" => "value"}
+        }
+      end
+
+      it "includes custom proxy headers" do
+        headers = request.send(:proxy_connect_headers)
+        expect(headers["X-Custom"]).to eq "value"
+      end
+    end
+  end
+
   describe "#inspect" do
     subject { request.inspect }
 

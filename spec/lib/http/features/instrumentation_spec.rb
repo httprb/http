@@ -60,6 +60,18 @@ RSpec.describe HTTP::Features::Instrumentation do
     end
   end
 
+  describe "NullInstrumenter" do
+    subject(:null_instrumenter) { HTTP::Features::Instrumentation::NullInstrumenter.new }
+
+    it "#start returns true" do
+      expect(null_instrumenter.start("test", {})).to be true
+    end
+
+    it "#finish returns true" do
+      expect(null_instrumenter.finish("test", {})).to be true
+    end
+  end
+
   describe "logging errors" do
     let(:request) do
       HTTP::Request.new(

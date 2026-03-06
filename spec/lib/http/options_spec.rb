@@ -10,4 +10,17 @@ RSpec.describe HTTP::Options do
   it "coerces to a Hash" do
     expect(subject.to_hash).to be_a(Hash)
   end
+
+  describe "#with_encoding" do
+    it "finds encoding by name" do
+      opts = subject.with_encoding("UTF-8")
+      expect(opts.encoding).to eq Encoding::UTF_8
+    end
+  end
+
+  describe "#with_follow" do
+    it "raises error for unsupported follow options" do
+      expect { subject.with_follow(42) }.to raise_error(HTTP::Error, /Unsupported follow/)
+    end
+  end
 end

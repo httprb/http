@@ -363,6 +363,12 @@ RSpec.describe HTTP do
           to eq global_timeout: 123
       end
     end
+
+    context "with unsupported options" do
+      it "raises ArgumentError" do
+        expect { HTTP.timeout("invalid") }.to raise_error(ArgumentError)
+      end
+    end
   end
 
   describe ".cookies" do
@@ -525,6 +531,31 @@ RSpec.describe HTTP do
         response = client.get("#{dummy.endpoint}/héllö-wörld")
         expect(response.to_s).to eq("hello world")
       end
+    end
+  end
+
+  %i[put delete trace options connect patch].each do |verb|
+    describe ".#{verb}" do
+      it "delegates to #request" do
+        client = HTTP::Client.new
+        allow(HTTP::Client).to receive(:new).and_return(client)
+        expect(client).to receive(:request).with(verb, "http://example.com/", {})
+        HTTP.public_send(verb, "http://example.com/")
+      end
+    end
+  end
+
+  describe ".build_request" do
+    it "returns an HTTP::Request" do
+      req = HTTP.build_request(:get, "http://example.com/")
+      expect(req).to be_a HTTP::Request
+    end
+  end
+
+  describe ".encoding" do
+    it "returns a client with the specified encoding" do
+      client = HTTP::Client.new.encoding("UTF-8")
+      expect(client).to be_a HTTP::Client
     end
   end
 
