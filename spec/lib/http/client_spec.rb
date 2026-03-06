@@ -352,6 +352,7 @@ RSpec.describe HTTP::Client do
     end
 
     context "Feature" do
+      let(:client) { described_class.new }
       let(:feature_class) do
         Class.new(HTTP::Feature) do
           attr_reader :captured_request, :captured_response, :captured_error
@@ -459,11 +460,13 @@ RSpec.describe HTTP::Client do
     end
   end
 
-  include_context "HTTP handling" do
+  context "with HTTP handling" do
     let(:extra_options) { {} }
     let(:options) { {} }
     let(:server)  { dummy }
     let(:client)  { described_class.new(options.merge(extra_options)) }
+
+    include_context "HTTP handling"
   end
 
   # TODO: https://github.com/httprb/http/issues/627
@@ -476,9 +479,9 @@ RSpec.describe HTTP::Client do
       described_class.new options.merge(ssl_context: SSLHelper.client_context).merge(extra_options)
     end
 
-    include_context "HTTP handling" do
-      let(:server) { dummy_ssl }
-    end
+    let(:server) { dummy_ssl }
+
+    include_context "HTTP handling"
 
     it "just works" do
       response = client.get(dummy_ssl.endpoint)
