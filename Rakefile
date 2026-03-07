@@ -30,17 +30,19 @@ task :steep do
   exit Steep::CLI.new(argv: ["check", "--log-level=fatal"], stdout: $stdout, stderr: $stderr, stdin: $stdin).run
 end
 
+desc "Generate HTTP status codes from IANA registry"
 task :generate_status_codes do
   require "http"
   require "nokogiri"
 
   url = "http://www.iana.org/assignments/http-status-codes/http-status-codes.xml"
   xml = Nokogiri::XML HTTP.get url
+  excluded_descriptions = %w[Unassigned (Unused)]
   arr = xml.xpath("//xmlns:record").reduce([]) do |a, e|
     code = e.xpath("xmlns:value").text.to_s
     desc = e.xpath("xmlns:description").text.to_s
 
-    next a if %w[Unassigned (Unused)].include?(desc)
+    next a if excluded_descriptions.include?(desc)
 
     a << "#{code} => #{desc.inspect}"
   end

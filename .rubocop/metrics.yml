@@ -1,3 +1,7 @@
+Metrics/AbcSize:
+  Exclude:
+    - 'test/support/**/*.rb'
+
 Metrics/BlockLength:
   CountAsOne:
     - array
@@ -18,6 +22,8 @@ Metrics/MethodLength:
     - array
     - heredoc
     - method_call
+  Exclude:
+    - 'test/support/**/*.rb'
 
 Metrics/ModuleLength:
   CountAsOne:

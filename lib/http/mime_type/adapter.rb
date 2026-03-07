@@ -15,15 +15,29 @@ module HTTP
         def_delegators :instance, :encode, :decode # steep:ignore
       end
 
-      # rubocop:disable Style/DocumentDynamicEvalDefinition
-      %w[encode decode].each do |operation|
-        class_eval <<-RUBY, __FILE__, __LINE__ + 1
-          def #{operation}(*)
-            fail Error, "\#{self.class} does not supports ##{operation}"
-          end
-        RUBY
+      # Encodes data into the MIME type format
+      #
+      # @example
+      #   adapter.encode("foo" => "bar")
+      #
+      # @return [String] encoded representation
+      # @raise [Error] if not implemented by subclass
+      # @api public
+      def encode(*)
+        raise Error, "#{self.class} does not supports #encode"
       end
-      # rubocop:enable Style/DocumentDynamicEvalDefinition
+
+      # Decodes data from the MIME type format
+      #
+      # @example
+      #   adapter.decode("{\"foo\":\"bar\"}")
+      #
+      # @return [Object] decoded data
+      # @raise [Error] if not implemented by subclass
+      # @api public
+      def decode(*)
+        raise Error, "#{self.class} does not supports #decode"
+      end
     end
   end
 end

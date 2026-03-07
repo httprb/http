@@ -19,17 +19,7 @@ module HTTP
       def wrap_response(response)
         return response unless supported_encoding?(response)
 
-        options = {
-          status:        response.status,
-          version:       response.version,
-          headers:       response.headers,
-          proxy_headers: response.proxy_headers,
-          connection:    response.connection,
-          body:          stream_for(response.connection),
-          request:       response.request
-        }
-
-        Response.new(options)
+        Response.new(inflated_response_options(response))
       end
 
       # Returns an inflating body stream for a connection
@@ -45,6 +35,20 @@ module HTTP
       end
 
       private
+
+      # Build options hash for an inflated response
+      # @api private
+      def inflated_response_options(response)
+        {
+          status:        response.status,
+          version:       response.version,
+          headers:       response.headers,
+          proxy_headers: response.proxy_headers,
+          connection:    response.connection,
+          body:          stream_for(response.connection),
+          request:       response.request
+        }
+      end
 
       # Check if the response encoding is supported
       # @api private

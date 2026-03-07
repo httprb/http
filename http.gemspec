@@ -32,9 +32,6 @@ Gem::Specification.new do |spec|
     end
   end
 
-  spec.bindir        = "exe"
-  spec.executables   = spec.files.filter_map { |f| File.basename(f) if f.start_with?("exe/") }
-  spec.test_files    = spec.files.select { |f| f.start_with?("test/") }
   spec.require_paths = ["lib"]
 
   spec.required_ruby_version = ">= 3.0"

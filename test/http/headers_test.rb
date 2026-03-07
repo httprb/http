@@ -438,7 +438,7 @@ describe HTTP::Headers do
     end
 
     it "returns self instance if block given" do
-      assert_same(headers, headers.each { |*| }) # rubocop:disable Lint/EmptyBlock
+      assert_same(headers, headers.each { |*| nil })
     end
 
     it "returns Enumerator if no block given" do
@@ -505,7 +505,7 @@ describe HTTP::Headers do
     it "allows comparison with Array of key/value pairs" do
       left.add :accept, "text/plain"
 
-      assert_equal left, [%w[Accept text/plain]] # rubocop:disable Minitest/LiteralAsActualArgument
+      assert_equal [%w[Accept text/plain]], left.to_a
     end
 
     it "sensitive to headers order" do

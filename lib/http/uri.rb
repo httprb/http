@@ -84,7 +84,7 @@ module HTTP
     #
     # @api public
     # @return [String] encoded value
-    def self.form_encode(form_values, sort = false)
+    def self.form_encode(form_values, sort: false)
       Addressable::URI.form_encode(form_values, sort)
     end
 
@@ -167,7 +167,7 @@ module HTTP
     # @api public
     # @return [Integer] A hash of the URI
     def hash
-      @hash ||= String(self).hash * -1
+      @hash ||= [self.class, String(self)].hash
     end
 
     # Sets the host component for the URI

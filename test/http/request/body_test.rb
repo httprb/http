@@ -98,11 +98,35 @@ describe HTTP::Request::Body do
     end
   end
 
+  describe "#empty?" do
+    context "when body is nil" do
+      let(:body) { nil }
+
+      it "returns true" do
+        assert_predicate subject_under_test, :empty?
+      end
+    end
+
+    context "when body is a string" do
+      let(:body) { "content" }
+
+      it "returns false" do
+        refute_predicate subject_under_test, :empty?
+      end
+    end
+
+    context "when body is an empty string" do
+      let(:body) { "" }
+
+      it "returns false" do
+        refute_predicate subject_under_test, :empty?
+      end
+    end
+  end
+
   describe "#each" do
     let(:chunks) do
-      chunks = []
-      subject_under_test.each { |chunk| chunks << chunk.dup } # rubocop:disable Style/MapIntoArray
-      chunks
+      subject_under_test.enum_for(:each).map(&:dup)
     end
 
     context "when body is nil" do
@@ -221,7 +245,7 @@ describe HTTP::Request::Body do
       let(:body) { "content" }
 
       it "returns self" do
-        assert_same(subject_under_test, subject_under_test.each { |_| })
+        assert_same(subject_under_test, subject_under_test.each { |_| nil })
       end
     end
 
@@ -229,7 +253,7 @@ describe HTTP::Request::Body do
       let(:body) { nil }
 
       it "returns self" do
-        assert_same(subject_under_test, subject_under_test.each { |_| })
+        assert_same(subject_under_test, subject_under_test.each { |_| nil })
       end
     end
 
@@ -237,7 +261,7 @@ describe HTTP::Request::Body do
       let(:body) { StringIO.new("io content") }
 
       it "returns self" do
-        assert_same(subject_under_test, subject_under_test.each { |_| })
+        assert_same(subject_under_test, subject_under_test.each { |_| nil })
       end
     end
 
@@ -245,7 +269,7 @@ describe HTTP::Request::Body do
       let(:body) { %w[bees cows] }
 
       it "returns self" do
-        assert_same(subject_under_test, subject_under_test.each { |_| })
+        assert_same(subject_under_test, subject_under_test.each { |_| nil })
       end
     end
   end
@@ -294,8 +318,7 @@ describe HTTP::Request::Body do
     end
 
     it "yields the string in #each" do
-      chunks = []
-      subject_under_test.each { |chunk| chunks << chunk.dup }
+      chunks = subject_under_test.enum_for(:each).map(&:dup)
 
       assert_equal ["subclass body"], chunks
     end

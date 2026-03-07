@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "http/base64"
+require "http/chainable/helpers"
 require "http/headers"
 
 module HTTP
@@ -169,15 +170,12 @@ module HTTP
                        when Numeric then [HTTP::Timeout::Global, { global: options }]
                        when Hash    then [HTTP::Timeout::PerOperation, options.dup]
                        when :null   then [HTTP::Timeout::Null, {}]
-                       else raise ArgumentError, "Use `.timeout(global_timeout_in_seconds)` or `.timeout(connect: x, write: y, read: z)`."
-
+                       else raise ArgumentError,
+                                  "Use `.timeout(global_timeout_in_seconds)` " \
+                                  "or `.timeout(connect: x, write: y, read: z)`."
                        end
 
-      %i[global read write connect].each do |k|
-        next unless options.key? k
-
-        options[:"#{k}_timeout"] = options.delete k
-      end
+      normalize_timeout_keys!(options)
 
       branch default_options.merge(
         timeout_class:   klass,
@@ -223,8 +221,7 @@ module HTTP
     # @return [HTTP::Client, Object]
     # @api public
     def persistent(host, timeout: 5)
-      options  = { keep_alive_timeout: timeout }
-      p_client = branch default_options.merge(options).with_persistent host
+      p_client = branch default_options.merge(keep_alive_timeout: timeout).with_persistent(host)
       return p_client unless block_given?
 
       yield p_client
@@ -242,13 +239,7 @@ module HTTP
     # @return [HTTP::Client]
     # @api public
     def via(*proxy)
-      proxy_hash = {} #: Hash[Symbol, untyped]
-      proxy_hash[:proxy_address]  = proxy[0] if proxy[0].is_a?(String)
-      proxy_hash[:proxy_port]     = proxy[1] if proxy[1].is_a?(Integer)
-      proxy_hash[:proxy_username] = proxy[2] if proxy[2].is_a?(String)
-      proxy_hash[:proxy_password] = proxy[3] if proxy[3].is_a?(String)
-      proxy_hash[:proxy_headers]  = proxy[2] if proxy[2].is_a?(Hash)
-      proxy_hash[:proxy_headers]  = proxy[4] if proxy[4].is_a?(Hash)
+      proxy_hash = build_proxy_hash(proxy)
 
       raise(RequestError, "invalid HTTP proxy: #{proxy_hash}") unless (2..5).cover?(proxy_hash.keys.size)
 

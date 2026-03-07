@@ -2,12 +2,14 @@
 
 require "forwardable"
 
+require "http/connection/internals"
 require "http/headers"
 
 module HTTP
   # A connection to the HTTP server
   class Connection
     extend Forwardable
+    include Internals
 
     # Allowed values for CONNECTION header
     KEEP_ALIVE = "Keep-Alive"
@@ -42,21 +44,8 @@ module HTTP
     # @raise [HTTP::ConnectionError] when failed to connect
     # @api public
     def initialize(req, options)
-      @persistent           = options.persistent?
-      @keep_alive_timeout   = options.keep_alive_timeout.to_f
-      @pending_request      = false
-      @pending_response     = false
-      @failed_proxy_connect = false
-      @buffer               = "".b
-
-      @parser = Response::Parser.new
-
-      @socket = options.timeout_class.new(options.timeout_options) # steep:ignore
-      @socket.connect(options.socket_class, req.socket_host, req.socket_port, options.nodelay)
-
-      send_proxy_connect_request(req)
-      start_tls(req, options)
-      reset_timer
+      init_state(options)
+      connect_socket(req, options)
     rescue IOError, SocketError, SystemCallError => e
       raise ConnectionError, "failed to connect: #{e}", e.backtrace
     rescue TimeoutError
@@ -213,88 +202,29 @@ module HTTP
 
     private
 
-    # Sets up SSL context and starts TLS if needed
-    # @param (see #initialize)
+    # Initialize connection state
     # @return [void]
     # @api private
-    def start_tls(req, options)
-      return unless req.uri.https? && !failed_proxy_connect?
-
-      ssl_context = options.ssl_context
-
-      unless ssl_context
-        ssl_context = OpenSSL::SSL::SSLContext.new
-        ssl_context.set_params(options.ssl || {})
-      end
-
-      @socket.start_tls(req.uri.host, options.ssl_socket_class, ssl_context)
+    def init_state(options)
+      @persistent           = options.persistent?
+      @keep_alive_timeout   = options.keep_alive_timeout.to_f
+      @pending_request      = false
+      @pending_response     = false
+      @failed_proxy_connect = false
+      @buffer               = "".b
+      @parser               = Response::Parser.new
     end
 
-    # Open tunnel through proxy
+    # Connect socket and set up proxy/TLS
     # @return [void]
     # @api private
-    def send_proxy_connect_request(req)
-      return unless req.uri.https? && req.using_proxy?
+    def connect_socket(req, options)
+      @socket = options.timeout_class.new(options.timeout_options) # steep:ignore
+      @socket.connect(options.socket_class, req.socket_host, req.socket_port, nodelay: options.nodelay)
 
-      @pending_request = true
-
-      req.connect_using_proxy @socket
-
-      @pending_request  = false
-      @pending_response = true
-
-      read_headers!
-      @proxy_response_headers = @parser.headers
-
-      if @parser.status_code != 200
-        @failed_proxy_connect = true
-        return
-      end
-
-      @parser.reset
-      @pending_response = false
-    end
-
-    # Resets expiration of persistent connection
-    # @return [void]
-    # @api private
-    def reset_timer
-      @conn_expires_at = Time.now + @keep_alive_timeout if @persistent
-    end
-
-    # Store keep-alive state from parser
-    # @return [void]
-    # @api private
-    def set_keep_alive
-      return @keep_alive = false unless @persistent
-
-      @keep_alive =
-        case @parser.http_version
-        when HTTP_1_0 # HTTP/1.0 requires opt in for Keep Alive
-          @parser.headers[Headers::CONNECTION] == KEEP_ALIVE
-        when HTTP_1_1 # HTTP/1.1 is opt-out
-          @parser.headers[Headers::CONNECTION] != CLOSE
-        else # Anything else we assume doesn't support it
-          false
-        end
-    end
-
-    # Feeds some more data into parser
-    # @return [void]
-    # @raise [SocketReadError] when unable to read from socket
-    # @api private
-    def read_more(size)
-      return if @parser.finished?
-
-      value = @socket.readpartial(size, @buffer)
-      if value == :eof
-        @parser << ""
-        :eof
-      elsif value
-        @parser << value
-      end
-    rescue IOError, SocketError, SystemCallError => e
-      raise SocketReadError, "error reading from socket: #{e}", e.backtrace
+      send_proxy_connect_request(req)
+      start_tls(req, options)
+      reset_timer
     end
   end
 end

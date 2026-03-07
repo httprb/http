@@ -24,10 +24,9 @@ module HTTP
       # @return [Headers]
       # @api public
       def coerce(object)
-        object = case
-                 when object.respond_to?(:to_hash) then object.to_hash
-                 when object.respond_to?(:to_h)    then object.to_h
-                 when object.respond_to?(:to_a)    then object.to_a
+        object = if    object.respond_to?(:to_hash) then object.to_hash
+                 elsif object.respond_to?(:to_h)    then object.to_h
+                 elsif object.respond_to?(:to_a)    then object.to_a
                  else raise Error, "Can't coerce #{object.inspect} to Headers"
                  end
 
@@ -125,14 +124,8 @@ module HTTP
     # @api public
     def add(name, value)
       lookup_name = normalize_header(name)
-      wire_name = case name
-                  when String
-                    name
-                  when Symbol
-                    lookup_name
-                  else
-                    raise HeaderError, "HTTP header must be a String or Symbol: #{name.inspect}"
-                  end
+      wire_name = wire_name_for(name, lookup_name)
+
       Array(value).each do |v|
         @pile << [
           lookup_name,
@@ -292,7 +285,8 @@ module HTTP
     # @api public
     def merge!(other)
       coerced = self.class.coerce(other)
-      coerced.keys.each { |name| set name, coerced.get(name) }
+      names = coerced.keys
+      names.each { |name| set name, coerced.get(name) }
     end
 
     # Returns new instance with other headers merged in
@@ -308,6 +302,18 @@ module HTTP
     end
 
     private
+
+    # Returns the wire name for a header
+    #
+    # @return [String]
+    # @api private
+    def wire_name_for(name, lookup_name)
+      case name
+      when String then name
+      when Symbol then lookup_name
+      else raise HeaderError, "HTTP header must be a String or Symbol: #{name.inspect}"
+      end
+    end
 
     # Transforms name to canonical HTTP header capitalization
     #

@@ -9,28 +9,28 @@ require "support/http_handling_shared"
 require "support/dummy_server"
 require "support/ssl_helper"
 
+StubbedClient = Class.new(HTTP::Client) do
+  def perform(request, options)
+    stubbed = stubs[HTTP::URI::NORMALIZER.call(request.uri).to_s]
+    stubbed ? stubbed.call(request) : super
+  end
+
+  def stubs
+    @stubs ||= {}
+  end
+
+  def stub(stubs)
+    @stubs = stubs.transform_keys do |k|
+      HTTP::URI::NORMALIZER.call(k).to_s
+    end
+
+    self
+  end
+end
+
 describe HTTP::Client do
   cover "HTTP::Client*"
   run_server(:dummy) { DummyServer.new }
-
-  StubbedClient = Class.new(HTTP::Client) do # rubocop:disable Lint/ConstantDefinitionInBlock
-    def perform(request, options)
-      stubbed = stubs[HTTP::URI::NORMALIZER.call(request.uri).to_s]
-      stubbed ? stubbed.call(request) : super
-    end
-
-    def stubs
-      @stubs ||= {}
-    end
-
-    def stub(stubs)
-      @stubs = stubs.transform_keys do |k|
-        HTTP::URI::NORMALIZER.call(k).to_s
-      end
-
-      self
-    end
-  end
 
   def capture_request(client, &block)
     captured_req = nil
@@ -389,7 +389,8 @@ describe HTTP::Client do
               attr_reader :order
             end
 
-            def initialize(id:) # rubocop:disable Lint/MissingSuper
+            def initialize(id:)
+              super()
               @id = id
             end
 

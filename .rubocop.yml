@@ -4,7 +4,6 @@ plugins:
   - rubocop-minitest
 
 inherit_from:
-  - .rubocop_todo.yml
   - .rubocop/layout.yml
   - .rubocop/metrics.yml
   - .rubocop/minitest.yml
@@ -15,3 +14,9 @@ AllCops:
   DisplayStyleGuide: true
   NewCops: enable
   TargetRubyVersion: 3.0
+
+# Feature has no initialize, so super() is a no-op in subclasses
+Lint/MissingSuper:
+  AllowedParentClasses:
+    - BasicObject
+    - Feature

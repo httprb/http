@@ -173,8 +173,9 @@ describe HTTP::Retriable::Performer do
 
       it "can be a positive number" do
         time, = measure_wait do
-          perform(delay: 0.02, tries: 3, should_retry: ->(*) { true })
-        rescue HTTP::OutOfRetriesError # rubocop:disable Lint/SuppressedException
+          assert_raises(HTTP::OutOfRetriesError) do
+            perform(delay: 0.02, tries: 3, should_retry: ->(*) { true })
+          end
         end
 
         assert_in_delta 0.04, time, timing_slack
@@ -182,8 +183,9 @@ describe HTTP::Retriable::Performer do
 
       it "can be a proc number" do
         time, = measure_wait do
-          perform(delay: ->(attempt) { attempt / 50.0 }, tries: 3, should_retry: ->(*) { true })
-        rescue HTTP::OutOfRetriesError # rubocop:disable Lint/SuppressedException
+          assert_raises(HTTP::OutOfRetriesError) do
+            perform(delay: ->(attempt) { attempt / 50.0 }, tries: 3, should_retry: ->(*) { true })
+          end
         end
 
         assert_in_delta 0.06, time, timing_slack
@@ -196,12 +198,11 @@ describe HTTP::Retriable::Performer do
           assert_operator attempt, :>, 0
           0
         end
-        begin
+        assert_raises(HTTP::OutOfRetriesError) do
           perform(delay: retry_proc, should_retry: ->(*) { true }) do
             retry_count += 1
             response
           end
-        rescue HTTP::OutOfRetriesError # rubocop:disable Lint/SuppressedException
         end
       end
     end
@@ -225,7 +226,8 @@ describe HTTP::Retriable::Performer do
           perform(should_retry: retry_proc) do
             rand < 0.5 ? response : raise(CustomException)
           end
-        rescue CustomException # rubocop:disable Lint/SuppressedException
+        rescue CustomException
+          nil
         end
 
         assert_equal 5, counter_spy
@@ -282,9 +284,8 @@ describe HTTP::Retriable::Performer do
       close_count = 0
       mock_client = fake(close: ->(*) { close_count += 1 })
 
-      begin
+      assert_raises(HTTP::OutOfRetriesError) do
         perform({ should_retry: ->(*) { true }, tries: 3 }, mock_client)
-      rescue HTTP::OutOfRetriesError # rubocop:disable Lint/SuppressedException
       end
 
       assert_equal 3, close_count
@@ -294,11 +295,10 @@ describe HTTP::Retriable::Performer do
       close_count = 0
       mock_client = fake(close: ->(*) { close_count += 1 })
 
-      begin
+      assert_raises(CustomException) do
         perform({}, mock_client) do
           raise CustomException
         end
-      rescue CustomException # rubocop:disable Lint/SuppressedException
       end
 
       assert_equal 1, close_count

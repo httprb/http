@@ -69,35 +69,57 @@ module HTTP
     # @param [HTTP::Response] response
     # @api public
     # @return [HTTP::Response]
-    def perform(request, response)
+    def perform(request, response, &block)
       @request  = request
       @response = response
       @visited  = []
       collect_cookies_from_request
       collect_cookies_from_response
 
-      while REDIRECT_CODES.include? @response.code
-        @visited << "#{@request.verb} #{@request.uri}"
-
-        raise TooManyRedirectsError if too_many_hops?
-        raise EndlessRedirectError  if endless_loop?
-
-        @response.flush
-
-        # XXX(ixti): using `Array#inject` to return `nil` if no Location header.
-        @request = redirect_to(@response.headers.get(Headers::LOCATION).inject(:+))
-        unless cookie_jar.empty?
-          @request.headers.set(Headers::COOKIE, cookie_jar.map { |c| "#{c.name}=#{c.value}" }.join("; "))
-        end
-        @on_redirect&.call @response, @request
-        @response = yield @request
-        collect_cookies_from_response
-      end
+      follow_redirects(&block) while REDIRECT_CODES.include?(@response.code)
 
       @response
     end
 
     private
+
+    # Perform a single redirect step
+    #
+    # @api private
+    # @return [void]
+    def follow_redirects
+      @visited << "#{@request.verb} #{@request.uri}"
+
+      raise TooManyRedirectsError if too_many_hops?
+      raise EndlessRedirectError  if endless_loop?
+
+      @response.flush
+
+      @request = redirect_to(redirect_uri)
+      apply_cookies_to_request
+      @on_redirect&.call @response, @request
+      @response = yield @request
+      collect_cookies_from_response
+    end
+
+    # Apply cookies to the current request
+    #
+    # @api private
+    # @return [void]
+    def apply_cookies_to_request
+      return if cookie_jar.empty?
+
+      @request.headers.set(Headers::COOKIE, cookie_jar.map { |c| "#{c.name}=#{c.value}" }.join("; "))
+    end
+
+    # Extracts the redirect URI from the Location header
+    #
+    # @api private
+    # @return [String, nil] URI string or nil if no Location header
+    def redirect_uri
+      location = @response.headers.get(Headers::LOCATION)
+      location.join unless location.empty?
+    end
 
     # Returns the cookie jar for tracking cookies
     #

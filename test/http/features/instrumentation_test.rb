@@ -8,7 +8,8 @@ describe HTTP::Features::Instrumentation do
     Class.new(HTTP::Features::Instrumentation::NullInstrumenter) do
       attr_reader :output
 
-      def initialize # rubocop:disable Lint/MissingSuper
+      def initialize
+        super
         @output = {}
       end
 
@@ -63,12 +64,12 @@ describe HTTP::Features::Instrumentation do
   describe "NullInstrumenter" do
     let(:null_instrumenter) { HTTP::Features::Instrumentation::NullInstrumenter.new }
 
-    it "#start returns true" do
-      assert null_instrumenter.start("test", {})
+    it "#start is callable" do
+      null_instrumenter.start("test", {})
     end
 
-    it "#finish returns true" do
-      assert null_instrumenter.finish("test", {})
+    it "#finish is callable" do
+      null_instrumenter.finish("test", {})
     end
 
     it "#instrument yields the block when given" do

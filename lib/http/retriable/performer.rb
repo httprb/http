@@ -53,20 +53,9 @@ module HTTP
           err, res = try_request(&block)
 
           if retry_request?(req, err, res, attempt)
-            begin
-              wait_for_retry_or_raise(req, err, res, attempt)
-            ensure
-              # Some servers support Keep-Alive on any response. Thus we should
-              # flush response before retry, to avoid state error (when socket
-              # has pending response data and we try to write new request).
-              # Alternatively, as we don't need response body here at all, we
-              # are going to close client, effectivle closing underlying socket
-              # and resetting client's state.
-              client.close
-            end
+            retry_attempt(client, req, err, res, attempt)
           elsif err
-            client.close
-            raise err
+            finish_attempt(client, err)
           elsif res
             return res
           end
@@ -84,6 +73,31 @@ module HTTP
       end
 
       private
+
+      # Executes a single retry attempt
+      #
+      # @api private
+      # @return [void]
+      def retry_attempt(client, req, err, res, attempt)
+        # Some servers support Keep-Alive on any response. Thus we should
+        # flush response before retry, to avoid state error (when socket
+        # has pending response data and we try to write new request).
+        # Alternatively, as we don't need response body here at all, we
+        # are going to close client, effectively closing underlying socket
+        # and resetting client's state.
+        wait_for_retry_or_raise(req, err, res, attempt)
+      ensure
+        client.close
+      end
+
+      # Closes client and raises the error
+      #
+      # @api private
+      # @return [void]
+      def finish_attempt(client, err)
+        client.close
+        raise err
+      end
 
       # Attempts to execute the request block
       #

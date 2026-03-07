@@ -8,6 +8,7 @@ require "http/timeout/null"
 module HTTP
   module Timeout
     class Global < Null
+      WAIT_RESULTS = %i[wait_readable wait_writable].freeze
       # Initializes global timeout with options
       #
       # @example
@@ -44,7 +45,7 @@ module HTTP
       # @param [Boolean] nodelay
       # @api public
       # @return [void]
-      def connect(socket_class, host, port, nodelay = false)
+      def connect(socket_class, host, port, nodelay: false)
         reset_timer
         ::Timeout.timeout(@time_left, ConnectTimeoutError) do
           @socket = socket_class.open(host, port)
@@ -129,20 +130,34 @@ module HTTP
 
         loop do
           result = yield
+          return handle_io_result(result) unless WAIT_RESULTS.include?(result)
 
-          case result
-          when :wait_readable then wait_readable_or_timeout
-          when :wait_writable then wait_writable_or_timeout
-          when NilClass       then return :eof
-          else                return result
-          end
-        rescue IO::WaitReadable
-          wait_readable_or_timeout
-        rescue IO::WaitWritable
-          wait_writable_or_timeout
+          wait_for_io(result)
+        rescue IO::WaitReadable then wait_readable_or_timeout
+        rescue IO::WaitWritable then wait_writable_or_timeout
         end
       rescue EOFError
         :eof
+      end
+
+      # Handles the result of an I/O operation
+      #
+      # @api private
+      # @return [Object, Symbol]
+      def handle_io_result(result)
+        result.nil? ? :eof : result
+      end
+
+      # Waits for an I/O readiness based on the result type
+      #
+      # @api private
+      # @return [void]
+      def wait_for_io(result)
+        if result == :wait_readable
+          wait_readable_or_timeout
+        else
+          wait_writable_or_timeout
+        end
       end
 
       # Waits for a socket to become readable

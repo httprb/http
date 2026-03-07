@@ -139,6 +139,18 @@ describe HTTP::MimeType do
     end
   end
 
+  describe HTTP::MimeType::Adapter do
+    it "raises Error on #encode with class name in message" do
+      err = assert_raises(HTTP::Error) { HTTP::MimeType::Adapter.instance.encode("data") }
+      assert_equal "HTTP::MimeType::Adapter does not supports #encode", err.message
+    end
+
+    it "raises Error on #decode with class name in message" do
+      err = assert_raises(HTTP::Error) { HTTP::MimeType::Adapter.instance.decode("data") }
+      assert_equal "HTTP::MimeType::Adapter does not supports #decode", err.message
+    end
+  end
+
   describe "built-in JSON registration" do
     it "has JSON adapter registered for application/json" do
       assert_equal HTTP::MimeType::JSON, HTTP::MimeType["application/json"]

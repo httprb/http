@@ -82,14 +82,7 @@ module HTTP
 
         begin
           @streaming = false
-          contents   = String.new("", encoding: @encoding)
-
-          while (chunk = @stream.readpartial)
-            contents << String.new(chunk, encoding: @encoding)
-            chunk = nil # deallocate string
-          end
-
-          @contents = contents
+          @contents = read_contents
         rescue
           @contents = nil
           raise
@@ -124,6 +117,21 @@ module HTTP
       end
 
       private
+
+      # Read all chunks into a single string
+      #
+      # @return [String]
+      # @api private
+      def read_contents
+        contents = String.new("", encoding: @encoding)
+
+        while (chunk = @stream.readpartial)
+          contents << String.new(chunk, encoding: @encoding)
+          chunk = nil # deallocate string
+        end
+
+        contents
+      end
 
       # Retrieve encoding by name
       #

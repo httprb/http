@@ -2,6 +2,7 @@
 
 require "forwardable"
 
+require "http/client/request_builder"
 require "http/form_data"
 require "http/options"
 require "http/feature"
@@ -15,6 +16,7 @@ module HTTP
   class Client
     extend Forwardable
     include Chainable
+    include RequestBuilder
 
     HTTP_OR_HTTPS_RE = %r{^https?://}i
 
@@ -106,24 +108,8 @@ module HTTP
 
       @state = :dirty
 
-      begin
-        @connection ||= HTTP::Connection.new(req, options)
-
-        unless @connection.failed_proxy_connect?
-          @connection.send_request(req)
-          @connection.read_headers!
-        end
-      rescue Error => e
-        options.features.each_value do |feature|
-          feature.on_error(req, e)
-        end
-        raise
-      end
-      res = build_response(req, options)
-
-      res = options.features.values.reverse.inject(res) do |response, feature|
-        feature.wrap_response(response)
-      end
+      send_request(req, options)
+      res = build_wrapped_response(req, options)
 
       @connection.finish_response if req.verb == :head
       @state = :clean
@@ -148,6 +134,34 @@ module HTTP
     end
 
     private
+
+    # Send request over the connection, handling proxy and errors
+    # @return [void]
+    # @api private
+    def send_request(req, options)
+      @connection ||= HTTP::Connection.new(req, options)
+
+      unless @connection.failed_proxy_connect?
+        @connection.send_request(req)
+        @connection.read_headers!
+      end
+    rescue Error => e
+      options.features.each_value do |feature|
+        feature.on_error(req, e)
+      end
+      raise
+    end
+
+    # Build response and apply feature wrapping
+    # @return [HTTP::Response] the wrapped response
+    # @api private
+    def build_wrapped_response(req, options)
+      res = build_response(req, options)
+
+      options.features.values.reverse.inject(res) do |response, feature|
+        feature.wrap_response(response)
+      end
+    end
 
     # Wrap request through feature middleware
     # @return [HTTP::Request] the wrapped request
@@ -189,78 +203,6 @@ module HTTP
       # If we get into a bad state (eg, Timeout.timeout ensure being killed)
       # close the connection to prevent potential for mixed responses.
       close if @state == :dirty
-    end
-
-    # Merges query params if needed
-    #
-    # @param uri [#to_s] the URI to process
-    # @param opts [HTTP::Options] request options
-    # @return [HTTP::URI] the constructed URI
-    # @api private
-    def make_request_uri(uri, opts)
-      uri = uri.to_s
-
-      uri = "#{default_options.persistent}#{uri}" if default_options.persistent? && uri !~ HTTP_OR_HTTPS_RE
-
-      uri = HTTP::URI.parse uri
-
-      uri.query_values = uri.query_values(Array).to_a.concat(opts.params.to_a) if opts.params && !opts.params.empty?
-
-      # Some proxies (seen on WEBRick) fail if URL has
-      # empty path (e.g. `http://example.com`) while it's RFC-complaint:
-      # http://tools.ietf.org/html/rfc1738#section-3.1
-      uri.path = "/" if uri.path.empty?
-
-      uri
-    end
-
-    # Creates request headers with cookies (if any) merged in
-    #
-    # @return [HTTP::Headers] the constructed headers
-    # @api private
-    def make_request_headers(opts)
-      headers = opts.headers
-
-      # Tell the server to keep the conn open
-      headers[Headers::CONNECTION] = default_options.persistent? ? Connection::KEEP_ALIVE : Connection::CLOSE
-
-      cookies = opts.cookies.values
-
-      unless cookies.empty?
-        cookies = opts.headers.get(Headers::COOKIE).concat(cookies).join("; ")
-        headers[Headers::COOKIE] = cookies
-      end
-
-      headers
-    end
-
-    # Create the request body object to send
-    #
-    # @return [String, HTTP::FormData, nil] the request body
-    # @api private
-    def make_request_body(opts, headers)
-      case
-      when opts.body
-        opts.body
-      when opts.form
-        form = make_form_data(opts.form)
-        headers[Headers::CONTENT_TYPE] ||= form.content_type
-        form
-      when opts.json
-        body = MimeType[:json].encode opts.json
-        headers[Headers::CONTENT_TYPE] ||= "application/json; charset=#{body.encoding.name.downcase}"
-        body
-      end
-    end
-
-    # Coerce form data into an HTTP::FormData object
-    # @return [HTTP::FormData::Multipart, HTTP::FormData::Urlencoded] form data
-    # @api private
-    def make_form_data(form)
-      return form if form.is_a? HTTP::FormData::Multipart
-      return form if form.is_a? HTTP::FormData::Urlencoded
-
-      HTTP::FormData.create(form)
     end
   end
 end

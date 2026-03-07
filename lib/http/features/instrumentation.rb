@@ -132,11 +132,9 @@ module HTTP
         #
         # @param _name [String]
         # @param _payload [Hash]
-        # @return [true]
+        # @return [nil]
         # @api public
-        def start(_name, _payload) # rubocop:disable Naming/PredicateMethod
-          true
-        end
+        def start(_name, _payload); end
 
         # Finishes an instrumentation event
         #
@@ -145,11 +143,9 @@ module HTTP
         #
         # @param _name [String]
         # @param _payload [Hash]
-        # @return [true]
+        # @return [nil]
         # @api public
-        def finish(_name, _payload) # rubocop:disable Naming/PredicateMethod
-          true
-        end
+        def finish(_name, _payload); end
       end
     end
   end

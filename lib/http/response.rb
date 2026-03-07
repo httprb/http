@@ -84,15 +84,7 @@ module HTTP
       @status        = HTTP::Response::Status.new(opts.fetch(:status))
       @headers       = HTTP::Headers.coerce(opts[:headers] || {})
       @proxy_headers = HTTP::Headers.coerce(opts[:proxy_headers] || {})
-
-      if opts.include?(:body)
-        @body = opts.fetch(:body)
-      else
-        connection = opts.fetch(:connection)
-        encoding = opts[:encoding] || charset || default_encoding
-
-        @body = Response::Body.new(connection, encoding: encoding)
-      end
+      @body          = init_body(opts)
     end
 
     # @!method reason
@@ -279,6 +271,21 @@ module HTTP
       return Encoding::UTF_8 if mime_type == "application/json"
 
       Encoding::BINARY
+    end
+
+    # Initialize the response body from options
+    #
+    # @return [Body]
+    # @api private
+    def init_body(opts)
+      if opts.include?(:body)
+        opts.fetch(:body)
+      else
+        connection = opts.fetch(:connection)
+        encoding = opts[:encoding] || charset || default_encoding
+
+        Response::Body.new(connection, encoding: encoding)
+      end
     end
 
     # Initialize an HTTP::Request from options

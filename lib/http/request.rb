@@ -7,6 +7,7 @@ require "http/base64"
 require "http/errors"
 require "http/headers"
 require "http/request/body"
+require "http/request/proxy"
 require "http/request/writer"
 require "http/version"
 require "http/uri"
@@ -17,6 +18,7 @@ module HTTP
 
     include HTTP::Base64
     include HTTP::Headers::Mixin
+    include Proxy
 
     # The method given was not understood
     class UnsupportedMethodError < RequestError; end
@@ -146,14 +148,9 @@ module HTTP
     # @return [HTTP::Request]
     # @api public
     def initialize(opts)
-      @verb           = opts.fetch(:verb).to_s.downcase.to_sym
       @uri_normalizer = opts[:uri_normalizer] || HTTP::URI::NORMALIZER
-
-      @uri    = @uri_normalizer.call(opts.fetch(:uri))
-      @scheme = @uri.scheme.to_s.downcase.to_sym if @uri.scheme
-
-      raise(UnsupportedMethodError, "unknown method: #{verb}") unless METHODS.include?(@verb)
-      raise(UnsupportedSchemeError, "unknown scheme: #{scheme}") unless SCHEMES.include?(@scheme)
+      parse_verb_and_uri!(opts)
+      validate_method_and_scheme!
 
       @proxy   = opts[:proxy] || {}
       @version = opts[:version] || "1.1"
@@ -231,52 +228,6 @@ module HTTP
       proxy && proxy.keys.size >= 4
     end
 
-    # Merges proxy headers into the request headers
-    #
-    # @example
-    #   request.include_proxy_headers
-    #
-    # @return [void]
-    # @api public
-    def include_proxy_headers
-      headers.merge!(proxy[:proxy_headers]) if proxy.key?(:proxy_headers)
-      include_proxy_authorization_header if using_authenticated_proxy?
-    end
-
-    # Compute and add the Proxy-Authorization header
-    #
-    # @example
-    #   request.include_proxy_authorization_header
-    #
-    # @return [void]
-    # @api public
-    def include_proxy_authorization_header
-      headers[Headers::PROXY_AUTHORIZATION] = proxy_authorization_header
-    end
-
-    # Build the Proxy-Authorization header value
-    #
-    # @example
-    #   request.proxy_authorization_header
-    #
-    # @return [String]
-    # @api public
-    def proxy_authorization_header
-      digest = encode64("#{proxy[:proxy_username]}:#{proxy[:proxy_password]}")
-      "Basic #{digest}"
-    end
-
-    # Setup tunnel through proxy for SSL request
-    #
-    # @example
-    #   request.connect_using_proxy(socket)
-    #
-    # @return [void]
-    # @api public
-    def connect_using_proxy(socket)
-      Request::Writer.new(socket, nil, proxy_connect_headers, proxy_connect_header).connect_through_proxy
-    end
-
     # Compute HTTP request header for direct or proxy request
     #
     # @example
@@ -295,35 +246,6 @@ module HTTP
       raise RequestError, "Invalid request URI: #{request_uri.inspect}" if request_uri.match?(/\s/)
 
       "#{verb.to_s.upcase} #{request_uri} HTTP/#{version}"
-    end
-
-    # Compute HTTP request header SSL proxy connection
-    #
-    # @example
-    #   request.proxy_connect_header
-    #
-    # @return [String]
-    # @api public
-    def proxy_connect_header
-      "CONNECT #{host}:#{port} HTTP/#{version}"
-    end
-
-    # Headers to send with proxy connect request
-    #
-    # @example
-    #   request.proxy_connect_headers
-    #
-    # @return [HTTP::Headers]
-    # @api public
-    def proxy_connect_headers
-      connect_headers = HTTP::Headers.coerce(
-        Headers::HOST       => headers[Headers::HOST],
-        Headers::USER_AGENT => headers[Headers::USER_AGENT]
-      )
-
-      connect_headers[Headers::PROXY_AUTHORIZATION] = proxy_authorization_header if using_authenticated_proxy?
-      connect_headers.merge!(proxy[:proxy_headers]) if proxy.key?(:proxy_headers)
-      connect_headers
     end
 
     # Host for tcp socket
@@ -385,6 +307,23 @@ module HTTP
       raise RequestError, "Invalid host: #{value.inspect}" if value.match?(/\s/)
 
       value
+    end
+
+    # Parse verb, URI, and scheme from options
+    # @return [void]
+    # @api private
+    def parse_verb_and_uri!(opts)
+      @verb   = opts.fetch(:verb).to_s.downcase.to_sym
+      @uri    = @uri_normalizer.call(opts.fetch(:uri))
+      @scheme = @uri.scheme.to_s.downcase.to_sym if @uri.scheme
+    end
+
+    # Validate HTTP method and URI scheme
+    # @return [void]
+    # @api private
+    def validate_method_and_scheme!
+      raise(UnsupportedMethodError, "unknown method: #{verb}") unless METHODS.include?(@verb)
+      raise(UnsupportedSchemeError, "unknown scheme: #{scheme}") unless SCHEMES.include?(@scheme)
     end
 
     # Coerce input into a Body object

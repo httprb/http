@@ -25,6 +25,17 @@ module HTTP
         validate_source_type!
       end
 
+      # Whether the body is empty
+      #
+      # @example
+      #   body.empty? # => true
+      #
+      # @return [Boolean]
+      # @api public
+      def empty?
+        @source.nil?
+      end
+
       # Returns size for the "Content-Length" header
       #
       # @example

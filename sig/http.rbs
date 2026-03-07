@@ -266,8 +266,8 @@ module HTTP
 
       class NullInstrumenter
         def instrument: (String name, ?Hash[Symbol, untyped] payload) ?{ (Hash[Symbol, untyped]) -> void } -> untyped
-        def start: (String _name, Hash[Symbol, untyped] _payload) -> true
-        def finish: (String _name, Hash[Symbol, untyped] _payload) -> true
+        def start: (String _name, Hash[Symbol, untyped] _payload) -> nil
+        def finish: (String _name, Hash[Symbol, untyped] _payload) -> nil
       end
     end
 
@@ -438,7 +438,7 @@ module HTTP
     NORMALIZER: ^(untyped) -> URI
 
     def self.parse: (untyped uri) -> URI
-    def self.form_encode: (untyped form_values, ?bool sort) -> String
+    def self.form_encode: (untyped form_values, ?sort: bool) -> String
     def self.percent_encode: (untyped string) -> untyped
 
     def initialize: (?untyped options_or_uri) -> void
@@ -544,6 +544,7 @@ module HTTP
       attr_reader source: untyped
 
       def initialize: (untyped source) -> void
+      def empty?: () -> bool
       def size: () -> Integer
       def each: () { (String) -> void } -> self
              | () -> Enumerator[String, self]
@@ -815,6 +816,7 @@ module HTTP
     def collect_cookies_from_response: () -> void
     def too_many_hops?: () -> bool
     def endless_loop?: () -> bool
+    def redirect_uri: () -> String?
     def redirect_to: (untyped uri) -> Request
   end
 
@@ -874,7 +876,7 @@ module HTTP
       attr_reader socket: untyped
 
       def initialize: (?untyped options) -> void
-      def connect: (untyped socket_class, untyped host, untyped port, ?bool nodelay) -> void
+      def connect: (untyped socket_class, untyped host, untyped port, ?nodelay: bool) -> void
       def connect_ssl: () -> void
       def close: () -> void
       def closed?: () -> untyped
@@ -901,7 +903,7 @@ module HTTP
       attr_reader connect_timeout: untyped
 
       def initialize: (*untyped args) -> void
-      def connect: (untyped socket_class, untyped host, untyped port, ?bool nodelay) -> void
+      def connect: (untyped socket_class, untyped host, untyped port, ?nodelay: bool) -> void
       def readpartial: (Integer size, ?String? buffer) -> (String | Symbol)
       def write: (String data) -> Integer
     end
@@ -917,7 +919,7 @@ module HTTP
 
       def initialize: (*untyped args) -> void
       def reset_counter: () -> Numeric
-      def connect: (untyped socket_class, untyped host, untyped port, ?bool nodelay) -> void
+      def connect: (untyped socket_class, untyped host, untyped port, ?nodelay: bool) -> void
       def readpartial: (Integer size, ?String? buffer) -> (String | Symbol)
       def write: (String data) -> (Integer | Symbol)
 

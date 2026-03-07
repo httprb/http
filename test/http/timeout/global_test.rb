@@ -21,7 +21,7 @@ describe HTTP::Timeout::Global do
       )
 
       socket_class = fake(open: tcp_socket)
-      timeout.connect(socket_class, "example.com", 80, true)
+      timeout.connect(socket_class, "example.com", 80, nodelay: true)
 
       assert_equal [Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1], setsockopt_args
     end

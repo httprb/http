@@ -70,7 +70,7 @@ describe HTTP::URI do
 
   describe ".form_encode" do
     it "encodes key/value pairs" do
-      assert_equal "foo=bar&baz=quux", HTTP::URI.form_encode(foo: "bar", baz: "quux")
+      assert_equal "foo=bar&baz=quux", HTTP::URI.form_encode({ foo: "bar", baz: "quux" })
     end
   end
 
@@ -143,7 +143,7 @@ describe HTTP::URI do
   describe ".form_encode" do
     it "sorts key/value pairs when sort is true" do
       unsorted = HTTP::URI.form_encode([[:z, 1], [:a, 2]])
-      sorted   = HTTP::URI.form_encode([[:z, 1], [:a, 2]], true)
+      sorted   = HTTP::URI.form_encode([[:z, 1], [:a, 2]], sort: true)
 
       assert_equal "z=1&a=2", unsorted
       assert_equal "a=2&z=1", sorted
@@ -275,8 +275,8 @@ describe HTTP::URI do
       assert_equal first, second
     end
 
-    it "returns the negated value of to_s.hash" do
-      assert_equal http_uri.to_s.hash * -1, http_uri.hash
+    it "returns a composite hash of class and string representation" do
+      assert_equal [HTTP::URI, http_uri.to_s].hash, http_uri.hash
     end
   end
 

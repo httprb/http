@@ -17,7 +17,7 @@ module HTTP
       # @return [Normalizer]
       # @api public
       def initialize
-        @cache = {}
+        @cache = {} #: Hash[String, String]
       end
 
       # Normalizes a header name to canonical form
