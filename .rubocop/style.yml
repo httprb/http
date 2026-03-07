@@ -1,6 +1,15 @@
 Style/Documentation:
   Enabled: false
 
+# Hash[] is used instead of {} to satisfy Steep strict mode (UnannotatedEmptyCollection)
+Style/EmptyLiteral:
+  Exclude:
+    - 'lib/http/options.rb'
+
+Style/HashConversion:
+  Exclude:
+    - 'lib/http/options.rb'
+
 Style/OneClassPerFile:
   Exclude:
     - 'test/**/*.rb'

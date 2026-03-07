@@ -1,0 +1,260 @@
+# Stubs for external dependencies
+
+class Delegator
+  def __getobj__: () -> untyped
+  def __setobj__: (untyped) -> void
+  def initialize: (untyped) -> void
+end
+
+module Forwardable
+  def def_delegator: (untyped, Symbol, ?Symbol) -> void
+  def def_delegators: (untyped, *Symbol) -> void
+  alias def_instance_delegator def_delegator
+  alias def_instance_delegators def_delegators
+end
+
+module SingleForwardable
+  def def_delegator: (untyped, Symbol, ?Symbol) -> void
+  def def_delegators: (untyped, *Symbol) -> void
+  alias def_single_delegator def_delegator
+  alias def_single_delegators def_delegators
+end
+
+module Singleton
+  def self.included: (Module) -> void
+  def self?.instance: () -> instance
+end
+
+module Zlib
+  MAX_WBITS: Integer
+
+  class Inflate
+    def initialize: (Integer window_bits) -> void
+    def inflate: (String data) -> String
+    def finish: () -> String
+    def close: () -> void
+    def closed?: () -> bool
+    def total_in: () -> Integer
+  end
+
+  class GzipWriter
+    def initialize: (untyped io) -> void
+    def write: (String data) -> Integer
+    def finish: () -> void
+    def close: () -> void
+  end
+
+  class Deflate
+    def self.new: (?Integer? level, ?Integer? window_bits, ?Integer? mem_level, ?Integer? strategy) -> Deflate
+    def deflate: (String data, ?Integer flush) -> String
+    def finish: () -> String
+    def close: () -> void
+  end
+end
+
+module Addressable
+  class URI
+    def self.parse: (untyped) -> Addressable::URI
+    def self.form_encode: (untyped, ?bool) -> String
+    def self.normalize_path: (untyped) -> String
+
+    def initialize: (?untyped) -> void
+    def scheme: () -> String?
+    def scheme=: (untyped) -> untyped
+    def normalized_scheme: () -> String?
+    def authority: () -> String?
+    def normalized_authority: () -> String?
+    def user: () -> String?
+    def user=: (untyped) -> untyped
+    def password: () -> String?
+    def password=: (untyped) -> untyped
+    def host: () -> String?
+    def host=: (untyped) -> untyped
+    def normalized_host: () -> String?
+    def port: () -> Integer?
+    def port=: (untyped) -> untyped
+    def normalized_port: () -> Integer?
+    def path: () -> String
+    def path=: (untyped) -> untyped
+    def normalized_path: () -> String
+    def query: () -> String?
+    def query=: (untyped) -> untyped
+    def query_values: (?untyped?) -> untyped
+    def query_values=: (untyped) -> untyped
+    def normalized_query: () -> String?
+    def request_uri: () -> String
+    def request_uri=: (untyped) -> untyped
+    def fragment: () -> String?
+    def normalized_fragment: () -> String?
+    def fragment=: (untyped) -> untyped
+    def omit: (*Symbol) -> Addressable::URI
+    def join: (untyped) -> Addressable::URI
+    def normalize: () -> Addressable::URI
+    def origin: () -> String
+    def default_port: () -> Integer?
+    def to_s: () -> String
+    def ==: (untyped) -> bool
+    def eql?: (untyped) -> bool
+    def hash: () -> Integer
+    def dup: () -> Addressable::URI
+  end
+end
+
+module OpenSSL
+  module SSL
+    VERIFY_PEER: Integer
+
+    class SSLError < OpenSSL::OpenSSLError
+    end
+
+    class SSLSocket
+      def hostname=: (String) -> void
+      def sync_close=: (bool) -> void
+      def connect: () -> void
+      def connect_nonblock: (?exception: bool) -> void
+      def post_connection_check: (String) -> void
+      def respond_to?: (Symbol, ?bool) -> bool
+    end
+
+    class SSLContext
+      attr_accessor verify_mode: Integer?
+      def set_params: (untyped) -> void
+      def verify_hostname: () -> bool
+      def respond_to?: (Symbol, ?bool) -> bool
+    end
+  end
+
+  class OpenSSLError < StandardError
+  end
+end
+
+class TCPSocket < IPSocket
+  def self.open: (String host, Integer port) -> TCPSocket
+end
+
+class IPSocket < BasicSocket
+end
+
+class BasicSocket < IO
+  def setsockopt: (untyped, untyped, untyped) -> Integer
+  def closed?: () -> bool
+  def close: () -> void
+  def read_nonblock: (Integer size, ?String? buffer, ?exception: bool) -> (String | Symbol | nil)
+  def write_nonblock: (String data, ?exception: bool) -> (Integer | Symbol)
+  def readpartial: (Integer size, ?String? buffer) -> String
+  def write: (String data) -> Integer
+  def to_io: () -> IO
+  def connect_nonblock: (?exception: bool) -> void
+end
+
+class Socket < BasicSocket
+  IPPROTO_TCP: Integer
+  TCP_NODELAY: Integer
+
+  class Option
+  end
+end
+
+class SocketError < StandardError
+end
+
+class IPAddr
+  class Error < ArgumentError
+  end
+
+  def initialize: (String, ?untyped) -> void
+  def ipv6?: () -> bool
+end
+
+class DateTime
+  def self.rfc2822: (String) -> DateTime
+  def to_time: () -> Time
+end
+
+# Timeout module stub
+module Timeout
+  def self.timeout: [T] (Numeric?, ?singleton(Exception)) { (Numeric?) -> T } -> T
+end
+
+module HTTP
+  class CookieJar
+    include Enumerable[untyped]
+
+    def initialize: () -> void
+    def parse: (String, untyped) -> void
+    def add: (untyped) -> void
+    def delete: (untyped) -> void
+    def each: () { (untyped) -> void } -> void
+           | () -> Enumerator[untyped, void]
+    def empty?: () -> bool
+    def cookies: () -> Array[untyped]
+  end
+
+  class Cookie
+    attr_reader name: String
+    attr_reader value: String
+    attr_reader cookie_value: String
+
+    def self.cookie_value_to_hash: (String) -> Hash[String, String]
+    def initialize: (String, String, **untyped) -> void
+  end
+
+  module FormData
+    class Multipart
+      def content_type: () -> String
+    end
+
+    class Urlencoded
+      def content_type: () -> String
+    end
+
+    def self.create: (untyped) -> (Multipart | Urlencoded)
+  end
+end
+
+module LLHttp
+  class Error < StandardError
+  end
+
+  class Parser
+    def initialize: (untyped, ?type: Symbol) -> void
+    def reset: () -> void
+    def <<: (String) -> void
+    def status_code: () -> Integer
+    def http_major: () -> Integer
+    def http_minor: () -> Integer
+  end
+
+  class Delegate
+    def initialize: () -> void
+  end
+end
+
+# JSON module stub
+module JSON
+  def self.dump: (untyped) -> String
+  def self.parse: (String) -> untyped
+end
+
+class Tempfile < File
+  def self.new: (String, ?binmode: bool) -> Tempfile
+  def rewind: () -> Integer
+  def close!: () -> void
+  def size: () -> Integer
+  def read: (?Integer?) -> String?
+end
+
+module IO::WaitReadable
+end
+
+module IO::WaitWritable
+end
+
+class IO
+  class EAGAINWaitReadable < Errno::EAGAIN
+    include IO::WaitReadable
+  end
+
+  def wait_readable: (?Numeric?) -> (IO | true | nil)
+  def wait_writable: (?Numeric?) -> (IO | true | nil)
+end

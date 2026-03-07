@@ -32,6 +32,7 @@ Metrics/AbcSize:
     - 'lib/http/client.rb'
     - 'lib/http/connection.rb'
     - 'lib/http/features/auto_deflate.rb'
+    - 'lib/http/options.rb'
     - 'lib/http/redirector.rb'
     - 'lib/http/request.rb'
     - 'lib/http/response.rb'

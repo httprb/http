@@ -116,7 +116,7 @@ module HTTP
         # @return [self, Enumerator]
         # @api public
         def each(&block)
-          return to_enum __method__ unless block
+          return to_enum(:each) unless block
 
           if @compressed
             compressed_each(&block)

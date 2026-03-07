@@ -105,7 +105,7 @@ module HTTP
         end
 
         define_method(:"with_#{name}") do |value|
-          dup { |opts| opts.send(:"#{name}=", instance_exec(value, &interpreter)) }
+          dup { |opts| opts.send(:"#{name}=", instance_exec(value, &interpreter)) } # steep:ignore
         end
       end
     end
@@ -121,18 +121,18 @@ module HTTP
     def initialize(options = {})
       defaults = {
         response:           :auto,
-        proxy:              {},
+        proxy:              Hash[],
         timeout_class:      self.class.default_timeout_class,
-        timeout_options:    {},
+        timeout_options:    Hash[],
         socket_class:       self.class.default_socket_class,
         nodelay:            false,
         ssl_socket_class:   self.class.default_ssl_socket_class,
-        ssl:                {},
+        ssl:                Hash[],
         keep_alive_timeout: 5,
-        headers:            {},
-        cookies:            {},
+        headers:            Hash[],
+        cookies:            Hash[],
         encoding:           nil,
-        features:           {}
+        features:           Hash[]
       }
 
       opts_w_defaults = defaults.merge(options)
@@ -141,18 +141,18 @@ module HTTP
     end
 
     def_option :headers do |new_headers|
-      headers.merge(new_headers)
+      headers.merge(new_headers) # steep:ignore
     end
 
     def_option :cookies do |new_cookies|
-      new_cookies.each_with_object cookies.dup do |(k, v), jar|
+      new_cookies.each_with_object cookies.dup do |(k, v), jar| # steep:ignore
         cookie = k.is_a?(Cookie) ? k : Cookie.new(k.to_s, v.to_s)
         jar[cookie.name] = cookie.cookie_value
       end
     end
 
     def_option :encoding do |encoding|
-      self.encoding = Encoding.find(encoding)
+      self.encoding = Encoding.find(encoding) # steep:ignore
     end
 
     def_option :features, reader_only: true do |new_features|
@@ -163,15 +163,16 @@ module HTTP
       # into:
       #
       #     {feature_one: {opt: 'val'}, feature_two: {}}
-      normalized_features = new_features.each_with_object({}) do |feature, h|
+      acc = {} #: Hash[untyped, untyped]
+      normalized_features = new_features.each_with_object(acc) do |feature, h|
         if feature.is_a?(Hash)
           h.merge!(feature)
         else
-          h[feature] = {}
+          h[feature] = Hash[]
         end
       end
 
-      features.merge(normalized_features)
+      features.merge(normalized_features) # steep:ignore
     end
 
     # Sets and normalizes features hash
@@ -180,14 +181,15 @@ module HTTP
     # @api private
     # @return [Hash]
     def features=(features)
-      @features = features.each_with_object({}) do |(name, opts_or_feature), h|
+      result = {} #: Hash[Symbol, Feature]
+      @features = features.each_with_object(result) do |(name, opts_or_feature), h|
         h[name] = if opts_or_feature.is_a?(Feature)
                     opts_or_feature
                   else
                     unless (feature = self.class.available_features[name])
                       argument_error! "Unsupported feature: #{name}"
                     end
-                    feature.new(**opts_or_feature)
+                    feature.new(**opts_or_feature) # steep:ignore
                   end
       end
     end
@@ -211,7 +213,7 @@ module HTTP
       @follow =
         case
         when !value                    then nil
-        when true == value             then {}
+        when true == value             then Hash[]
         when value.respond_to?(:fetch) then value
         else argument_error! "Unsupported follow options: #{value}"
         end

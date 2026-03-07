@@ -38,7 +38,7 @@ module HTTP
         @exception_classes = opts.fetch(:exceptions, RETRIABLE_ERRORS)
         @retry_statuses = opts[:retry_statuses]
         @tries = opts.fetch(:tries, 5).to_i
-        @on_retry = opts.fetch(:on_retry, ->(*) {})
+        @on_retry = opts.fetch(:on_retry, ->(*_args) {})
         @should_retry_proc = opts[:should_retry]
         @delay_calculator = DelayCalculator.new(opts)
       end
@@ -151,7 +151,7 @@ module HTTP
       def wait_for_retry_or_raise(req, err, res, attempt)
         if attempt < @tries
           @on_retry.call(req, err, res)
-          sleep calculate_delay(attempt, res)
+          sleep(calculate_delay(attempt, res))
         else
           res&.flush
           raise out_of_retries_error(req, res, err)

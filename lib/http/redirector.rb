@@ -116,9 +116,9 @@ module HTTP
       request_cookie_header = @request.headers["Cookie"]
       cookies =
         if request_cookie_header
-          HTTP::Cookie.cookie_value_to_hash(request_cookie_header)
+          HTTP::Cookie.cookie_value_to_hash(request_cookie_header.to_s)
         else
-          {}
+          {} #: Hash[String, String]
         end
 
       cookies.each do |key, value|

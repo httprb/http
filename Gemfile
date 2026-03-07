@@ -33,6 +33,7 @@ group :test do
   gem "minitest-memory"
   gem "minitest-mock"
 
+  gem "steep"
   gem "yardstick"
 end
 

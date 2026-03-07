@@ -21,7 +21,7 @@ module HTTP
           code = case
                  when object.is_a?(String)  then SYMBOL_CODES[symbolize object]
                  when object.is_a?(Symbol)  then SYMBOL_CODES[object]
-                 when object.is_a?(Numeric) then object.to_i
+                 when object.is_a?(Numeric) then object.to_int
                  end
 
           return new code if code

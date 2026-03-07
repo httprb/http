@@ -81,13 +81,15 @@ module HTTP
         raise StateError, "body is being streamed" unless @streaming.nil?
 
         begin
-          @streaming  = false
-          @contents   = String.new("", encoding: @encoding)
+          @streaming = false
+          contents   = String.new("", encoding: @encoding)
 
           while (chunk = @stream.readpartial)
-            @contents << String.new(chunk, encoding: @encoding)
+            contents << String.new(chunk, encoding: @encoding)
             chunk = nil # deallocate string
           end
+
+          @contents = contents
         rescue
           @contents = nil
           raise

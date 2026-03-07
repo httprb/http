@@ -132,8 +132,8 @@ module HTTP
     # @param (see Client#request)
     # @return [HTTP::Response]
     # @api public
-    def request(*args)
-      branch(default_options).request(*args)
+    def request(verb, uri, opts = {})
+      branch(default_options).request(verb, uri, opts)
     end
 
     # Prepare an HTTP request with the given verb
@@ -144,8 +144,8 @@ module HTTP
     # @param (see Client#build_request)
     # @return [HTTP::Request]
     # @api public
-    def build_request(*args)
-      branch(default_options).build_request(*args)
+    def build_request(verb, uri, opts = {})
+      branch(default_options).build_request(verb, uri, opts)
     end
 
     # Set timeout on the request
@@ -242,7 +242,7 @@ module HTTP
     # @return [HTTP::Client]
     # @api public
     def via(*proxy)
-      proxy_hash = {}
+      proxy_hash = {} #: Hash[Symbol, untyped]
       proxy_hash[:proxy_address]  = proxy[0] if proxy[0].is_a?(String)
       proxy_hash[:proxy_port]     = proxy[1] if proxy[1].is_a?(Integer)
       proxy_hash[:proxy_username] = proxy[2] if proxy[2].is_a?(String)

@@ -12,7 +12,7 @@ module HTTP
       class << self
         extend Forwardable
 
-        def_delegators :instance, :encode, :decode
+        def_delegators :instance, :encode, :decode # steep:ignore
       end
 
       # rubocop:disable Style/DocumentDynamicEvalDefinition

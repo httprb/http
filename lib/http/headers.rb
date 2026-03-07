@@ -56,7 +56,7 @@ module HTTP
       # @return [Headers::Normalizer]
       # @api public
       def normalizer
-        @normalizer ||= Headers::Normalizer.new
+        @normalizer ||= Headers::Normalizer.new #: Headers::Normalizer
       end
     end
 
@@ -263,7 +263,7 @@ module HTTP
     # @return [Headers] self-reference
     # @api public
     def each
-      return to_enum(__method__) unless block_given?
+      return to_enum(:each) unless block_given?
 
       @pile.each { |item| yield(item[1..2]) }
       self

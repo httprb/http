@@ -81,7 +81,7 @@ module HTTP
       # @api private
       # @return [Numeric]
       def ensure_dealy_in_bounds(delay)
-        delay.clamp(0, @max_delay)
+        Float(delay.clamp(0, @max_delay))
       end
     end
   end

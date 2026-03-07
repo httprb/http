@@ -46,7 +46,7 @@ module HTTP
         # @api private
         def set(key, value)
           # Maintain cache size
-          @store.delete(@store.each_key.first) while MAX_SIZE <= @store.size
+          @store.shift while MAX_SIZE <= @store.size
 
           @store[key] = value
         end

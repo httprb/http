@@ -23,6 +23,13 @@ Yardstick::Rake::Verify.new do |verify|
   verify.threshold = 100
 end
 
+desc "Type check with Steep"
+task :steep do
+  require "steep"
+  require "steep/cli"
+  exit Steep::CLI.new(argv: ["check", "--log-level=fatal"], stdout: $stdout, stderr: $stderr, stdin: $stdin).run
+end
+
 task :generate_status_codes do
   require "http"
   require "nokogiri"
@@ -65,4 +72,4 @@ task :generate_status_codes do
   end
 end
 
-task default: %i[test rubocop verify_measurements]
+task default: %i[test rubocop verify_measurements steep]
