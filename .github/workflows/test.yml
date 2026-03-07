@@ -1,0 +1,29 @@
+name: Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  BUNDLE_WITHOUT: "development"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        ruby: [ ruby-3.0, ruby-3.1, ruby-3.2, ruby-3.3, ruby-3.4 ]
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+
+      - name: bundle exec rake test
+        run: bundle exec rake test

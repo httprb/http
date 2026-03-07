@@ -1,0 +1,25 @@
+name: Lint
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  BUNDLE_WITHOUT: "development"
+
+jobs:
+  rubocop:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ruby-3.4
+          bundler-cache: true
+
+      - name: bundle exec rubocop
+        run: bundle exec rubocop --format progress --color
