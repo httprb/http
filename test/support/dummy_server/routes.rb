@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class DummyServer < WEBrick::HTTPServer
+class DummyServer
   class Servlet
     get "/" do |req, res|
       res.status = 200
@@ -65,12 +65,12 @@ class DummyServer < WEBrick::HTTPServer
 
     get "/redirect-301" do |_req, res|
       res.status      = 301
-      res["Location"] = "http://#{@server.config[:BindAddress]}:#{@server.config[:Port]}/"
+      res["Location"] = "http://#{@server.addr}:#{@server.port}/"
     end
 
     get "/redirect-302" do |_req, res|
       res.status      = 302
-      res["Location"] = "http://#{@server.config[:BindAddress]}:#{@server.config[:Port]}/"
+      res["Location"] = "http://#{@server.addr}:#{@server.port}/"
     end
 
     post "/form" do |req, res|

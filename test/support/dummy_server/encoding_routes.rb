@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class DummyServer < WEBrick::HTTPServer
+class DummyServer
   class Servlet
     post "/encoded-body" do |req, res|
       res.status = 200

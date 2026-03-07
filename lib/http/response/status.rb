@@ -19,8 +19,8 @@ module HTTP
         # @api public
         def coerce(object)
           code = case object
-                 when String  then SYMBOL_CODES.dig(symbolize(object))
-                 when Symbol  then SYMBOL_CODES.dig(object)
+                 when String  then SYMBOL_CODES[symbolize(object)]
+                 when Symbol  then SYMBOL_CODES[object]
                  when Numeric then object
                  end
 
