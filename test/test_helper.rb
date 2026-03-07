@@ -5,6 +5,7 @@ require_relative "support/simplecov"
 require "minitest/autorun"
 require "minitest/mock"
 require "minitest/memory"
+require "minitest/strict"
 
 require "http"
 
