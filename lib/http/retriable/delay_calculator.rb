@@ -31,7 +31,7 @@ module HTTP
                   calculate_delay_from_iteration(iteration)
                 end
 
-        ensure_dealy_in_bounds(delay)
+        ensure_delay_in_bounds(delay)
       end
 
       RFC2822_DATE_REGEX = /^
@@ -80,7 +80,7 @@ module HTTP
       # @param [Numeric] delay
       # @api private
       # @return [Numeric]
-      def ensure_dealy_in_bounds(delay)
+      def ensure_delay_in_bounds(delay)
         Float(delay.clamp(0, @max_delay))
       end
     end

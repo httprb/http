@@ -983,7 +983,7 @@ module HTTP
 
       def delay_from_retry_header: (untyped value) -> Numeric
       def calculate_delay_from_iteration: (untyped iteration) -> Numeric
-      def ensure_dealy_in_bounds: (untyped delay) -> Float
+      def ensure_delay_in_bounds: (untyped delay) -> Float
     end
   end
 end

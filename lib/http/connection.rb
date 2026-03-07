@@ -197,7 +197,7 @@ module HTTP
     # @return [Boolean]
     # @api public
     def keep_alive?
-      !!@keep_alive && !@socket.closed?
+      @keep_alive && !@socket.closed?
     end
 
     # Whether our connection has expired
@@ -274,7 +274,7 @@ module HTTP
           @parser.headers[Headers::CONNECTION] == KEEP_ALIVE
         when HTTP_1_1 # HTTP/1.1 is opt-out
           @parser.headers[Headers::CONNECTION] != CLOSE
-        else # Anything else we assume doesn't supportit
+        else # Anything else we assume doesn't support it
           false
         end
     end

@@ -18,10 +18,10 @@ module HTTP
         # @return [Status]
         # @api public
         def coerce(object)
-          code = case
-                 when object.is_a?(String)  then SYMBOL_CODES[symbolize object]
-                 when object.is_a?(Symbol)  then SYMBOL_CODES[object]
-                 when object.is_a?(Numeric) then object.to_int
+          code = case object
+                 when String  then SYMBOL_CODES[symbolize object]
+                 when Symbol  then SYMBOL_CODES[object]
+                 when Numeric then object.to_int
                  end
 
           return new code if code

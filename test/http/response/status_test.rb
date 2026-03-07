@@ -45,123 +45,27 @@ describe HTTP::Response::Status do
     end
   end
 
-  context "with 1xx codes" do
-    let(:statuses) { (100...200).map { |code| HTTP::Response::Status.new(code) } }
+  all_category_methods = %i[informational? success? redirect? client_error? server_error?]
 
-    it "is #informational?" do
-      assert statuses.all?(&:informational?)
-    end
+  {
+    100...200 => :informational?,
+    200...300 => :success?,
+    300...400 => :redirect?,
+    400...500 => :client_error?,
+    500...600 => :server_error?
+  }.each do |range, positive_method|
+    context "with #{range.first / 100}xx codes" do
+      let(:statuses) { range.map { |code| HTTP::Response::Status.new(code) } }
 
-    it "is not #success?" do
-      assert(statuses.all? { |status| !status.success? })
-    end
+      it "is ##{positive_method}" do
+        assert(statuses.all?(&positive_method))
+      end
 
-    it "is not #redirect?" do
-      assert(statuses.all? { |status| !status.redirect? })
-    end
-
-    it "is not #client_error?" do
-      assert(statuses.all? { |status| !status.client_error? })
-    end
-
-    it "is not #server_error?" do
-      assert(statuses.all? { |status| !status.server_error? })
-    end
-  end
-
-  context "with 2xx codes" do
-    let(:statuses) { (200...300).map { |code| HTTP::Response::Status.new(code) } }
-
-    it "is not #informational?" do
-      assert(statuses.all? { |status| !status.informational? })
-    end
-
-    it "is #success?" do
-      assert statuses.all?(&:success?)
-    end
-
-    it "is not #redirect?" do
-      assert(statuses.all? { |status| !status.redirect? })
-    end
-
-    it "is not #client_error?" do
-      assert(statuses.all? { |status| !status.client_error? })
-    end
-
-    it "is not #server_error?" do
-      assert(statuses.all? { |status| !status.server_error? })
-    end
-  end
-
-  context "with 3xx codes" do
-    let(:statuses) { (300...400).map { |code| HTTP::Response::Status.new(code) } }
-
-    it "is not #informational?" do
-      assert(statuses.all? { |status| !status.informational? })
-    end
-
-    it "is not #success?" do
-      assert(statuses.all? { |status| !status.success? })
-    end
-
-    it "is #redirect?" do
-      assert statuses.all?(&:redirect?)
-    end
-
-    it "is not #client_error?" do
-      assert(statuses.all? { |status| !status.client_error? })
-    end
-
-    it "is not #server_error?" do
-      assert(statuses.all? { |status| !status.server_error? })
-    end
-  end
-
-  context "with 4xx codes" do
-    let(:statuses) { (400...500).map { |code| HTTP::Response::Status.new(code) } }
-
-    it "is not #informational?" do
-      assert(statuses.all? { |status| !status.informational? })
-    end
-
-    it "is not #success?" do
-      assert(statuses.all? { |status| !status.success? })
-    end
-
-    it "is not #redirect?" do
-      assert(statuses.all? { |status| !status.redirect? })
-    end
-
-    it "is #client_error?" do
-      assert statuses.all?(&:client_error?)
-    end
-
-    it "is not #server_error?" do
-      assert(statuses.all? { |status| !status.server_error? })
-    end
-  end
-
-  context "with 5xx codes" do
-    let(:statuses) { (500...600).map { |code| HTTP::Response::Status.new(code) } }
-
-    it "is not #informational?" do
-      assert(statuses.all? { |status| !status.informational? })
-    end
-
-    it "is not #success?" do
-      assert(statuses.all? { |status| !status.success? })
-    end
-
-    it "is not #redirect?" do
-      assert(statuses.all? { |status| !status.redirect? })
-    end
-
-    it "is not #client_error?" do
-      assert(statuses.all? { |status| !status.client_error? })
-    end
-
-    it "is #server_error?" do
-      assert statuses.all?(&:server_error?)
+      (all_category_methods - [positive_method]).each do |method|
+        it "is not ##{method}" do
+          assert(statuses.none?(&method))
+        end
+      end
     end
   end
 

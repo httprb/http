@@ -8,7 +8,7 @@ module HTTP
       # CRLF is the universal HTTP delimiter
       CRLF = "\r\n"
 
-      # Chunked data termintaor.
+      # Chunked data terminator
       ZERO = "0"
 
       # Chunked transfer encoding

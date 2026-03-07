@@ -35,13 +35,14 @@ module HTTP
       # @api public
       def readpartial(*args)
         chunk = @connection.readpartial(*args)
-        if chunk
-          chunk = zstream.inflate(chunk)
-        elsif !zstream.closed?
+        return zstream.inflate(chunk) if chunk
+
+        unless zstream.closed?
           zstream.finish if zstream.total_in.positive?
           zstream.close
         end
-        chunk
+
+        nil
       end
 
       private

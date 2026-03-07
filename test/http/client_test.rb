@@ -31,6 +31,15 @@ describe HTTP::Client do
     end
   end
 
+  def capture_request(client, &block)
+    captured_req = nil
+    client.stub(:perform, lambda { |req, _opts|
+      captured_req = req
+      nil
+    }, &block)
+    captured_req
+  end
+
   def redirect_response(location, status = 302)
     lambda do |request|
       HTTP::Response.new(
@@ -158,166 +167,94 @@ describe HTTP::Client do
     end
 
     it "accepts params within the provided URL" do
-      captured_req = nil
-      client.stub(:perform, lambda { |req, _opts|
-        captured_req = req
-        nil
-      }) do
-        client.get("http://example.com/?foo=bar")
-      end
+      req = capture_request(client) { client.get("http://example.com/?foo=bar") }
 
-      assert_equal({ "foo" => %w[bar] }, parse_query(captured_req.uri.query))
+      assert_equal({ "foo" => %w[bar] }, parse_query(req.uri.query))
     end
 
     it "combines GET params from the URI with the passed in params" do
-      captured_req = nil
-      client.stub(:perform, lambda { |req, _opts|
-        captured_req = req
-        nil
-      }) do
-        client.get("http://example.com/?foo=bar", params: { baz: "quux" })
-      end
+      req = capture_request(client) { client.get("http://example.com/?foo=bar", params: { baz: "quux" }) }
 
-      assert_equal({ "foo" => %w[bar], "baz" => %w[quux] }, parse_query(captured_req.uri.query))
+      assert_equal({ "foo" => %w[bar], "baz" => %w[quux] }, parse_query(req.uri.query))
     end
 
     it "merges duplicate values" do
-      captured_req = nil
-      client.stub(:perform, lambda { |req, _opts|
-        captured_req = req
-        nil
-      }) do
-        client.get("http://example.com/?a=1", params: { a: 2 })
-      end
+      req = capture_request(client) { client.get("http://example.com/?a=1", params: { a: 2 }) }
 
-      assert_match(/^(a=1&a=2|a=2&a=1)$/, captured_req.uri.query)
+      assert_match(/^(a=1&a=2|a=2&a=1)$/, req.uri.query)
     end
 
     it "does not modify query part if no params were given" do
-      captured_req = nil
-      client.stub(:perform, lambda { |req, _opts|
-        captured_req = req
-        nil
-      }) do
-        client.get("http://example.com/?deadbeef")
-      end
+      req = capture_request(client) { client.get("http://example.com/?deadbeef") }
 
-      assert_equal "deadbeef", captured_req.uri.query
+      assert_equal "deadbeef", req.uri.query
     end
 
     it "does not corrupt index-less arrays" do
-      captured_req = nil
-      client.stub(:perform, lambda { |req, _opts|
-        captured_req = req
-        nil
-      }) do
-        client.get("http://example.com/?a[]=b&a[]=c", params: { d: "e" })
-      end
+      req = capture_request(client) { client.get("http://example.com/?a[]=b&a[]=c", params: { d: "e" }) }
 
-      assert_equal({ "a[]" => %w[b c], "d" => %w[e] }, parse_query(captured_req.uri.query))
+      assert_equal({ "a[]" => %w[b c], "d" => %w[e] }, parse_query(req.uri.query))
     end
 
     it "properly encodes colons" do
-      captured_req = nil
-      client.stub(:perform, lambda { |req, _opts|
-        captured_req = req
-        nil
-      }) do
-        client.get("http://example.com/", params: { t: "1970-01-01T00:00:00Z" })
-      end
+      req = capture_request(client) { client.get("http://example.com/", params: { t: "1970-01-01T00:00:00Z" }) }
 
-      assert_equal "t=1970-01-01T00%3A00%3A00Z", captured_req.uri.query
+      assert_equal "t=1970-01-01T00%3A00%3A00Z", req.uri.query
     end
 
     it 'does not convert newlines into \r\n before encoding string values' do
-      captured_req = nil
-      client.stub(:perform, lambda { |req, _opts|
-        captured_req = req
-        nil
-      }) do
-        client.get("http://example.com/", params: { foo: "bar\nbaz" })
-      end
+      req = capture_request(client) { client.get("http://example.com/", params: { foo: "bar\nbaz" }) }
 
-      assert_equal "foo=bar%0Abaz", captured_req.uri.query
+      assert_equal "foo=bar%0Abaz", req.uri.query
     end
   end
 
   describe "passing multipart form data" do
     it "creates url encoded form data object" do
-      captured_req = nil
       client = HTTP::Client.new
-      client.stub(:perform, lambda { |req, _opts|
-        captured_req = req
-        nil
-      }) do
-        client.get("http://example.com/", form: { foo: "bar" })
-      end
+      req = capture_request(client) { client.get("http://example.com/", form: { foo: "bar" }) }
 
-      assert_kind_of HTTP::FormData::Urlencoded, captured_req.body.source
-      assert_equal "foo=bar", captured_req.body.source.to_s
+      assert_kind_of HTTP::FormData::Urlencoded, req.body.source
+      assert_equal "foo=bar", req.body.source.to_s
     end
 
     it "creates multipart form data object" do
-      captured_req = nil
       client = HTTP::Client.new
-      client.stub(:perform, lambda { |req, _opts|
-        captured_req = req
-        nil
-      }) do
-        client.get("http://example.com/", form: { foo: HTTP::FormData::Part.new("content") })
-      end
+      req = capture_request(client) { client.get("http://example.com/", form: { foo: HTTP::FormData::Part.new("content") }) }
 
-      assert_kind_of HTTP::FormData::Multipart, captured_req.body.source
-      assert_includes captured_req.body.source.to_s, "content"
+      assert_kind_of HTTP::FormData::Multipart, req.body.source
+      assert_includes req.body.source.to_s, "content"
     end
 
     context "when passing an HTTP::FormData::Multipart object directly" do
       it "passes it through unchanged" do
         form_data = HTTP::FormData::Multipart.new({ foo: "bar" })
-        captured_req = nil
         client = HTTP::Client.new
-        client.stub(:perform, lambda { |req, _opts|
-          captured_req = req
-          nil
-        }) do
-          client.get("http://example.com/", form: form_data)
-        end
+        req = capture_request(client) { client.get("http://example.com/", form: form_data) }
 
-        assert_same form_data, captured_req.body.source
-        assert_match(/^Content-Disposition: form-data; name="foo"\r\n\r\nbar\r\n/m, captured_req.body.source.to_s)
+        assert_same form_data, req.body.source
+        assert_match(/^Content-Disposition: form-data; name="foo"\r\n\r\nbar\r\n/m, req.body.source.to_s)
       end
     end
 
     context "when passing an HTTP::FormData::Urlencoded object directly" do
       it "passes it through unchanged" do
         form_data = HTTP::FormData::Urlencoded.new({ foo: "bar" })
-        captured_req = nil
         client = HTTP::Client.new
-        client.stub(:perform, lambda { |req, _opts|
-          captured_req = req
-          nil
-        }) do
-          client.get("http://example.com/", form: form_data)
-        end
+        req = capture_request(client) { client.get("http://example.com/", form: form_data) }
 
-        assert_same form_data, captured_req.body.source
+        assert_same form_data, req.body.source
       end
     end
   end
 
   describe "passing json" do
     it "encodes given object" do
-      captured_req = nil
       client = HTTP::Client.new
-      client.stub(:perform, lambda { |req, _opts|
-        captured_req = req
-        nil
-      }) do
-        client.get("http://example.com/", json: { foo: :bar })
-      end
+      req = capture_request(client) { client.get("http://example.com/", json: { foo: :bar }) }
 
-      assert_equal '{"foo":"bar"}', captured_req.body.source
-      assert_equal "application/json; charset=utf-8", captured_req["Content-Type"]
+      assert_equal '{"foo":"bar"}', req.body.source
+      assert_equal "application/json; charset=utf-8", req["Content-Type"]
     end
   end
 
@@ -339,15 +276,9 @@ describe HTTP::Client do
       let(:client)  { HTTP::Client.new headers: headers }
 
       it "keeps Host header as is" do
-        captured_req = nil
-        client.stub(:perform, lambda { |req, _opts|
-          captured_req = req
-          nil
-        }) do
-          client.request(:get, "http://example.com/")
-        end
+        req = capture_request(client) { client.request(:get, "http://example.com/") }
 
-        assert_equal "another.example.com", captured_req["Host"]
+        assert_equal "another.example.com", req["Host"]
       end
     end
 
@@ -356,42 +287,24 @@ describe HTTP::Client do
       let(:client)  { HTTP::Client.new headers: headers, features: { auto_deflate: {} }, body: "foo" }
 
       it "deletes Content-Length header" do
-        captured_req = nil
-        client.stub(:perform, lambda { |req, _opts|
-          captured_req = req
-          nil
-        }) do
-          client.request(:get, "http://example.com/")
-        end
+        req = capture_request(client) { client.request(:get, "http://example.com/") }
 
-        assert_nil captured_req["Content-Length"]
+        assert_nil req["Content-Length"]
       end
 
       it "sets Content-Encoding header" do
-        captured_req = nil
-        client.stub(:perform, lambda { |req, _opts|
-          captured_req = req
-          nil
-        }) do
-          client.request(:get, "http://example.com/")
-        end
+        req = capture_request(client) { client.request(:get, "http://example.com/") }
 
-        assert_equal "gzip", captured_req["Content-Encoding"]
+        assert_equal "gzip", req["Content-Encoding"]
       end
 
       context "and there is no body" do
         let(:client) { HTTP::Client.new headers: headers, features: { auto_deflate: {} } }
 
         it "doesn't set Content-Encoding header" do
-          captured_req = nil
-          client.stub(:perform, lambda { |req, _opts|
-            captured_req = req
-            nil
-          }) do
-            client.request(:get, "http://example.com/")
-          end
+          req = capture_request(client) { client.request(:get, "http://example.com/") }
 
-          refute_includes captured_req.headers, "Content-Encoding"
+          refute_includes req.headers, "Content-Encoding"
         end
       end
     end

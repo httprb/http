@@ -75,7 +75,7 @@ module HTTP
       # @return [Boolean]
       # @api public
       def ==(other)
-        self.class == other.class && self.source == other.source # rubocop:disable Style/RedundantSelf
+        other.is_a?(self.class) && source == other.source
       end
 
       private
