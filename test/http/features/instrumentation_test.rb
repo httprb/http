@@ -3,6 +3,7 @@
 require "test_helper"
 
 describe HTTP::Features::Instrumentation do
+  cover "HTTP::Features::Instrumentation*"
   let(:instrumenter_class) do
     Class.new(HTTP::Features::Instrumentation::NullInstrumenter) do
       attr_reader :output

@@ -3,6 +3,7 @@
 require "test_helper"
 
 describe HTTP::Connection do
+  cover "HTTP::Connection*"
   let(:req) do
     HTTP::Request.new(
       verb:    :get,

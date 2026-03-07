@@ -96,7 +96,7 @@ module HTTP
     # @return [String] encoded value
     def self.percent_encode(string)
       string&.gsub(PERCENT_ENCODE) do |substr|
-        substr.encode(Encoding::UTF_8).bytes.map { |c| format("%%%02X", c) }.join
+        substr.bytes.map { |c| format("%%%02X", c) }.join
       end
     end
 
@@ -142,7 +142,7 @@ module HTTP
     # @api public
     # @return [TrueClass, FalseClass] are the URIs equivalent (after normalization)?
     def ==(other)
-      other.is_a?(URI) && normalize.to_s == other.normalize.to_s
+      other.is_a?(URI) && String(normalize) == String(other.normalize)
     end
 
     # Are these URI objects equal without normalization
@@ -156,7 +156,7 @@ module HTTP
     # @api public
     # @return [TrueClass, FalseClass] are the URIs equivalent?
     def eql?(other)
-      other.is_a?(URI) && to_s == other.to_s
+      other.is_a?(URI) && String(self) == String(other)
     end
 
     # Hash value based off the normalized form of a URI
@@ -167,7 +167,7 @@ module HTTP
     # @api public
     # @return [Integer] A hash of the URI
     def hash
-      @hash ||= to_s.hash * -1
+      @hash ||= String(self).hash * -1
     end
 
     # Sets the host component for the URI
@@ -240,7 +240,7 @@ module HTTP
     # @api public
     # @return [String] URI serialized as a String
     def to_s
-      @uri.to_s
+      String(@uri)
     end
     alias to_str to_s
 
@@ -252,7 +252,7 @@ module HTTP
     # @api public
     # @return [String] human-readable representation of URI
     def inspect
-      format("#<%s:0x%014x URI:%s>", self.class.name, object_id << 1, to_s)
+      format("#<%s:0x%014x URI:%s>", self.class, object_id << 1, self)
     end
 
     private

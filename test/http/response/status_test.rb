@@ -3,6 +3,7 @@
 require "test_helper"
 
 describe HTTP::Response::Status do
+  cover "HTTP::Response::Status*"
   describe ".new" do
     it "fails if given value does not respond to #to_i" do
       assert_raises(TypeError) { HTTP::Response::Status.new(Object.new) }
@@ -125,10 +126,45 @@ describe HTTP::Response::Status do
     end
   end
 
+  describe "#to_s" do
+    it "strips trailing whitespace for unknown codes" do
+      assert_equal "1024", HTTP::Response::Status.new(1024).to_s
+    end
+  end
+
+  describe "#__setobj__" do
+    it "includes the inspected object in the error message" do
+      obj = Object.new
+      def obj.to_s = "custom"
+
+      err = assert_raises(TypeError) { HTTP::Response::Status.new(obj) }
+      assert_match(/#<Object:0x\h+>/, err.message)
+      refute_includes err.message, "custom"
+    end
+  end
+
+  describe "boundary conditions" do
+    it "code 99 is not informational" do
+      refute_predicate HTTP::Response::Status.new(99), :informational?
+    end
+
+    it "code 600 is not server_error" do
+      refute_predicate HTTP::Response::Status.new(600), :server_error?
+    end
+  end
+
   describe ".coerce" do
     context "with String" do
       it "coerces reasons" do
         assert_equal HTTP::Response::Status.new(400), HTTP::Response::Status.coerce("Bad request")
+      end
+
+      it "coerces hyphenated reasons" do
+        assert_equal HTTP::Response::Status.new(207), HTTP::Response::Status.coerce("Multi-Status")
+      end
+
+      it "coerces reasons with multiple words" do
+        assert_equal HTTP::Response::Status.new(203), HTTP::Response::Status.coerce("Non-Authoritative Information")
       end
 
       it "fails when reason is unknown" do
@@ -152,12 +188,23 @@ describe HTTP::Response::Status do
       end
     end
 
+    it "returns a Status instance" do
+      result = HTTP::Response::Status.coerce(:ok)
+
+      assert_instance_of HTTP::Response::Status, result
+    end
+
     it "fails if coercion failed" do
-      assert_raises(HTTP::Error) { HTTP::Response::Status.coerce(true) }
+      err = assert_raises(HTTP::Error) { HTTP::Response::Status.coerce(true) }
+      assert_includes err.message, "TrueClass"
+      assert_includes err.message, "true"
+      assert_includes err.message, "HTTP::Response::Status"
     end
 
     it "is aliased as `.[]`" do
-      assert_equal HTTP::Response::Status.method(:coerce), HTTP::Response::Status.method(:[])
+      status = HTTP::Response::Status[:ok]
+
+      assert_equal 200, status.code
     end
   end
 end

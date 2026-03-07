@@ -3,6 +3,7 @@
 require "test_helper"
 
 describe HTTP::Options do
+  cover "HTTP::Options*"
   let(:subject_under_test) { HTTP::Options.new(response: :body) }
 
   it "has reader methods for attributes" do

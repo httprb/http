@@ -3,11 +3,21 @@
 require "test_helper"
 
 describe HTTP::MimeType::JSON do
+  cover "HTTP::MimeType*"
   let(:adapter) { HTTP::MimeType::JSON.send(:new) }
 
   describe "#encode" do
     it "uses to_json when available" do
       assert_equal '{"foo":"bar"}', adapter.encode(foo: "bar")
+    end
+
+    it "prefers to_json over JSON.dump" do
+      obj = Object.new
+      def obj.to_json(*args)
+        args.empty? ? '"direct"' : '"via_dump"'
+      end
+
+      assert_equal '"direct"', adapter.encode(obj)
     end
 
     it "falls back to JSON.dump for objects without to_json" do

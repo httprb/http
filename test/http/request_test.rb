@@ -3,6 +3,7 @@
 require "test_helper"
 
 describe HTTP::Request do
+  cover "HTTP::Request*"
   let(:request) do
     HTTP::Request.new(
       verb:    :get,

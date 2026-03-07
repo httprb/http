@@ -17,9 +17,7 @@ module HTTP
       # @api public
       # @return [String]
       def encode(obj)
-        return obj.to_json if obj.respond_to?(:to_json)
-
-        ::JSON.dump obj
+        obj.to_json
       end
 
       # Decodes JSON string into Ruby object

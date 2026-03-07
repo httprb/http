@@ -4,6 +4,7 @@ require "test_helper"
 require "logger"
 
 describe HTTP::Features::Logging do
+  cover "HTTP::Features::Logging*"
   let(:logdev) { StringIO.new }
 
   let(:feature) do

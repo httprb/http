@@ -8,6 +8,7 @@ require "support/dummy_server"
 require "support/proxy_server"
 
 describe HTTP do
+  cover "HTTP::Chainable*"
   run_server(:dummy) { DummyServer.new }
   run_server(:dummy_ssl) { DummyServer.new(ssl: true) }
 

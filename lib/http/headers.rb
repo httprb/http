@@ -24,14 +24,12 @@ module HTTP
       # @return [Headers]
       # @api public
       def coerce(object)
-        unless object.is_a? self
-          object = case
-                   when object.respond_to?(:to_hash) then object.to_hash
-                   when object.respond_to?(:to_h)    then object.to_h
-                   when object.respond_to?(:to_a)    then object.to_a
-                   else raise Error, "Can't coerce #{object.inspect} to Headers"
-                   end
-        end
+        object = case
+                 when object.respond_to?(:to_hash) then object.to_hash
+                 when object.respond_to?(:to_h)    then object.to_h
+                 when object.respond_to?(:to_a)    then object.to_a
+                 else raise Error, "Can't coerce #{object.inspect} to Headers"
+                 end
 
         headers = new
         object.each { |k, v| headers.add k, v }
@@ -56,7 +54,7 @@ module HTTP
       # @return [Headers::Normalizer]
       # @api public
       def normalizer
-        @normalizer ||= Headers::Normalizer.new #: Headers::Normalizer
+        @normalizer ||= Normalizer.new #: Headers::Normalizer
       end
     end
 
@@ -107,7 +105,7 @@ module HTTP
     # @return [void]
     # @api public
     def delete(name)
-      name = normalize_header name.to_s
+      name = normalize_header name
       @pile.delete_if { |k, _| k == name }
     end
 
@@ -126,14 +124,14 @@ module HTTP
     # @return [void]
     # @api public
     def add(name, value)
-      lookup_name = normalize_header(name.to_s)
+      lookup_name = normalize_header(name)
       wire_name = case name
                   when String
                     name
                   when Symbol
                     lookup_name
                   else
-                    raise HTTP::HeaderError, "HTTP header must be a String or Symbol: #{name.inspect}"
+                    raise HeaderError, "HTTP header must be a String or Symbol: #{name.inspect}"
                   end
       Array(value).each do |v|
         @pile << [
@@ -152,7 +150,7 @@ module HTTP
     # @return [Array<String>]
     # @api public
     def get(name)
-      name = normalize_header name.to_s
+      name = normalize_header name
       @pile.select { |k, _| k == name }.map { |_, _, v| v }
     end
 
@@ -167,12 +165,9 @@ module HTTP
     # @api public
     def [](name)
       values = get(name)
+      return if values.empty?
 
-      case values.count
-      when 0 then nil
-      when 1 then values.first
-      else        values
-      end
+      values.one? ? values.first : values
     end
 
     # Tells whether header with given name is set
@@ -183,7 +178,7 @@ module HTTP
     # @return [Boolean]
     # @api public
     def include?(name)
-      name = normalize_header name.to_s
+      name = normalize_header name
       @pile.any? { |k, _| k == name }
     end
 
@@ -207,17 +202,6 @@ module HTTP
     #   @return [Hash]
     #   @api public
     alias to_hash to_h
-
-    # Returns headers key/value pairs
-    #
-    # @example
-    #   headers.to_a
-    #
-    # @return [Array<[String, String]>]
-    # @api public
-    def to_a
-      @pile.map { |item| item[1..2] }
-    end
 
     # Returns human-readable representation of self instance
     #
@@ -263,9 +247,9 @@ module HTTP
     # @return [Headers] self-reference
     # @api public
     def each
-      return to_enum(:each) unless block_given?
+      return to_enum unless block_given?
 
-      @pile.each { |item| yield(item[1..2]) }
+      @pile.each { |item| yield(item.drop(1)) }
       self
     end
 
@@ -294,8 +278,7 @@ module HTTP
     #
     # @return [void]
     # @api private
-    def initialize_copy(orig)
-      super
+    def initialize_copy(_orig)
       @pile = @pile.map(&:dup)
     end
 
@@ -308,7 +291,8 @@ module HTTP
     # @return [void]
     # @api public
     def merge!(other)
-      self.class.coerce(other).to_h.each { |name, values| set name, values }
+      coerced = self.class.coerce(other)
+      coerced.keys.each { |name| set name, coerced.get(name) }
     end
 
     # Returns new instance with other headers merged in

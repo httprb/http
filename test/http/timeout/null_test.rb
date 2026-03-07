@@ -3,6 +3,7 @@
 require "test_helper"
 
 describe HTTP::Timeout::Null do
+  cover "HTTP::Timeout::Null*"
   let(:timeout) { HTTP::Timeout::Null.new }
 
   let(:io) { fake(wait_readable: true, wait_writable: true) }

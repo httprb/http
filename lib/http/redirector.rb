@@ -56,7 +56,7 @@ module HTTP
     # @return [HTTP::Redirector]
     def initialize(opts = {})
       @strict      = opts.fetch(:strict, true)
-      @max_hops    = opts.fetch(:max_hops, 5).to_i
+      @max_hops    = Integer(opts.fetch(:max_hops, 5))
       @on_redirect = opts.fetch(:on_redirect, nil)
     end
 
@@ -76,7 +76,7 @@ module HTTP
       collect_cookies_from_request
       collect_cookies_from_response
 
-      while REDIRECT_CODES.include? @response.status.code
+      while REDIRECT_CODES.include? @response.code
         @visited << "#{@request.verb} #{@request.uri}"
 
         raise TooManyRedirectsError if too_many_hops?
@@ -87,9 +87,9 @@ module HTTP
         # XXX(ixti): using `Array#inject` to return `nil` if no Location header.
         @request = redirect_to(@response.headers.get(Headers::LOCATION).inject(:+))
         unless cookie_jar.empty?
-          @request.headers.set(Headers::COOKIE, cookie_jar.cookies.map { |c| "#{c.name}=#{c.value}" }.join("; "))
+          @request.headers.set(Headers::COOKIE, cookie_jar.map { |c| "#{c.name}=#{c.value}" }.join("; "))
         end
-        @on_redirect.call @response, @request if @on_redirect.respond_to?(:call)
+        @on_redirect&.call @response, @request
         @response = yield @request
         collect_cookies_from_response
       end
@@ -105,7 +105,7 @@ module HTTP
     # @return [HTTP::CookieJar]
     def cookie_jar
       # it seems that @response.cookies instance is reused between responses, so we have to "clone"
-      @cookie_jar ||= HTTP::CookieJar.new
+      @cookie_jar ||= CookieJar.new
     end
 
     # Collects cookies from the current request
@@ -113,16 +113,11 @@ module HTTP
     # @api private
     # @return [void]
     def collect_cookies_from_request
-      request_cookie_header = @request.headers["Cookie"]
-      cookies =
-        if request_cookie_header
-          HTTP::Cookie.cookie_value_to_hash(request_cookie_header.to_s)
-        else
-          {} #: Hash[String, String]
-        end
+      request_cookie_header = @request["Cookie"]
+      cookies = Cookie.cookie_value_to_hash(request_cookie_header.to_s)
 
       cookies.each do |key, value|
-        cookie_jar.add(HTTP::Cookie.new(key, value, path: @request.uri.path, domain: @request.host))
+        cookie_jar.add(Cookie.new(key, value, path: @request.uri.path, domain: @request.host))
       end
     end
 
@@ -151,7 +146,7 @@ module HTTP
     # @api private
     # @return [Boolean]
     def too_many_hops?
-      1 <= @max_hops && @max_hops < @visited.count
+      @max_hops.positive? && @visited.length > @max_hops
     end
 
     # Check if we got into an endless loop
@@ -159,7 +154,7 @@ module HTTP
     # @api private
     # @return [Boolean]
     def endless_loop?
-      2 <= @visited.count(@visited.last)
+      @visited.count(@visited.last) > 1
     end
 
     # Redirect policy for follow
@@ -170,7 +165,7 @@ module HTTP
       raise StateError, "no Location header in redirect" unless uri
 
       verb = @request.verb
-      code = @response.status.code
+      code = @response.code
 
       if UNSAFE_VERBS.include?(verb) && STRICT_SENSITIVE_CODES.include?(code)
         raise StateError, "can't follow #{@response.status} redirect" if @strict

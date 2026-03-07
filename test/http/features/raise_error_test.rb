@@ -3,6 +3,7 @@
 require "test_helper"
 
 describe HTTP::Features::RaiseError do
+  cover "HTTP::Features::RaiseError*"
   let(:feature)    { HTTP::Features::RaiseError.new(ignore: ignore) }
   let(:connection) { fake }
   let(:status)     { 200 }
@@ -60,6 +61,22 @@ describe HTTP::Features::RaiseError do
       it "returns original request" do
         assert_same response, result
       end
+    end
+  end
+
+  describe "#initialize" do
+    it "defaults ignore to empty array" do
+      feature = HTTP::Features::RaiseError.new
+      response = HTTP::Response.new(
+        version: "1.1", status: 500, headers: {},
+        connection: connection,
+        request: HTTP::Request.new(verb: :get, uri: "https://example.com")
+      )
+      assert_raises(HTTP::StatusError) { feature.wrap_response(response) }
+    end
+
+    it "is a Feature" do
+      assert_kind_of HTTP::Feature, HTTP::Features::RaiseError.new
     end
   end
 end

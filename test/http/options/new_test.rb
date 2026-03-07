@@ -3,6 +3,7 @@
 require "test_helper"
 
 describe HTTP::Options, "new" do
+  cover "HTTP::Options*"
   it "supports a Options instance" do
     opts = HTTP::Options.new
 

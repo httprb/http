@@ -3,6 +3,7 @@
 require "test_helper"
 
 describe HTTP::Options, "body" do
+  cover "HTTP::Options*"
   let(:opts) { HTTP::Options.new }
 
   it "defaults to nil" do

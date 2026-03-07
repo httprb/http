@@ -3,6 +3,7 @@
 require "test_helper"
 
 describe HTTP::Headers do
+  cover "HTTP::Headers*"
   let(:headers) { HTTP::Headers.new }
 
   it "is Enumerable" do
@@ -94,6 +95,13 @@ describe HTTP::Headers do
       assert_nil headers["Content-Type"]
     end
 
+    it "calls .to_s on non-string name argument" do
+      name = fake(to_s: "Content-Type")
+      headers.delete name
+
+      assert_nil headers["Content-Type"]
+    end
+
     it "fails with empty header name" do
       assert_raises(HTTP::HeaderError) { headers.delete "" }
     end
@@ -147,7 +155,35 @@ describe HTTP::Headers do
     end
 
     it "fails when header name is not a String or Symbol" do
-      assert_raises(HTTP::HeaderError) { headers.add 2, "foo" }
+      err = assert_raises(HTTP::HeaderError) { headers.add 2, "foo" }
+      assert_includes err.message, "2"
+    end
+
+    it "includes inspect-formatted name in error for non-String/Symbol" do
+      obj = Object.new
+      def obj.to_s = "plain"
+      def obj.inspect = "INSPECTED"
+
+      err = assert_raises(HTTP::HeaderError) { headers.add obj, "foo" }
+      assert_includes err.message, "INSPECTED"
+    end
+
+    it "uses normalized name as wire_name for Symbol keys in to_a" do
+      headers.add :content_type, "application/json"
+
+      assert_equal [["Content-Type", "application/json"]], headers.to_a
+    end
+
+    it "preserves original string as wire_name for String keys in to_a" do
+      headers.add "auth_key", "secret"
+
+      assert_equal [%w[auth_key secret]], headers.to_a
+    end
+
+    it "calls .to_s on Symbol name for normalization" do
+      headers.add :accept, "text/html"
+
+      assert_equal [["Accept", "text/html"]], headers.to_a
     end
   end
 
@@ -166,6 +202,12 @@ describe HTTP::Headers do
       it "returns empty array" do
         assert_equal [], headers.get(:accept)
       end
+    end
+
+    it "calls .to_s on non-string name argument" do
+      name = fake(to_s: "Content-Type")
+
+      assert_equal %w[application/json], headers.get(name)
     end
 
     it "fails with empty header name" do
@@ -212,6 +254,32 @@ describe HTTP::Headers do
         assert_equal %w[hoo=ray woo=hoo], headers[:set_cookie]
       end
     end
+
+    it "returns nil for missing header (not empty array or other)" do
+      headers.set "Content-Type", "text/plain"
+      result = headers[:nonexistent]
+
+      assert_nil result
+    end
+
+    it "returns a String (not Array) for single value" do
+      headers.set "Content-Type", "text/plain"
+
+      result = headers["Content-Type"]
+
+      assert_instance_of String, result
+      assert_equal "text/plain", result
+    end
+
+    it "returns an Array for multiple values" do
+      headers.add :cookie, "a=1"
+      headers.add :cookie, "b=2"
+
+      result = headers[:cookie]
+
+      assert_instance_of Array, result
+      assert_equal %w[a=1 b=2], result
+    end
   end
 
   describe "#include?" do
@@ -231,6 +299,19 @@ describe HTTP::Headers do
       assert_includes headers, :content_type
       assert_includes headers, :set_cookie
       refute_includes headers, :accept
+    end
+
+    it "calls .to_s on non-string name argument" do
+      name = fake(to_s: "Content-Type")
+
+      assert_includes headers, name
+    end
+
+    it "finds headers added with non-canonical string keys" do
+      h = HTTP::Headers.new
+      h.add("x-custom", "value")
+
+      assert_includes h, "x-custom"
     end
   end
 
@@ -279,6 +360,19 @@ describe HTTP::Headers do
         %w[Set-Cookie hoo=ray],
         %w[Set-Cookie woo=hoo]
       ], headers.to_a
+    end
+
+    it "returns two-element arrays (not three-element or one-element)" do
+      headers.to_a.each do |pair|
+        assert_equal 2, pair.size, "Expected each element to be a [name, value] pair"
+      end
+    end
+
+    it "returns wire_name (not lookup_name) as first element" do
+      h = HTTP::Headers.new
+      h.add "X_Custom", "val"
+
+      assert_equal [%w[X_Custom val]], h.to_a
     end
   end
 
@@ -349,6 +443,12 @@ describe HTTP::Headers do
 
     it "returns Enumerator if no block given" do
       assert_kind_of Enumerator, headers.each
+    end
+
+    it "yields two-element arrays [name, value]" do
+      headers.each do |pair|
+        assert_equal 2, pair.size
+      end
     end
   end
 
@@ -461,6 +561,51 @@ describe HTTP::Headers do
         assert_equal "application/json", headers[:content_type]
       end
     end
+
+    it "deep copies internal pile entries so mutations to inner arrays don't leak" do
+      original_pile = headers.instance_variable_get(:@pile)
+      dupped_pile   = dupped.instance_variable_get(:@pile)
+
+      # The outer arrays should be different objects
+      refute_same original_pile, dupped_pile
+
+      # Each inner array should also be a different object
+      original_pile.each_with_index do |entry, i|
+        refute_same entry, dupped_pile[i]
+      end
+    end
+  end
+
+  describe "validate_value (via #add)" do
+    it "raises HeaderError when value contains a newline in the middle" do
+      err = assert_raises(HTTP::HeaderError) { headers.add "X-Test", "foo\nbar" }
+      assert_includes err.message, "foo"
+    end
+
+    it "accepts values without newlines" do
+      headers.add "X-Test", "foobar"
+
+      assert_equal "foobar", headers["X-Test"]
+    end
+
+    it "calls .to_s on non-string values" do
+      numeric_value = 42
+      headers.add "X-Number", numeric_value
+
+      assert_equal "42", headers["X-Number"]
+    end
+
+    it "raises HeaderError when .to_s result contains a newline" do
+      evil = fake(to_s: "good\nevil")
+
+      assert_raises(HTTP::HeaderError) { headers.add "X-Evil", evil }
+    end
+
+    it "includes inspected value in error message" do
+      err = assert_raises(HTTP::HeaderError) { headers.add "Test", "bad\nvalue" }
+
+      assert_includes err.message, '"bad\nvalue"'
+    end
   end
 
   describe "#merge!" do
@@ -480,6 +625,26 @@ describe HTTP::Headers do
 
     it "appends other headers, not presented in base" do
       assert_equal %w[hoo=ray woo=hoo], headers[:cookie]
+    end
+
+    it "accepts an HTTP::Headers instance" do
+      other = HTTP::Headers.new
+      other.set :accept, "text/xml"
+
+      h = HTTP::Headers.new
+      h.set :accept, "application/json"
+      h.merge!(other)
+
+      assert_equal "text/xml", h[:accept]
+    end
+
+    it "uses set (not add) so existing values are replaced" do
+      h = HTTP::Headers.new
+      h.add :accept, "text/html"
+      h.add :accept, "text/plain"
+      h[:accept] = "application/json"
+
+      assert_equal "application/json", h[:accept]
     end
   end
 
@@ -540,7 +705,13 @@ describe HTTP::Headers do
     end
 
     it "fails if given object cannot be coerced" do
-      assert_raises(HTTP::Error) { HTTP::Headers.coerce dummy_class.new }
+      obj = Object.new
+      def obj.respond_to?(*); end
+      def obj.inspect = "INSPECTED"
+      def obj.to_s = "plain"
+
+      err = assert_raises(HTTP::Error) { HTTP::Headers.coerce obj }
+      assert_includes err.message, "INSPECTED"
     end
 
     context "with duplicate header keys (mixed case)" do
@@ -554,7 +725,20 @@ describe HTTP::Headers do
     end
 
     it "is aliased as .[]" do
-      assert_equal HTTP::Headers.method(:coerce), HTTP::Headers.method(:[])
+      result = HTTP::Headers["Content-Type" => "text/plain"]
+
+      assert_instance_of HTTP::Headers, result
+      assert_equal "text/plain", result["Content-Type"]
+    end
+  end
+
+  describe ".normalizer" do
+    it "returns a Normalizer instance" do
+      assert_instance_of HTTP::Headers::Normalizer, HTTP::Headers.normalizer
+    end
+
+    it "returns the same instance on subsequent calls" do
+      assert_same HTTP::Headers.normalizer, HTTP::Headers.normalizer
     end
   end
 end

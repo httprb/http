@@ -3,6 +3,7 @@
 require "test_helper"
 
 describe HTTP::Request::Writer do
+  cover "HTTP::Request::Writer*"
   let(:writer)      { HTTP::Request::Writer.new(io, body, headers, headerstart) }
 
   let(:io)          { StringIO.new }

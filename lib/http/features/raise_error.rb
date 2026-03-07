@@ -12,8 +12,6 @@ module HTTP
       # @return [RaiseError]
       # @api public
       def initialize(ignore: [])
-        super()
-
         @ignore = ignore
       end
 
@@ -29,7 +27,7 @@ module HTTP
         return response if response.code < 400
         return response if @ignore.include?(response.code)
 
-        raise HTTP::StatusError, response
+        raise StatusError, response
       end
 
       HTTP::Options.register_feature(:raise_error, self)

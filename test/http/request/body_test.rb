@@ -3,6 +3,7 @@
 require "test_helper"
 
 describe HTTP::Request::Body do
+  cover "HTTP::Request::Body*"
   let(:subject_under_test) { HTTP::Request::Body.new(body) }
 
   let(:body) { "" }
@@ -202,6 +203,135 @@ describe HTTP::Request::Body do
 
       it "returns false" do
         refute_equal body1, body2
+      end
+    end
+
+    context "when sources are both truthy but different" do
+      let(:body1) { HTTP::Request::Body.new("alpha") }
+      let(:body2) { HTTP::Request::Body.new("beta") }
+
+      it "returns false" do
+        refute_equal body1, body2
+      end
+    end
+  end
+
+  describe "#each return value" do
+    context "when body is a string" do
+      let(:body) { "content" }
+
+      it "returns self" do
+        assert_same(subject_under_test, subject_under_test.each { |_| })
+      end
+    end
+
+    context "when body is nil" do
+      let(:body) { nil }
+
+      it "returns self" do
+        assert_same(subject_under_test, subject_under_test.each { |_| })
+      end
+    end
+
+    context "when body is an IO" do
+      let(:body) { StringIO.new("io content") }
+
+      it "returns self" do
+        assert_same(subject_under_test, subject_under_test.each { |_| })
+      end
+    end
+
+    context "when body is an Enumerable" do
+      let(:body) { %w[bees cows] }
+
+      it "returns self" do
+        assert_same(subject_under_test, subject_under_test.each { |_| })
+      end
+    end
+  end
+
+  describe "#size error messages" do
+    context "when body is an IO without #size" do
+      let(:body) { IO.pipe[0] }
+
+      it "raises RequestError with message about IO needing #size" do
+        err = assert_raises(HTTP::RequestError) { subject_under_test.size }
+        assert_match(/IO object must respond to #size/, err.message)
+      end
+    end
+
+    context "when body is an Enumerable" do
+      let(:body) { %w[bees cows] }
+
+      it "raises RequestError with message about undetermined size including inspect" do
+        err = assert_raises(HTTP::RequestError) { subject_under_test.size }
+        assert_match(/cannot determine size of body/, err.message)
+        assert_includes err.message, body.inspect
+      end
+    end
+  end
+
+  describe "#initialize error messages" do
+    context "when body is of unrecognized type" do
+      it "raises RequestError mentioning wrong type and class name" do
+        err = assert_raises(HTTP::RequestError) { HTTP::Request::Body.new(123) }
+        assert_match(/body of wrong type/, err.message)
+        assert_match(/Integer/, err.message)
+      end
+    end
+  end
+
+  context "when body is a String subclass" do
+    let(:string_subclass) { Class.new(String) }
+    let(:body) { string_subclass.new("subclass body") }
+
+    it "does not raise on initialization" do
+      HTTP::Request::Body.new(body)
+    end
+
+    it "returns correct size" do
+      assert_equal 13, subject_under_test.size
+    end
+
+    it "yields the string in #each" do
+      chunks = []
+      subject_under_test.each { |chunk| chunks << chunk.dup }
+
+      assert_equal ["subclass body"], chunks
+    end
+  end
+
+  context "when comparing with a Body subclass" do
+    it "returns true for equivalent subclass instance" do
+      subclass = Class.new(HTTP::Request::Body)
+      body1 = HTTP::Request::Body.new("content")
+      body2 = subclass.new("content")
+
+      assert_equal body1, body2
+    end
+  end
+
+  describe HTTP::Request::Body::ProcIO do
+    describe "#write" do
+      it "calls the block with data and returns bytesize" do
+        received = nil
+        block = proc { |data| received = data }
+        proc_io = HTTP::Request::Body::ProcIO.new(block)
+
+        result = proc_io.write("hello")
+
+        assert_equal "hello", received
+        assert_equal 5, result
+      end
+
+      it "returns correct bytesize for multibyte strings" do
+        block = proc { |_| }
+        proc_io = HTTP::Request::Body::ProcIO.new(block)
+
+        # "Привет" is 12 bytes in UTF-8
+        result = proc_io.write("\u041F\u0440\u0438\u0432\u0435\u0442")
+
+        assert_equal 12, result
       end
     end
   end

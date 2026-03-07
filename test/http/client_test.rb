@@ -10,6 +10,7 @@ require "support/dummy_server"
 require "support/ssl_helper"
 
 describe HTTP::Client do
+  cover "HTTP::Client*"
   run_server(:dummy) { DummyServer.new }
 
   StubbedClient = Class.new(HTTP::Client) do # rubocop:disable Lint/ConstantDefinitionInBlock

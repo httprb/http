@@ -3,6 +3,7 @@
 require "test_helper"
 
 describe HTTP::Timeout::Global do
+  cover "HTTP::Timeout::Global*"
   let(:timeout) { HTTP::Timeout::Global.new(global_timeout: 5) }
 
   let(:io) { fake(wait_readable: true, wait_writable: true) }

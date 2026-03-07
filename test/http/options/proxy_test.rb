@@ -3,6 +3,7 @@
 require "test_helper"
 
 describe HTTP::Options, "proxy" do
+  cover "HTTP::Options*"
   let(:opts) { HTTP::Options.new }
 
   it "defaults to {}" do

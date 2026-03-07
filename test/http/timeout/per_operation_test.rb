@@ -3,6 +3,7 @@
 require "test_helper"
 
 describe HTTP::Timeout::PerOperation do
+  cover "HTTP::Timeout::PerOperation*"
   let(:timeout) { HTTP::Timeout::PerOperation.new(connect_timeout: 1, read_timeout: 1, write_timeout: 1) }
 
   let(:io) { fake(wait_readable: true, wait_writable: true) }

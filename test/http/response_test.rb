@@ -3,6 +3,7 @@
 require "test_helper"
 
 describe HTTP::Response do
+  cover "HTTP::Response*"
   let(:response) do
     HTTP::Response.new(
       status:  200,

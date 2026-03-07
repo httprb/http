@@ -3,6 +3,7 @@
 require "test_helper"
 
 describe HTTP::Headers::Mixin do
+  cover "HTTP::Headers::Mixin*"
   let :dummy_class do
     Class.new do
       include HTTP::Headers::Mixin

@@ -1,0 +1,29 @@
+usage: opensource
+
+environment_variables:
+  MUTANT: "true"
+
+integration:
+  name: minitest
+
+includes:
+  - lib
+  - test
+
+requires:
+  - http
+
+mutation:
+  timeout: 10.0
+
+matcher:
+  subjects:
+    - HTTP::Response::Status*
+    - HTTP::Request::Body*
+    - HTTP::ContentType*
+    - HTTP::MimeType*
+    - HTTP::URI*
+    - HTTP::Headers*
+    - HTTP::Redirector*
+    - HTTP::Features::RaiseError*
+    - HTTP::Base64*

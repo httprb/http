@@ -3,6 +3,7 @@
 require "test_helper"
 
 describe HTTP::Options, "merge" do
+  cover "HTTP::Options*"
   let(:opts) { HTTP::Options.new }
 
   it "supports a Hash" do

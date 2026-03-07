@@ -3,6 +3,7 @@
 require "test_helper"
 
 describe HTTP::Response::Body do
+  cover "HTTP::Response::Body*"
   let(:body) { HTTP::Response::Body.new(connection, encoding: Encoding::UTF_8) }
 
   let(:connection) do

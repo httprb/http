@@ -3,6 +3,7 @@
 require "test_helper"
 
 describe HTTP::Response::Parser do
+  cover "HTTP::Response::Parser*"
   let(:parser) { HTTP::Response::Parser.new }
 
   let(:raw_response) do

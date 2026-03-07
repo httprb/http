@@ -3,6 +3,7 @@
 require "test_helper"
 
 describe HTTP::Retriable::Client do
+  cover "HTTP::Retriable::Client*"
   describe "#branch (private)" do
     let(:performer) { HTTP::Retriable::Performer.new({}) }
     let(:client) { HTTP::Retriable::Client.new(performer, HTTP::Options.new) }

@@ -72,4 +72,9 @@ task :generate_status_codes do
   end
 end
 
+desc "Run mutation testing with Mutant"
+task :mutant do
+  system("bundle exec mutant run") || abort("Mutant failed!")
+end
+
 task default: %i[test rubocop verify_measurements steep]

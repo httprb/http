@@ -42,7 +42,7 @@ module HTTP
         elsif @source.nil?
           0
         else
-          raise RequestError, "cannot determine size of body: #{@source.inspect}"
+          raise RequestError, "cannot determine size of body: #{@source}"
         end
       end
 
@@ -60,7 +60,7 @@ module HTTP
         elsif @source.respond_to?(:read)
           IO.copy_stream(@source, ProcIO.new(block))
           rewind(@source)
-        elsif @source.is_a?(Enumerable)
+        elsif @source
           @source.each(&block)
         end
 

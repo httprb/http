@@ -3,6 +3,7 @@
 require "test_helper"
 
 describe HTTP::Retriable::DelayCalculator do
+  cover "HTTP::Retriable::DelayCalculator*"
   let(:response) do
     HTTP::Response.new(
       status:  200,

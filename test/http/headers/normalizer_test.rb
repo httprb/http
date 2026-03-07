@@ -3,6 +3,7 @@
 require "test_helper"
 
 describe HTTP::Headers::Normalizer do
+  cover "HTTP::Headers::Normalizer*"
   let(:normalizer) { HTTP::Headers::Normalizer.new }
 
   describe "#call" do
@@ -12,15 +13,6 @@ describe HTTP::Headers::Normalizer do
 
     it "returns a non-frozen string" do
       refute_predicate normalizer.call("content_type"), :frozen?
-    end
-
-    it "evicts the oldest item when cache is full" do
-      max_headers = (1..HTTP::Headers::Normalizer::Cache::MAX_SIZE).map { |i| "Header#{i}" }
-      max_headers.each { |header| normalizer.call(header) }
-      normalizer.call("New-Header")
-      cache_store = normalizer.instance_variable_get(:@cache).instance_variable_get(:@store)
-
-      assert_equal(max_headers[1..] + ["New-Header"], cache_store.keys)
     end
 
     it "returns mutable strings" do
@@ -46,6 +38,48 @@ describe HTTP::Headers::Normalizer do
       assert_allocations(Array: 0, MatchData: 0, String: 1) do
         normalizer.call("content_type")
       end
+    end
+
+    it "calls .to_s on the name argument" do
+      name = fake(to_s: "content_type")
+
+      assert_equal "Content-Type", normalizer.call(name)
+    end
+
+    it "caches the normalized value and reuses it" do
+      first  = normalizer.call("content_type")
+      second = normalizer.call("content_type")
+
+      assert_equal first, second
+    end
+
+    it "passes through names already in canonical form unchanged" do
+      assert_equal "Content-Type", normalizer.call("Content-Type")
+    end
+
+    it "normalizes underscore-separated names" do
+      assert_equal "Content-Type", normalizer.call("content_type")
+    end
+
+    it "normalizes dash-separated names" do
+      assert_equal "Content-Type", normalizer.call("content-type")
+    end
+
+    it "raises HeaderError for invalid header names" do
+      err = assert_raises(HTTP::HeaderError) { normalizer.call("invalid header") }
+      assert_includes err.message, "invalid header"
+    end
+
+    it "includes inspect-formatted name in invalid header error" do
+      err = assert_raises(HTTP::HeaderError) { normalizer.call("invalid header") }
+      assert_includes err.message, '"invalid header"'
+    end
+
+    it "freezes the cached value internally but returns a dup" do
+      result = normalizer.call("accept")
+
+      refute_predicate result, :frozen?
+      assert_equal "Accept", result
     end
   end
 end

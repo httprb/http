@@ -19,9 +19,9 @@ module HTTP
         # @api public
         def coerce(object)
           code = case object
-                 when String  then SYMBOL_CODES[symbolize object]
-                 when Symbol  then SYMBOL_CODES[object]
-                 when Numeric then object.to_int
+                 when String  then SYMBOL_CODES.dig(symbolize(object))
+                 when Symbol  then SYMBOL_CODES.dig(object)
+                 when Numeric then object
                  end
 
           return new code if code
@@ -38,7 +38,7 @@ module HTTP
         # @return [Symbol]
         # @api private
         def symbolize(str)
-          str.to_s.downcase.tr("-", " ").gsub(/[^a-z ]/, "").gsub(/\s+/, "_").to_sym
+          str.downcase.tr("- ", "_").to_sym
         end
       end
 
@@ -93,7 +93,7 @@ module HTTP
       # @return [String]
       # @api public
       def to_s
-        "#{code} #{reason}".strip
+        reason ? "#{code} #{reason}" : code.to_s
       end
 
       # Check if status code is informational (1XX)

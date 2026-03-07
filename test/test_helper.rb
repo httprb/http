@@ -9,6 +9,9 @@ require "minitest/strict"
 
 require "http"
 
+# No-op for mutant cover declarations when mutant is not loaded
+Minitest::Test.extend(Module.new { def cover(*); end }) unless Minitest::Test.respond_to?(:cover)
+
 require "support/capture_warning"
 require "support/fakeio"
 

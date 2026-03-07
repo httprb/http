@@ -3,6 +3,7 @@
 require "test_helper"
 
 describe HTTP::Features::AutoInflate do
+  cover "HTTP::Features::AutoInflate*"
   let(:feature)    { HTTP::Features::AutoInflate.new }
   let(:connection) { fake }
   let(:headers)    { {} }

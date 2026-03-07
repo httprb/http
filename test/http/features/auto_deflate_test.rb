@@ -3,6 +3,7 @@
 require "test_helper"
 
 describe HTTP::Features::AutoDeflate do
+  cover "HTTP::Features::AutoDeflate*"
   let(:subject_under_test) { HTTP::Features::AutoDeflate.new }
 
   it "raises error for wrong type" do

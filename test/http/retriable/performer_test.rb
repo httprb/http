@@ -9,6 +9,7 @@ unless defined?(CustomException)
 end
 
 describe HTTP::Retriable::Performer do
+  cover "HTTP::Retriable::Performer*"
   let(:client) do
     HTTP::Client.new
   end
