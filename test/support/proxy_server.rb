@@ -7,6 +7,8 @@ require "base64"
 require "support/servers/runner"
 
 class ProxyServer
+  Target = Struct.new(:host, :port, :path, :query, keyword_init: true)
+
   def initialize
     @tcp_server = TCPServer.new("127.0.0.1", 0)
     @port       = @tcp_server.addr[1]
@@ -40,16 +42,20 @@ class ProxyServer
   private
 
   def handle_request(client)
-    method, uri, version, headers, body = read_proxy_request(client)
-    return unless method
+    method, target, version, headers, body = read_proxy_request(client)
+    return unless method && target
 
     if (response = authenticate(headers))
       client.write(response)
       return
     end
 
-    forward_and_respond(client, method, uri, body, version)
-  rescue IOError, Errno::ECONNRESET, Errno::EPIPE
+    if method == "CONNECT"
+      tunnel_connection(client, target)
+    else
+      forward_and_respond(client, method, target, body, version)
+    end
+  rescue IOError, Errno::ECONNRESET, Errno::EPIPE, URI::InvalidURIError
     # Connection closed
   ensure
     client.close rescue nil # rubocop:disable Style/RescueModifier
@@ -59,11 +65,27 @@ class ProxyServer
     line = client.gets
     return unless line
 
-    method, url, version = line.strip.split(" ", 3)
+    method, target, version = line.strip.split(" ", 3)
     headers = read_headers(client)
     body = headers["Content-Length"] ? client.read(headers["Content-Length"].to_i) : nil
 
-    [method, URI.parse(url), version, headers, body]
+    [method, parse_target(method, target), version, headers, body]
+  end
+
+  def parse_target(method, target)
+    return parse_connect_target(target) if method == "CONNECT"
+
+    uri = URI.parse(target)
+    Target.new(host: uri.host, port: uri.port, path: uri.path, query: uri.query)
+  end
+
+  def parse_connect_target(target)
+    host, port = target.split(":", 2)
+    return unless host && port
+
+    Target.new(host: host, port: Integer(port))
+  rescue ArgumentError
+    nil
   end
 
   def read_headers(client)
@@ -81,24 +103,24 @@ class ProxyServer
     nil
   end
 
-  def forward_and_respond(client, method, uri, body, version)
-    target = send_to_target(method, uri, body, version)
-    relay_response(client, target)
+  def forward_and_respond(client, method, target, body, version)
+    target_socket = send_to_target(method, target, body, version)
+    relay_response(client, target_socket)
   ensure
-    target&.close rescue nil # rubocop:disable Style/RescueModifier
+    target_socket&.close rescue nil # rubocop:disable Style/RescueModifier
   end
 
-  def send_to_target(method, uri, body, version)
-    target = TCPSocket.new(uri.host, uri.port)
-    path = uri.path.empty? ? "/" : uri.path
-    path = "#{path}?#{uri.query}" if uri.query
+  def send_to_target(method, target, body, version)
+    socket = TCPSocket.new(target.host, target.port)
+    path = target.path.to_s.empty? ? "/" : target.path
+    path = "#{path}?#{target.query}" if target.query
 
-    target.write("#{method} #{path} #{version}\r\n")
-    target.write("Host: #{uri.host}:#{uri.port}\r\n")
-    target.write("Content-Length: #{body.bytesize}\r\n") if body
-    target.write("\r\n")
-    target.write(body) if body
-    target
+    socket.write("#{method} #{path} #{version}\r\n")
+    socket.write("Host: #{target.host}:#{target.port}\r\n")
+    socket.write("Content-Length: #{body.bytesize}\r\n") if body
+    socket.write("\r\n")
+    socket.write(body) if body
+    socket
   end
 
   def relay_response(client, target)
@@ -111,6 +133,30 @@ class ProxyServer
     client.write("#{response_line}X-PROXIED: true\r\n#{headers}\r\n#{body}")
   rescue IOError, Errno::ECONNRESET
     # Target connection error
+  end
+
+  def tunnel_connection(client, target)
+    target_socket = TCPSocket.new(target.host, target.port)
+
+    client.write("HTTP/1.1 200 Connection established\r\n\r\n")
+    relay_tunnel(client, target_socket)
+  ensure
+    target_socket&.close rescue nil # rubocop:disable Style/RescueModifier
+  end
+
+  def relay_tunnel(client, target)
+    [
+      Thread.new { copy_stream(client, target) },
+      Thread.new { copy_stream(target, client) }
+    ].each(&:join)
+  end
+
+  def copy_stream(source, destination)
+    loop do
+      destination.write(source.readpartial(1024))
+    end
+  rescue EOFError, IOError, Errno::ECONNRESET, Errno::EPIPE
+    nil
   end
 
   def read_response_headers(target)

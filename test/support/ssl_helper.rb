@@ -6,10 +6,19 @@ require "certificate_authority"
 
 module SSLHelper
   CERTS_PATH = Pathname.new File.expand_path("../../tmp/certs", __dir__)
+  CA_EXTENSIONS = {
+    "basicConstraints" => { "ca" => true, "critical" => true },
+    "keyUsage"         => { "usage" => %w[critical keyCertSign cRLSign] },
+    "extendedKeyUsage" => { "usage" => [] }
+  }.freeze
+  SERVER_EXTENSIONS = {
+    "basicConstraints" => { "ca" => false },
+    "keyUsage"         => { "usage" => %w[critical digitalSignature keyEncipherment] },
+    "extendedKeyUsage" => { "usage" => ["serverAuth"] },
+    "subjectAltName"   => { "ips" => ["127.0.0.1"] }
+  }.freeze
 
   class RootCertificate < ::CertificateAuthority::Certificate
-    EXTENSIONS = { "keyUsage" => { "usage" => %w[critical keyCertSign] } }.freeze
-
     def initialize
       super
 
@@ -19,7 +28,7 @@ module SSLHelper
 
       self.signing_entity = true
 
-      sign!("extensions" => EXTENSIONS)
+      sign!("extensions" => CA_EXTENSIONS)
     end
 
     def file
@@ -35,17 +44,17 @@ module SSLHelper
   end
 
   class ChildCertificate < ::CertificateAuthority::Certificate
-    def initialize(parent)
+    def initialize(parent, common_name:, serial_number:, extensions:)
       super()
 
-      subject.common_name  = "127.0.0.1"
-      serial_number.number = 1
+      subject.common_name = common_name
+      self.serial_number.number = serial_number
 
       key_material.generate_key
 
       self.parent = parent
 
-      sign!
+      sign!("extensions" => extensions)
     end
 
     def cert
@@ -61,7 +70,7 @@ module SSLHelper
     def server_context
       context = OpenSSL::SSL::SSLContext.new
 
-      context.verify_mode = OpenSSL::SSL::VERIFY_PEER
+      context.verify_mode = OpenSSL::SSL::VERIFY_NONE
       context.key         = server_cert.key
       context.cert        = server_cert.cert
       context.ca_file     = ca.file
@@ -70,31 +79,31 @@ module SSLHelper
     end
 
     def client_context
+      server_cert
       context = OpenSSL::SSL::SSLContext.new
 
       context.options     = OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:options]
       context.verify_mode = OpenSSL::SSL::VERIFY_PEER
-      context.key         = client_cert.key
-      context.cert        = client_cert.cert
-      context.ca_file     = ca.file
+      context.verify_hostname = true if context.respond_to?(:verify_hostname=)
+      context.ca_file = ca.file
 
       context
     end
 
     def client_params
+      server_cert
       {
-        key:     client_cert.key,
-        cert:    client_cert.cert,
         ca_file: ca.file
       }
     end
 
-    %w[server client].each do |side|
-      class_eval <<-RUBY, __FILE__, __LINE__ + 1
-        def #{side}_cert
-          @#{side}_cert ||= ChildCertificate.new ca
-        end
-      RUBY
+    def server_cert
+      @server_cert ||= ChildCertificate.new(
+        ca,
+        common_name:   "127.0.0.1",
+        serial_number: 2,
+        extensions:    SERVER_EXTENSIONS
+      )
     end
 
     def ca

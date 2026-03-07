@@ -112,7 +112,13 @@ module HTTP
       chunk = @parser.read(size)
       return chunk if chunk
 
-      finished = (read_more(size) == :eof) || @parser.finished?
+      eof = read_more(size) == :eof
+      if eof && !@parser.finished? && body_framed?
+        close
+        raise ConnectionError, "response body ended prematurely"
+      end
+
+      finished = eof || @parser.finished?
       chunk    = @parser.read(size)
       finish_response if finished
 
@@ -213,6 +219,11 @@ module HTTP
       @failed_proxy_connect = false
       @buffer               = "".b
       @parser               = Response::Parser.new
+    end
+
+    def body_framed?
+      @parser.headers.include?(Headers::TRANSFER_ENCODING) ||
+        @parser.headers.include?(Headers::CONTENT_LENGTH)
     end
 
     # Connect socket and set up proxy/TLS

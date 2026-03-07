@@ -15,6 +15,7 @@ class DummyServer
     @memo       = {}
     @servlet    = Servlet.new(self, @memo)
     @running    = false
+    ssl_context if @ssl
   end
 
   def addr

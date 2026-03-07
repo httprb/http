@@ -105,17 +105,14 @@ describe HTTP do
         assert_match(/<!doctype html>/, response.to_s)
       end
 
-      # TODO: https://github.com/httprb/http/issues/627
       context "ssl" do
         it "responds with the endpoint's body" do
-          skip "TODO: https://github.com/httprb/http/issues/627"
           response = ssl_client.via(proxy.addr, proxy.port).get dummy_ssl.endpoint
 
           assert_match(/<!doctype html>/, response.to_s)
         end
 
         it "ignores credentials" do
-          skip "TODO: https://github.com/httprb/http/issues/627"
           response = ssl_client.via(proxy.addr, proxy.port, "username", "password").get dummy_ssl.endpoint
 
           assert_match(/<!doctype html>/, response.to_s)
@@ -150,24 +147,20 @@ describe HTTP do
         assert_equal 407, response.status.to_i
       end
 
-      # TODO: https://github.com/httprb/http/issues/627
       context "ssl" do
         it "responds with the endpoint's body" do
-          skip "TODO: https://github.com/httprb/http/issues/627"
           response = ssl_client.via(proxy.addr, proxy.port, "username", "password").get dummy_ssl.endpoint
 
           assert_match(/<!doctype html>/, response.to_s)
         end
 
         it "responds with 407 when wrong credentials given" do
-          skip "TODO: https://github.com/httprb/http/issues/627"
           response = ssl_client.via(proxy.addr, proxy.port, "user", "pass").get dummy_ssl.endpoint
 
           assert_equal 407, response.status.to_i
         end
 
         it "responds with 407 if no credentials given" do
-          skip "TODO: https://github.com/httprb/http/issues/627"
           response = ssl_client.via(proxy.addr, proxy.port).get dummy_ssl.endpoint
 
           assert_equal 407, response.status.to_i

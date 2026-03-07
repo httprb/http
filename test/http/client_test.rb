@@ -431,10 +431,10 @@ describe HTTP::Client do
     include HTTPHandlingTests
   end
 
-  # TODO: https://github.com/httprb/http/issues/627
   describe "working with SSL" do
     run_server(:dummy_ssl) { DummyServer.new(ssl: true) }
 
+    let(:options) { {} }
     let(:extra_options) { {} }
 
     let(:client) do
@@ -442,8 +442,6 @@ describe HTTP::Client do
     end
 
     let(:server) { dummy_ssl }
-
-    before { skip "TODO: https://github.com/httprb/http/issues/627" }
 
     include HTTPHandlingTests
 
@@ -566,8 +564,6 @@ describe HTTP::Client do
 
       context "with broken body (too early closed connection)" do
         it "raises HTTP::ConnectionError" do
-          skip "TODO: broken chunked body handling"
-
           response_data = [
             "HTTP/1.1 200 OK\r\n" \
             "Content-Type: application/json\r\n" \
