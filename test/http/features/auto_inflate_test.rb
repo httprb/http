@@ -67,6 +67,14 @@ describe HTTP::Features::AutoInflate do
       end
     end
 
+    context "for gzip Content-Encoding with charset" do
+      let(:headers) { { content_encoding: "gzip", content_type: "text/html; charset=Shift_JIS" } }
+
+      it "preserves the encoding from the original response" do
+        assert_equal Encoding::Shift_JIS, result.body.encoding
+      end
+    end
+
     context "when response has uri" do
       let(:response) do
         HTTP::Response.new(

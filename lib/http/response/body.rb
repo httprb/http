@@ -21,6 +21,15 @@ module HTTP
       # @api public
       attr_reader :connection
 
+      # The encoding used for the body content
+      #
+      # @example
+      #   body.encoding # => Encoding::UTF_8
+      #
+      # @return [Encoding]
+      # @api public
+      attr_reader :encoding
+
       # Create a new Body instance
       #
       # @example

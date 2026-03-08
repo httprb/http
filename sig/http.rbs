@@ -275,7 +275,7 @@ module HTTP
       SUPPORTED_ENCODING: Set[String]
 
       def wrap_response: (untyped response) -> untyped
-      def stream_for: (untyped connection) -> Response::Body
+      def stream_for: (untyped connection, ?encoding: Encoding) -> Response::Body
 
       private
 
@@ -722,6 +722,7 @@ module HTTP
       @encoding: Encoding
 
       attr_reader connection: untyped
+      attr_reader encoding: Encoding
 
       def initialize: (untyped stream, ?encoding: untyped) -> void
       def readpartial: (*untyped args) -> String

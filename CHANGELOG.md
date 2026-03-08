@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `HTTP.timeout(global: 60, read: 30, write: 30, connect: 5)` to set both a
   global request timeout and individual operation limits (#773)
 
+### Fixed
+
+- AutoInflate now preserves the response charset encoding instead of
+  defaulting to `Encoding::BINARY` (#535)
+
 ### Changed
 
 - Improved error message when request body size cannot be determined to suggest
