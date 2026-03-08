@@ -41,7 +41,7 @@ module HTTP
       # @api public
       def initialize(stream, encoding: Encoding::BINARY)
         @stream     = stream
-        @connection = stream.is_a?(Inflater) ? stream.connection : stream
+        @connection = stream.respond_to?(:connection) ? stream.connection : stream
         @streaming  = nil
         @contents   = nil
         @encoding   = find_encoding(encoding)

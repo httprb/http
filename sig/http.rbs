@@ -322,7 +322,17 @@ module HTTP
 
       private
 
+      def log_response_body_inline: (untyped response) -> untyped
+      def logged_response_options: (untyped response) -> Hash[Symbol, untyped]
+      def logged_body: (Response::Body body) -> Response::Body
       def stringify_headers: (Headers headers) -> String
+
+      class BodyLogger
+        attr_reader connection: untyped
+
+        def initialize: (untyped stream, untyped logger) -> void
+        def readpartial: (*untyped) -> String
+      end
     end
 
     class NormalizeUri < Feature

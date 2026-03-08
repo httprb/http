@@ -23,6 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `LocalJumpError` when using instrumentation with instrumenters that
   unconditionally yield in `#instrument` (e.g., `ActiveSupport::Notifications`)
   (#673)
+- Logging feature no longer eagerly consumes the response body at debug level;
+  body chunks are now logged as they are streamed, preserving
+  `response.body.each` (#785)
 
 ### Changed
 
