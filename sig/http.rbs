@@ -659,7 +659,7 @@ module HTTP
     def code: () -> Integer
     def to_s: () -> String
     alias to_str to_s
-    def readpartial: (*untyped args) -> String?
+    def readpartial: (*untyped args) -> String
     def connection: () -> untyped
     def uri: () -> URI
     def to_a: () -> Array[untyped]
@@ -724,7 +724,7 @@ module HTTP
       attr_reader connection: untyped
 
       def initialize: (untyped stream, ?encoding: untyped) -> void
-      def readpartial: (*untyped args) -> untyped
+      def readpartial: (*untyped args) -> String
       def each: () { (String) -> void } -> void
              | () -> Enumerator[String, void]
       def to_s: () -> untyped
@@ -744,7 +744,7 @@ module HTTP
       attr_reader connection: untyped
 
       def initialize: (untyped connection) -> void
-      def readpartial: (*untyped args) -> String?
+      def readpartial: (*untyped args) -> String
 
       private
 
@@ -821,7 +821,7 @@ module HTTP
     def initialize: (Request req, Options options) -> void
     def failed_proxy_connect?: () -> bool
     def send_request: (Request req) -> void
-    def readpartial: (?Integer size) -> String?
+    def readpartial: (?Integer size, ?String? outbuf) -> String
     def read_headers!: () -> void
     def finish_response: () -> void
     def close: () -> void
@@ -836,7 +836,6 @@ module HTTP
 
     def init_state: (Options options) -> void
     def check_premature_eof: (bool eof) -> void
-    def body_framed?: () -> bool
     def connect_socket: (Request req, Options options) -> void
     def start_tls: (untyped req, untyped options) -> void
     def send_proxy_connect_request: (untyped req) -> void
@@ -858,6 +857,7 @@ module HTTP
       def handle_proxy_connect_response: () -> void
       def reset_timer: () -> void
       def set_keep_alive: () -> void
+      def body_framed?: () -> bool
       def read_more: (Integer size) -> untyped
     end
   end

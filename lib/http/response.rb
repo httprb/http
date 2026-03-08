@@ -117,7 +117,8 @@ module HTTP
     #   Read a chunk of the response body
     #   @example
     #     response.readpartial # => "chunk"
-    #   @return [String, nil]
+    #   @return [String]
+    #   @raise [EOFError] when no more data left
     #   @api public
     def_delegator :@body, :readpartial
 

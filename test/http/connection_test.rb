@@ -280,13 +280,50 @@ describe HTTP::Connection do
 
       conn.read_headers!
       buffer = +""
-      while (s = conn.readpartial(3))
-        refute_predicate conn, :finished_request? if s != ""
-        buffer << s
+      begin
+        loop do
+          s = conn.readpartial(3)
+          refute_predicate conn, :finished_request? if s != ""
+          buffer << s
+        end
+      rescue EOFError
+        # Expected — end of response
       end
 
       assert_equal "1234567890", buffer
       assert_predicate conn, :finished_request?
+    end
+
+    it "raises EOFError when no response is pending" do
+      assert_raises(EOFError) { connection.readpartial }
+    end
+
+    it "fills outbuf when provided" do
+      call_count = 0
+      responses = [
+        "HTTP/1.1 200 OK\r\nContent-Length: 5\r\n\r\nhello",
+        :eof
+      ]
+      ob_socket = fake(
+        connect:     nil,
+        close:       nil,
+        readpartial: proc {
+          idx = [call_count, responses.length - 1].min
+          responses[idx].tap { call_count += 1 }
+        },
+        closed?:     proc { call_count >= responses.length }
+      )
+      ob_timeout_class = fake(new: ob_socket)
+      ob_opts = HTTP::Options.new(timeout_class: ob_timeout_class)
+      conn = HTTP::Connection.new(req, ob_opts)
+      conn.instance_variable_set(:@pending_response, true)
+
+      conn.read_headers!
+      outbuf = +""
+      result = conn.readpartial(16_384, outbuf)
+
+      assert_equal "hello", outbuf
+      assert_same outbuf, result
     end
   end
 end

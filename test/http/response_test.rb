@@ -357,7 +357,7 @@ describe HTTP::Response do
     end
 
     let(:connection) do
-      fake(sequence_id: 0, readpartial: proc { chunks.shift }, body_completed?: proc {
+      fake(sequence_id: 0, readpartial: proc { chunks.shift || raise(EOFError) }, body_completed?: proc {
         chunks.empty?
       })
     end

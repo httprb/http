@@ -44,13 +44,13 @@ module HTTP
       #   body.readpartial # => "chunk of data"
       #
       # (see HTTP::Client#readpartial)
-      # @return [String, nil]
+      # @return [String]
+      # @raise [EOFError] when no more data left
       # @api public
       def readpartial(*)
         stream!
         chunk = @stream.readpartial(*)
-
-        String.new(chunk, encoding: @encoding) if chunk
+        String.new(chunk, encoding: @encoding)
       end
 
       # Iterate over the body, allowing it to be enumerable
@@ -63,9 +63,10 @@ module HTTP
       # @return [void]
       # @api public
       def each
-        while (chunk = readpartial)
-          yield chunk
+        loop do
+          yield readpartial
         end
+      rescue EOFError # rubocop:disable Lint/SuppressedException
       end
 
       # Eagerly consume the entire body as a string
@@ -125,9 +126,10 @@ module HTTP
       def read_contents
         contents = String.new("", encoding: @encoding)
 
-        while (chunk = @stream.readpartial)
-          contents << String.new(chunk, encoding: @encoding)
-          chunk = nil # deallocate string
+        loop do
+          contents << String.new(@stream.readpartial, encoding: @encoding)
+        rescue EOFError
+          break
         end
 
         contents

@@ -79,6 +79,18 @@ module HTTP
           end
       end
 
+      # Check if the response body has a known framing mechanism
+      #
+      # @example
+      #   body_framed?
+      #
+      # @return [Boolean]
+      # @api private
+      def body_framed?
+        @parser.headers.include?(Headers::TRANSFER_ENCODING) ||
+          @parser.headers.include?(Headers::CONTENT_LENGTH)
+      end
+
       # Feeds some more data into parser
       # @return [void]
       # @raise [SocketReadError] when unable to read from socket

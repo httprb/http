@@ -32,18 +32,19 @@ module HTTP
       # @example
       #   inflater.readpartial # => "decompressed data"
       #
-      # @return [String, nil]
+      # @return [String]
+      # @raise [EOFError] when no more data left
       # @api public
       def readpartial(*)
         chunk = @connection.readpartial(*)
-        return zstream.inflate(chunk) if chunk
-
+        zstream.inflate(chunk)
+      rescue EOFError
         unless zstream.closed?
           zstream.finish if zstream.total_in.positive?
           zstream.close
         end
 
-        nil
+        raise
       end
 
       private

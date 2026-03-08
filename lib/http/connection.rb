@@ -104,23 +104,24 @@ module HTTP
     # @example
     #   connection.readpartial
     #
+    # @param [Integer] size maximum bytes to read
+    # @param [String, nil] outbuf buffer to fill with data
     # @return [String] data chunk
-    # @return [nil] when no more data left
+    # @raise [EOFError] when no more data left
     # @api public
-    def readpartial(size = BUFFER_SIZE)
-      return unless @pending_response
+    def readpartial(size = BUFFER_SIZE, outbuf = nil)
+      raise EOFError unless @pending_response
 
       chunk = @parser.read(size)
-      return chunk if chunk
+      unless chunk
+        eof = read_more(size) == :eof
+        check_premature_eof(eof)
+        finished = eof || @parser.finished?
+        chunk    = @parser.read(size) || "".b
+        finish_response if finished
+      end
 
-      eof = read_more(size) == :eof
-      check_premature_eof(eof)
-
-      finished = eof || @parser.finished?
-      chunk    = @parser.read(size)
-      finish_response if finished
-
-      chunk || "".b
+      outbuf ? outbuf.replace(chunk) : chunk
     end
 
     # Reads data from socket up until headers are loaded
@@ -231,18 +232,6 @@ module HTTP
 
       close
       raise ConnectionError, "response body ended prematurely"
-    end
-
-    # Check if the response body has a known framing mechanism
-    #
-    # @example
-    #   body_framed?
-    #
-    # @return [Boolean]
-    # @api private
-    def body_framed?
-      @parser.headers.include?(Headers::TRANSFER_ENCODING) ||
-        @parser.headers.include?(Headers::CONTENT_LENGTH)
     end
 
     # Connect socket and set up proxy/TLS

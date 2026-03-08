@@ -7,7 +7,7 @@ describe HTTP::Response::Body do
   let(:body) { HTTP::Response::Body.new(connection, encoding: Encoding::UTF_8) }
 
   let(:connection) do
-    fake(sequence_id: 0, readpartial: proc { chunks.shift }, body_completed?: proc {
+    fake(sequence_id: 0, readpartial: proc { chunks.shift || raise(EOFError) }, body_completed?: proc {
       chunks.empty?
     })
   end
@@ -141,18 +141,25 @@ describe HTTP::Response::Body do
       it "streams decoded body" do
         assert_equal "Hi, HTTP ", body.readpartial
         assert_equal "here \u263A", body.readpartial
-        assert_nil body.readpartial
+        assert_raises(EOFError) { body.readpartial }
       end
     end
   end
 
-  context "when inflater receives nil chunk without prior data" do
-    it "closes the zstream and handles subsequent nil" do
-      conn = fake(sequence_id: 0, readpartial: proc {}, body_completed?: proc { true })
+  context "when inflater receives EOFError without prior data" do
+    it "closes the zstream and re-raises" do
+      conn = fake(readpartial: proc { raise EOFError })
       inflater = HTTP::Response::Inflater.new(conn)
-      inflater.readpartial
 
-      assert_nil inflater.readpartial
+      assert_raises(EOFError) { inflater.readpartial }
+    end
+
+    it "handles repeated EOFError after zstream is already closed" do
+      conn = fake(readpartial: proc { raise EOFError })
+      inflater = HTTP::Response::Inflater.new(conn)
+
+      assert_raises(EOFError) { inflater.readpartial }
+      assert_raises(EOFError) { inflater.readpartial }
     end
   end
 end

@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **BREAKING** `Connection#readpartial` now raises `EOFError` instead of
+  returning `nil` at end-of-stream, and supports an `outbuf` parameter,
+  conforming to the `IO#readpartial` API. `Body#readpartial` and
+  `Inflater#readpartial` also raise `EOFError` (#618)
 - **BREAKING** Stricter timeout options parsing: `.timeout()` with a Hash now
   rejects unknown keys, non-numeric values, string keys, and empty hashes (#754)
 - Bumped min llhttp dependency version
