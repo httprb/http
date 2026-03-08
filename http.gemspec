@@ -5,7 +5,7 @@ require_relative "./lib/http/version"
 Gem::Specification.new do |spec|
   spec.name          = "http"
   spec.version       = HTTP::VERSION
-  spec.authors       = ["Tony Arcieri", "Erik Michaels-Ober", "Alexey V. Zapparov", "Zachary Anker"]
+  spec.authors       = ["Tony Arcieri", "Erik Berlin", "Alexey V. Zapparov", "Zachary Anker"]
   spec.email         = ["bascule@gmail.com"]
 
   spec.summary       = "HTTP should be easy"
