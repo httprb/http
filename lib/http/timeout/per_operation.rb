@@ -15,6 +15,55 @@ module HTTP
       # Default read timeout in seconds
       READ_TIMEOUT = 0.25
 
+      # Mapping of shorthand option keys to their full forms
+      KEYS = %i[read write connect].to_h { |k| [k, :"#{k}_timeout"] }.freeze
+
+      # Normalize and validate timeout options
+      #
+      # @example
+      #   PerOperation.normalize_options(read: 5, write: 3)
+      #
+      # @param [Hash] options timeout options with short or long keys
+      # @return [Hash] normalized options with long keys
+      # @raise [ArgumentError] if options are invalid
+      # @api public
+      def self.normalize_options(options)
+        remaining  = options.dup
+        normalized = {} #: Hash[Symbol, Numeric]
+
+        KEYS.each do |short, long|
+          next if !remaining.key?(short) && !remaining.key?(long)
+
+          normalized[long] = resolve_timeout_value!(remaining, short, long)
+        end
+
+        raise ArgumentError, "unknown timeout options: #{remaining.keys.join(', ')}" unless remaining.empty?
+        raise ArgumentError, "no timeout options given" if normalized.empty?
+
+        normalized
+      end
+
+      # Resolve a single timeout value from the options hash
+      #
+      # @example
+      #   resolve_timeout_value!({read: 5}, :read, :read_timeout)
+      #
+      # @param [Hash] options mutable options hash (keys are deleted as consumed)
+      # @param [Symbol] short short key name (e.g. :read)
+      # @param [Symbol] long long key name (e.g. :read_timeout)
+      # @return [Numeric] the timeout value
+      # @raise [ArgumentError] if both forms given or value is not numeric
+      # @api private
+      private_class_method def self.resolve_timeout_value!(options, short, long)
+        raise ArgumentError, "can't pass both #{short} and #{long}" if options.key?(short) && options.key?(long)
+
+        value = options.delete(options.key?(long) ? long : short)
+
+        raise ArgumentError, "#{long} must be numeric" unless value.is_a?(Numeric)
+
+        value
+      end
+
       # Initializes per-operation timeout with options
       #
       # @example

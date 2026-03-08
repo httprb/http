@@ -168,15 +168,15 @@ module HTTP
     # @api public
     def timeout(options)
       klass, options = case options
-                       when Numeric then [HTTP::Timeout::Global, { global: options }]
-                       when Hash    then [HTTP::Timeout::PerOperation, options.dup]
-                       when :null   then [HTTP::Timeout::Null, {}]
+                       when Numeric then [HTTP::Timeout::Global, { global_timeout: options }]
+                       when Hash
+                         [HTTP::Timeout::PerOperation, HTTP::Timeout::PerOperation.normalize_options(options)]
+                       when :null then [HTTP::Timeout::Null, {}]
                        else raise ArgumentError,
-                                  "Use `.timeout(global_timeout_in_seconds)` " \
-                                  "or `.timeout(connect: x, write: y, read: z)`."
+                                  "Use `.timeout(:null)`, " \
+                                  "`.timeout(global_timeout_in_seconds)` or " \
+                                  "`.timeout(connect: x, write: y, read: z)`."
                        end
-
-      normalize_timeout_keys!(options)
 
       branch default_options.merge(
         timeout_class:   klass,

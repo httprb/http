@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **BREAKING** Stricter timeout options parsing: `.timeout()` with a Hash now
+  rejects unknown keys, non-numeric values, string keys, and empty hashes.
+  `HTTP.timeout(global: N)` is no longer accepted; use `HTTP.timeout(N)` (#754)
 - Bumped min llhttp dependency version
 - **BREAKING** Handle responses in the reverse order from the requests (#776)
 

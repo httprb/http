@@ -418,12 +418,64 @@ describe HTTP do
       end
     end
 
+    context "specifying per operation timeouts with long form keys" do
+      let(:client) { HTTP.timeout read_timeout: 123 }
+
+      it "sets given timeout options" do
+        assert_equal({ read_timeout: 123 }, client.default_options.timeout_options)
+      end
+    end
+
+    context "specifying all per operation timeouts" do
+      let(:client) { HTTP.timeout read: 1, write: 2, connect: 3 }
+
+      it "sets all timeout options" do
+        assert_equal({ read_timeout: 1, write_timeout: 2, connect_timeout: 3 }, client.default_options.timeout_options)
+      end
+    end
+
     context "specifying per operation timeouts as frozen hash" do
       let(:frozen_options) { { read: 123 }.freeze }
       let(:client) { HTTP.timeout(frozen_options) }
 
       it "does not raise an error" do
         client
+      end
+    end
+
+    context "with empty hash" do
+      it "raises ArgumentError" do
+        assert_raises(ArgumentError) { HTTP.timeout({}) }
+      end
+    end
+
+    context "with unknown timeout key" do
+      it "raises ArgumentError" do
+        assert_raises(ArgumentError) { HTTP.timeout(timeout: 2) }
+      end
+    end
+
+    context "with both short and long form of same key" do
+      it "raises ArgumentError" do
+        assert_raises(ArgumentError) { HTTP.timeout(read: 2, read_timeout: 2) }
+      end
+    end
+
+    context "with non-numeric timeout value" do
+      it "raises ArgumentError" do
+        assert_raises(ArgumentError) { HTTP.timeout(read: "2") }
+      end
+    end
+
+    context "with string keys" do
+      it "raises ArgumentError" do
+        assert_raises(ArgumentError) { HTTP.timeout("read" => 2) }
+      end
+    end
+
+    context "with global key as hash" do
+      it "raises ArgumentError" do
+        assert_raises(ArgumentError) { HTTP.timeout(global: 161) }
       end
     end
 
@@ -436,6 +488,14 @@ describe HTTP do
 
       it "sets given timeout option" do
         assert_equal({ global_timeout: 123 }, client.default_options.timeout_options)
+      end
+    end
+
+    context "specifying a float global timeout" do
+      let(:client) { HTTP.timeout 2.5 }
+
+      it "sets given timeout option" do
+        assert_equal({ global_timeout: 2.5 }, client.default_options.timeout_options)
       end
     end
 

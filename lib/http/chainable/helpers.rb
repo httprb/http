@@ -27,18 +27,5 @@ module HTTP
       end
       result
     end
-
-    # Normalize timeout option keys to include _timeout suffix
-    #
-    # @param [Hash] options timeout options to normalize
-    # @return [void]
-    # @api private
-    def normalize_timeout_keys!(options)
-      %i[global read write connect].each do |k|
-        next unless options.key? k
-
-        options[:"#{k}_timeout"] = options.delete k
-      end
-    end
   end
 end

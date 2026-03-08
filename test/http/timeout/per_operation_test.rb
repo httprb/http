@@ -4,6 +4,64 @@ require "test_helper"
 
 describe HTTP::Timeout::PerOperation do
   cover "HTTP::Timeout::PerOperation*"
+  describe ".normalize_options" do
+    it "normalizes short read key to long form" do
+      assert_equal({ read_timeout: 5 }, HTTP::Timeout::PerOperation.normalize_options(read: 5))
+    end
+
+    it "normalizes short write key to long form" do
+      assert_equal({ write_timeout: 3 }, HTTP::Timeout::PerOperation.normalize_options(write: 3))
+    end
+
+    it "normalizes short connect key to long form" do
+      assert_equal({ connect_timeout: 1 }, HTTP::Timeout::PerOperation.normalize_options(connect: 1))
+    end
+
+    it "passes through long form keys" do
+      assert_equal({ read_timeout: 5 }, HTTP::Timeout::PerOperation.normalize_options(read_timeout: 5))
+    end
+
+    it "normalizes all keys together" do
+      result = HTTP::Timeout::PerOperation.normalize_options(read: 1, write: 2, connect: 3)
+
+      assert_equal({ read_timeout: 1, write_timeout: 2, connect_timeout: 3 }, result)
+    end
+
+    it "accepts float values" do
+      assert_equal({ read_timeout: 1.5 }, HTTP::Timeout::PerOperation.normalize_options(read: 1.5))
+    end
+
+    it "handles frozen hashes" do
+      result = HTTP::Timeout::PerOperation.normalize_options({ read: 5 }.freeze)
+
+      assert_equal({ read_timeout: 5 }, result)
+    end
+
+    it "raises when both short and long form of same key given" do
+      assert_raises(ArgumentError) do
+        HTTP::Timeout::PerOperation.normalize_options(read: 1, read_timeout: 2)
+      end
+    end
+
+    it "raises for non-numeric values" do
+      assert_raises(ArgumentError) do
+        HTTP::Timeout::PerOperation.normalize_options(read: "5")
+      end
+    end
+
+    it "raises for unknown keys" do
+      assert_raises(ArgumentError) do
+        HTTP::Timeout::PerOperation.normalize_options(timeout: 5)
+      end
+    end
+
+    it "raises for empty hash" do
+      assert_raises(ArgumentError) do
+        HTTP::Timeout::PerOperation.normalize_options({})
+      end
+    end
+  end
+
   let(:timeout) { HTTP::Timeout::PerOperation.new(connect_timeout: 1, read_timeout: 1, write_timeout: 1) }
 
   let(:io) { fake(wait_readable: true, wait_writable: true) }

@@ -50,7 +50,6 @@ module HTTP
 
     def branch: (Options options) -> Client
     def build_proxy_hash: (Array[untyped] proxy) -> Hash[Symbol, untyped]
-    def normalize_timeout_keys!: (Hash[untyped, untyped] options) -> void
   end
 
   class Client
@@ -975,6 +974,13 @@ module HTTP
       READ_TIMEOUT: Numeric
       WRITE_TIMEOUT: Numeric
       CONNECT_TIMEOUT: Numeric
+      KEYS: Hash[Symbol, Symbol]
+
+      def self.normalize_options: (Hash[Symbol, untyped] options) -> Hash[Symbol, Numeric]
+
+      private
+
+      def self.resolve_timeout_value!: (Hash[Symbol, untyped] options, Symbol short, Symbol long) -> Numeric
 
       attr_reader read_timeout: untyped
       attr_reader write_timeout: untyped
