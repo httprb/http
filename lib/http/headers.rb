@@ -186,15 +186,19 @@ module HTTP
       keys.to_h { |k| [k, self[k]] }
     end
     # @!method to_hash
-    #   Returns Rack-compatible headers Hash
-    #
-    #   @example
-    #     headers.to_hash
-    #
     #   @see #to_h
     #   @return [Hash]
-    #   @api public
     alias to_hash to_h
+
+    # Pattern matching interface
+    #
+    # @example
+    #   headers.deconstruct_keys(%i[content_type])
+    #
+    # @param keys [Array<Symbol>, nil] keys to extract, or nil for all
+    # @return [Hash{Symbol => Object}]
+    # @api public
+    def deconstruct_keys(keys) = @pile.map { |_, k, _| k }.to_h { |k| [k.tr("A-Z-", "a-z_").to_sym, self[k]] }.then { |h| keys ? h.slice(*keys) : h } # rubocop:disable Layout/LineLength
 
     # Returns human-readable representation of self instance
     #

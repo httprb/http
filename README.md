@@ -104,6 +104,24 @@ and call `#readpartial` on it repeatedly until it returns `nil`:
 => nil
 ```
 
+### Pattern Matching
+
+Response objects support Ruby's pattern matching:
+
+```ruby
+case HTTP.get("https://api.example.com/users")
+in { status: 200..299, body: body }
+  JSON.parse(body.to_s)
+in { status: 404 }
+  nil
+in { status: 400.. }
+  raise "request failed"
+end
+```
+
+Pattern matching is also supported on `HTTP::Response::Status`, `HTTP::Headers`,
+`HTTP::ContentType`, and `HTTP::URI`.
+
 ## Supported Ruby Versions
 
 This library aims to support and is [tested against][build-link]

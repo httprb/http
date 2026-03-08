@@ -126,6 +126,43 @@ describe HTTP::ContentType do
     end
   end
 
+  describe "#deconstruct_keys" do
+    let(:content_type) { HTTP::ContentType.new("text/html", "utf-8") }
+
+    it "returns all keys when given nil" do
+      assert_equal({ mime_type: "text/html", charset: "utf-8" }, content_type.deconstruct_keys(nil))
+    end
+
+    it "returns only requested keys" do
+      assert_equal({ mime_type: "text/html" }, content_type.deconstruct_keys([:mime_type]))
+    end
+
+    it "excludes unrequested keys" do
+      refute_includes content_type.deconstruct_keys([:mime_type]).keys, :charset
+    end
+
+    it "returns empty hash for empty keys" do
+      assert_equal({}, content_type.deconstruct_keys([]))
+    end
+
+    it "returns nil values when attributes are nil" do
+      ct = HTTP::ContentType.new
+
+      assert_equal({ mime_type: nil, charset: nil }, ct.deconstruct_keys(nil))
+    end
+
+    it "supports pattern matching with case/in" do
+      matched = case content_type
+                in { mime_type: /html/ }
+                  true
+                else
+                  false
+                end
+
+      assert matched
+    end
+  end
+
   describe "#initialize" do
     it "stores mime_type and charset" do
       ct = HTTP::ContentType.new("text/html", "utf-8")

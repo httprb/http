@@ -376,6 +376,51 @@ describe HTTP::Headers do
     end
   end
 
+  describe "#deconstruct_keys" do
+    before do
+      headers.add :content_type, "application/json"
+      headers.add :set_cookie,   "hoo=ray"
+      headers.add :set_cookie,   "woo=hoo"
+    end
+
+    it "returns all keys as snake_case symbols when given nil" do
+      result = headers.deconstruct_keys(nil)
+
+      assert_equal "application/json", result[:content_type]
+      assert_equal %w[hoo=ray woo=hoo], result[:set_cookie]
+    end
+
+    it "converts header names to snake_case symbols" do
+      assert_includes headers.deconstruct_keys(nil).keys, :content_type
+      assert_includes headers.deconstruct_keys(nil).keys, :set_cookie
+    end
+
+    it "returns only requested keys" do
+      result = headers.deconstruct_keys([:content_type])
+
+      assert_equal({ content_type: "application/json" }, result)
+    end
+
+    it "excludes unrequested keys" do
+      refute_includes headers.deconstruct_keys([:content_type]).keys, :set_cookie
+    end
+
+    it "returns empty hash for empty keys" do
+      assert_equal({}, headers.deconstruct_keys([]))
+    end
+
+    it "supports pattern matching with case/in" do
+      matched = case headers
+                in { content_type: /json/ }
+                  true
+                else
+                  false
+                end
+
+      assert matched
+    end
+  end
+
   describe "#inspect" do
     it "returns a human-readable representation" do
       headers.set :set_cookie, %w[hoo=ray woo=hoo]

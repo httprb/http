@@ -367,6 +367,55 @@ describe HTTP::URI do
     end
   end
 
+  describe "#deconstruct_keys" do
+    let(:full_uri) { HTTP::URI.parse("http://user:pass@example.com:8080/path?q=1#frag") }
+
+    it "returns all keys when given nil" do
+      result = full_uri.deconstruct_keys(nil)
+
+      assert_equal "http", result[:scheme]
+      assert_equal "example.com", result[:host]
+      assert_equal 8080, result[:port]
+      assert_equal "/path", result[:path]
+      assert_equal "q=1", result[:query]
+      assert_equal "frag", result[:fragment]
+      assert_equal "user", result[:user]
+      assert_equal "pass", result[:password]
+    end
+
+    it "returns only requested keys" do
+      result = http_uri.deconstruct_keys(%i[scheme host])
+
+      assert_equal({ scheme: "http", host: "example.com" }, result)
+    end
+
+    it "excludes unrequested keys" do
+      result = http_uri.deconstruct_keys([:host])
+
+      refute_includes result.keys, :scheme
+      refute_includes result.keys, :port
+    end
+
+    it "returns empty hash for empty keys" do
+      assert_equal({}, http_uri.deconstruct_keys([]))
+    end
+
+    it "returns correct port for HTTPS URIs" do
+      assert_equal 443, https_uri.deconstruct_keys([:port])[:port]
+    end
+
+    it "supports pattern matching with case/in" do
+      matched = case http_uri
+                in { scheme: "http", host: /example/ }
+                  true
+                else
+                  false
+                end
+
+      assert matched
+    end
+  end
+
   describe "process_ipv6_brackets (via host=)" do
     it "handles IPv4 addresses" do
       http_uri.host = "192.168.1.1"

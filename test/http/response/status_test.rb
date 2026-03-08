@@ -143,6 +143,56 @@ describe HTTP::Response::Status do
     end
   end
 
+  describe "#deconstruct_keys" do
+    let(:status) { HTTP::Response::Status.new(200) }
+
+    it "returns all keys when given nil" do
+      assert_equal({ code: 200, reason: "OK" }, status.deconstruct_keys(nil))
+    end
+
+    it "returns only requested keys" do
+      result = status.deconstruct_keys([:code])
+
+      assert_equal({ code: 200 }, result)
+    end
+
+    it "excludes unrequested keys" do
+      refute_includes status.deconstruct_keys([:code]).keys, :reason
+    end
+
+    it "returns empty hash for empty keys" do
+      assert_equal({}, status.deconstruct_keys([]))
+    end
+
+    it "returns nil reason for unknown code" do
+      unknown = HTTP::Response::Status.new(1024)
+
+      assert_equal({ code: 1024, reason: nil }, unknown.deconstruct_keys(nil))
+    end
+
+    it "supports pattern matching with case/in" do
+      matched = case status
+                in { code: 200..299 }
+                  true
+                else
+                  false
+                end
+
+      assert matched
+    end
+
+    it "supports pattern matching with specific code" do
+      matched = case status
+                in { code: 200, reason: "OK" }
+                  true
+                else
+                  false
+                end
+
+      assert matched
+    end
+  end
+
   describe "boundary conditions" do
     it "code 99 is not informational" do
       refute_predicate HTTP::Response::Status.new(99), :informational?

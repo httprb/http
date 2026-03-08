@@ -148,6 +148,42 @@ module HTTP
       [status.to_i, headers.to_h, body.to_s]
     end
 
+    # @!method deconstruct
+    #   Array pattern matching interface
+    #
+    #   @example
+    #     response.deconstruct
+    #
+    #   @see #to_a
+    #   @return [Array(Integer, Hash, String)]
+    #   @api public
+    alias deconstruct to_a
+
+    # Pattern matching interface for matching against response attributes
+    #
+    # @example
+    #   case response
+    #   in { status: 200..299, body: /success/ }
+    #     "ok"
+    #   in { status: 400.. }
+    #     "error"
+    #   end
+    #
+    # @param keys [Array<Symbol>, nil] keys to extract, or nil for all
+    # @return [Hash{Symbol => Object}]
+    # @api public
+    def deconstruct_keys(keys)
+      h = {
+        status:        @status,
+        version:       @version,
+        headers:       @headers,
+        body:          @body,
+        request:       @request,
+        proxy_headers: @proxy_headers
+      }
+      keys ? h.slice(*keys) : h
+    end
+
     # Flushes body and returns self-reference
     #
     # @example

@@ -33,6 +33,70 @@ describe HTTP::Response do
     end
   end
 
+  describe "#deconstruct_keys" do
+    it "returns all keys when given nil" do
+      result = response.deconstruct_keys(nil)
+
+      assert_instance_of HTTP::Response::Status, result[:status]
+      assert_equal "1.1", result[:version]
+      assert_instance_of HTTP::Headers, result[:headers]
+      assert_equal body, result[:body]
+      assert_equal request, result[:request]
+      assert_instance_of HTTP::Headers, result[:proxy_headers]
+    end
+
+    it "returns only requested keys" do
+      result = response.deconstruct_keys(%i[status version])
+
+      assert_equal 2, result.size
+      assert_instance_of HTTP::Response::Status, result[:status]
+      assert_equal "1.1", result[:version]
+    end
+
+    it "excludes unrequested keys" do
+      result = response.deconstruct_keys([:status])
+
+      refute_includes result.keys, :version
+      refute_includes result.keys, :body
+    end
+
+    it "returns empty hash for empty keys" do
+      assert_equal({}, response.deconstruct_keys([]))
+    end
+
+    it "supports hash pattern matching" do
+      matched = case response
+                in { status: HTTP::Response::Status => s, version: "1.1" }
+                  true
+                else
+                  false
+                end
+
+      assert matched
+    end
+  end
+
+  describe "#deconstruct" do
+    let(:body)         { "Hello world" }
+    let(:content_type) { "text/plain" }
+    let(:headers)      { { "Content-Type" => content_type } }
+
+    it "returns a Rack-like array" do
+      assert_equal [200, headers, body], response.deconstruct
+    end
+
+    it "supports array pattern matching" do
+      matched = case response
+                in [200, *, String => b]
+                  true
+                else
+                  false
+                end
+
+      assert matched
+    end
+  end
+
   describe "#content_length" do
     context "without Content-Length header" do
       it "returns nil" do

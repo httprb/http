@@ -140,6 +140,7 @@ module HTTP
     def include?: (untyped name) -> bool
     def to_h: () -> Hash[String, untyped]
     alias to_hash to_h
+    def deconstruct_keys: (Array[Symbol]? keys) -> Hash[Symbol, untyped]
     def to_a: () -> Array[Array[String]]
     def inspect: () -> String
     def keys: () -> Array[String]
@@ -213,6 +214,7 @@ module HTTP
     public
 
     def initialize: (?String? mime_type, ?String? charset) -> void
+    def deconstruct_keys: (Array[Symbol]? keys) -> Hash[Symbol, untyped]
   end
 
   class Feature
@@ -480,6 +482,7 @@ module HTTP
     def to_s: () -> String
     alias to_str to_s
     def inspect: () -> String
+    def deconstruct_keys: (Array[Symbol]? keys) -> Hash[Symbol, untyped]
 
     # Delegated methods from Addressable::URI
     def scheme: () -> String?
@@ -659,6 +662,8 @@ module HTTP
     def connection: () -> untyped
     def uri: () -> URI
     def to_a: () -> Array[untyped]
+    alias deconstruct to_a
+    def deconstruct_keys: (Array[Symbol]? keys) -> Hash[Symbol, untyped]
     def flush: () -> Response
     def content_length: () -> Integer?
     def content_type: () -> ContentType
@@ -702,6 +707,7 @@ module HTTP
       def server_error?: () -> bool
       def to_sym: () -> Symbol?
       def inspect: () -> String
+      def deconstruct_keys: (Array[Symbol]? keys) -> Hash[Symbol, untyped]
       def __setobj__: (untyped obj) -> void
       def __getobj__: () -> Integer
     end

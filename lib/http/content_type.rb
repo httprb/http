@@ -69,5 +69,21 @@ module HTTP
       @mime_type = mime_type
       @charset   = charset
     end
+
+    # Pattern matching interface for matching against content type attributes
+    #
+    # @example
+    #   case response.content_type
+    #   in { mime_type: /json/ }
+    #     "JSON content"
+    #   end
+    #
+    # @param keys [Array<Symbol>, nil] keys to extract, or nil for all
+    # @return [Hash{Symbol => Object}]
+    # @api public
+    def deconstruct_keys(keys)
+      h = { mime_type: @mime_type, charset: @charset }
+      keys ? h.slice(*keys) : h
+    end
   end
 end

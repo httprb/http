@@ -176,6 +176,24 @@ module HTTP
         "#<#{self.class} #{self}>"
       end
 
+      # Pattern matching interface for matching against status code and reason
+      #
+      # @example
+      #   case response.status
+      #   in { code: 200..299 }
+      #     "success"
+      #   in { code: 400.. }
+      #     "error"
+      #   end
+      #
+      # @param keys [Array<Symbol>, nil] keys to extract, or nil for all
+      # @return [Hash{Symbol => Object}]
+      # @api public
+      def deconstruct_keys(keys)
+        h = { code: code, reason: reason }
+        keys ? h.slice(*keys) : h
+      end
+
       SYMBOLS.each do |code, symbol|
         class_eval <<-RUBY, __FILE__, __LINE__ + 1
           def #{symbol}?      # def bad_request?

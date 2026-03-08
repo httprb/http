@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Pattern matching support (`deconstruct_keys`) for Response, Response::Status,
+  Headers, ContentType, and URI (#642)
+
 ### Changed
 
 - Bumped min llhttp dependency version

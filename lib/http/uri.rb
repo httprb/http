@@ -260,6 +260,20 @@ module HTTP
       format("#<%s:0x%014x URI:%s>", self.class, object_id << 1, self)
     end
 
+    # Pattern matching interface
+    #
+    # @example
+    #   uri.deconstruct_keys(%i[scheme host])
+    #
+    # @param keys [Array<Symbol>, nil] keys to extract, or nil for all
+    # @return [Hash{Symbol => Object}]
+    # @api public
+    def deconstruct_keys(keys)
+      h = { scheme: scheme, host: host, port: port, path: path,
+            query: query, fragment: fragment, user: user, password: password }
+      keys ? h.slice(*keys) : h
+    end
+
     private
 
     # Adds or removes IPv6 brackets from a host
