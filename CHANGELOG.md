@@ -20,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - AutoInflate now preserves the response charset encoding instead of
   defaulting to `Encoding::BINARY` (#535)
+- `LocalJumpError` when using instrumentation with instrumenters that
+  unconditionally yield in `#instrument` (e.g., `ActiveSupport::Notifications`)
+  (#673)
 
 ### Changed
 

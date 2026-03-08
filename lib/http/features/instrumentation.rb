@@ -73,7 +73,7 @@ module HTTP
       def wrap_request(request)
         # Emit a separate "start" event, so a logger can print the request
         # being run without waiting for a response
-        instrumenter.instrument("start_#{name}", request: request)
+        instrumenter.instrument("start_#{name}", request: request) {} # rubocop:disable Lint/EmptyBlock
         instrumenter.start(name, request: request)
         request
       end
@@ -101,7 +101,7 @@ module HTTP
       # @return [Object]
       # @api public
       def on_error(request, error)
-        instrumenter.instrument(error_name, request: request, error: error)
+        instrumenter.instrument(error_name, request: request, error: error) {} # rubocop:disable Lint/EmptyBlock
       end
 
       HTTP::Options.register_feature(:instrumentation, self)
