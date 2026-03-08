@@ -2,7 +2,11 @@
 
 [![Gem Version][gem-image]][gem-link]
 [![MIT licensed][license-image]][license-link]
-[![Build Status][build-image]][build-link]
+[![Docs][docs-image]][docs-link]
+[![Lint][lint-image]][lint-link]
+[![Mutant][mutant-image]][mutant-link]
+[![Test][test-image]][test-link]
+[![Typecheck][typecheck-image]][typecheck-link]
 
 [Documentation]
 
@@ -127,12 +131,10 @@ Pattern matching is also supported on `HTTP::Response::Status`, `HTTP::Headers`,
 This library aims to support and is [tested against][build-link]
 the following Ruby  versions:
 
-- Ruby 3.0
-- Ruby 3.1
 - Ruby 3.2
 - Ruby 3.3
 - Ruby 3.4
-- JRuby 9.4
+- Ruby 4.0
 
 If something doesn't work on one of these versions, it's a bug.
 
@@ -170,8 +172,16 @@ See LICENSE.txt for further details.
 [gem-link]: https://rubygems.org/gems/http
 [license-image]: https://img.shields.io/badge/license-MIT-blue.svg
 [license-link]: https://github.com/httprb/http/blob/main/LICENSE.txt
-[build-image]: https://github.com/httprb/http/workflows/CI/badge.svg
-[build-link]: https://github.com/httprb/http/actions/workflows/ci.yml
+[docs-image]: https://github.com/httprb/http/actions/workflows/docs.yml/badge.svg
+[docs-link]: https://github.com/httprb/http/actions/workflows/docs.yml
+[lint-image]: https://github.com/httprb/http/actions/workflows/lint.yml/badge.svg
+[lint-link]: https://github.com/httprb/http/actions/workflows/lint.yml
+[mutant-image]: https://github.com/httprb/http/actions/workflows/mutant.yml/badge.svg
+[mutant-link]: https://github.com/httprb/http/actions/workflows/mutant.yml
+[test-image]: https://github.com/httprb/http/actions/workflows/test.yml/badge.svg
+[test-link]: https://github.com/httprb/http/actions/workflows/test.yml
+[typecheck-image]: https://github.com/httprb/http/actions/workflows/typecheck.yml/badge.svg
+[typecheck-link]: https://github.com/httprb/http/actions/workflows/typecheck.yml
 
 [//]: # (links)
 

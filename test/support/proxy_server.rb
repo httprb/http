@@ -7,7 +7,7 @@ require "base64"
 require "support/servers/runner"
 
 class ProxyServer
-  Target = Struct.new(:host, :port, :path, :query, keyword_init: true)
+  Target = Struct.new(:host, :port, :path, :query)
 
   def initialize
     @tcp_server = TCPServer.new("127.0.0.1", 0)

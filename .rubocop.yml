@@ -13,7 +13,7 @@ AllCops:
   DisplayCopNames: true
   DisplayStyleGuide: true
   NewCops: enable
-  TargetRubyVersion: 3.0
+  TargetRubyVersion: 3.2
 
 # Feature has no initialize, so super() is a no-op in subclasses
 Lint/MissingSuper:

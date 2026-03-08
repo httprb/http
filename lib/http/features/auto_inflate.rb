@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "set"
-
 module HTTP
   module Features
     # Automatically decompresses response bodies

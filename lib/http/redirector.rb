@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "set"
-
 require "http/headers"
 
 module HTTP
@@ -70,14 +68,14 @@ module HTTP
     # @param [HTTP::Response] response
     # @api public
     # @return [HTTP::Response]
-    def perform(request, response, &block)
+    def perform(request, response, &)
       @request  = request
       @response = response
       @visited  = []
       collect_cookies_from_request
       collect_cookies_from_response
 
-      follow_redirects(&block) while REDIRECT_CODES.include?(@response.code)
+      follow_redirects(&) while REDIRECT_CODES.include?(@response.code)
 
       @response
     end

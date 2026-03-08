@@ -34,8 +34,8 @@ module HTTP
       #
       # @return [String, nil]
       # @api public
-      def readpartial(*args)
-        chunk = @connection.readpartial(*args)
+      def readpartial(*)
+        chunk = @connection.readpartial(*)
         return zstream.inflate(chunk) if chunk
 
         unless zstream.closed?

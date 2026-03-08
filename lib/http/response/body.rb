@@ -46,9 +46,9 @@ module HTTP
       # (see HTTP::Client#readpartial)
       # @return [String, nil]
       # @api public
-      def readpartial(*args)
+      def readpartial(*)
         stream!
-        chunk = @stream.readpartial(*args)
+        chunk = @stream.readpartial(*)
 
         String.new(chunk, encoding: @encoding) if chunk
       end

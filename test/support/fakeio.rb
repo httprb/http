@@ -11,8 +11,8 @@ class FakeIO
     @io.string
   end
 
-  def read(*args)
-    @io.read(*args)
+  def read(*)
+    @io.read(*)
   end
 
   def size
