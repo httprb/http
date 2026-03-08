@@ -650,6 +650,64 @@ describe HTTP::Redirector do
       end
     end
 
+    context "with Authorization header" do
+      it "preserves Authorization when redirecting to same origin" do
+        req = HTTP::Request.new verb: :get, uri: "http://example.com"
+        req.headers.set("Authorization", "Bearer secret")
+        hops = [
+          redirect_response(301, "http://example.com/other"),
+          simple_response(200, "done")
+        ]
+
+        redirector.perform(req, hops.shift) do |request|
+          assert_equal "Bearer secret", request["Authorization"]
+          hops.shift
+        end
+      end
+
+      it "strips Authorization when redirecting to different host" do
+        req = HTTP::Request.new verb: :get, uri: "http://example.com"
+        req.headers.set("Authorization", "Bearer secret")
+        hops = [
+          redirect_response(301, "http://other.example.com/"),
+          simple_response(200, "done")
+        ]
+
+        redirector.perform(req, hops.shift) do |request|
+          assert_nil request["Authorization"]
+          hops.shift
+        end
+      end
+
+      it "strips Authorization when redirecting to different scheme" do
+        req = HTTP::Request.new verb: :get, uri: "http://example.com"
+        req.headers.set("Authorization", "Bearer secret")
+        hops = [
+          redirect_response(301, "https://example.com/"),
+          simple_response(200, "done")
+        ]
+
+        redirector.perform(req, hops.shift) do |request|
+          assert_nil request["Authorization"]
+          hops.shift
+        end
+      end
+
+      it "strips Authorization when redirecting to different port" do
+        req = HTTP::Request.new verb: :get, uri: "http://example.com"
+        req.headers.set("Authorization", "Bearer secret")
+        hops = [
+          redirect_response(301, "http://example.com:8080/"),
+          simple_response(200, "done")
+        ]
+
+        redirector.perform(req, hops.shift) do |request|
+          assert_nil request["Authorization"]
+          hops.shift
+        end
+      end
+    end
+
     it "does not falsely detect endless loop when verb changes for same URL" do
       req = HTTP::Request.new verb: :post, uri: "http://example.com"
       # POST http://example.com → 302 → GET http://example.com → 302 → GET http://example.com/done → 200

@@ -258,6 +258,50 @@ describe HTTP::Request do
         assert_equal :get, redirected_with_verb.verb
       end
     end
+
+    context "with Authorization header" do
+      let(:headers) { { accept: "text/html", authorization: "Bearer token123" } }
+
+      context "when redirecting to same origin" do
+        let(:redirected) { request.redirect "/other-path" }
+
+        it "preserves Authorization header" do
+          assert_equal "Bearer token123", redirected["Authorization"]
+        end
+      end
+
+      context "when redirecting to different host" do
+        let(:redirected) { request.redirect "http://other.example.com/" }
+
+        it "strips Authorization header" do
+          assert_nil redirected["Authorization"]
+        end
+      end
+
+      context "when redirecting to different scheme" do
+        let(:redirected) { request.redirect "https://example.com/" }
+
+        it "strips Authorization header" do
+          assert_nil redirected["Authorization"]
+        end
+      end
+
+      context "when redirecting to different port" do
+        let(:redirected) { request.redirect "http://example.com:8080/" }
+
+        it "strips Authorization header" do
+          assert_nil redirected["Authorization"]
+        end
+      end
+
+      context "when redirecting to schema-less URL with different host" do
+        let(:redirected) { request.redirect "//other.example.com/path" }
+
+        it "strips Authorization header" do
+          assert_nil redirected["Authorization"]
+        end
+      end
+    end
   end
 
   describe "#headline" do

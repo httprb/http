@@ -171,6 +171,13 @@ module HTTP
       headers = self.headers.dup
       headers.delete(Headers::HOST)
 
+      redirect_uri = @uri.join(uri)
+
+      # Strip sensitive auth headers when redirecting to a different origin
+      # (scheme + host + port) to prevent credential leakage.
+      # See: https://github.com/httprb/http/issues/770
+      headers.delete(Headers::AUTHORIZATION) unless @uri.origin == redirect_uri.origin
+
       new_body = body.source
       if verb == :get
         # request bodies should not always be resubmitted when following a redirect
@@ -187,7 +194,7 @@ module HTTP
 
       self.class.new(
         verb:           verb,
-        uri:            @uri.join(uri),
+        uri:            redirect_uri,
         headers:        headers,
         proxy:          proxy,
         body:           new_body,
