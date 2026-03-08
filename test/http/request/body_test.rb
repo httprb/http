@@ -291,6 +291,8 @@ describe HTTP::Request::Body do
         err = assert_raises(HTTP::RequestError) { subject_under_test.size }
         assert_match(/cannot determine size of body/, err.message)
         assert_includes err.message, body.inspect
+        assert_match(/Content-Length/, err.message)
+        assert_match(/chunked Transfer-Encoding/, err.message)
       end
     end
   end

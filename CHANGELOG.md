@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Improved error message when request body size cannot be determined to suggest
+  setting `Content-Length` explicitly or using chunked `Transfer-Encoding` (#560)
 - **BREAKING** `Connection#readpartial` now raises `EOFError` instead of
   returning `nil` at end-of-stream, and supports an `outbuf` parameter,
   conforming to the `IO#readpartial` API. `Body#readpartial` and
