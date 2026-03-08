@@ -27,5 +27,36 @@ module HTTP
       end
       result
     end
+
+    # Resolve a timeout hash into a timeout class and normalized options
+    #
+    # @example
+    #   resolve_timeout_hash(global: 60, read: 30)
+    #
+    # @param [Hash] options timeout options
+    # @return [Array(Class, Hash)] timeout class and normalized options
+    # @raise [ArgumentError] if options are invalid
+    # @api private
+    def resolve_timeout_hash(options)
+      remaining = options.dup
+      global = HTTP::Timeout::PerOperation.send(:extract_global_timeout!, remaining)
+
+      return resolve_global_only(global) if remaining.empty?
+
+      per_op = HTTP::Timeout::PerOperation.normalize_options(remaining)
+      global ? [HTTP::Timeout::Global, per_op.merge(global_timeout: global)] : [HTTP::Timeout::PerOperation, per_op]
+    end
+
+    # Build options for a global-only timeout from a hash
+    #
+    # @param [Numeric, nil] global the global timeout value
+    # @return [Array(Class, Hash)] timeout class and options
+    # @raise [ArgumentError] if no global timeout given
+    # @api private
+    def resolve_global_only(global)
+      raise ArgumentError, "no timeout options given" unless global
+
+      [HTTP::Timeout::Global, { global_timeout: global }]
+    end
   end
 end

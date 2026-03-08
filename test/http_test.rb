@@ -64,7 +64,7 @@ describe HTTP do
     context "with a large request body" do
       let(:request_body) { "\xE2\x80\x9C" * 1_000_000 } # use multi-byte character
 
-      [:null, 6, { read: 2, write: 2, connect: 2 }].each do |timeout|
+      [:null, 6, { read: 2, write: 2, connect: 2 }, { global: 6, read: 2, write: 2, connect: 2 }].each do |timeout|
         context "with `.timeout(#{timeout.inspect})`" do
           let(:client) { HTTP.timeout(timeout) }
 
@@ -473,9 +473,67 @@ describe HTTP do
       end
     end
 
-    context "with global key as hash" do
+    context "specifying global timeout as hash key" do
+      let(:client) { HTTP.timeout global: 60 }
+
+      it "sets timeout_class to Global" do
+        assert_equal HTTP::Timeout::Global, client.default_options.timeout_class
+      end
+
+      it "sets given timeout option" do
+        assert_equal({ global_timeout: 60 }, client.default_options.timeout_options)
+      end
+    end
+
+    context "specifying global timeout with long form hash key" do
+      let(:client) { HTTP.timeout global_timeout: 60 }
+
+      it "sets timeout_class to Global" do
+        assert_equal HTTP::Timeout::Global, client.default_options.timeout_class
+      end
+
+      it "sets given timeout option" do
+        assert_equal({ global_timeout: 60 }, client.default_options.timeout_options)
+      end
+    end
+
+    context "specifying combined global and per-operation timeouts" do
+      let(:client) { HTTP.timeout global: 60, read: 30, write: 20, connect: 5 }
+
+      it "sets timeout_class to Global" do
+        assert_equal HTTP::Timeout::Global, client.default_options.timeout_class
+      end
+
+      it "sets all timeout options" do
+        expected = { read_timeout: 30, write_timeout: 20, connect_timeout: 5, global_timeout: 60 }
+
+        assert_equal expected, client.default_options.timeout_options
+      end
+    end
+
+    context "specifying combined global and partial per-operation timeouts" do
+      let(:client) { HTTP.timeout global: 60, read: 30 }
+
+      it "sets timeout_class to Global" do
+        assert_equal HTTP::Timeout::Global, client.default_options.timeout_class
+      end
+
+      it "includes both global and per-op options" do
+        expected = { read_timeout: 30, global_timeout: 60 }
+
+        assert_equal expected, client.default_options.timeout_options
+      end
+    end
+
+    context "with both short and long form of global key" do
       it "raises ArgumentError" do
-        assert_raises(ArgumentError) { HTTP.timeout(global: 161) }
+        assert_raises(ArgumentError) { HTTP.timeout(global: 60, global_timeout: 60) }
+      end
+    end
+
+    context "with non-numeric global value" do
+      it "raises ArgumentError" do
+        assert_raises(ArgumentError) { HTTP.timeout(global: "60") }
       end
     end
 

@@ -23,6 +23,9 @@ module HTTP
         super
 
         @timeout = @time_left = options.fetch(:global_timeout)
+        @read_timeout    = options[:read_timeout]
+        @write_timeout   = options[:write_timeout]
+        @connect_timeout = options[:connect_timeout]
       end
 
       # Resets the time left counter to initial timeout
@@ -49,7 +52,7 @@ module HTTP
       # @return [void]
       def connect(socket_class, host, port, nodelay: false)
         reset_timer
-        ::Timeout.timeout(@time_left, ConnectTimeoutError) do
+        ::Timeout.timeout(effective_timeout(@connect_timeout), ConnectTimeoutError) do
           @socket = socket_class.open(host, port)
           @socket.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1) if nodelay
         end
@@ -70,10 +73,10 @@ module HTTP
         begin
           @socket.connect_nonblock
         rescue IO::WaitReadable
-          wait_readable_or_timeout
+          wait_readable_or_timeout(@connect_timeout)
           retry
         rescue IO::WaitWritable
-          wait_writable_or_timeout
+          wait_writable_or_timeout(@connect_timeout)
           retry
         end
       end
@@ -88,7 +91,7 @@ module HTTP
       # @api public
       # @return [String, :eof]
       def readpartial(size, buffer = nil)
-        perform_io { read_nonblock(size, buffer) }
+        perform_io(@read_timeout) { read_nonblock(size, buffer) }
       end
 
       # Write to the socket
@@ -100,7 +103,7 @@ module HTTP
       # @api public
       # @return [Integer, :eof]
       def write(data)
-        perform_io { write_nonblock(data) }
+        perform_io(@write_timeout) { write_nonblock(data) }
       end
 
       alias << write
@@ -125,18 +128,19 @@ module HTTP
 
       # Performs I/O operation with timeout tracking
       #
+      # @param [Numeric, nil] per_op_timeout per-operation timeout limit
       # @api private
       # @return [Object]
-      def perform_io
+      def perform_io(per_op_timeout = nil)
         reset_timer
 
         loop do
           result = yield
           return handle_io_result(result) unless WAIT_RESULTS.include?(result)
 
-          wait_for_io(result)
-        rescue IO::WaitReadable then wait_readable_or_timeout
-        rescue IO::WaitWritable then wait_writable_or_timeout
+          wait_for_io(result, per_op_timeout)
+        rescue IO::WaitReadable then wait_readable_or_timeout(per_op_timeout)
+        rescue IO::WaitWritable then wait_writable_or_timeout(per_op_timeout)
         end
       rescue EOFError
         :eof
@@ -152,32 +156,53 @@ module HTTP
 
       # Waits for an I/O readiness based on the result type
       #
+      # @param [Symbol] result the I/O wait type
+      # @param [Numeric, nil] per_op_timeout per-operation timeout limit
       # @api private
       # @return [void]
-      def wait_for_io(result)
+      def wait_for_io(result, per_op_timeout = nil)
         if result == :wait_readable
-          wait_readable_or_timeout
+          wait_readable_or_timeout(per_op_timeout)
         else
-          wait_writable_or_timeout
+          wait_writable_or_timeout(per_op_timeout)
         end
       end
 
       # Waits for a socket to become readable
       #
+      # @param [Numeric, nil] per_op per-operation timeout limit
       # @api private
       # @return [void]
-      def wait_readable_or_timeout
-        @socket.to_io.wait_readable(@time_left)
+      def wait_readable_or_timeout(per_op = nil)
+        timeout = effective_timeout(per_op)
+        result = @socket.to_io.wait_readable(timeout)
         log_time
+
+        raise TimeoutError, "Read timed out after #{per_op} seconds" if per_op && result.nil?
       end
 
       # Waits for a socket to become writable
       #
+      # @param [Numeric, nil] per_op per-operation timeout limit
       # @api private
       # @return [void]
-      def wait_writable_or_timeout
-        @socket.to_io.wait_writable(@time_left)
+      def wait_writable_or_timeout(per_op = nil)
+        timeout = effective_timeout(per_op)
+        result = @socket.to_io.wait_writable(timeout)
         log_time
+
+        raise TimeoutError, "Write timed out after #{per_op} seconds" if per_op && result.nil?
+      end
+
+      # Computes the effective timeout as the minimum of global and per-operation
+      #
+      # @param [Numeric, nil] per_op_timeout per-operation timeout limit
+      # @api private
+      # @return [Numeric]
+      def effective_timeout(per_op_timeout)
+        return @time_left unless per_op_timeout
+
+        [per_op_timeout, @time_left].min
       end
 
       # Resets the I/O timer to current time

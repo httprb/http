@@ -161,6 +161,7 @@ module HTTP
     #   @option options [Float] :read Read timeout
     #   @option options [Float] :write Write timeout
     #   @option options [Float] :connect Connect timeout
+    #   @option options [Float] :global Global timeout (combines with per-operation)
     # @overload timeout(global_timeout)
     #   Adds a global timeout to the full request
     #   @param [Numeric] global_timeout
@@ -169,9 +170,8 @@ module HTTP
     def timeout(options)
       klass, options = case options
                        when Numeric then [HTTP::Timeout::Global, { global_timeout: options }]
-                       when Hash
-                         [HTTP::Timeout::PerOperation, HTTP::Timeout::PerOperation.normalize_options(options)]
-                       when :null then [HTTP::Timeout::Null, {}]
+                       when Hash    then resolve_timeout_hash(options)
+                       when :null   then [HTTP::Timeout::Null, {}]
                        else raise ArgumentError,
                                   "Use `.timeout(:null)`, " \
                                   "`.timeout(global_timeout_in_seconds)` or " \

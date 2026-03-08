@@ -4,6 +4,41 @@ require "test_helper"
 
 describe HTTP::Timeout::PerOperation do
   cover "HTTP::Timeout::PerOperation*"
+  describe ".extract_global_timeout!" do
+    it "extracts short global key" do
+      opts = { global: 60, read: 5 }
+
+      assert_equal 60, HTTP::Timeout::PerOperation.send(:extract_global_timeout!, opts)
+      assert_equal({ read: 5 }, opts)
+    end
+
+    it "extracts long global_timeout key" do
+      opts = { global_timeout: 60, read: 5 }
+
+      assert_equal 60, HTTP::Timeout::PerOperation.send(:extract_global_timeout!, opts)
+      assert_equal({ read: 5 }, opts)
+    end
+
+    it "returns nil when no global key present" do
+      opts = { read: 5 }
+
+      assert_nil HTTP::Timeout::PerOperation.send(:extract_global_timeout!, opts)
+      assert_equal({ read: 5 }, opts)
+    end
+
+    it "raises when both global and global_timeout given" do
+      assert_raises(ArgumentError) do
+        HTTP::Timeout::PerOperation.send(:extract_global_timeout!, global: 60, global_timeout: 60)
+      end
+    end
+
+    it "raises for non-numeric global value" do
+      assert_raises(ArgumentError) do
+        HTTP::Timeout::PerOperation.send(:extract_global_timeout!, global: "60")
+      end
+    end
+  end
+
   describe ".normalize_options" do
     it "normalizes short read key to long form" do
       assert_equal({ read_timeout: 5 }, HTTP::Timeout::PerOperation.normalize_options(read: 5))

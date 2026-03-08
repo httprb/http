@@ -50,6 +50,8 @@ module HTTP
 
     def branch: (Options options) -> Client
     def build_proxy_hash: (Array[untyped] proxy) -> Hash[Symbol, untyped]
+    def resolve_timeout_hash: (Hash[Symbol, untyped] options) -> [Class, Hash[Symbol, untyped]]
+    def resolve_global_only: (Numeric? global) -> [Class, Hash[Symbol, untyped]]
   end
 
   class Client
@@ -980,6 +982,7 @@ module HTTP
 
       private
 
+      def self.extract_global_timeout!: (Hash[Symbol, untyped] options) -> Numeric?
       def self.resolve_timeout_value!: (Hash[Symbol, untyped] options, Symbol short, Symbol long) -> Numeric
 
       attr_reader read_timeout: untyped
@@ -998,10 +1001,9 @@ module HTTP
       @timeout: Numeric
       @time_left: Numeric
       @started: Time
-
-      attr_reader read_timeout: untyped
-      attr_reader write_timeout: untyped
-      attr_reader connect_timeout: untyped
+      @read_timeout: Numeric?
+      @write_timeout: Numeric?
+      @connect_timeout: Numeric?
 
       def initialize: (*untyped args) -> void
       def reset_counter: () -> Numeric
@@ -1013,11 +1015,12 @@ module HTTP
 
       def read_nonblock: (Integer size, ?String? buffer) -> untyped
       def write_nonblock: (String data) -> untyped
-      def perform_io: () { () -> untyped } -> untyped
+      def perform_io: (?Numeric? per_op_timeout) { () -> untyped } -> untyped
       def handle_io_result: (untyped result) -> untyped
-      def wait_for_io: (untyped result) -> void
-      def wait_readable_or_timeout: () -> void
-      def wait_writable_or_timeout: () -> void
+      def wait_for_io: (untyped result, ?Numeric? per_op_timeout) -> void
+      def wait_readable_or_timeout: (?Numeric? per_op) -> void
+      def wait_writable_or_timeout: (?Numeric? per_op) -> void
+      def effective_timeout: (Numeric? per_op_timeout) -> Numeric
       def reset_timer: () -> void
       def log_time: () -> void
     end

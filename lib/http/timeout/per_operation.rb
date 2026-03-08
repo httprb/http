@@ -43,6 +43,21 @@ module HTTP
         normalized
       end
 
+      # Extract and validate global timeout from options hash
+      #
+      # @example
+      #   extract_global_timeout!({global: 60, read: 5})
+      #
+      # @param [Hash] options mutable options hash (global key is deleted if found)
+      # @return [Numeric, nil] the global timeout value, or nil if not present
+      # @raise [ArgumentError] if both forms given or value is not numeric
+      # @api private
+      private_class_method def self.extract_global_timeout!(options)
+        return unless options.key?(:global) || options.key?(:global_timeout)
+
+        resolve_timeout_value!(options, :global, :global_timeout)
+      end
+
       # Resolve a single timeout value from the options hash
       #
       # @example

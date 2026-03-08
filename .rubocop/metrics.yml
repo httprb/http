@@ -32,3 +32,5 @@ Metrics/ModuleLength:
     - array
     - heredoc
     - method_call
+  Exclude:
+    - 'test/support/**/*.rb'

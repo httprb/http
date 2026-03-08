@@ -96,6 +96,38 @@ module TimeoutTests
           end
         end
       end
+
+      context "with combined global and per-operation timeouts" do
+        let(:options) do
+          {
+            timeout_class:   HTTP::Timeout::Global,
+            timeout_options: {
+              global_timeout:  1.0,
+              connect_timeout: 0.5,
+              read_timeout:    read_timeout,
+              write_timeout:   0.5
+            }
+          }
+        end
+        let(:read_timeout) { 0.5 }
+
+        let(:response) { client.get(server.endpoint).body.to_s }
+
+        it "works for normal requests" do
+          assert_equal "<!doctype html>", response
+        end
+
+        context "read of 0" do
+          let(:read_timeout) { 0 }
+
+          it "errors if per-op read times out" do
+            err = assert_raises(HTTP::TimeoutError) do
+              client.get("#{server.endpoint}/sleep").body.to_s
+            end
+            assert_match(/Read timed out/, err.message)
+          end
+        end
+      end
     end
   end
 end
