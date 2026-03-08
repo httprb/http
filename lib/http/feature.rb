@@ -37,6 +37,20 @@ module HTTP
     # @return [nil]
     # @api public
     def on_error(_request, _error); end
+
+    # Wraps the entire HTTP request/response lifecycle
+    #
+    # @example
+    #   feature.around_request(request) { |req| perform(req) }
+    #
+    # @param request [HTTP::Request]
+    # @yield [HTTP::Request] the request to perform
+    # @yieldreturn [HTTP::Response] the response
+    # @return [HTTP::Response]
+    # @api public
+    def around_request(request)
+      yield request
+    end
   end
 end
 

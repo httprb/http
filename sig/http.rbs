@@ -75,6 +75,7 @@ module HTTP
     private
 
     def wrap_request: (Request req, Options opts) -> Request
+    def around_request: (Request request, Options options) { (Request) -> Response } -> Response
     def build_response: (Request req, Options options) -> Response
     def build_wrapped_response: (Request req, Options options) -> Response
     def send_request: (Request req, Options options) -> void
@@ -222,6 +223,7 @@ module HTTP
     def wrap_request: (untyped request) -> untyped
     def wrap_response: (untyped response) -> untyped
     def on_error: (untyped _request, untyped _error) -> nil
+    def around_request: (untyped request) { (untyped) -> Response } -> Response
   end
 
   module Features

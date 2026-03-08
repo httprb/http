@@ -109,8 +109,10 @@ module HTTP
 
       @state = :dirty
 
-      send_request(req, options)
-      res = build_wrapped_response(req, options)
+      res = around_request(req, options) do |request|
+        send_request(request, options)
+        build_wrapped_response(request, options)
+      end
 
       @connection.finish_response if req.verb == :head
       @state = :clean
@@ -171,6 +173,15 @@ module HTTP
       opts.features.inject(req) do |request, (_name, feature)|
         feature.wrap_request(request)
       end
+    end
+
+    # Compose around_request chains from all features
+    # @return [HTTP::Response] the response
+    # @api private
+    def around_request(request, options, &block)
+      options.features.values.reverse.reduce(block) do |inner, feature|
+        ->(req) { feature.around_request(req) { |r| inner.call(r) } }
+      end.call(request)
     end
 
     # Build a response from the current connection
