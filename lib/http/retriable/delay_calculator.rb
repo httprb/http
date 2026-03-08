@@ -2,6 +2,7 @@
 
 module HTTP
   module Retriable
+    # Calculates retry delays with support for Retry-After headers
     # @api private
     class DelayCalculator
       # Initializes the delay calculator
@@ -34,6 +35,7 @@ module HTTP
         ensure_delay_in_bounds(delay)
       end
 
+      # Pattern matching RFC 2822 formatted dates in Retry-After headers
       RFC2822_DATE_REGEX = /^
         (?:Sun|Mon|Tue|Wed|Thu|Fri|Sat),\s+
         (?:0[1-9]|[1-2]?[0-9]|3[01])\s+

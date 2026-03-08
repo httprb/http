@@ -155,7 +155,7 @@ class ProxyServer
     loop do
       destination.write(source.readpartial(1024))
     end
-  rescue EOFError, IOError, Errno::ECONNRESET, Errno::EPIPE
+  rescue IOError, Errno::ECONNRESET, Errno::EPIPE
     nil
   end
 

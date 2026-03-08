@@ -13,6 +13,7 @@ module HTTP
 
     # Allowed values for CONNECTION header
     KEEP_ALIVE = "Keep-Alive"
+    # Connection: close header value
     CLOSE      = "close"
 
     # Attempt to read this much data
@@ -113,10 +114,7 @@ module HTTP
       return chunk if chunk
 
       eof = read_more(size) == :eof
-      if eof && !@parser.finished? && body_framed?
-        close
-        raise ConnectionError, "response body ended prematurely"
-      end
+      check_premature_eof(eof)
 
       finished = eof || @parser.finished?
       chunk    = @parser.read(size)
@@ -221,6 +219,27 @@ module HTTP
       @parser               = Response::Parser.new
     end
 
+    # Check for premature end-of-file and raise if detected
+    #
+    # @example
+    #   check_premature_eof(:eof)
+    #
+    # @return [void]
+    # @api private
+    def check_premature_eof(eof)
+      return unless eof && !@parser.finished? && body_framed?
+
+      close
+      raise ConnectionError, "response body ended prematurely"
+    end
+
+    # Check if the response body has a known framing mechanism
+    #
+    # @example
+    #   body_framed?
+    #
+    # @return [Boolean]
+    # @api private
     def body_framed?
       @parser.headers.include?(Headers::TRANSFER_ENCODING) ||
         @parser.headers.include?(Headers::CONTENT_LENGTH)

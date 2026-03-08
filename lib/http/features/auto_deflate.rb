@@ -8,7 +8,9 @@ require "http/request/body"
 
 module HTTP
   module Features
+    # Automatically compresses request bodies with gzip or deflate
     class AutoDeflate < Feature
+      # Supported compression methods
       VALID_METHODS = Set.new(%w[gzip deflate]).freeze
 
       # Compression method name
@@ -75,6 +77,7 @@ module HTTP
       private
 
       # Build a new request with deflated body
+      # @return [HTTP::Request]
       # @api private
       def build_deflated_request(request)
         Request.new(
@@ -90,6 +93,7 @@ module HTTP
 
       HTTP::Options.register_feature(:auto_deflate, self)
 
+      # Base class for compressed request body wrappers
       class CompressedBody < HTTP::Request::Body
         # Initializes a compressed body wrapper
         #
@@ -159,6 +163,7 @@ module HTTP
         end
       end
 
+      # Gzip-compressed request body wrapper
       class GzippedBody < CompressedBody
         # Compresses data using gzip
         #
@@ -174,6 +179,7 @@ module HTTP
           gzip.finish
         end
 
+        # IO adapter that delegates writes to a block
         class BlockIO
           # Initializes a block-based IO adapter
           #
@@ -201,6 +207,7 @@ module HTTP
         end
       end
 
+      # Deflate-compressed request body wrapper
       class DeflatedBody < CompressedBody
         # Compresses data using deflate
         #

@@ -6,6 +6,7 @@ require "socket"
 require "http/uri"
 
 module HTTP
+  # Configuration options for HTTP requests and clients
   class Options
     @default_socket_class     = TCPSocket
     @default_ssl_socket_class = OpenSSL::SSL::SSLSocket
@@ -104,6 +105,13 @@ module HTTP
         end
       end
 
+      # Define accessor methods for an option
+      #
+      # @example
+      #   def_option_accessor(:timeout, reader_only: false)
+      #
+      # @return [void]
+      # @api private
       def def_option_accessor(name, reader_only:)
         if reader_only
           attr_reader name

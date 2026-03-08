@@ -2,6 +2,7 @@
 
 module HTTP
   class Request
+    # Represents an HTTP request body with streaming support
     class Body
       # The source data for this body
       #

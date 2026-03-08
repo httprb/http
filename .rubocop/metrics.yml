@@ -16,6 +16,8 @@ Metrics/ClassLength:
     - array
     - heredoc
     - method_call
+  Exclude:
+    - 'test/support/**/*.rb'
 
 Metrics/MethodLength:
   CountAsOne:

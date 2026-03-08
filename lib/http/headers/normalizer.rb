@@ -2,11 +2,13 @@
 
 module HTTP
   class Headers
+    # Normalizes HTTP header names to canonical form
     class Normalizer
       # Matches valid header field name according to RFC.
       # @see http://tools.ietf.org/html/rfc7230#section-3.2
       COMPLIANT_NAME_RE = /\A[A-Za-z0-9!#$%&'*+\-.^_`|~]+\z/
 
+      # Pattern matching header name part separators (hyphens and underscores)
       NAME_PARTS_SEPARATOR_RE = /[-_]/
 
       # Creates a new Normalizer with an empty cache

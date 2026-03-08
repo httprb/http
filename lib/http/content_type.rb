@@ -1,8 +1,11 @@
 # frozen_string_literal: true
 
 module HTTP
+  # Parsed representation of a Content-Type header
   class ContentType
+    # Pattern for extracting MIME type from Content-Type header
     MIME_TYPE_RE = %r{^([^/]+/[^;]+)(?:$|;)}
+    # Pattern for extracting charset from Content-Type header
     CHARSET_RE   = /;\s*charset=([^;]+)/i
 
     # MIME type of the content

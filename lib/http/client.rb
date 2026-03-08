@@ -18,6 +18,7 @@ module HTTP
     include Chainable
     include RequestBuilder
 
+    # Pattern matching HTTP or HTTPS URI schemes
     HTTP_OR_HTTPS_RE = %r{^https?://}i
 
     # Initialize a new HTTP Client

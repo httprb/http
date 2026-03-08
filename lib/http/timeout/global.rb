@@ -7,7 +7,9 @@ require "http/timeout/null"
 
 module HTTP
   module Timeout
+    # Timeout handler with a single global timeout for the entire request
     class Global < Null
+      # I/O wait result symbols returned by non-blocking operations
       WAIT_RESULTS = %i[wait_readable wait_writable].freeze
       # Initializes global timeout with options
       #

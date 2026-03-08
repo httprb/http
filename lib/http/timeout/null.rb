@@ -3,7 +3,9 @@
 require "io/wait"
 
 module HTTP
+  # Namespace for timeout handlers
   module Timeout
+    # Base timeout handler with no timeout enforcement
     class Null
       # Timeout configuration options
       #

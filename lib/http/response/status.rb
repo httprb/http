@@ -6,6 +6,7 @@ require "http/response/status/reasons"
 
 module HTTP
   class Response
+    # Represents an HTTP response status code with reason phrase
     class Status < ::Delegator
       class << self
         # Coerces given value to Status
@@ -19,8 +20,8 @@ module HTTP
         # @api public
         def coerce(object)
           code = case object
-                 when String  then SYMBOL_CODES[symbolize(object)]
-                 when Symbol  then SYMBOL_CODES[object]
+                 when String  then SYMBOL_CODES.fetch(symbolize(object), nil)
+                 when Symbol  then SYMBOL_CODES.fetch(object, nil)
                  when Numeric then object
                  end
 

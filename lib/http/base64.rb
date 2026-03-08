@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module HTTP
+  # Strict Base64 encoding utilities
   module Base64
     module_function
 

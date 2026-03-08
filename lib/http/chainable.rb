@@ -5,6 +5,7 @@ require "http/chainable/helpers"
 require "http/headers"
 
 module HTTP
+  # HTTP verb methods and client configuration DSL
   module Chainable
     include HTTP::Base64
 

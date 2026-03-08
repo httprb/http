@@ -14,6 +14,8 @@ module HTTP
   module Chainable
     include Base64
 
+    PROXY_ARG_MAP: Array[Array[untyped]]
+
     @default_options: Options
 
     def head: (untyped uri, ?::Hash[untyped, untyped] options) -> Response
@@ -47,11 +49,14 @@ module HTTP
     private
 
     def branch: (Options options) -> Client
+    def build_proxy_hash: (Array[untyped] proxy) -> Hash[Symbol, untyped]
+    def normalize_timeout_keys!: (Hash[untyped, untyped] options) -> void
   end
 
   class Client
     extend Forwardable
     include Chainable
+    include Client::RequestBuilder
 
     HTTP_OR_HTTPS_RE: Regexp
 
@@ -70,11 +75,24 @@ module HTTP
 
     def wrap_request: (Request req, Options opts) -> Request
     def build_response: (Request req, Options options) -> Response
+    def build_wrapped_response: (Request req, Options options) -> Response
+    def send_request: (Request req, Options options) -> void
     def verify_connection!: (untyped uri) -> void
-    def make_request_uri: (untyped uri, Options opts) -> URI
-    def make_request_headers: (Options opts) -> Headers
-    def make_request_body: (Options opts, Headers headers) -> untyped
-    def make_form_data: (untyped form) -> untyped
+
+    module RequestBuilder : _RequestBuilderHost
+      interface _RequestBuilderHost
+        def default_options: () -> Options
+      end
+
+      private
+
+      def make_request_uri: (untyped uri, Options opts) -> URI
+      def merge_query_params!: (URI uri, Options opts) -> void
+      def make_request_headers: (Options opts) -> Headers
+      def make_request_body: (Options opts, Headers headers) -> untyped
+      def make_json_body: (untyped data, Headers headers) -> String
+      def make_form_data: (untyped form) -> untyped
+    end
   end
 
   class Headers
@@ -136,6 +154,7 @@ module HTTP
 
     private
 
+    def wire_name_for: (untyped name, String lookup_name) -> String
     def normalize_header: (String name) -> String
     def validate_value: (untyped value) -> String
   end
@@ -212,6 +231,12 @@ module HTTP
       def wrap_request: (untyped request) -> untyped
       def deflated_body: (untyped body) -> untyped
 
+      private
+
+      def build_deflated_request: (untyped request) -> Request
+
+      public
+
       class CompressedBody < Request::Body
         @body: untyped
         @compressed: Tempfile?
@@ -251,6 +276,7 @@ module HTTP
 
       private
 
+      def inflated_response_options: (untyped response) -> Hash[Symbol, untyped]
       def supported_encoding?: (untyped response) -> bool
     end
 
@@ -358,6 +384,7 @@ module HTTP
     private
 
     def self.def_option: (untyped name, ?reader_only: bool) ?{ (untyped) -> untyped } -> void
+    def self.def_option_accessor: (untyped name, reader_only: bool) -> void
 
     public
 
@@ -419,7 +446,7 @@ module HTTP
     private
 
     def []=: (Symbol option, untyped val) -> untyped
-
+    def default_options_hash: () -> Hash[Symbol, untyped]
     def argument_error!: (String message) -> bot
   end
 
@@ -493,6 +520,7 @@ module HTTP
     extend Forwardable
     include Headers::Mixin
     include Base64
+    include Request::Proxy
 
     class UnsupportedMethodError < RequestError
     end
@@ -518,13 +546,7 @@ module HTTP
     def stream: (untyped socket) -> void
     def using_proxy?: () -> bool
     def using_authenticated_proxy?: () -> bool
-    def include_proxy_headers: () -> void
-    def include_proxy_authorization_header: () -> void
-    def proxy_authorization_header: () -> String
-    def connect_using_proxy: (untyped socket) -> void
     def headline: () -> String
-    def proxy_connect_header: () -> String
-    def proxy_connect_headers: () -> Headers
     def socket_host: () -> String
     def socket_port: () -> Integer
     def inspect: () -> String
@@ -537,6 +559,30 @@ module HTTP
     def default_host_header_value: () -> String
     def prepare_body: (untyped body) -> Request::Body
     def prepare_headers: (untyped headers) -> Headers
+    def parse_verb_and_uri!: (untyped opts) -> void
+    def validate_method_and_scheme!: () -> void
+
+    module Proxy : _ProxyHost
+      interface _ProxyHost
+        def headers: () -> Headers
+        def proxy: () -> Hash[untyped, untyped]
+        def host: () -> untyped
+        def version: () -> String
+        def using_authenticated_proxy?: () -> bool
+      end
+
+      def include_proxy_headers: () -> void
+      def include_proxy_authorization_header: () -> void
+      def proxy_authorization_header: () -> String
+      def connect_using_proxy: (untyped socket) -> void
+      def proxy_connect_header: () -> String
+      def proxy_connect_headers: () -> Headers
+
+      private
+
+      def encode64: (String input) -> String
+      def port: () -> untyped
+    end
 
     class Body
       @source: untyped
@@ -627,6 +673,7 @@ module HTTP
 
     def default_encoding: () -> Encoding
     def init_request: (untyped opts) -> Request
+    def init_body: (untyped opts) -> Response::Body
 
     class Status < ::Delegator
       REASONS: Hash[Integer, String]
@@ -680,6 +727,7 @@ module HTTP
 
       private
 
+      def read_contents: () -> String
       def find_encoding: (untyped encoding) -> untyped
     end
 
@@ -742,6 +790,7 @@ module HTTP
 
   class Connection
     extend Forwardable
+    include Connection::Internals
 
     BUFFER_SIZE: Integer
     KEEP_ALIVE: String
@@ -778,11 +827,32 @@ module HTTP
 
     private
 
+    def init_state: (Options options) -> void
+    def check_premature_eof: (bool eof) -> void
+    def body_framed?: () -> bool
+    def connect_socket: (Request req, Options options) -> void
     def start_tls: (untyped req, untyped options) -> void
     def send_proxy_connect_request: (untyped req) -> void
+    def handle_proxy_connect_response: () -> void
     def reset_timer: () -> void
     def set_keep_alive: () -> void
     def read_more: (Integer size) -> untyped
+
+    module Internals : _InternalsHost
+      interface _InternalsHost
+        def failed_proxy_connect?: () -> bool
+        def read_headers!: () -> void
+      end
+
+      private
+
+      def start_tls: (untyped req, untyped options) -> void
+      def send_proxy_connect_request: (untyped req) -> void
+      def handle_proxy_connect_response: () -> void
+      def reset_timer: () -> void
+      def set_keep_alive: () -> void
+      def read_more: (Integer size) -> untyped
+    end
   end
 
   class Redirector
@@ -811,6 +881,8 @@ module HTTP
 
     private
 
+    def follow_redirects: () { (Request) -> Response } -> void
+    def apply_cookies_to_request: () -> void
     def cookie_jar: () -> untyped
     def collect_cookies_from_request: () -> void
     def collect_cookies_from_response: () -> void
@@ -909,6 +981,8 @@ module HTTP
     end
 
     class Global < Null
+      WAIT_RESULTS: Array[Symbol]
+
       @timeout: Numeric
       @time_left: Numeric
       @started: Time
@@ -928,6 +1002,8 @@ module HTTP
       def read_nonblock: (Integer size, ?String? buffer) -> untyped
       def write_nonblock: (String data) -> untyped
       def perform_io: () { () -> untyped } -> untyped
+      def handle_io_result: (untyped result) -> untyped
+      def wait_for_io: (untyped result) -> void
       def wait_readable_or_timeout: () -> void
       def wait_writable_or_timeout: () -> void
       def reset_timer: () -> void
@@ -963,6 +1039,8 @@ module HTTP
 
       private
 
+      def retry_attempt: (untyped client, untyped req, untyped err, untyped res, untyped attempt) -> void
+      def finish_attempt: (untyped client, untyped err) -> void
       def try_request: () { () -> untyped } -> untyped
       def retry_request?: (untyped req, untyped err, untyped res, untyped attempt) -> bool
       def retry_exception?: (untyped err) -> bool

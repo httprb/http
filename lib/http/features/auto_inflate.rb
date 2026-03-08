@@ -4,6 +4,7 @@ require "set"
 
 module HTTP
   module Features
+    # Automatically decompresses response bodies
     class AutoInflate < Feature
       SUPPORTED_ENCODING = Set.new(%w[deflate gzip x-gzip]).freeze
       private_constant :SUPPORTED_ENCODING
@@ -37,6 +38,7 @@ module HTTP
       private
 
       # Build options hash for an inflated response
+      # @return [Hash]
       # @api private
       def inflated_response_options(response)
         {

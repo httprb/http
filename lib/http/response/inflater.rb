@@ -4,6 +4,7 @@ require "zlib"
 
 module HTTP
   class Response
+    # Decompresses gzip/deflate response body streams
     class Inflater
       # The underlying connection
       #

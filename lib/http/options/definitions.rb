@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module HTTP
+  # Configuration options for HTTP requests and clients
   class Options
     def_option :headers do |new_headers|
       headers.merge(new_headers) # steep:ignore

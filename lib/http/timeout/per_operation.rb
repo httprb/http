@@ -6,9 +6,13 @@ require "http/timeout/null"
 
 module HTTP
   module Timeout
+    # Timeout handler with separate timeouts for connect, read, and write
     class PerOperation < Null
+      # Default connect timeout in seconds
       CONNECT_TIMEOUT = 0.25
+      # Default write timeout in seconds
       WRITE_TIMEOUT = 0.25
+      # Default read timeout in seconds
       READ_TIMEOUT = 0.25
 
       # Initializes per-operation timeout with options

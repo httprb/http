@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module HTTP
+  # Base class for HTTP client features (middleware)
   class Feature
     # Wraps an HTTP request
     #

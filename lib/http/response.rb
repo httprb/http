@@ -12,6 +12,7 @@ require "http/cookie_jar"
 require "time"
 
 module HTTP
+  # Represents an HTTP response with status, headers, and body
   class Response
     extend Forwardable
 

@@ -4,6 +4,7 @@ require "json"
 require "http/mime_type/adapter"
 
 module HTTP
+  # MIME type registry and adapter interface
   module MimeType
     # JSON encode/decode MIME type adapter
     class JSON < Adapter

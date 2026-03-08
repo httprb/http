@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module HTTP
+  # Namespace for HTTP client features
   module Features
     # Log requests and responses. Request verb and uri, and Response status are
     # logged at `info`, and the headers and bodies of both are logged at
@@ -11,6 +12,7 @@ module HTTP
     class Logging < Feature
       HTTP::Options.register_feature(:logging, self)
 
+      # No-op logger used as default when none is provided
       class NullLogger
         %w[fatal error warn info debug].each do |level|
           define_method(level.to_sym) do |*_args|

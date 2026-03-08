@@ -4,6 +4,7 @@ require "http/uri"
 
 module HTTP
   module Features
+    # Normalizes request URIs before sending
     class NormalizeUri < Feature
       # The URI normalizer proc
       #

@@ -37,7 +37,11 @@ class DummyServer
     @running = true
 
     while @running
-      client = server.accept
+      begin
+        client = server.accept
+      rescue OpenSSL::SSL::SSLError
+        next
+      end
       Thread.new(client) { |c| handle_connection(c) }
     end
   rescue IOError, Errno::EBADF

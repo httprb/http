@@ -12,7 +12,6 @@ group :development do
 end
 
 group :test do
-  gem "certificate_authority", "~> 1.0", require: false
   gem "logger"
 
   gem "backports"

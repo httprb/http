@@ -3,6 +3,7 @@
 require "addressable/uri"
 
 module HTTP
+  # Wrapper around Addressable::URI with HTTP-specific behavior
   class URI
     extend Forwardable
 
@@ -37,15 +38,19 @@ module HTTP
     # @return [String] The normalized host of the URI
     attr_reader :normalized_host
 
+    # HTTP scheme string
     # @private
     HTTP_SCHEME = "http"
 
+    # HTTPS scheme string
     # @private
     HTTPS_SCHEME = "https"
 
+    # Pattern matching characters requiring percent-encoding
     # @private
     PERCENT_ENCODE = /[^\x21-\x7E]+/
 
+    # Default URI normalizer
     # @private
     NORMALIZER = lambda do |uri|
       uri = HTTP::URI.parse uri

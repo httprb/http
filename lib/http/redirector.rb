@@ -5,6 +5,7 @@ require "set"
 require "http/headers"
 
 module HTTP
+  # Follows HTTP redirects according to configured policy
   class Redirector
     # Notifies that we reached max allowed redirect hops
     class TooManyRedirectsError < ResponseError; end

@@ -13,6 +13,7 @@ require "http/version"
 require "http/uri"
 
 module HTTP
+  # Represents an HTTP request with verb, URI, headers, and body
   class Request
     extend Forwardable
 
@@ -29,6 +30,7 @@ module HTTP
     # Default User-Agent header value
     USER_AGENT = "http.rb/#{HTTP::VERSION}".freeze
 
+    # Supported HTTP methods
     METHODS = [
       # RFC 2616: Hypertext Transfer Protocol -- HTTP/1.1
       :options, :get, :head, :post, :put, :delete, :trace, :connect,

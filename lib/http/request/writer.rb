@@ -4,6 +4,7 @@ require "http/headers"
 
 module HTTP
   class Request
+    # Streams HTTP requests to a socket
     class Writer
       # CRLF is the universal HTTP delimiter
       CRLF = "\r\n"

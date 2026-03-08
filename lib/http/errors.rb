@@ -9,7 +9,9 @@ module HTTP
 
   # Types of Connection errors
   class ResponseHeaderError < ConnectionError; end
+  # Error raised when reading from a socket fails
   class SocketReadError < ConnectionError; end
+  # Error raised when writing to a socket fails
   class SocketWriteError < ConnectionError; end
 
   # Generic Request error

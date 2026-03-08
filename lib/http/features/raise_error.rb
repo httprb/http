@@ -2,6 +2,7 @@
 
 module HTTP
   module Features
+    # Raises an error for non-successful HTTP responses
     class RaiseError < Feature
       # Initializes the RaiseError feature
       #

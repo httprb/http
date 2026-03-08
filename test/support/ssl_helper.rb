@@ -1,113 +1,108 @@
 # frozen_string_literal: true
 
+require "openssl"
 require "pathname"
-
-require "certificate_authority"
 
 module SSLHelper
   CERTS_PATH = Pathname.new File.expand_path("../../tmp/certs", __dir__)
-  CA_EXTENSIONS = {
-    "basicConstraints" => { "ca" => true, "critical" => true },
-    "keyUsage"         => { "usage" => %w[critical keyCertSign cRLSign] },
-    "extendedKeyUsage" => { "usage" => [] }
-  }.freeze
-  SERVER_EXTENSIONS = {
-    "basicConstraints" => { "ca" => false },
-    "keyUsage"         => { "usage" => %w[critical digitalSignature keyEncipherment] },
-    "extendedKeyUsage" => { "usage" => ["serverAuth"] },
-    "subjectAltName"   => { "ips" => ["127.0.0.1"] }
-  }.freeze
-
-  class RootCertificate < ::CertificateAuthority::Certificate
-    def initialize
-      super
-
-      subject.common_name  = "honestachmed.com"
-      serial_number.number = 1
-      key_material.generate_key
-
-      self.signing_entity = true
-
-      sign!("extensions" => CA_EXTENSIONS)
-    end
-
-    def file
-      return @file if defined? @file
-
-      CERTS_PATH.mkpath
-
-      cert_file = CERTS_PATH.join("ca.crt")
-      cert_file.open("w") { |io| io << to_pem }
-
-      @file = cert_file.to_s
-    end
-  end
-
-  class ChildCertificate < ::CertificateAuthority::Certificate
-    def initialize(parent, common_name:, serial_number:, extensions:)
-      super()
-
-      subject.common_name = common_name
-      self.serial_number.number = serial_number
-
-      key_material.generate_key
-
-      self.parent = parent
-
-      sign!("extensions" => extensions)
-    end
-
-    def cert
-      OpenSSL::X509::Certificate.new to_pem
-    end
-
-    def key
-      OpenSSL::PKey::RSA.new key_material.private_key.to_pem
-    end
-  end
 
   class << self
     def server_context
       context = OpenSSL::SSL::SSLContext.new
 
       context.verify_mode = OpenSSL::SSL::VERIFY_NONE
-      context.key         = server_cert.key
-      context.cert        = server_cert.cert
-      context.ca_file     = ca.file
+      context.key         = server_cert_key
+      context.cert        = server_cert_cert
+      context.ca_file     = ca_file
 
       context
     end
 
     def client_context
-      server_cert
+      # Ensure server cert is generated (triggers CA generation too)
+      server_cert_cert
       context = OpenSSL::SSL::SSLContext.new
 
       context.options     = OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:options]
       context.verify_mode = OpenSSL::SSL::VERIFY_PEER
       context.verify_hostname = true if context.respond_to?(:verify_hostname=)
-      context.ca_file = ca.file
+      context.ca_file = ca_file
 
       context
     end
 
     def client_params
-      server_cert
+      server_cert_cert
       {
-        ca_file: ca.file
+        ca_file: ca_file
       }
     end
 
-    def server_cert
-      @server_cert ||= ChildCertificate.new(
-        ca,
-        common_name:   "127.0.0.1",
-        serial_number: 2,
-        extensions:    SERVER_EXTENSIONS
-      )
+    private
+
+    def ca_key
+      @ca_key ||= OpenSSL::PKey::RSA.new(2048)
     end
 
-    def ca
-      @ca ||= RootCertificate.new
+    def ca_cert
+      @ca_cert ||= begin
+        cert = OpenSSL::X509::Certificate.new
+        cert.version    = 2
+        cert.serial     = 1
+        cert.subject    = OpenSSL::X509::Name.parse("/CN=honestachmed.com")
+        cert.issuer     = cert.subject
+        cert.public_key = ca_key.public_key
+        cert.not_before = Time.now - 60
+        cert.not_after  = Time.now + (365 * 24 * 60 * 60)
+
+        ef = OpenSSL::X509::ExtensionFactory.new
+        ef.subject_certificate = cert
+        ef.issuer_certificate  = cert
+
+        cert.add_extension(ef.create_extension("basicConstraints", "CA:TRUE", true))
+        cert.add_extension(ef.create_extension("keyUsage", "keyCertSign,cRLSign", true))
+
+        cert.sign(ca_key, OpenSSL::Digest.new("SHA256"))
+        cert
+      end
+    end
+
+    def ca_file
+      return @ca_file if defined?(@ca_file)
+
+      CERTS_PATH.mkpath
+      cert_file = CERTS_PATH.join("ca.crt")
+      cert_file.open("w") { |io| io << ca_cert.to_pem }
+      @ca_file = cert_file.to_s
+    end
+
+    def server_cert_key
+      @server_cert_key ||= OpenSSL::PKey::RSA.new(2048)
+    end
+
+    def server_cert_cert
+      @server_cert_cert ||= begin
+        cert = OpenSSL::X509::Certificate.new
+        cert.version    = 2
+        cert.serial     = 2
+        cert.subject    = OpenSSL::X509::Name.parse("/CN=127.0.0.1")
+        cert.issuer     = ca_cert.subject
+        cert.public_key = server_cert_key.public_key
+        cert.not_before = Time.now - 60
+        cert.not_after  = Time.now + (365 * 24 * 60 * 60)
+
+        ef = OpenSSL::X509::ExtensionFactory.new
+        ef.subject_certificate = cert
+        ef.issuer_certificate  = ca_cert
+
+        cert.add_extension(ef.create_extension("basicConstraints", "CA:FALSE"))
+        cert.add_extension(ef.create_extension("keyUsage", "digitalSignature,keyEncipherment", true))
+        cert.add_extension(ef.create_extension("extendedKeyUsage", "serverAuth"))
+        cert.add_extension(ef.create_extension("subjectAltName", "IP:127.0.0.1"))
+
+        cert.sign(ca_key, OpenSSL::Digest.new("SHA256"))
+        cert
+      end
     end
   end
 end

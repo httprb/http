@@ -4,6 +4,7 @@ require "llhttp"
 
 module HTTP
   class Response
+    # HTTP response parser backed by LLHttp
     # @api private
     class Parser
       # The underlying LLHttp parser
@@ -129,6 +130,7 @@ module HTTP
         chunk
       end
 
+      # Delegate handler for LLHttp parser callbacks
       # @api private
       class Handler < LLHttp::Delegate
         # Create a new parser handler

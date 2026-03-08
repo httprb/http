@@ -106,6 +106,7 @@ module HTTP
 
       HTTP::Options.register_feature(:instrumentation, self)
 
+      # No-op instrumenter used as default when none is provided
       class NullInstrumenter
         # Instruments an event with a name and payload
         #

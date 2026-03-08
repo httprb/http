@@ -3,6 +3,7 @@
 require "http/retriable/performer"
 
 module HTTP
+  # Namespace for retriable HTTP client functionality
   module Retriable
     # Retriable version of HTTP::Client.
     #

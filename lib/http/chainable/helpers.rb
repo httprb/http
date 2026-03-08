@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module HTTP
+  # HTTP verb methods and client configuration DSL
   module Chainable
     # Mapping of proxy argument positions to hash keys and expected types
     PROXY_ARG_MAP = [
