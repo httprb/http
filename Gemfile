@@ -14,8 +14,6 @@ end
 group :test do
   gem "logger"
 
-  gem "backports"
-
   gem "rubocop",             "~> 1.85"
   gem "rubocop-minitest",    "~> 0.36"
   gem "rubocop-performance", "~> 1.26"
