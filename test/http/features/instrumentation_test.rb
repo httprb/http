@@ -14,11 +14,11 @@ describe HTTP::Features::Instrumentation do
       end
 
       def start(_name, payload)
-        output[:start] = payload
+        output[:start] = payload.dup
       end
 
       def finish(_name, payload)
-        output[:finish] = payload
+        output[:finish] = payload.dup
       end
     end
   end
@@ -26,7 +26,7 @@ describe HTTP::Features::Instrumentation do
   let(:instrumenter) { instrumenter_class.new }
   let(:feature) { HTTP::Features::Instrumentation.new(instrumenter: instrumenter) }
 
-  describe "starting instrumentation" do
+  describe "around_request" do
     let(:request) do
       HTTP::Request.new(
         verb:    :post,
@@ -36,28 +36,40 @@ describe HTTP::Features::Instrumentation do
       )
     end
 
-    it "starts the instrumentation span" do
-      feature.on_request(request)
-
-      assert_equal({ request: request }, instrumenter.output[:start])
-    end
-  end
-
-  describe "logging the response" do
     let(:response) do
       HTTP::Response.new(
         version: "1.1",
         status:  200,
         headers: { content_type: "application/json" },
         body:    '{"success": true}',
-        request: HTTP::Request.new(verb: :get, uri: "https://example.com")
+        request: request
       )
     end
 
-    it "logs the response" do
-      feature.wrap_response(response)
+    it "starts the instrumentation span" do
+      feature.around_request(request) { response }
 
-      assert_equal({ response: response }, instrumenter.output[:finish])
+      assert_equal({ request: request }, instrumenter.output[:start])
+    end
+
+    it "finishes the instrumentation span with the response" do
+      feature.around_request(request) { response }
+
+      assert_equal({ request: request, response: response }, instrumenter.output[:finish])
+    end
+
+    it "returns the response from the block" do
+      result = feature.around_request(request) { response }
+
+      assert_same response, result
+    end
+
+    it "finishes the span even when the block raises" do
+      assert_raises(RuntimeError) do
+        feature.around_request(request) { raise "boom" }
+      end
+
+      assert_equal({ request: request }, instrumenter.output[:finish])
     end
   end
 
@@ -100,8 +112,17 @@ describe HTTP::Features::Instrumentation do
       HTTP::Request.new(verb: :get, uri: "https://example.com/", headers: {})
     end
 
-    it "does not raise LocalJumpError in on_request" do
-      feature.on_request(request)
+    let(:response) do
+      HTTP::Response.new(
+        version: "1.1",
+        status:  200,
+        body:    "",
+        request: request
+      )
+    end
+
+    it "does not raise LocalJumpError in around_request" do
+      feature.around_request(request) { response }
     end
 
     it "does not raise LocalJumpError in on_error" do

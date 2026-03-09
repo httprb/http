@@ -136,13 +136,9 @@ module HTTP
     # @return [HTTP::Response] the response
     # @api private
     def perform_once(req, options)
-      verify_connection!(req.uri)
-      @state = :dirty
+      res = perform_exchange(req, options)
 
-      send_request(req, options)
-      res = build_wrapped_response(req, options)
-
-      @connection.finish_response if req.verb == :head
+      @connection.finish_response if res.request.verb == :head
       @state = :clean
 
       res
@@ -196,6 +192,27 @@ module HTTP
     # @api private
     def notify_features(req, options)
       options.features.each_value { |feature| feature.on_request(req) }
+    end
+
+    # Execute the HTTP exchange wrapped by feature around_request hooks
+    # @return [HTTP::Response] the response
+    # @api private
+    def perform_exchange(req, options)
+      around_request(req, options) do |request|
+        verify_connection!(request.uri)
+        @state = :dirty
+        send_request(request, options)
+        build_wrapped_response(request, options)
+      end
+    end
+
+    # Compose around_request chains from all features
+    # @return [HTTP::Response] the response
+    # @api private
+    def around_request(request, options, &block)
+      options.features.values.reverse.reduce(block) do |inner, feature|
+        ->(req) { feature.around_request(req) { |r| inner.call(r) } }
+      end.call(request)
     end
 
     # Wrap request through feature middleware

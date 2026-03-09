@@ -41,6 +41,28 @@ module HTTP
     # @api public
     def on_request(_request); end
 
+    # Wraps the HTTP exchange for a single request attempt
+    #
+    # Called once per attempt (including retries), wrapping the send and
+    # receive cycle. The block performs the I/O and returns the response.
+    # Override this to add behavior that must span the entire exchange,
+    # such as instrumentation spans or circuit breakers.
+    #
+    # @example Timing a request
+    #   def around_request(request)
+    #     start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    #     yield(request).tap { log_duration(Process.clock_gettime(Process::CLOCK_MONOTONIC) - start) }
+    #   end
+    #
+    # @param request [HTTP::Request]
+    # @yield [HTTP::Request] the request to perform
+    # @yieldreturn [HTTP::Response]
+    # @return [HTTP::Response] must return the response from yield
+    # @api public
+    def around_request(request)
+      yield request
+    end
+
     # Callback for request errors
     #
     # @example
