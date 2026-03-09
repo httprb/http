@@ -126,6 +126,34 @@ end
 Pattern matching is also supported on `HTTP::Response::Status`, `HTTP::Headers`,
 `HTTP::ContentType`, and `HTTP::URI`.
 
+### Thread Safety
+
+Configured sessions are safe to share across threads:
+
+```ruby
+# Build a session once, use it from any thread
+session = HTTP.headers("Accept" => "application/json")
+              .timeout(10)
+              .auth("Bearer token")
+
+threads = 10.times.map do
+  Thread.new { session.get("https://example.com/api/data") }
+end
+threads.each(&:join)
+```
+
+Chainable configuration methods (`.headers`, `.timeout`, `.auth`, etc.) return
+an `HTTP::Session`, which creates a fresh `HTTP::Client` for every request.
+
+Persistent connections (`HTTP.persistent`) return an `HTTP::Client`, which is
+**not** thread-safe. For thread-safe persistent connections, use the
+[connection_pool](https://rubygems.org/gems/connection_pool) gem:
+
+```ruby
+pool = ConnectionPool.new(size: 5) { HTTP.persistent("https://example.com") }
+pool.with { |http| http.get("/path") }
+```
+
 ## Supported Ruby Versions
 
 This library aims to support and is [tested against][build-link]

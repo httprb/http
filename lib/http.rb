@@ -5,8 +5,10 @@ require "http/timeout/null"
 require "http/timeout/per_operation"
 require "http/timeout/global"
 require "http/chainable"
+require "http/session"
 require "http/client"
 require "http/retriable/client"
+require "http/retriable/session"
 require "http/connection"
 require "http/options"
 require "http/feature"
@@ -21,14 +23,14 @@ module HTTP
   extend Chainable
 
   class << self
-    # Set default headers and return a chainable client instance
+    # Set default headers and return a chainable session
     #
     # @example
     #   HTTP[:accept => "text/html"].get("https://example.com")
     #
     # @param headers [Hash] headers to set
     #
-    # @return [HTTP::Client]
+    # @return [HTTP::Session]
     #
     # @api public
     alias [] headers

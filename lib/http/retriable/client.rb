@@ -39,12 +39,21 @@ module HTTP
 
       private
 
-      # Creates a new branch of the retriable client
+      # Creates a new retriable session when chaining options
+      #
+      # @param [HTTP::Options] options
+      # @api private
+      # @return [HTTP::Retriable::Session]
+      def branch(options)
+        Retriable::Session.new(@performer, options)
+      end
+
+      # Creates a new Retriable::Client for executing a single request
       #
       # @param [HTTP::Options] options
       # @api private
       # @return [HTTP::Retriable::Client]
-      def branch(options)
+      def make_client(options)
         Retriable::Client.new(@performer, options)
       end
     end

@@ -5,7 +5,7 @@ module HTTP
 
   extend Chainable
 
-  def self.[]: (untyped headers) -> Client
+  def self.[]: (untyped headers) -> Session
 
   module Base64
     def self?.encode64: (String input) -> String
@@ -13,42 +13,51 @@ module HTTP
 
   module Chainable
     include Base64
+    include Chainable::Verbs
 
     PROXY_ARG_MAP: Array[Array[untyped]]
 
     @default_options: Options
 
-    def head: (untyped uri, ?::Hash[untyped, untyped] options) -> Response
-    def get: (untyped uri, ?::Hash[untyped, untyped] options) -> Response
-    def post: (untyped uri, ?::Hash[untyped, untyped] options) -> Response
-    def put: (untyped uri, ?::Hash[untyped, untyped] options) -> Response
-    def delete: (untyped uri, ?::Hash[untyped, untyped] options) -> Response
-    def trace: (untyped uri, ?::Hash[untyped, untyped] options) -> Response
-    def options: (untyped uri, ?::Hash[untyped, untyped] options) -> Response
-    def connect: (untyped uri, ?::Hash[untyped, untyped] options) -> Response
-    def patch: (untyped uri, ?::Hash[untyped, untyped] options) -> Response
+    module Verbs : _VerbsHost
+      interface _VerbsHost
+        def request: (Symbol verb, untyped uri, ?untyped opts) -> Response
+      end
+
+      def head: (untyped uri, ?::Hash[untyped, untyped] options) -> Response
+      def get: (untyped uri, ?::Hash[untyped, untyped] options) -> Response
+      def post: (untyped uri, ?::Hash[untyped, untyped] options) -> Response
+      def put: (untyped uri, ?::Hash[untyped, untyped] options) -> Response
+      def delete: (untyped uri, ?::Hash[untyped, untyped] options) -> Response
+      def trace: (untyped uri, ?::Hash[untyped, untyped] options) -> Response
+      def options: (untyped uri, ?::Hash[untyped, untyped] options) -> Response
+      def connect: (untyped uri, ?::Hash[untyped, untyped] options) -> Response
+      def patch: (untyped uri, ?::Hash[untyped, untyped] options) -> Response
+    end
+
     def request: (Symbol verb, untyped uri, ?untyped opts) -> Response
     def build_request: (Symbol verb, untyped uri, ?untyped opts) -> Request
-    def timeout: (untyped options) -> Client
+    def timeout: (untyped options) -> Session
     def persistent: (String host, ?timeout: Integer) ?{ (Client) -> untyped } -> untyped
-    def via: (*untyped proxy) -> Client
+    def via: (*untyped proxy) -> Session
     alias through via
-    def follow: (?::Hash[untyped, untyped] options) -> Client
-    def headers: (untyped headers) -> Client
-    def cookies: (untyped cookies) -> Client
-    def encoding: (untyped encoding) -> Client
-    def accept: (untyped type) -> Client
-    def auth: (untyped value) -> Client
-    def basic_auth: (untyped opts) -> Client
+    def follow: (?::Hash[untyped, untyped] options) -> Session
+    def headers: (untyped headers) -> Session
+    def cookies: (untyped cookies) -> Session
+    def encoding: (untyped encoding) -> Session
+    def accept: (untyped type) -> Session
+    def auth: (untyped value) -> Session
+    def basic_auth: (untyped opts) -> Session
     def default_options: () -> Options
     def default_options=: (untyped opts) -> Options
-    def nodelay: () -> Client
-    def use: (*untyped features) -> Client
-    def retriable: (**untyped options) -> Retriable::Client
+    def nodelay: () -> Session
+    def use: (*untyped features) -> Session
+    def retriable: (**untyped options) -> Retriable::Session
 
     private
 
-    def branch: (Options options) -> Client
+    def branch: (Options options) -> Session
+    def make_client: (Options options) -> Client
     def build_proxy_hash: (Array[untyped] proxy) -> Hash[Symbol, untyped]
     def resolve_timeout_hash: (Hash[Symbol, untyped] options) -> [Class, Hash[Symbol, untyped]]
     def resolve_global_only: (Numeric? global) -> [Class, Hash[Symbol, untyped]]
@@ -94,6 +103,18 @@ module HTTP
       def make_json_body: (untyped data, Headers headers) -> String
       def make_form_data: (untyped form) -> untyped
     end
+  end
+
+  class Session
+    extend Forwardable
+    include Chainable
+
+    @default_options: Options
+
+    def initialize: (?untyped default_options) -> void
+    def request: (Symbol verb, untyped uri, ?untyped opts) -> Response
+    def build_request: (Symbol verb, untyped uri, ?untyped opts) -> Request
+    def persistent?: () -> bool
   end
 
   class Headers
@@ -1038,6 +1059,17 @@ module HTTP
   end
 
   module Retriable
+    class Session < HTTP::Session
+      @performer: untyped
+
+      def initialize: (untyped performer, untyped options) -> void
+
+      private
+
+      def branch: (Options options) -> Retriable::Session
+      def make_client: (Options options) -> Retriable::Client
+    end
+
     class Client < HTTP::Client
       @performer: untyped
 
@@ -1046,7 +1078,8 @@ module HTTP
 
       private
 
-      def branch: (Options options) -> Retriable::Client
+      def branch: (Options options) -> Retriable::Session
+      def make_client: (Options options) -> Retriable::Client
     end
 
     class Performer

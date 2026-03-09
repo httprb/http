@@ -754,10 +754,10 @@ describe HTTP do
   end
 
   describe ".encoding" do
-    it "returns a client with the specified encoding" do
-      client = HTTP::Client.new.encoding("UTF-8")
+    it "returns a session with the specified encoding" do
+      session = HTTP::Client.new.encoding("UTF-8")
 
-      assert_kind_of HTTP::Client, client
+      assert_kind_of HTTP::Session, session
     end
   end
 
