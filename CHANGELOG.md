@@ -34,6 +34,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **BREAKING** `HTTP::Response::Status` no longer inherits from `Delegator`.
+  It now uses `Comparable` and `Forwardable` instead, providing `to_i`,
+  `to_int`, and `<=>` for numeric comparisons and range matching. Code that
+  called `__getobj__`/`__setobj__` or relied on implicit delegation of
+  arbitrary `Integer` methods (e.g., `status.even?`) will need to be updated
+  to use `status.code` instead
 - **BREAKING** Chainable option methods (`.headers`, `.timeout`, `.cookies`,
   `.auth`, `.follow`, `.via`, `.use`, `.encoding`, `.nodelay`, `.basic_auth`,
   `.accept`) now return a thread-safe `HTTP::Session` instead of `HTTP::Client`.

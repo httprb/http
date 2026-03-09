@@ -132,7 +132,7 @@ describe HTTP::Response::Status do
     end
   end
 
-  describe "#__setobj__" do
+  describe "#initialize" do
     it "includes the inspected object in the error message" do
       obj = Object.new
       def obj.to_s = "custom"
@@ -140,6 +140,56 @@ describe HTTP::Response::Status do
       err = assert_raises(TypeError) { HTTP::Response::Status.new(obj) }
       assert_match(/#<Object:0x\h+>/, err.message)
       refute_includes err.message, "custom"
+    end
+  end
+
+  describe "#to_i" do
+    it "returns the integer code" do
+      assert_equal 200, HTTP::Response::Status.new(200).to_i
+    end
+  end
+
+  describe "#to_int" do
+    it "returns the integer code" do
+      assert_equal 200, HTTP::Response::Status.new(200).to_int
+    end
+  end
+
+  describe "#<=>" do
+    it "compares by code" do
+      assert_equal(-1, HTTP::Response::Status.new(200) <=> HTTP::Response::Status.new(404))
+    end
+
+    it "compares with integers" do
+      assert_equal 0, HTTP::Response::Status.new(200) <=> 200
+    end
+
+    it "returns nil for non-numeric" do
+      assert_nil HTTP::Response::Status.new(200) <=> Object.new
+    end
+
+    it "compares with objects that respond to #to_i but not #to_int" do
+      assert_equal 1, HTTP::Response::Status.new(200) <=> "abc"
+    end
+  end
+
+  describe "#==" do
+    it "is equal to another Status with the same code" do
+      assert_equal HTTP::Response::Status.new(200), HTTP::Response::Status.new(200)
+    end
+
+    it "is not equal to a Status with a different code" do
+      refute_equal HTTP::Response::Status.new(200), HTTP::Response::Status.new(404)
+    end
+  end
+
+  describe "#hash" do
+    it "is the same for equal statuses" do
+      assert_equal HTTP::Response::Status.new(200).hash, HTTP::Response::Status.new(200).hash
+    end
+
+    it "is consistent with the code's hash" do
+      assert_equal 200.hash, HTTP::Response::Status.new(200).hash
     end
   end
 

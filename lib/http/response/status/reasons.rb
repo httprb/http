@@ -2,11 +2,9 @@
 
 # AUTO-GENERATED FILE, DO NOT CHANGE IT MANUALLY
 
-require "delegate"
-
 module HTTP
   class Response
-    class Status < ::Delegator
+    class Status
       # Code to Reason map
       #
       # @example Usage

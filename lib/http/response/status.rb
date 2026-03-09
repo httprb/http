@@ -1,13 +1,16 @@
 # frozen_string_literal: true
 
-require "delegate"
+require "forwardable"
 
 require "http/response/status/reasons"
 
 module HTTP
   class Response
     # Represents an HTTP response status code with reason phrase
-    class Status < ::Delegator
+    class Status
+      include Comparable
+      extend Forwardable
+
       class << self
         # Coerces given value to Status
         #
@@ -73,6 +76,60 @@ module HTTP
       # @return [Fixnum] status code
       # @api public
       attr_reader :code
+
+      # @!method to_i
+      #   Convert status to Integer
+      #   @example
+      #     status.to_i # => 200
+      #   @return [Integer]
+      #   @api public
+
+      # @!method to_int
+      #   Implicit conversion to Integer
+      #   @example
+      #     status.to_int # => 200
+      #   @return [Integer]
+      #   @api public
+      def_delegators :@code, :to_i, :to_int
+
+      # Create a new Status from a value that responds to #to_i
+      #
+      # @example
+      #   Status.new(200)
+      #
+      # @param [#to_i] obj
+      # @return [Status]
+      # @api public
+      def initialize(obj)
+        raise TypeError, "Expected #{obj.inspect} to respond to #to_i" unless obj.respond_to?(:to_i)
+
+        @code = obj.to_i
+      end
+
+      # Compare status codes for ordering
+      #
+      # @example
+      #   Status.new(200) <=> Status.new(404) # => -1
+      #
+      # @param [#to_i] other
+      # @return [Integer, nil]
+      # @api public
+      def <=>(other)
+        return nil unless other.respond_to?(:to_i)
+
+        code <=> other.to_i
+      end
+
+      # Hash value based on status code
+      #
+      # @example
+      #   Status.new(200).hash
+      #
+      # @return [Integer]
+      # @api public
+      def hash
+        code.hash
+      end
 
       # Return the reason phrase for the status code
       #
@@ -200,30 +257,6 @@ module HTTP
             #{code} == code   #   400 == code
           end                 # end
         RUBY
-      end
-
-      # Set the delegate object
-      #
-      # @example
-      #   status.__setobj__(200)
-      #
-      # @return [void]
-      # @api public
-      def __setobj__(obj)
-        raise TypeError, "Expected #{obj.inspect} to respond to #to_i" unless obj.respond_to? :to_i
-
-        @code = obj.to_i
-      end
-
-      # Return the delegate object
-      #
-      # @example
-      #   status.__getobj__ # => 200
-      #
-      # @return [Fixnum]
-      # @api public
-      def __getobj__
-        @code
       end
     end
   end

@@ -5,7 +5,6 @@ target :lib do
   check "lib"
 
   library "date"
-  library "delegate"
   library "forwardable"
   library "ipaddr"
   library "json"

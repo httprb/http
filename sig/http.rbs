@@ -738,7 +738,10 @@ module HTTP
     def init_request: (untyped opts) -> Request
     def init_body: (untyped opts) -> Response::Body
 
-    class Status < ::Delegator
+    class Status
+      include Comparable
+      extend Forwardable
+
       REASONS: Hash[Integer, String]
       SYMBOLS: Hash[Integer, Symbol]
       SYMBOL_CODES: Hash[Symbol, Integer]
@@ -749,17 +752,18 @@ module HTTP
       private
 
       def self.symbolize: (untyped str) -> Symbol
-      def raise: (*untyped) -> bot
 
       public
 
       attr_reader code: Integer
 
       def initialize: (untyped obj) -> void
-      def class: () -> untyped
+      def to_i: () -> Integer
+      def to_int: () -> Integer
+      def <=>: (untyped other) -> Integer?
+      def hash: () -> Integer
       def reason: () -> String?
       def to_s: () -> String
-      def to_i: () -> Integer
       def informational?: () -> bool
       def success?: () -> bool
       def redirect?: () -> bool
@@ -768,8 +772,6 @@ module HTTP
       def to_sym: () -> Symbol?
       def inspect: () -> String
       def deconstruct_keys: (Array[Symbol]? keys) -> Hash[Symbol, untyped]
-      def __setobj__: (untyped obj) -> void
-      def __getobj__: () -> Integer
     end
 
     class Body
