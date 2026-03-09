@@ -6,6 +6,7 @@ require "http/retriable/delay_calculator"
 require "openssl"
 
 module HTTP
+  # Retry logic for failed HTTP requests
   module Retriable
     # Request performing watchdog.
     # @api private
