@@ -651,6 +651,14 @@ describe HTTP::Headers do
 
       assert_includes err.message, '"bad\nvalue"'
     end
+
+    it "raises HeaderError when value contains a carriage return" do
+      assert_raises(HTTP::HeaderError) { headers.add "X-Test", "foo\rbar" }
+    end
+
+    it "raises HeaderError when value contains CRLF" do
+      assert_raises(HTTP::HeaderError) { headers.add "X-Test", "foo\r\nbar" }
+    end
   end
 
   describe "#merge!" do

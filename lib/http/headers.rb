@@ -335,7 +335,7 @@ module HTTP
     # @api private
     def validate_value(value)
       v = value.to_s
-      return v unless v.include?("\n")
+      return v unless v.include?("\n") || v.include?("\r")
 
       raise HeaderError, "Invalid HTTP header field value: #{v.inspect}"
     end
