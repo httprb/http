@@ -27,6 +27,20 @@ module HTTP
       response
     end
 
+    # Callback invoked before each request attempt
+    #
+    # Unlike {#wrap_request}, which is called once when the request is built,
+    # this hook is called before every attempt, including retries. Use it for
+    # per-attempt side effects like starting instrumentation spans.
+    #
+    # @example
+    #   feature.on_request(request)
+    #
+    # @param _request [HTTP::Request]
+    # @return [nil]
+    # @api public
+    def on_request(_request); end
+
     # Callback for request errors
     #
     # @example

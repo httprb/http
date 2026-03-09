@@ -419,6 +419,28 @@ describe HTTP::Client do
           feature_class_order.order
         )
       end
+
+      it "calls on_request once per attempt" do
+        feature_class_on_request =
+          Class.new(HTTP::Feature) do
+            attr_reader :call_count
+
+            def initialize
+              super
+              @call_count = 0
+            end
+
+            def on_request(_request)
+              @call_count += 1
+            end
+          end
+        feature_instance = feature_class_on_request.new
+
+        client.use(test_feature: feature_instance)
+              .request(:get, dummy.endpoint)
+
+        assert_equal 1, feature_instance.call_count
+      end
     end
   end
 

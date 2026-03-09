@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `Feature#on_request` lifecycle hook, called before each request attempt
+  (including retries), for per-attempt side effects like instrumentation (#826)
 - Pattern matching support (`deconstruct_keys`) for Response, Response::Status,
   Headers, ContentType, and URI (#642)
 - Combined global and per-operation timeouts: global and per-operation timeouts
@@ -18,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Instrumentation feature now correctly starts a new span for each retry
+  attempt, fixing `NoMethodError` with `ActiveSupport::Notifications` when
+  using `.retriable` with the instrumentation feature (#826)
 - Raise `HTTP::Request::InvalidURIError` for invalid URIs (nil, empty string,
   missing scheme, malformed) instead of confusing `UnsupportedSchemeError` or
   `Addressable::URI::InvalidURIError` (#565)

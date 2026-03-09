@@ -85,6 +85,7 @@ module HTTP
 
     def perform_once: (Request req, Options options) -> Response
     def perform_with_retry: (Request req, Options options) -> Response
+    def notify_features: (Request req, Options options) -> void
     def wrap_request: (Request req, Options opts) -> Request
     def build_response: (Request req, Options options) -> Response
     def build_wrapped_response: (Request req, Options options) -> Response
@@ -244,6 +245,7 @@ module HTTP
   class Feature
     def wrap_request: (untyped request) -> untyped
     def wrap_response: (untyped response) -> untyped
+    def on_request: (untyped _request) -> nil
     def on_error: (untyped _request, untyped _error) -> nil
   end
 
@@ -312,7 +314,7 @@ module HTTP
       attr_reader error_name: String
 
       def initialize: (?instrumenter: untyped, ?namespace: String) -> void
-      def wrap_request: (untyped request) -> untyped
+      def on_request: (untyped request) -> nil
       def wrap_response: (untyped response) -> untyped
       def on_error: (untyped request, untyped error) -> untyped
 

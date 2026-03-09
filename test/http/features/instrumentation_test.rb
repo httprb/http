@@ -26,7 +26,7 @@ describe HTTP::Features::Instrumentation do
   let(:instrumenter) { instrumenter_class.new }
   let(:feature) { HTTP::Features::Instrumentation.new(instrumenter: instrumenter) }
 
-  describe "logging the request" do
+  describe "starting instrumentation" do
     let(:request) do
       HTTP::Request.new(
         verb:    :post,
@@ -36,8 +36,8 @@ describe HTTP::Features::Instrumentation do
       )
     end
 
-    it "logs the request" do
-      feature.wrap_request(request)
+    it "starts the instrumentation span" do
+      feature.on_request(request)
 
       assert_equal({ request: request }, instrumenter.output[:start])
     end
@@ -100,8 +100,8 @@ describe HTTP::Features::Instrumentation do
       HTTP::Request.new(verb: :get, uri: "https://example.com/", headers: {})
     end
 
-    it "does not raise LocalJumpError in wrap_request" do
-      feature.wrap_request(request)
+    it "does not raise LocalJumpError in on_request" do
+      feature.on_request(request)
     end
 
     it "does not raise LocalJumpError in on_error" do

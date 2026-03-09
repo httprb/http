@@ -62,20 +62,24 @@ module HTTP
         @error_name = "error.#{namespace}"
       end
 
-      # Wraps a request with instrumentation events
+      # Starts instrumentation for a request attempt
+      #
+      # Called before each request attempt, including retries. Emits a
+      # separate "start" event so a logger can print the request being run
+      # without waiting for a response, then starts the main request span.
       #
       # @example
-      #   feature.wrap_request(request)
+      #   feature.on_request(request)
       #
       # @param request [HTTP::Request]
-      # @return [HTTP::Request]
+      # @return [nil]
       # @api public
-      def wrap_request(request)
+      def on_request(request)
         # Emit a separate "start" event, so a logger can print the request
         # being run without waiting for a response
         instrumenter.instrument("start_#{name}", request: request) {} # rubocop:disable Lint/EmptyBlock
         instrumenter.start(name, request: request)
-        request
+        nil
       end
 
       # Wraps a response with instrumentation events
