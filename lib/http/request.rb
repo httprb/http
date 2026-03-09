@@ -18,7 +18,6 @@ module HTTP
     extend Forwardable
 
     include HTTP::Base64
-    include HTTP::Headers::Mixin
     include Proxy
 
     # The method given was not understood
@@ -124,6 +123,15 @@ module HTTP
     # @return [HTTP::Request::Body]
     # @api public
     attr_reader :body
+
+    # The HTTP headers collection
+    #
+    # @example
+    #   request.headers
+    #
+    # @return [HTTP::Headers]
+    # @api public
+    attr_reader :headers
 
     # HTTP version string
     #

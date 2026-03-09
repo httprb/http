@@ -303,7 +303,7 @@ describe HTTP do
       response = HTTP.head dummy.endpoint
 
       assert_equal 200, response.status.to_i
-      assert_match(/html/, response["content-type"])
+      assert_match(/html/, response.headers["content-type"])
     end
   end
 

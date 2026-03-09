@@ -58,5 +58,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - **BREAKING** Drop Ruby 2.x support
+- **BREAKING** Remove `Headers::Mixin` and the `[]`/`[]=` delegators on
+  `Request` and `Response`. Use `request.headers["..."]` and
+  `response.headers["..."]` instead (#537)
 
 [unreleased]: https://github.com/httprb/http/compare/v5.3.0...main

@@ -660,7 +660,7 @@ describe HTTP::Redirector do
         ]
 
         redirector.perform(req, hops.shift) do |request|
-          assert_equal "Bearer secret", request["Authorization"]
+          assert_equal "Bearer secret", request.headers["Authorization"]
           hops.shift
         end
       end
@@ -674,7 +674,7 @@ describe HTTP::Redirector do
         ]
 
         redirector.perform(req, hops.shift) do |request|
-          assert_nil request["Authorization"]
+          assert_nil request.headers["Authorization"]
           hops.shift
         end
       end
@@ -688,7 +688,7 @@ describe HTTP::Redirector do
         ]
 
         redirector.perform(req, hops.shift) do |request|
-          assert_nil request["Authorization"]
+          assert_nil request.headers["Authorization"]
           hops.shift
         end
       end
@@ -702,7 +702,7 @@ describe HTTP::Redirector do
         ]
 
         redirector.perform(req, hops.shift) do |request|
-          assert_nil request["Authorization"]
+          assert_nil request.headers["Authorization"]
           hops.shift
         end
       end

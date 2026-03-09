@@ -185,14 +185,6 @@ module HTTP
   end
 
   class Headers
-    module Mixin
-      extend Forwardable
-
-      attr_reader headers: Headers
-      def []: (untyped name) -> (String | Array[String] | nil)
-      def []=: (untyped name, untyped value) -> void
-    end
-
     class Normalizer
       CANONICAL_NAME_RE: Regexp
       COMPLIANT_NAME_RE: Regexp
@@ -558,7 +550,6 @@ module HTTP
 
   class Request
     extend Forwardable
-    include Headers::Mixin
     include Base64
     include Request::Proxy
 
@@ -579,6 +570,7 @@ module HTTP
     attr_reader uri: URI
     attr_reader proxy: Hash[untyped, untyped]
     attr_reader body: Request::Body
+    attr_reader headers: Headers
     attr_reader version: String
 
     def initialize: (untyped opts) -> void
@@ -679,13 +671,13 @@ module HTTP
 
   class Response
     extend Forwardable
-    include Headers::Mixin
 
     @content_type: ContentType
     @cookies: untyped
 
     attr_reader status: Response::Status
     attr_reader version: String
+    attr_reader headers: Headers
     attr_reader body: Response::Body
     attr_reader request: Request
     attr_reader proxy_headers: untyped

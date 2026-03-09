@@ -16,8 +16,6 @@ module HTTP
   class Response
     extend Forwardable
 
-    include HTTP::Headers::Mixin
-
     # The response status
     #
     # @example
@@ -53,6 +51,15 @@ module HTTP
     # @return [Request] the original request
     # @api public
     attr_reader :request
+
+    # The HTTP headers collection
+    #
+    # @example
+    #   response.headers
+    #
+    # @return [HTTP::Headers] the response headers
+    # @api public
+    attr_reader :headers
 
     # The proxy headers
     #
