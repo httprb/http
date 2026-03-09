@@ -29,6 +29,13 @@ describe HTTP::Options do
     end
   end
 
+  describe "#with_retriable" do
+    it "raises error for unsupported retriable options" do
+      err = assert_raises(HTTP::Error) { subject_under_test.with_retriable(42) }
+      assert_match(/Unsupported retriable/, err.message)
+    end
+  end
+
   describe "#dup" do
     it "returns a duplicate without a block" do
       dupped = subject_under_test.dup

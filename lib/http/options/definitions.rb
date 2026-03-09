@@ -81,6 +81,22 @@ module HTTP
         end
     end
 
+    def_option :retriable, reader_only: true
+
+    # Sets retriable options
+    #
+    # @param [Boolean, Hash, nil] value
+    # @api private
+    # @return [Hash, nil]
+    def retriable=(value)
+      @retriable =
+        if    !value                    then nil
+        elsif true == value             then Hash[]
+        elsif value.respond_to?(:fetch) then value
+        else argument_error! "Unsupported retriable options: #{value}"
+        end
+    end
+
     def_option :persistent, reader_only: true
 
     # Sets persistent connection origin

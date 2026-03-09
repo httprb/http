@@ -289,10 +289,10 @@ module HTTP
     #   HTTP.retriable(tries: 3, delay: proc { |i| 1 + i*i }).get(url)
     #
     # @param (see Performer#initialize)
-    # @return [HTTP::Retriable::Session]
+    # @return [HTTP::Session]
     # @api public
     def retriable(**options)
-      Retriable::Session.new(Retriable::Performer.new(options), default_options)
+      branch default_options.with_retriable(options.empty? || options)
     end
 
     private

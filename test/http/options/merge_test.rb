@@ -62,6 +62,7 @@ describe HTTP::Options, "merge" do
         headers:            { "Foo" => "foo", "Accept" => "xml", "Bar" => "bar" },
         proxy:              { proxy_address: "127.0.0.1", proxy_port: 8080 },
         follow:             nil,
+        retriable:          nil,
         socket_class:       HTTP::Options.default_socket_class,
         nodelay:            false,
         ssl_socket_class:   HTTP::Options.default_ssl_socket_class,

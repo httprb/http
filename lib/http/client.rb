@@ -4,6 +4,7 @@ require "forwardable"
 
 require "http/client/request_builder"
 require "http/form_data"
+require "http/retriable/performer"
 require "http/options"
 require "http/feature"
 require "http/headers"
@@ -105,20 +106,11 @@ module HTTP
     # @return [HTTP::Response] the response
     # @api public
     def perform(req, options)
-      verify_connection!(req.uri)
-
-      @state = :dirty
-
-      send_request(req, options)
-      res = build_wrapped_response(req, options)
-
-      @connection.finish_response if req.verb == :head
-      @state = :clean
-
-      res
-    rescue
-      close
-      raise
+      if options.retriable
+        perform_with_retry(req, options)
+      else
+        perform_once(req, options)
+      end
     end
 
     # Close the connection and reset state
@@ -135,6 +127,41 @@ module HTTP
     end
 
     private
+
+    # Execute a single HTTP request without retry logic
+    #
+    # @param req [HTTP::Request] the request to perform
+    # @param options [HTTP::Options] request options
+    # @return [HTTP::Response] the response
+    # @api private
+    def perform_once(req, options)
+      verify_connection!(req.uri)
+
+      @state = :dirty
+
+      send_request(req, options)
+      res = build_wrapped_response(req, options)
+
+      @connection.finish_response if req.verb == :head
+      @state = :clean
+
+      res
+    rescue
+      close
+      raise
+    end
+
+    # Execute a request with retry logic
+    #
+    # @param req [HTTP::Request] the request to perform
+    # @param options [HTTP::Options] request options
+    # @return [HTTP::Response] the response
+    # @api private
+    def perform_with_retry(req, options)
+      Retriable::Performer.new(options.retriable).perform(self, req) do
+        perform_once(req, options)
+      end
+    end
 
     # Send request over the connection, handling proxy and errors
     # @return [void]
