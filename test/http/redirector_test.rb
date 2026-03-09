@@ -114,7 +114,7 @@ describe HTTP::Redirector do
       assert_equal "http://example.com/123", res.to_s
     end
 
-    it "returns cookies in response" do
+    it "forwards accumulated cookies through redirect chain" do
       req  = HTTP::Request.new verb: :head, uri: "http://example.com"
       hops = [
         redirect_response(301, "http://example.com/1", { "foo" => "42" }),
@@ -139,13 +139,9 @@ describe HTTP::Redirector do
       end
 
       assert_equal "bar", res.to_s
-      assert_equal(
-        { "foo" => "42", "bar" => "53", "baz" => "65" },
-        res.cookies.cookies.to_h { |c| [c.name, c.value] }
-      )
     end
 
-    it "returns original cookies in response" do
+    it "forwards original request cookies through redirect chain" do
       req = HTTP::Request.new verb: :head, uri: "http://example.com"
       req.headers.set("Cookie", "foo=42; deleted=baz")
       hops = [
@@ -158,19 +154,12 @@ describe HTTP::Redirector do
         { "foo" => "42", "bar" => "64" }
       ]
 
-      res = redirector.perform(req, hops.shift) do |request|
+      redirector.perform(req, hops.shift) do |request|
         req_cookie = HTTP::Cookie.cookie_value_to_hash(request.headers["Cookie"] || "")
 
         assert_equal request_cookies.shift, req_cookie
         hops.shift
       end
-
-      assert_equal "bar", res.to_s
-      cookies = res.cookies.cookies.to_h { |c| [c.name, c.value] }
-
-      assert_equal "42", cookies["foo"]
-      assert_equal "64", cookies["bar"]
-      assert_nil cookies["deleted"]
     end
 
     it "collects request cookies with correct path" do
@@ -609,7 +598,7 @@ describe HTTP::Redirector do
       end
     end
 
-    it "deletes cookies with empty value from final response" do
+    it "deletes cookies with empty value during redirect" do
       req = HTTP::Request.new verb: :get, uri: "http://example.com"
       hops = [
         redirect_response(301, "http://example.com/1", { "mycookie" => "present" }),
@@ -617,10 +606,9 @@ describe HTTP::Redirector do
         simple_response(200, "done")
       ]
 
-      res = redirector.perform(req, hops.shift) { hops.shift }
-      cookie_names = res.cookies.cookies.map(&:name)
+      redirector.perform(req, hops.shift) { hops.shift }
+      cookie_names = cookie_jar_from(redirector).map(&:name)
 
-      # The cookie with empty value should have been deleted from the jar
       refute_includes cookie_names, "mycookie"
     end
 

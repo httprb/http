@@ -571,23 +571,16 @@ describe HTTP do
       assert_equal "abc: def", HTTP.cookies(abc: :def).get(endpoint).to_s
     end
 
-    it "properly works with cookie jars from response" do
+    it "properly works with cookies from response" do
       res = HTTP.get(endpoint).flush
 
       assert_equal "foo: bar", HTTP.cookies(res.cookies).get(endpoint).to_s
     end
 
-    it "properly merges cookies" do
-      res     = HTTP.get(endpoint).flush
-      client  = HTTP.cookies(foo: 123, bar: 321).cookies(res.cookies)
+    it "replaces previously set cookies" do
+      client = HTTP.cookies(foo: 123, bar: 321).cookies(baz: :moo)
 
-      assert_equal "foo: bar\nbar: 321", client.get(endpoint).to_s
-    end
-
-    it "properly merges Cookie headers and cookies" do
-      client = HTTP.headers("Cookie" => "foo=bar").cookies(baz: :moo)
-
-      assert_equal "foo: bar\nbaz: moo", client.get(endpoint).to_s
+      assert_equal "baz: moo", client.get(endpoint).to_s
     end
   end
 

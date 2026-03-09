@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "http/cookie_jar"
 require "http/headers"
 
 module HTTP
@@ -125,7 +126,6 @@ module HTTP
     # @api private
     # @return [HTTP::CookieJar]
     def cookie_jar
-      # it seems that @response.cookies instance is reused between responses, so we have to "clone"
       @cookie_jar ||= CookieJar.new
     end
 
@@ -147,18 +147,12 @@ module HTTP
     # @api private
     # @return [void]
     def collect_cookies_from_response
-      # Overwrite previous cookies
       @response.cookies.each do |cookie|
         if cookie.value == ""
           cookie_jar.delete(cookie)
         else
           cookie_jar.add(cookie)
         end
-      end
-
-      # I wish we could just do @response.cookes = cookie_jar
-      cookie_jar.each do |cookie|
-        @response.cookies.add(cookie)
       end
     end
 

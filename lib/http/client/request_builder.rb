@@ -39,7 +39,7 @@ module HTTP
         uri.query_values = uri.query_values(Array).to_a.concat(opts.params.to_a)
       end
 
-      # Creates request headers with cookies (if any) merged in
+      # Creates request headers
       #
       # @return [HTTP::Headers] the constructed headers
       # @api private
@@ -48,13 +48,6 @@ module HTTP
 
         # Tell the server to keep the conn open
         headers[Headers::CONNECTION] = default_options.persistent? ? Connection::KEEP_ALIVE : Connection::CLOSE
-
-        cookies = opts.cookies.values
-
-        unless cookies.empty?
-          cookies = opts.headers.get(Headers::COOKIE).concat(cookies).join("; ")
-          headers[Headers::COOKIE] = cookies
-        end
 
         headers
       end

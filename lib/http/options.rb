@@ -213,7 +213,7 @@ module HTTP
     # @return [Hash]
     def default_options_hash
       { response: :auto, encoding: nil, nodelay: false, keep_alive_timeout: 5,
-        proxy: Hash[], ssl: Hash[], headers: Hash[], cookies: Hash[], features: Hash[],
+        proxy: Hash[], ssl: Hash[], headers: Hash[], features: Hash[],
         timeout_class: self.class.default_timeout_class, timeout_options: Hash[],
         socket_class: self.class.default_socket_class,
         ssl_socket_class: self.class.default_ssl_socket_class }

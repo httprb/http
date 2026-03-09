@@ -7,13 +7,6 @@ module HTTP
       headers.merge(new_headers) # steep:ignore
     end
 
-    def_option :cookies do |new_cookies|
-      new_cookies.each_with_object cookies.dup do |(k, v), jar| # steep:ignore
-        cookie = k.is_a?(Cookie) ? k : Cookie.new(k.to_s, v.to_s)
-        jar[cookie.name] = cookie.cookie_value
-      end
-    end
-
     def_option :encoding do |encoding|
       self.encoding = Encoding.find(encoding) # steep:ignore
     end
