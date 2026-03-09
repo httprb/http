@@ -58,6 +58,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `HTTP::CookieJar`. The `cookies` option has been removed from `Options`;
   `Chainable#cookies` now sets the `Cookie` header directly with no implicit
   merging — the last `.cookies()` call wins (#536)
+- Cookie jar management during redirects moved from `Redirector` to `Session`.
+  `Redirector` is now a pure redirect-following engine with no cookie
+  awareness; `Session#request` manages cookies across redirect hops
 
 ### Removed
 

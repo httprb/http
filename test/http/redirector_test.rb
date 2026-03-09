@@ -14,16 +14,8 @@ describe HTTP::Redirector do
     )
   end
 
-  def redirect_response(status, location, set_cookie = {})
-    res = simple_response status, "", "Location" => location
-    set_cookie.each do |name, value|
-      res.headers.add("Set-Cookie", "#{name}=#{value}; path=/; httponly; secure; SameSite=none; Secure")
-    end
-    res
-  end
-
-  def cookie_jar_from(redirector)
-    redirector.instance_variable_get(:@cookie_jar)
+  def redirect_response(status, location)
+    simple_response status, "", "Location" => location
   end
 
   describe "#strict" do
@@ -112,68 +104,6 @@ describe HTTP::Redirector do
       end
 
       assert_equal "http://example.com/123", res.to_s
-    end
-
-    it "forwards accumulated cookies through redirect chain" do
-      req  = HTTP::Request.new verb: :head, uri: "http://example.com"
-      hops = [
-        redirect_response(301, "http://example.com/1", { "foo" => "42" }),
-        redirect_response(301, "http://example.com/2", { "bar" => "53", "deleted" => "foo" }),
-        redirect_response(301, "http://example.com/3", { "baz" => "64", "deleted" => "" }),
-        redirect_response(301, "http://example.com/4", { "baz" => "65" }),
-        simple_response(200, "bar")
-      ]
-
-      request_cookies = [
-        { "foo" => "42" },
-        { "foo" => "42", "bar" => "53", "deleted" => "foo" },
-        { "foo" => "42", "bar" => "53", "baz" => "64" },
-        { "foo" => "42", "bar" => "53", "baz" => "65" }
-      ]
-
-      res = redirector.perform(req, hops.shift) do |request|
-        req_cookie = HTTP::Cookie.cookie_value_to_hash(request.headers["Cookie"] || "")
-
-        assert_equal request_cookies.shift, req_cookie
-        hops.shift
-      end
-
-      assert_equal "bar", res.to_s
-    end
-
-    it "forwards original request cookies through redirect chain" do
-      req = HTTP::Request.new verb: :head, uri: "http://example.com"
-      req.headers.set("Cookie", "foo=42; deleted=baz")
-      hops = [
-        redirect_response(301, "http://example.com/1", { "bar" => "64", "deleted" => "" }),
-        simple_response(200, "bar")
-      ]
-
-      request_cookies = [
-        { "foo" => "42", "bar" => "64" },
-        { "foo" => "42", "bar" => "64" }
-      ]
-
-      redirector.perform(req, hops.shift) do |request|
-        req_cookie = HTTP::Cookie.cookie_value_to_hash(request.headers["Cookie"] || "")
-
-        assert_equal request_cookies.shift, req_cookie
-        hops.shift
-      end
-    end
-
-    it "collects request cookies with correct path" do
-      req = HTTP::Request.new verb: :head, uri: "http://example.com/some/path"
-      req.headers.set("Cookie", "foo=bar")
-      hops = [simple_response(200, "done")]
-
-      redirector.perform(req, redirect_response(301, "http://example.com/other")) do
-        hops.shift
-      end
-
-      cookie = cookie_jar_from(redirector).detect { |c| c.name == "foo" }
-
-      assert_equal "/some/path", cookie.path
     end
 
     context "with on_redirect callback" do
@@ -564,64 +494,6 @@ describe HTTP::Redirector do
           redirector.perform(req, res) { simple_response 200 }
         end
         assert_match(/301/, err.message)
-      end
-    end
-
-    it "collects cookies from initial request headers" do
-      req = HTTP::Request.new verb: :get, uri: "http://example.com"
-      req.headers.set("Cookie", "initial=cookie")
-      hops = [
-        redirect_response(301, "http://example.com/1"),
-        simple_response(200, "done")
-      ]
-
-      redirector.perform(req, hops.shift) do |request|
-        cookie_header = request.headers["Cookie"]
-
-        assert_includes cookie_header, "initial=cookie"
-        hops.shift
-      end
-    end
-
-    it "collects cookies from response Set-Cookie headers" do
-      req = HTTP::Request.new verb: :get, uri: "http://example.com"
-      hops = [
-        redirect_response(301, "http://example.com/1", { "resp_cookie" => "value1" }),
-        simple_response(200, "done")
-      ]
-
-      redirector.perform(req, hops.shift) do |request|
-        cookie_header = request.headers["Cookie"]
-
-        assert_includes cookie_header, "resp_cookie=value1"
-        hops.shift
-      end
-    end
-
-    it "deletes cookies with empty value during redirect" do
-      req = HTTP::Request.new verb: :get, uri: "http://example.com"
-      hops = [
-        redirect_response(301, "http://example.com/1", { "mycookie" => "present" }),
-        redirect_response(301, "http://example.com/2", { "mycookie" => "" }),
-        simple_response(200, "done")
-      ]
-
-      redirector.perform(req, hops.shift) { hops.shift }
-      cookie_names = cookie_jar_from(redirector).map(&:name)
-
-      refute_includes cookie_names, "mycookie"
-    end
-
-    it "does not set Cookie header when cookie jar is empty" do
-      req = HTTP::Request.new verb: :get, uri: "http://example.com"
-      hops = [
-        redirect_response(301, "http://example.com/1"),
-        simple_response(200, "done")
-      ]
-
-      redirector.perform(req, hops.shift) do |request|
-        assert_nil request.headers["Cookie"]
-        hops.shift
       end
     end
 

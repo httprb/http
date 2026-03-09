@@ -123,5 +123,45 @@ class DummyServer
       res.status = 200
       res.body   = "hello world"
     end
+
+    get "/echo-cookies" do |req, res|
+      res.status = 200
+      res.body   = req.cookies.map { |c| "#{c.name}=#{c.value}" }.join("; ")
+    end
+
+    get "/redirect-with-cookie" do |_req, res|
+      res.status      = 301
+      res["Location"] = "http://#{@server.addr}:#{@server.port}/echo-cookies"
+      res["Set-Cookie"] = "from_redirect=yes; path=/"
+    end
+
+    get "/redirect-cookie-chain/1" do |_req, res|
+      res.status      = 301
+      res["Location"] = "http://#{@server.addr}:#{@server.port}/redirect-cookie-chain/2"
+      res["Set-Cookie"] = "first=1; path=/"
+    end
+
+    get "/redirect-cookie-chain/2" do |_req, res|
+      res.status      = 301
+      res["Location"] = "http://#{@server.addr}:#{@server.port}/echo-cookies"
+      res["Set-Cookie"] = "second=2; path=/"
+    end
+
+    get "/redirect-set-then-delete/1" do |_req, res|
+      res.status      = 301
+      res["Location"] = "http://#{@server.addr}:#{@server.port}/redirect-set-then-delete/2"
+      res["Set-Cookie"] = "temp=present; path=/"
+    end
+
+    get "/redirect-set-then-delete/2" do |_req, res|
+      res.status      = 301
+      res["Location"] = "http://#{@server.addr}:#{@server.port}/echo-cookies"
+      res["Set-Cookie"] = "temp=; path=/"
+    end
+
+    get "/redirect-no-cookies" do |_req, res|
+      res.status      = 301
+      res["Location"] = "http://#{@server.addr}:#{@server.port}/echo-cookies"
+    end
   end
 end
