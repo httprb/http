@@ -145,6 +145,46 @@ describe HTTP::Session do
     end
   end
 
+  describe "cookies during redirects" do
+    it "forwards response cookies through redirect chain" do
+      response = HTTP.follow.get("#{dummy.endpoint}/redirect-with-cookie")
+
+      assert_includes response.to_s, "from_redirect=yes"
+    end
+
+    it "accumulates cookies across redirect hops" do
+      response = HTTP.follow.get("#{dummy.endpoint}/redirect-cookie-chain/1")
+      body = response.to_s
+
+      assert_includes body, "first=1"
+      assert_includes body, "second=2"
+    end
+
+    it "forwards initial request cookies through redirects" do
+      response = HTTP.cookies(original: "value").follow.get("#{dummy.endpoint}/redirect-no-cookies")
+
+      assert_includes response.to_s, "original=value"
+    end
+
+    it "deletes cookies with empty value during redirect" do
+      response = HTTP.follow.get("#{dummy.endpoint}/redirect-set-then-delete/1")
+
+      refute_includes response.to_s, "temp="
+    end
+
+    it "does not set Cookie header when no cookies present" do
+      response = HTTP.follow.get("#{dummy.endpoint}/redirect-no-cookies")
+
+      assert_equal "", response.to_s
+    end
+
+    it "applies features to redirect requests" do
+      response = HTTP.use(:auto_deflate).follow.get("#{dummy.endpoint}/redirect-301")
+
+      assert_equal "<!doctype html>", response.to_s
+    end
+  end
+
   describe "persistent" do
     it "returns an HTTP::Client" do
       p_client = HTTP::Session.new.persistent(dummy.endpoint)

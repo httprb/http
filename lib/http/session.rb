@@ -2,6 +2,10 @@
 
 require "forwardable"
 
+require "http/cookie_jar"
+require "http/headers"
+require "http/redirector"
+
 module HTTP
   # Thread-safe options builder for configuring HTTP requests.
   #
@@ -50,6 +54,7 @@ module HTTP
     # Make an HTTP request by creating a new {Client}
     #
     # A fresh {Client} is created for each request, ensuring thread safety.
+    # Manages cookies across redirect hops when following redirects.
     #
     # @example
     #   session = HTTP::Session.new
@@ -61,7 +66,18 @@ module HTTP
     # @return [HTTP::Response] the response
     # @api public
     def request(verb, uri, opts = {})
-      make_client(default_options).request(verb, uri, opts)
+      cookie_jar = CookieJar.new
+      client = make_client(default_options)
+      merged = default_options.merge(opts)
+
+      req = client.build_request(verb, uri, opts)
+      load_cookies(cookie_jar, req)
+      res = client.perform(req, merged)
+      store_cookies(cookie_jar, res)
+
+      return res unless merged.follow
+
+      perform_redirects(cookie_jar, client, req, res, merged)
     end
 
     # Build an HTTP request without executing it
@@ -77,6 +93,84 @@ module HTTP
     # @api public
     def build_request(verb, uri, opts = {})
       make_client(default_options).build_request(verb, uri, opts)
+    end
+
+    private
+
+    # Follow redirects with cookie management
+    #
+    # @param jar [HTTP::CookieJar] the cookie jar
+    # @param client [HTTP::Client] the client to perform requests
+    # @param req [HTTP::Request] the original request
+    # @param res [HTTP::Response] the initial redirect response
+    # @param opts [HTTP::Options] the merged options
+    # @return [HTTP::Response] the final non-redirect response
+    # @api private
+    def perform_redirects(jar, client, req, res, opts)
+      Redirector.new(opts.follow).perform(req, res) do |redirect_req| # steep:ignore
+        wrapped = wrap_redirect(redirect_req, opts)
+        apply_cookies(jar, wrapped)
+        response = client.perform(wrapped, opts)
+        store_cookies(jar, response)
+        response
+      end
+    end
+
+    # Load cookies from the request's Cookie header into the jar
+    #
+    # @param jar [HTTP::CookieJar] the cookie jar
+    # @param request [HTTP::Request] the request
+    # @return [void]
+    # @api private
+    def load_cookies(jar, request)
+      header = request.headers[Headers::COOKIE]
+      cookies = HTTP::Cookie.cookie_value_to_hash(header.to_s)
+
+      cookies.each do |name, value|
+        jar.add(HTTP::Cookie.new(name, value, path: request.uri.path, domain: request.host))
+      end
+    end
+
+    # Store cookies from the response's Set-Cookie headers into the jar
+    #
+    # @param jar [HTTP::CookieJar] the cookie jar
+    # @param response [HTTP::Response] the response
+    # @return [void]
+    # @api private
+    def store_cookies(jar, response)
+      response.cookies.each do |cookie|
+        if cookie.value == ""
+          jar.delete(cookie)
+        else
+          jar.add(cookie)
+        end
+      end
+    end
+
+    # Apply cookies from the jar to the request's Cookie header
+    #
+    # @param jar [HTTP::CookieJar] the cookie jar
+    # @param request [HTTP::Request] the request
+    # @return [void]
+    # @api private
+    def apply_cookies(jar, request)
+      if jar.empty?
+        request.headers.delete(Headers::COOKIE)
+      else
+        request.headers.set(Headers::COOKIE, jar.map { |c| "#{c.name}=#{c.value}" }.join("; "))
+      end
+    end
+
+    # Apply feature middleware to a redirect request
+    #
+    # @param request [HTTP::Request] the redirect request
+    # @param opts [HTTP::Options] the merged options
+    # @return [HTTP::Request] the wrapped request
+    # @api private
+    def wrap_redirect(request, opts)
+      opts.features.inject(request) do |req, (_name, feature)|
+        feature.wrap_request(req)
+      end
     end
   end
 end

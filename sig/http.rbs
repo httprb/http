@@ -117,6 +117,14 @@ module HTTP
     def request: (Symbol verb, untyped uri, ?untyped opts) -> Response
     def build_request: (Symbol verb, untyped uri, ?untyped opts) -> Request
     def persistent?: () -> bool
+
+    private
+
+    def perform_redirects: (untyped jar, Client client, Request req, Response res, Options opts) -> Response
+    def load_cookies: (untyped jar, Request request) -> void
+    def store_cookies: (untyped jar, Response response) -> void
+    def apply_cookies: (untyped jar, Request request) -> void
+    def wrap_redirect: (Request request, Options opts) -> Request
   end
 
   class Headers
@@ -905,7 +913,6 @@ module HTTP
     @request: Request
     @response: Response
     @visited: Array[untyped]
-    @cookie_jar: untyped
 
     attr_reader strict: bool
     attr_reader max_hops: Integer
@@ -916,10 +923,6 @@ module HTTP
     private
 
     def follow_redirects: () { (Request) -> Response } -> void
-    def apply_cookies_to_request: () -> void
-    def cookie_jar: () -> untyped
-    def collect_cookies_from_request: () -> void
-    def collect_cookies_from_response: () -> void
     def too_many_hops?: () -> bool
     def endless_loop?: () -> bool
     def redirect_uri: () -> String?

@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require "http/cookie_jar"
 require "http/headers"
 
 module HTTP
@@ -73,8 +72,6 @@ module HTTP
       @request  = request
       @response = response
       @visited  = []
-      collect_cookies_from_request
-      collect_cookies_from_response
 
       follow_redirects(&) while REDIRECT_CODES.include?(@response.code)
 
@@ -96,20 +93,8 @@ module HTTP
       @response.flush
 
       @request = redirect_to(redirect_uri)
-      apply_cookies_to_request
       @on_redirect&.call @response, @request
       @response = yield @request
-      collect_cookies_from_response
-    end
-
-    # Apply cookies to the current request
-    #
-    # @api private
-    # @return [void]
-    def apply_cookies_to_request
-      return if cookie_jar.empty?
-
-      @request.headers.set(Headers::COOKIE, cookie_jar.map { |c| "#{c.name}=#{c.value}" }.join("; "))
     end
 
     # Extracts the redirect URI from the Location header
@@ -119,41 +104,6 @@ module HTTP
     def redirect_uri
       location = @response.headers.get(Headers::LOCATION)
       location.join unless location.empty?
-    end
-
-    # Returns the cookie jar for tracking cookies
-    #
-    # @api private
-    # @return [HTTP::CookieJar]
-    def cookie_jar
-      @cookie_jar ||= CookieJar.new
-    end
-
-    # Collects cookies from the current request
-    #
-    # @api private
-    # @return [void]
-    def collect_cookies_from_request
-      request_cookie_header = @request.headers["Cookie"]
-      cookies = Cookie.cookie_value_to_hash(request_cookie_header.to_s)
-
-      cookies.each do |key, value|
-        cookie_jar.add(Cookie.new(key, value, path: @request.uri.path, domain: @request.host))
-      end
-    end
-
-    # Carries cookies from response to the next request
-    #
-    # @api private
-    # @return [void]
-    def collect_cookies_from_response
-      @response.cookies.each do |cookie|
-        if cookie.value == ""
-          cookie_jar.delete(cookie)
-        else
-          cookie_jar.add(cookie)
-        end
-      end
     end
 
     # Check if we reached max amount of redirect hops
