@@ -181,7 +181,7 @@ module HTTP
     # @return [Hash{Symbol => Object}]
     # @api public
     def deconstruct_keys(keys)
-      h = {
+      hash = {
         status:        @status,
         version:       @version,
         headers:       @headers,
@@ -189,7 +189,7 @@ module HTTP
         request:       @request,
         proxy_headers: @proxy_headers
       }
-      keys ? h.slice(*keys) : h
+      keys ? hash.slice(*keys) : hash
     end
 
     # Flushes body and returns self-reference

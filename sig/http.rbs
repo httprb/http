@@ -74,7 +74,7 @@ module HTTP
     @connection: untyped
     @state: Symbol
 
-    def initialize: (?untyped default_options) -> void
+    def initialize: (?untyped? default_options, **untyped options) -> void
     def request: (Symbol verb, untyped uri, ?untyped opts) -> Response
     def build_request: (Symbol verb, untyped uri, ?untyped opts) -> Request
     def persistent?: () -> bool
@@ -113,7 +113,7 @@ module HTTP
 
     @default_options: Options
 
-    def initialize: (?untyped default_options) -> void
+    def initialize: (?untyped? default_options, **untyped options) -> void
     def request: (Symbol verb, untyped uri, ?untyped opts) -> Response
     def build_request: (Symbol verb, untyped uri, ?untyped opts) -> Request
     def persistent?: () -> bool
@@ -413,7 +413,7 @@ module HTTP
     attr_accessor self.default_timeout_class: Class
     attr_reader self.available_features: Hash[Symbol, Class]
 
-    def self.new: (?untyped options) -> Options
+    def self.new: (?untyped? options, **untyped kwargs) -> Options
     def self.defined_options: () -> Array[Symbol]
     def self.register_feature: (Symbol name, Class impl) -> Class
 
@@ -424,7 +424,28 @@ module HTTP
 
     public
 
-    def initialize: (?::Hash[untyped, untyped] options) -> void
+    def initialize: (
+      ?response: untyped,
+      ?encoding: Encoding?,
+      ?nodelay: bool,
+      ?keep_alive_timeout: Integer,
+      ?proxy: Hash[untyped, untyped],
+      ?ssl: untyped,
+      ?headers: untyped,
+      ?features: Hash[untyped, untyped],
+      ?timeout_class: Class,
+      ?timeout_options: Hash[Symbol, untyped],
+      ?socket_class: Class,
+      ?ssl_socket_class: Class,
+      ?params: untyped,
+      ?form: untyped,
+      ?json: untyped,
+      ?body: untyped,
+      ?follow: untyped,
+      ?retriable: untyped,
+      ?persistent: String?,
+      ?ssl_context: untyped
+    ) -> void
     def features=: (untyped features) -> untyped
 
     attr_reader features: Hash[Symbol, Feature]
@@ -482,8 +503,7 @@ module HTTP
 
     private
 
-    def []=: (Symbol option, untyped val) -> untyped
-    def default_options_hash: () -> Hash[Symbol, untyped]
+    def assign_options: (untyped env) -> void
     def argument_error!: (String message) -> bot
   end
 

@@ -44,11 +44,12 @@ module HTTP
     # @example
     #   session = HTTP::Session.new(headers: {"Accept" => "application/json"})
     #
-    # @param default_options [Hash, Options] options for requests
+    # @param default_options [HTTP::Options, nil] existing options instance
+    # @param options [Hash] keyword options (see HTTP::Options#initialize)
     # @return [HTTP::Session] a new session instance
     # @api public
-    def initialize(default_options = {})
-      @default_options = HTTP::Options.new(default_options)
+    def initialize(default_options = nil, **)
+      @default_options = HTTP::Options.new(default_options, **)
     end
 
     # Make an HTTP request by creating a new {Client}
@@ -107,7 +108,8 @@ module HTTP
     # @return [HTTP::Response] the final non-redirect response
     # @api private
     def perform_redirects(jar, client, req, res, opts)
-      Redirector.new(opts.follow).perform(req, res) do |redirect_req| # steep:ignore
+      follow = opts.follow || {} #: Hash[untyped, untyped]
+      Redirector.new(follow).perform(req, res) do |redirect_req|
         wrapped = wrap_redirect(redirect_req, opts)
         apply_cookies(jar, wrapped)
         response = client.perform(wrapped, opts)

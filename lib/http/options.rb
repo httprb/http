@@ -55,11 +55,13 @@ module HTTP
       # @example
       #   HTTP::Options.new(response: :auto)
       #
-      # @param [Hash] options
+      # @param [HTTP::Options, Hash, nil] options existing Options or Hash to convert
       # @api public
       # @return [HTTP::Options]
-      def new(options = {})
-        options.is_a?(self) ? options : super
+      def new(options = nil, **kwargs)
+        return options if options.is_a?(self)
+
+        super(**(options || kwargs)) # steep:ignore
       end
 
       # Returns list of defined option names
@@ -122,18 +124,36 @@ module HTTP
       end
     end
 
-    # Initializes options with defaults
+    # Initializes options with keyword arguments
     #
     # @example
     #   HTTP::Options.new(response: :auto, follow: true)
     #
-    # @param [Hash] options
     # @api public
     # @return [HTTP::Options]
-    def initialize(options = {})
-      opts_w_defaults = default_options_hash.merge(options)
-      opts_w_defaults[:headers] = HTTP::Headers.coerce(opts_w_defaults[:headers])
-      opts_w_defaults.each { |(k, v)| self[k] = v }
+    def initialize(
+      response: :auto,
+      encoding: nil,
+      nodelay: false,
+      keep_alive_timeout: 5,
+      proxy: {},
+      ssl: {},
+      headers: {},
+      features: {},
+      timeout_class: self.class.default_timeout_class,
+      timeout_options: {},
+      socket_class: self.class.default_socket_class,
+      ssl_socket_class: self.class.default_ssl_socket_class,
+      params: nil,
+      form: nil,
+      json: nil,
+      body: nil,
+      follow: nil,
+      retriable: nil,
+      persistent: nil,
+      ssl_context: nil
+    )
+      assign_options(binding)
     end
 
     # Merges two Options objects
@@ -141,7 +161,7 @@ module HTTP
     # @example
     #   opts = HTTP::Options.new.merge(HTTP::Options.new(response: :body))
     #
-    # @param [HTTP::Options] other
+    # @param [HTTP::Options, Hash] other
     # @api public
     # @return [HTTP::Options]
     def merge(other)
@@ -149,7 +169,7 @@ module HTTP
         k == :headers ? v1.merge(v2) : v2
       end
 
-      self.class.new(merged)
+      self.class.new(**merged)
     end
 
     # Converts options to a Hash
@@ -160,10 +180,7 @@ module HTTP
     # @api public
     # @return [Hash]
     def to_hash
-      hash_pairs = self.class
-                       .defined_options
-                       .flat_map { |opt_name| [opt_name, send(opt_name)] }
-      Hash[*hash_pairs]
+      self.class.defined_options.to_h { |opt_name| [opt_name, send(opt_name)] }
     end
 
     # Duplicates the options object
@@ -193,30 +210,19 @@ module HTTP
       features[name]
     end
 
-    protected
-
-    # Sets an option by name
-    #
-    # @param [Symbol] option
-    # @param [Object] val
-    # @api private
-    # @return [Object]
-    def []=(option, val)
-      send(:"#{option}=", val)
-    end
-
     private
 
-    # Returns the default options hash
+    # Assigns all option values from the initialize binding
     #
+    # @param [Binding] env binding from initialize with keyword argument values
     # @api private
-    # @return [Hash]
-    def default_options_hash
-      { response: :auto, encoding: nil, nodelay: false, keep_alive_timeout: 5,
-        proxy: Hash[], ssl: Hash[], headers: Hash[], features: Hash[],
-        timeout_class: self.class.default_timeout_class, timeout_options: Hash[],
-        socket_class: self.class.default_socket_class,
-        ssl_socket_class: self.class.default_ssl_socket_class }
+    # @return [void]
+    def assign_options(env)
+      self.class.defined_options.each do |name|
+        value = env.local_variable_get(name)
+        value = HTTP::Headers.coerce(value) if name == :headers
+        send(:"#{name}=", value)
+      end
     end
 
     # Raises an argument error with adjusted backtrace

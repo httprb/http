@@ -1,7 +1,3 @@
-Layout/DotPosition:
-  Enabled: true
-  EnforcedStyle: leading
-
 Layout/LeadingCommentSpace:
   AllowRBSInlineAnnotation: true
 

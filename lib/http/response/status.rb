@@ -190,8 +190,8 @@ module HTTP
       # @return [Hash{Symbol => Object}]
       # @api public
       def deconstruct_keys(keys)
-        h = { code: code, reason: reason }
-        keys ? h.slice(*keys) : h
+        hash = { code: code, reason: reason }
+        keys ? hash.slice(*keys) : hash
       end
 
       SYMBOLS.each do |code, symbol|

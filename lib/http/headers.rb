@@ -197,7 +197,10 @@ module HTTP
     # @param keys [Array<Symbol>, nil] keys to extract, or nil for all
     # @return [Hash{Symbol => Object}]
     # @api public
-    def deconstruct_keys(keys) = @pile.map { |_, k, _| k }.to_h { |k| [k.tr("A-Z-", "a-z_").to_sym, self[k]] }.then { |h| keys ? h.slice(*keys) : h } # rubocop:disable Layout/LineLength
+    def deconstruct_keys(keys)
+      hash = @pile.map { |_, k, _| k }.to_h { |k| [k.tr("A-Z-", "a-z_").to_sym, self[k]] }
+      keys ? hash.slice(*keys) : hash
+    end
 
     # Returns human-readable representation of self instance
     #
@@ -206,9 +209,7 @@ module HTTP
     #
     # @return [String]
     # @api public
-    def inspect
-      "#<#{self.class}>"
-    end
+    def inspect = "#<#{self.class}>"
 
     # Returns list of header names
     #
@@ -322,9 +323,7 @@ module HTTP
     #
     # @return [String]
     # @api private
-    def normalize_header(name)
-      self.class.normalizer.call(name)
-    end
+    def normalize_header(name) = self.class.normalizer.call(name)
 
     # Ensures there is no new line character in the header value
     #

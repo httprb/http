@@ -61,6 +61,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cookie jar management during redirects moved from `Redirector` to `Session`.
   `Redirector` is now a pure redirect-following engine with no cookie
   awareness; `Session#request` manages cookies across redirect hops
+- **BREAKING** `HTTP::Options.new`, `HTTP::Client.new`, and `HTTP::Session.new`
+  now accept keyword arguments instead of an options hash. For example,
+  `HTTP::Options.new(response: :body)` continues to work, but
+  `HTTP::Options.new({response: :body})` must be updated to
+  `HTTP::Options.new(**options)`. Invalid option names now raise
+  `ArgumentError` automatically (#447)
 
 ### Removed
 

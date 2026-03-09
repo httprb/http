@@ -269,9 +269,9 @@ module HTTP
     # @return [Hash{Symbol => Object}]
     # @api public
     def deconstruct_keys(keys)
-      h = { scheme: scheme, host: host, port: port, path: path,
-            query: query, fragment: fragment, user: user, password: password }
-      keys ? h.slice(*keys) : h
+      hash = { scheme: scheme, host: host, port: port, path: path,
+               query: query, fragment: fragment, user: user, password: password }
+      keys ? hash.slice(*keys) : hash
     end
 
     private

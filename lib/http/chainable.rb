@@ -251,7 +251,7 @@ module HTTP
     # @example
     #   HTTP.default_options = { response: :object }
     #
-    # @param [Hash] opts options to set
+    # @param [Hash, HTTP::Options] opts options to set
     # @return [HTTP::Options]
     # @api public
     def default_options=(opts)

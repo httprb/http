@@ -426,7 +426,7 @@ describe HTTP::Client do
     let(:extra_options) { {} }
     let(:options) { {} }
     let(:server)  { dummy }
-    let(:client)  { HTTP::Client.new(options.merge(extra_options)) }
+    let(:client)  { HTTP::Client.new(**options, **extra_options) }
 
     include HTTPHandlingTests
   end
@@ -438,7 +438,7 @@ describe HTTP::Client do
     let(:extra_options) { {} }
 
     let(:client) do
-      HTTP::Client.new options.merge(ssl_context: SSLHelper.client_context).merge(extra_options)
+      HTTP::Client.new(**options, ssl_context: SSLHelper.client_context, **extra_options)
     end
 
     let(:server) { dummy_ssl }
@@ -459,7 +459,7 @@ describe HTTP::Client do
 
     context "with SSL options instead of a context" do
       let(:client) do
-        HTTP::Client.new options.merge(ssl: SSLHelper.client_params)
+        HTTP::Client.new(**options, ssl: SSLHelper.client_params)
       end
 
       it "just works" do

@@ -27,11 +27,12 @@ module HTTP
     # @example
     #   client = HTTP::Client.new(headers: {"Accept" => "application/json"})
     #
-    # @param default_options [Hash] default options for requests
+    # @param default_options [HTTP::Options, nil] existing options instance
+    # @param options [Hash] keyword options (see HTTP::Options#initialize)
     # @return [HTTP::Client] a new client instance
     # @api public
-    def initialize(default_options = {})
-      @default_options = HTTP::Options.new(default_options)
+    def initialize(default_options = nil, **)
+      @default_options = HTTP::Options.new(default_options, **)
       @connection = nil
       @state = :clean
     end

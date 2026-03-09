@@ -3,50 +3,16 @@ Style/AccessorGrouping:
   EnforcedStyle: separated
 
 Style/DocumentDynamicEvalDefinition:
-  Enabled: true
   Exclude:
     - 'test/**/*.rb'
-
-# Hash[] is used instead of {} to satisfy Steep strict mode (UnannotatedEmptyCollection)
-Style/EmptyLiteral:
-  Exclude:
-    - 'lib/http/options.rb'
-    - 'lib/http/options/definitions.rb'
 
 Style/FormatStringToken:
   Enabled: true
   EnforcedStyle: unannotated
 
-Style/HashConversion:
-  Exclude:
-    - 'lib/http/options.rb'
-    - 'lib/http/options/definitions.rb'
-
-Style/HashSyntax:
-  Enabled: true
-  EnforcedStyle: ruby19_no_mixed_keys
-
 Style/OneClassPerFile:
   Exclude:
     - 'test/**/*.rb'
-
-# Configuration parameters: SuspiciousParamNames, Allowlist.
-# SuspiciousParamNames: options, opts, args, params, parameters
-Style/OptionHash:
-  Enabled: true
-  Exclude:
-    - 'lib/http/chainable.rb'
-    - 'lib/http/chainable/verbs.rb'
-    - 'lib/http/client.rb'
-    - 'lib/http/options.rb'
-    - 'lib/http/redirector.rb'
-    - 'lib/http/session.rb'
-    - 'lib/http/timeout/null.rb'
-    - 'test/support/dummy_server.rb'
-
-# Using explicit `./` makes code more consistent
-Style/RedundantCurrentDirectoryInPath:
-  Enabled: false
 
 Style/RescueStandardError:
   Enabled: true
@@ -55,9 +21,6 @@ Style/RescueStandardError:
 Style/StringLiterals:
   Enabled: true
   EnforcedStyle: double_quotes
-
-Style/WordArray:
-  Enabled: true
 
 Style/YodaCondition:
   Enabled: false

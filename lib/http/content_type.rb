@@ -82,8 +82,8 @@ module HTTP
     # @return [Hash{Symbol => Object}]
     # @api public
     def deconstruct_keys(keys)
-      h = { mime_type: @mime_type, charset: @charset }
-      keys ? h.slice(*keys) : h
+      hash = { mime_type: @mime_type, charset: @charset }
+      keys ? hash.slice(*keys) : hash
     end
   end
 end

@@ -24,7 +24,7 @@ module HTTP
         if feature.is_a?(Hash)
           h.merge!(feature)
         else
-          h[feature] = Hash[]
+          h[feature] = {} # steep:ignore
         end
       end
 
@@ -68,7 +68,7 @@ module HTTP
     def follow=(value)
       @follow =
         if    !value                    then nil
-        elsif true == value             then Hash[]
+        elsif true == value             then {} #: Hash[untyped, untyped]
         elsif value.respond_to?(:fetch) then value
         else argument_error! "Unsupported follow options: #{value}"
         end
@@ -84,7 +84,7 @@ module HTTP
     def retriable=(value)
       @retriable =
         if    !value                    then nil
-        elsif true == value             then Hash[]
+        elsif true == value             then {} #: Hash[untyped, untyped]
         elsif value.respond_to?(:fetch) then value
         else argument_error! "Unsupported retriable options: #{value}"
         end

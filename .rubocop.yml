@@ -6,7 +6,6 @@ plugins:
 inherit_from:
   - .rubocop/layout.yml
   - .rubocop/metrics.yml
-  - .rubocop/minitest.yml
   - .rubocop/style.yml
 
 AllCops:

@@ -2,6 +2,9 @@ Metrics/AbcSize:
   Exclude:
     - 'test/support/**/*.rb'
 
+Metrics/ParameterLists:
+  CountKeywordArgs: false
+
 Metrics/BlockLength:
   CountAsOne:
     - array
