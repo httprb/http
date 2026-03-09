@@ -52,7 +52,7 @@ module HTTP
     def default_options=: (untyped opts) -> Options
     def nodelay: () -> Session
     def use: (*untyped features) -> Session
-    def retriable: (**untyped options) -> Retriable::Session
+    def retriable: (**untyped options) -> Session
 
     private
 
@@ -83,6 +83,8 @@ module HTTP
 
     private
 
+    def perform_once: (Request req, Options options) -> Response
+    def perform_with_retry: (Request req, Options options) -> Response
     def wrap_request: (Request req, Options opts) -> Request
     def build_response: (Request req, Options options) -> Response
     def build_wrapped_response: (Request req, Options options) -> Response
@@ -428,6 +430,7 @@ module HTTP
     attr_reader features: Hash[Symbol, Feature]
 
     def follow=: (untyped value) -> untyped
+    def retriable=: (untyped value) -> untyped
     def persistent=: (untyped value) -> String?
     def persistent?: () -> bool
     def merge: (untyped other) -> Options
@@ -454,6 +457,7 @@ module HTTP
     attr_accessor cookies: Hash[untyped, untyped]
     attr_accessor encoding: Encoding?
     attr_reader follow: Hash[untyped, untyped]?
+    attr_reader retriable: Hash[untyped, untyped]?
     attr_reader persistent: String?
 
     def with_headers: (untyped value) -> Options
@@ -461,6 +465,7 @@ module HTTP
     def with_encoding: (untyped value) -> Options
     def with_features: (untyped value) -> Options
     def with_follow: (untyped value) -> Options
+    def with_retriable: (untyped value) -> Options
     def with_persistent: (untyped value) -> Options
     def with_proxy: (untyped value) -> Options
     def with_params: (untyped value) -> Options
@@ -1059,29 +1064,6 @@ module HTTP
   end
 
   module Retriable
-    class Session < HTTP::Session
-      @performer: untyped
-
-      def initialize: (untyped performer, untyped options) -> void
-
-      private
-
-      def branch: (Options options) -> Retriable::Session
-      def make_client: (Options options) -> Retriable::Client
-    end
-
-    class Client < HTTP::Client
-      @performer: untyped
-
-      def initialize: (untyped performer, untyped options) -> void
-      def perform: (Request req, Options options) -> Response
-
-      private
-
-      def branch: (Options options) -> Retriable::Session
-      def make_client: (Options options) -> Retriable::Client
-    end
-
     class Performer
       RETRIABLE_ERRORS: Array[untyped]
 

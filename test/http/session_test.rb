@@ -109,6 +109,12 @@ describe HTTP::Session do
       assert_kind_of HTTP::Session, chained
     end
 
+    it "returns a Session from retriable" do
+      chained = session.retriable
+
+      assert_kind_of HTTP::Session, chained
+    end
+
     it "preserves options through chaining" do
       chained = session.headers("Accept" => "text/html")
                        .timeout(10)

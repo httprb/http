@@ -40,8 +40,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   calls HTTP verb methods (`.get`, `.post`, etc.) or accesses `.default_options`
   is unaffected. Code that checks `is_a?(HTTP::Client)` on the return value of
   chainable methods will need to be updated to check for `HTTP::Session`
-- **BREAKING** `.retriable` now returns `HTTP::Retriable::Session` instead of
-  `HTTP::Retriable::Client`
+- **BREAKING** `.retriable` now returns `HTTP::Session` instead of
+  `HTTP::Retriable::Client`. Retry is a session-level option: it flows through
+  `HTTP::Options` into `HTTP::Client#perform`, eliminating the need for
+  separate `Retriable::Client` and `Retriable::Session` classes
 - Improved error message when request body size cannot be determined to suggest
   setting `Content-Length` explicitly or using chunked `Transfer-Encoding` (#560)
 - **BREAKING** `Connection#readpartial` now raises `EOFError` instead of
