@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **BREAKING** Extract request building into `HTTP::Request::Builder`. The
+  `build_request` method has been removed from `Client`, `Session`, and the
+  top-level `HTTP` module. Use `HTTP::Request::Builder.new(options).build(verb, uri)`
+  to construct requests without executing them.
+
 ### Added
 
 - `Feature#on_request` and `Feature#around_request` lifecycle hooks, called

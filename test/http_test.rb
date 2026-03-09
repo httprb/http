@@ -738,9 +738,11 @@ describe HTTP do
     end
   end
 
-  describe ".build_request" do
-    it "returns an HTTP::Request" do
-      req = HTTP.build_request(:get, "http://example.com/")
+  describe "Request::Builder" do
+    it "builds an HTTP::Request from options" do
+      options = HTTP::Options.new
+      builder = HTTP::Request::Builder.new(options)
+      req = builder.build(:get, "http://example.com/")
 
       assert_kind_of HTTP::Request, req
     end

@@ -46,9 +46,10 @@ describe HTTP::Session do
     end
   end
 
-  describe "#build_request" do
-    it "returns an HTTP::Request" do
-      req = session.build_request(:get, "http://example.com/")
+  describe "Request::Builder" do
+    it "builds an HTTP::Request from session options" do
+      builder = HTTP::Request::Builder.new(session.default_options)
+      req = builder.build(:get, "http://example.com/")
 
       assert_kind_of HTTP::Request, req
     end

@@ -2,7 +2,6 @@
 
 require "forwardable"
 
-require "http/client/request_builder"
 require "http/form_data"
 require "http/retriable/performer"
 require "http/options"
@@ -10,6 +9,7 @@ require "http/feature"
 require "http/headers"
 require "http/connection"
 require "http/redirector"
+require "http/request/builder"
 require "http/uri"
 
 module HTTP
@@ -17,10 +17,6 @@ module HTTP
   class Client
     extend Forwardable
     include Chainable
-    include RequestBuilder
-
-    # Pattern matching HTTP or HTTPS URI schemes
-    HTTP_OR_HTTPS_RE = %r{^https?://}i
 
     # Initialize a new HTTP Client
     #
@@ -48,42 +44,15 @@ module HTTP
     # @return [HTTP::Response] the response
     # @api public
     def request(verb, uri, opts = {})
-      opts = @default_options.merge(opts)
-      req = build_request(verb, uri, opts)
-      res = perform(req, opts)
+      opts    = @default_options.merge(opts)
+      builder = Request::Builder.new(opts)
+      req     = builder.build(verb, uri)
+      res     = perform(req, opts)
       return res unless opts.follow
 
       Redirector.new(opts.follow).perform(req, res) do |request|
-        perform(wrap_request(request, opts), opts)
+        perform(builder.wrap(request), opts)
       end
-    end
-
-    # Prepare an HTTP request
-    #
-    # @example
-    #   client.build_request(:get, "https://example.com")
-    #
-    # @param verb [Symbol] the HTTP method
-    # @param uri [#to_s] the URI to request
-    # @param opts [Hash] request options
-    # @return [HTTP::Request] the built request object
-    # @api public
-    def build_request(verb, uri, opts = {})
-      opts    = @default_options.merge(opts)
-      uri     = make_request_uri(uri, opts)
-      headers = make_request_headers(opts)
-      body    = make_request_body(opts, headers)
-
-      req = HTTP::Request.new({
-        verb:           verb,
-        uri:            uri,
-        uri_normalizer: opts.feature(:normalize_uri)&.normalizer,
-        proxy:          opts.proxy,
-        headers:        headers,
-        body:           body
-      })
-
-      wrap_request(req, opts)
     end
 
     # @!method persistent?
@@ -213,15 +182,6 @@ module HTTP
       options.features.values.reverse.reduce(block) do |inner, feature|
         ->(req) { feature.around_request(req) { |r| inner.call(r) } }
       end.call(request)
-    end
-
-    # Wrap request through feature middleware
-    # @return [HTTP::Request] the wrapped request
-    # @api private
-    def wrap_request(req, opts)
-      opts.features.inject(req) do |request, (_name, feature)|
-        feature.wrap_request(request)
-      end
     end
 
     # Build a response from the current connection

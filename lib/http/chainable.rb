@@ -23,18 +23,6 @@ module HTTP
       make_client(default_options).request(verb, uri, opts)
     end
 
-    # Prepare an HTTP request with the given verb
-    #
-    # @example
-    #   HTTP.build_request(:get, "http://example.com")
-    #
-    # @param (see Client#build_request)
-    # @return [HTTP::Request]
-    # @api public
-    def build_request(verb, uri, opts = {})
-      make_client(default_options).build_request(verb, uri, opts)
-    end
-
     # Set timeout on the request
     #
     # @example
