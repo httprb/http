@@ -31,6 +31,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **BREAKING** Chainable option methods (`.headers`, `.timeout`, `.cookies`,
+  `.auth`, `.follow`, `.via`, `.use`, `.encoding`, `.nodelay`, `.basic_auth`,
+  `.accept`) now return a thread-safe `HTTP::Session` instead of `HTTP::Client`.
+  `Session` creates a new `Client` for each request, making it safe to share a
+  configured session across threads. `HTTP.persistent` still returns
+  `HTTP::Client` since persistent connections require mutable state. Code that
+  calls HTTP verb methods (`.get`, `.post`, etc.) or accesses `.default_options`
+  is unaffected. Code that checks `is_a?(HTTP::Client)` on the return value of
+  chainable methods will need to be updated to check for `HTTP::Session`
+- **BREAKING** `.retriable` now returns `HTTP::Retriable::Session` instead of
+  `HTTP::Retriable::Client`
 - Improved error message when request body size cannot be determined to suggest
   setting `Content-Length` explicitly or using chunked `Transfer-Encoding` (#560)
 - **BREAKING** `Connection#readpartial` now raises `EOFError` instead of

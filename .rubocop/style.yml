@@ -36,9 +36,11 @@ Style/OptionHash:
   Enabled: true
   Exclude:
     - 'lib/http/chainable.rb'
+    - 'lib/http/chainable/verbs.rb'
     - 'lib/http/client.rb'
     - 'lib/http/options.rb'
     - 'lib/http/redirector.rb'
+    - 'lib/http/session.rb'
     - 'lib/http/timeout/null.rb'
     - 'test/support/dummy_server.rb'
 

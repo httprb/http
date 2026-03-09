@@ -2,129 +2,14 @@
 
 require "http/base64"
 require "http/chainable/helpers"
+require "http/chainable/verbs"
 require "http/headers"
 
 module HTTP
   # HTTP verb methods and client configuration DSL
   module Chainable
     include HTTP::Base64
-
-    # Request a get sans response body
-    #
-    # @example
-    #   HTTP.head("http://example.com")
-    #
-    # @param [String, URI] uri URI to request
-    # @param [Hash] options request options
-    # @return [HTTP::Response]
-    # @api public
-    def head(uri, options = {})
-      request :head, uri, options
-    end
-
-    # Get a resource
-    #
-    # @example
-    #   HTTP.get("http://example.com")
-    #
-    # @param [String, URI] uri URI to request
-    # @param [Hash] options request options
-    # @return [HTTP::Response]
-    # @api public
-    def get(uri, options = {})
-      request :get, uri, options
-    end
-
-    # Post to a resource
-    #
-    # @example
-    #   HTTP.post("http://example.com", body: "data")
-    #
-    # @param [String, URI] uri URI to request
-    # @param [Hash] options request options
-    # @return [HTTP::Response]
-    # @api public
-    def post(uri, options = {})
-      request :post, uri, options
-    end
-
-    # Put to a resource
-    #
-    # @example
-    #   HTTP.put("http://example.com", body: "data")
-    #
-    # @param [String, URI] uri URI to request
-    # @param [Hash] options request options
-    # @return [HTTP::Response]
-    # @api public
-    def put(uri, options = {})
-      request :put, uri, options
-    end
-
-    # Delete a resource
-    #
-    # @example
-    #   HTTP.delete("http://example.com/resource")
-    #
-    # @param [String, URI] uri URI to request
-    # @param [Hash] options request options
-    # @return [HTTP::Response]
-    # @api public
-    def delete(uri, options = {})
-      request :delete, uri, options
-    end
-
-    # Echo the request back to the client
-    #
-    # @example
-    #   HTTP.trace("http://example.com")
-    #
-    # @param [String, URI] uri URI to request
-    # @param [Hash] options request options
-    # @return [HTTP::Response]
-    # @api public
-    def trace(uri, options = {})
-      request :trace, uri, options
-    end
-
-    # Return the methods supported on the given URI
-    #
-    # @example
-    #   HTTP.options("http://example.com")
-    #
-    # @param [String, URI] uri URI to request
-    # @param [Hash] options request options
-    # @return [HTTP::Response]
-    # @api public
-    def options(uri, options = {})
-      request :options, uri, options
-    end
-
-    # Convert to a transparent TCP/IP tunnel
-    #
-    # @example
-    #   HTTP.connect("http://example.com")
-    #
-    # @param [String, URI] uri URI to request
-    # @param [Hash] options request options
-    # @return [HTTP::Response]
-    # @api public
-    def connect(uri, options = {})
-      request :connect, uri, options
-    end
-
-    # Apply partial modifications to a resource
-    #
-    # @example
-    #   HTTP.patch("http://example.com/resource", body: "data")
-    #
-    # @param [String, URI] uri URI to request
-    # @param [Hash] options request options
-    # @return [HTTP::Response]
-    # @api public
-    def patch(uri, options = {})
-      request :patch, uri, options
-    end
+    include Verbs
 
     # Make an HTTP request with the given verb
     #
@@ -135,7 +20,7 @@ module HTTP
     # @return [HTTP::Response]
     # @api public
     def request(verb, uri, opts = {})
-      branch(default_options).request(verb, uri, opts)
+      make_client(default_options).request(verb, uri, opts)
     end
 
     # Prepare an HTTP request with the given verb
@@ -147,7 +32,7 @@ module HTTP
     # @return [HTTP::Request]
     # @api public
     def build_request(verb, uri, opts = {})
-      branch(default_options).build_request(verb, uri, opts)
+      make_client(default_options).build_request(verb, uri, opts)
     end
 
     # Set timeout on the request
@@ -165,7 +50,7 @@ module HTTP
     # @overload timeout(global_timeout)
     #   Adds a global timeout to the full request
     #   @param [Numeric] global_timeout
-    # @return [HTTP::Client]
+    # @return [HTTP::Session]
     # @api public
     def timeout(options)
       klass, options = case options
@@ -222,7 +107,8 @@ module HTTP
     # @return [HTTP::Client, Object]
     # @api public
     def persistent(host, timeout: 5)
-      p_client = branch default_options.merge(keep_alive_timeout: timeout).with_persistent(host)
+      options = default_options.merge(keep_alive_timeout: timeout).with_persistent(host)
+      p_client = make_client(options)
       return p_client unless block_given?
 
       yield p_client
@@ -237,7 +123,7 @@ module HTTP
     #
     # @param [Array] proxy
     # @raise [Request::Error] if HTTP proxy is invalid
-    # @return [HTTP::Client]
+    # @return [HTTP::Session]
     # @api public
     def via(*proxy)
       proxy_hash = build_proxy_hash(proxy)
@@ -254,7 +140,7 @@ module HTTP
     #   HTTP.follow.get("http://example.com")
     #
     # @param [Hash] options redirect options
-    # @return [HTTP::Client]
+    # @return [HTTP::Session]
     # @see Redirector#initialize
     # @api public
     def follow(options = {})
@@ -267,7 +153,7 @@ module HTTP
     #   HTTP.headers("Accept" => "text/plain").get("http://example.com")
     #
     # @param [Hash] headers request headers
-    # @return [HTTP::Client]
+    # @return [HTTP::Session]
     # @api public
     def headers(headers)
       branch default_options.with_headers(headers)
@@ -279,7 +165,7 @@ module HTTP
     #   HTTP.cookies(session: "abc123").get("http://example.com")
     #
     # @param [Hash] cookies cookies to set
-    # @return [HTTP::Client]
+    # @return [HTTP::Session]
     # @api public
     def cookies(cookies)
       branch default_options.with_cookies(cookies)
@@ -291,7 +177,7 @@ module HTTP
     #   HTTP.encoding("UTF-8").get("http://example.com")
     #
     # @param [String, Encoding] encoding encoding to use
-    # @return [HTTP::Client]
+    # @return [HTTP::Session]
     # @api public
     def encoding(encoding)
       branch default_options.with_encoding(encoding)
@@ -303,7 +189,7 @@ module HTTP
     #   HTTP.accept("application/json").get("http://example.com")
     #
     # @param [String, Symbol] type MIME type to accept
-    # @return [HTTP::Client]
+    # @return [HTTP::Session]
     # @api public
     def accept(type)
       headers Headers::ACCEPT => MimeType.normalize(type)
@@ -315,7 +201,7 @@ module HTTP
     #   HTTP.auth("Bearer token123").get("http://example.com")
     #
     # @param [#to_s] value Authorization header value
-    # @return [HTTP::Client]
+    # @return [HTTP::Session]
     # @api public
     def auth(value)
       headers Headers::AUTHORIZATION => value.to_s
@@ -330,7 +216,7 @@ module HTTP
     # @param [#fetch] opts
     # @option opts [#to_s] :user
     # @option opts [#to_s] :pass
-    # @return [HTTP::Client]
+    # @return [HTTP::Session]
     # @api public
     def basic_auth(opts)
       user  = opts.fetch(:user)
@@ -368,7 +254,7 @@ module HTTP
     # @example
     #   HTTP.nodelay.get("http://example.com")
     #
-    # @return [HTTP::Client]
+    # @return [HTTP::Session]
     # @api public
     def nodelay
       branch default_options.with_nodelay(true)
@@ -380,13 +266,13 @@ module HTTP
     #   HTTP.use(:auto_inflate).get("http://example.com")
     #
     # @param [Array<Symbol, Hash>] features features to enable
-    # @return [HTTP::Client]
+    # @return [HTTP::Session]
     # @api public
     def use(*features)
       branch default_options.with_features(features)
     end
 
-    # Return a retriable client that retries on failure
+    # Return a retriable session that retries on failure
     #
     # @example Usage
     #
@@ -403,20 +289,29 @@ module HTTP
     #   HTTP.retriable(tries: 3, delay: proc { |i| 1 + i*i }).get(url)
     #
     # @param (see Performer#initialize)
-    # @return [HTTP::Retriable::Client]
+    # @return [HTTP::Retriable::Session]
     # @api public
     def retriable(**options)
-      Retriable::Client.new(Retriable::Performer.new(options), default_options)
+      Retriable::Session.new(Retriable::Performer.new(options), default_options)
     end
 
     private
 
-    # Create a new client with the given options
+    # Create a new session with the given options
+    #
+    # @param [HTTP::Options] options options for the session
+    # @return [HTTP::Session]
+    # @api private
+    def branch(options)
+      HTTP::Session.new(options)
+    end
+
+    # Create a new client for executing a request
     #
     # @param [HTTP::Options] options options for the client
     # @return [HTTP::Client]
     # @api private
-    def branch(options)
+    def make_client(options)
       HTTP::Client.new(options)
     end
   end

@@ -1,0 +1,151 @@
+# frozen_string_literal: true
+
+require "test_helper"
+
+require "support/dummy_server"
+
+describe HTTP::Session do
+  cover "HTTP::Session*"
+  run_server(:dummy) { DummyServer.new }
+
+  let(:session) { HTTP::Session.new }
+
+  describe "#initialize" do
+    it "creates a session with default options" do
+      assert_kind_of HTTP::Options, session.default_options
+    end
+
+    it "creates a session with given options" do
+      session = HTTP::Session.new(headers: { "Accept" => "text/html" })
+
+      assert_equal "text/html", session.default_options.headers[:accept]
+    end
+  end
+
+  describe "#request" do
+    it "returns an HTTP::Response" do
+      response = session.request(:get, dummy.endpoint)
+
+      assert_kind_of HTTP::Response, response
+    end
+
+    it "creates a new client for each request" do
+      client_ids = []
+      original_new = HTTP::Client.method(:new)
+
+      HTTP::Client.stub(:new, lambda { |*args|
+        c = original_new.call(*args)
+        client_ids << c.object_id
+        c
+      }) do
+        session.get(dummy.endpoint)
+        session.get(dummy.endpoint)
+      end
+
+      assert_equal 2, client_ids.uniq.size
+    end
+  end
+
+  describe "#build_request" do
+    it "returns an HTTP::Request" do
+      req = session.build_request(:get, "http://example.com/")
+
+      assert_kind_of HTTP::Request, req
+    end
+  end
+
+  describe "#persistent?" do
+    it "returns false by default" do
+      refute_predicate session, :persistent?
+    end
+  end
+
+  describe "chaining" do
+    it "returns a Session from headers" do
+      chained = session.headers("Accept" => "text/html")
+
+      assert_kind_of HTTP::Session, chained
+    end
+
+    it "returns a Session from timeout" do
+      chained = session.timeout(10)
+
+      assert_kind_of HTTP::Session, chained
+    end
+
+    it "returns a Session from cookies" do
+      chained = session.cookies(session_id: "abc")
+
+      assert_kind_of HTTP::Session, chained
+    end
+
+    it "returns a Session from follow" do
+      chained = session.follow
+
+      assert_kind_of HTTP::Session, chained
+    end
+
+    it "returns a Session from use" do
+      chained = session.use(:auto_deflate)
+
+      assert_kind_of HTTP::Session, chained
+    end
+
+    it "returns a Session from nodelay" do
+      chained = session.nodelay
+
+      assert_kind_of HTTP::Session, chained
+    end
+
+    it "returns a Session from encoding" do
+      chained = session.encoding("UTF-8")
+
+      assert_kind_of HTTP::Session, chained
+    end
+
+    it "returns a Session from via" do
+      chained = session.via("proxy.example.com", 8080)
+
+      assert_kind_of HTTP::Session, chained
+    end
+
+    it "preserves options through chaining" do
+      chained = session.headers("Accept" => "text/html")
+                       .timeout(10)
+                       .cookies(session_id: "abc")
+
+      assert_equal "text/html", chained.default_options.headers[:accept]
+      assert_equal HTTP::Timeout::Global, chained.default_options.timeout_class
+      assert_equal "session_id=abc", chained.default_options.cookies["session_id"]
+    end
+  end
+
+  describe "thread safety" do
+    it "can be shared across threads without errors" do
+      shared_session = HTTP.headers("Accept" => "text/html").timeout(5)
+      errors = []
+      mutex = Mutex.new
+
+      threads = Array.new(5) do
+        Thread.new do
+          shared_session.get(dummy.endpoint)
+        rescue => e
+          mutex.synchronize { errors << e }
+        end
+      end
+      threads.each(&:join)
+
+      assert_empty errors, "Expected no errors but got: #{errors.map(&:message).join(', ')}"
+    end
+  end
+
+  describe "persistent" do
+    it "returns an HTTP::Client" do
+      p_client = HTTP::Session.new.persistent(dummy.endpoint)
+
+      assert_kind_of HTTP::Client, p_client
+    ensure
+      p_client&.close
+    end
+  end
+end
