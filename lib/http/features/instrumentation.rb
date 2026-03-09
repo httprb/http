@@ -62,37 +62,29 @@ module HTTP
         @error_name = "error.#{namespace}"
       end
 
-      # Starts instrumentation for a request attempt
+      # Wraps the HTTP exchange with instrumentation
       #
-      # Called before each request attempt, including retries. Emits a
-      # separate "start" event so a logger can print the request being run
-      # without waiting for a response, then starts the main request span.
+      # Emits a `"start_request.http"` event before the request, then wraps
+      # the exchange in a `"request.http"` span that is guaranteed to close
+      # on both success and failure (via the instrumenter's ensure block).
       #
       # @example
-      #   feature.on_request(request)
+      #   feature.around_request(request) { perform_io }
       #
       # @param request [HTTP::Request]
-      # @return [nil]
+      # @yield Executes the HTTP exchange
+      # @yieldreturn [HTTP::Response]
+      # @return [HTTP::Response]
       # @api public
-      def on_request(request)
+      def around_request(request)
         # Emit a separate "start" event, so a logger can print the request
         # being run without waiting for a response
         instrumenter.instrument("start_#{name}", request: request) {} # rubocop:disable Lint/EmptyBlock
-        instrumenter.start(name, request: request)
-        nil
-      end
-
-      # Wraps a response with instrumentation events
-      #
-      # @example
-      #   feature.wrap_response(response)
-      #
-      # @param response [HTTP::Response]
-      # @return [HTTP::Response]
-      # @api public
-      def wrap_response(response)
-        instrumenter.finish(name, response: response)
-        response
+        instrumenter.instrument(name, request: request) do |payload|
+          response = yield request
+          payload[:response] = response if payload
+          response
+        end
       end
 
       # Instruments a request error

@@ -441,6 +441,92 @@ describe HTTP::Client do
 
         assert_equal 1, feature_instance.call_count
       end
+
+      it "calls on_request once per retry attempt" do
+        feature_class_on_request =
+          Class.new(HTTP::Feature) do
+            attr_reader :call_count
+
+            def initialize
+              super
+              @call_count = 0
+            end
+
+            def on_request(_request)
+              @call_count += 1
+            end
+          end
+        feature_instance = feature_class_on_request.new
+
+        client.use(test_feature: feature_instance)
+              .retriable(delay: 0, retry_statuses: [500])
+              .request(:get, "#{dummy.endpoint}/retry-2")
+
+        assert_equal 2, feature_instance.call_count
+      end
+
+      it "wraps each retry attempt with around_request" do
+        feature_class_around =
+          Class.new(HTTP::Feature) do
+            attr_reader :events
+
+            def initialize
+              super
+              @events = []
+            end
+
+            def around_request(request)
+              @events << :before
+              yield(request).tap do
+                @events << :after
+              end
+            end
+          end
+        feature_instance = feature_class_around.new
+
+        client.use(test_feature: feature_instance)
+              .retriable(delay: 0, retry_statuses: [500])
+              .request(:get, "#{dummy.endpoint}/retry-2")
+
+        assert_equal %i[before after before after], feature_instance.events
+      end
+
+      it "wraps the exchange with around_request in feature order" do
+        feature_class_around =
+          Class.new(HTTP::Feature) do
+            @order = []
+
+            class << self
+              attr_reader :order
+            end
+
+            def initialize(id:)
+              super()
+              @id = id
+            end
+
+            def around_request(request)
+              self.class.order << "before.#{@id}"
+              yield(request).tap do
+                self.class.order << "after.#{@id}"
+              end
+            end
+          end
+        feature_instance_a = feature_class_around.new(id: "a")
+        feature_instance_b = feature_class_around.new(id: "b")
+        feature_instance_c = feature_class_around.new(id: "c")
+
+        client.use(
+          test_feature_a: feature_instance_a,
+          test_feature_b: feature_instance_b,
+          test_feature_c: feature_instance_c
+        ).request(:get, dummy.endpoint)
+
+        assert_equal(
+          ["before.a", "before.b", "before.c", "after.c", "after.b", "after.a"],
+          feature_class_around.order
+        )
+      end
     end
   end
 

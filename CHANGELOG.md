@@ -9,8 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `Feature#on_request` lifecycle hook, called before each request attempt
-  (including retries), for per-attempt side effects like instrumentation (#826)
+- `Feature#on_request` and `Feature#around_request` lifecycle hooks, called
+  before/around each request attempt (including retries), for per-attempt side
+  effects like instrumentation spans and circuit breakers (#826)
 - Pattern matching support (`deconstruct_keys`) for Response, Response::Status,
   Headers, ContentType, and URI (#642)
 - Combined global and per-operation timeouts: global and per-operation timeouts
