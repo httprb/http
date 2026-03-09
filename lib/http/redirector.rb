@@ -134,7 +134,7 @@ module HTTP
     # @api private
     # @return [void]
     def collect_cookies_from_request
-      request_cookie_header = @request["Cookie"]
+      request_cookie_header = @request.headers["Cookie"]
       cookies = Cookie.cookie_value_to_hash(request_cookie_header.to_s)
 
       cookies.each do |key, value|

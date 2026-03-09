@@ -255,7 +255,7 @@ describe HTTP::Client do
       req = capture_request(client) { client.get("http://example.com/", json: { foo: :bar }) }
 
       assert_equal '{"foo":"bar"}', req.body.source
-      assert_equal "application/json; charset=utf-8", req["Content-Type"]
+      assert_equal "application/json; charset=utf-8", req.headers["Content-Type"]
     end
   end
 
@@ -279,7 +279,7 @@ describe HTTP::Client do
       it "keeps Host header as is" do
         req = capture_request(client) { client.request(:get, "http://example.com/") }
 
-        assert_equal "another.example.com", req["Host"]
+        assert_equal "another.example.com", req.headers["Host"]
       end
     end
 
@@ -290,13 +290,13 @@ describe HTTP::Client do
       it "deletes Content-Length header" do
         req = capture_request(client) { client.request(:get, "http://example.com/") }
 
-        assert_nil req["Content-Length"]
+        assert_nil req.headers["Content-Length"]
       end
 
       it "sets Content-Encoding header" do
         req = capture_request(client) { client.request(:get, "http://example.com/") }
 
-        assert_equal "gzip", req["Content-Encoding"]
+        assert_equal "gzip", req.headers["Content-Encoding"]
       end
 
       context "and there is no body" do

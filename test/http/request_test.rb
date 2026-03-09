@@ -17,8 +17,8 @@ describe HTTP::Request do
   let(:headers)     { { accept: "text/html" } }
   let(:request_uri) { "http://example.com/foo?bar=baz" }
 
-  it "includes HTTP::Headers::Mixin" do
-    assert_includes HTTP::Request.ancestors, HTTP::Headers::Mixin
+  it "provides a #headers accessor" do
+    assert_kind_of HTTP::Headers, request.headers
   end
 
   it "requires URI to have scheme part" do
@@ -43,20 +43,20 @@ describe HTTP::Request do
   end
 
   it "sets given headers" do
-    assert_equal "text/html", request["Accept"]
+    assert_equal "text/html", request.headers["Accept"]
   end
 
   describe "Host header" do
     context "was not given" do
       it "defaults to the host from the URI" do
-        assert_equal "example.com", request["Host"]
+        assert_equal "example.com", request.headers["Host"]
       end
 
       context "and request URI has non-standard port" do
         let(:request_uri) { "http://example.com:3000/" }
 
         it "includes the port" do
-          assert_equal "example.com:3000", request["Host"]
+          assert_equal "example.com:3000", request.headers["Host"]
         end
       end
     end
@@ -65,7 +65,7 @@ describe HTTP::Request do
       before { headers[:host] = "github.com" }
 
       it "uses the given host" do
-        assert_equal "github.com", request["Host"]
+        assert_equal "github.com", request.headers["Host"]
       end
     end
   end
@@ -73,7 +73,7 @@ describe HTTP::Request do
   describe "User-Agent header" do
     context "was not given" do
       it "defaults to HTTP::Request::USER_AGENT" do
-        assert_equal HTTP::Request::USER_AGENT, request["User-Agent"]
+        assert_equal HTTP::Request::USER_AGENT, request.headers["User-Agent"]
       end
     end
 
@@ -81,7 +81,7 @@ describe HTTP::Request do
       before { headers[:user_agent] = "MrCrawly/123" }
 
       it "uses the given user agent" do
-        assert_equal "MrCrawly/123", request["User-Agent"]
+        assert_equal "MrCrawly/123", request.headers["User-Agent"]
       end
     end
   end
@@ -120,7 +120,7 @@ describe HTTP::Request do
     end
 
     it "presets new Host header" do
-      assert_equal "blog.example.com", redirected["Host"]
+      assert_equal "blog.example.com", redirected.headers["Host"]
     end
 
     context "with URL with non-standard port given" do
@@ -143,7 +143,7 @@ describe HTTP::Request do
       end
 
       it "presets new Host header" do
-        assert_equal "example.com:8080", redirected["Host"]
+        assert_equal "example.com:8080", redirected.headers["Host"]
       end
     end
 
@@ -167,7 +167,7 @@ describe HTTP::Request do
       end
 
       it "presets new Host header" do
-        assert_equal "another.example.com", redirected["Host"]
+        assert_equal "another.example.com", redirected.headers["Host"]
       end
     end
 
@@ -191,7 +191,7 @@ describe HTTP::Request do
       end
 
       it "keeps Host header" do
-        assert_equal "example.com", redirected["Host"]
+        assert_equal "example.com", redirected.headers["Host"]
       end
 
       context "with original URI having non-standard port" do
@@ -231,7 +231,7 @@ describe HTTP::Request do
       end
 
       it "keeps Host header" do
-        assert_equal "example.com", redirected["Host"]
+        assert_equal "example.com", redirected.headers["Host"]
       end
 
       context "with original URI having non-standard port" do
@@ -266,7 +266,7 @@ describe HTTP::Request do
         let(:redirected) { request.redirect "/other-path" }
 
         it "preserves Authorization header" do
-          assert_equal "Bearer token123", redirected["Authorization"]
+          assert_equal "Bearer token123", redirected.headers["Authorization"]
         end
       end
 
@@ -274,7 +274,7 @@ describe HTTP::Request do
         let(:redirected) { request.redirect "http://other.example.com/" }
 
         it "strips Authorization header" do
-          assert_nil redirected["Authorization"]
+          assert_nil redirected.headers["Authorization"]
         end
       end
 
@@ -282,7 +282,7 @@ describe HTTP::Request do
         let(:redirected) { request.redirect "https://example.com/" }
 
         it "strips Authorization header" do
-          assert_nil redirected["Authorization"]
+          assert_nil redirected.headers["Authorization"]
         end
       end
 
@@ -290,7 +290,7 @@ describe HTTP::Request do
         let(:redirected) { request.redirect "http://example.com:8080/" }
 
         it "strips Authorization header" do
-          assert_nil redirected["Authorization"]
+          assert_nil redirected.headers["Authorization"]
         end
       end
 
@@ -298,7 +298,7 @@ describe HTTP::Request do
         let(:redirected) { request.redirect "//other.example.com/path" }
 
         it "strips Authorization header" do
-          assert_nil redirected["Authorization"]
+          assert_nil redirected.headers["Authorization"]
         end
       end
     end

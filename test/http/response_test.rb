@@ -19,8 +19,8 @@ describe HTTP::Response do
   let(:headers)       { {} }
   let(:request)       { HTTP::Request.new(verb: :get, uri: uri) }
 
-  it "includes HTTP::Headers::Mixin" do
-    assert_includes HTTP::Response.ancestors, HTTP::Headers::Mixin
+  it "provides a #headers accessor" do
+    assert_kind_of HTTP::Headers, response.headers
   end
 
   describe "to_a" do

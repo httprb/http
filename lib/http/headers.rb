@@ -3,7 +3,6 @@
 require "forwardable"
 
 require "http/errors"
-require "http/headers/mixin"
 require "http/headers/normalizer"
 require "http/headers/known"
 
