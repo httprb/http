@@ -8,7 +8,7 @@ require "http/content_type"
 require "http/mime_type"
 require "http/response/status"
 require "http/response/inflater"
-require "http/cookie_jar"
+require "http/cookie"
 require "time"
 
 module HTTP
@@ -255,14 +255,12 @@ module HTTP
     # Cookies from Set-Cookie headers
     #
     # @example
-    #   response.cookies # => #<HTTP::CookieJar ...>
+    #   response.cookies # => [#<HTTP::Cookie ...>, ...]
     #
-    # @return [HTTP::CookieJar]
+    # @return [Array<HTTP::Cookie>]
     # @api public
     def cookies
-      @cookies ||= headers.get(Headers::SET_COOKIE).each_with_object CookieJar.new do |v, jar|
-        jar.parse(v, uri)
-      end
+      @cookies ||= headers.get(Headers::SET_COOKIE).flat_map { |v| HTTP::Cookie.parse(v, uri) }
     end
 
     # Check if the response uses chunked transfer encoding

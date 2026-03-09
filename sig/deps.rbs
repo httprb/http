@@ -195,6 +195,7 @@ module HTTP
     attr_reader value: String
     attr_reader cookie_value: String
 
+    def self.parse: (String, untyped) -> Array[HTTP::Cookie]
     def self.cookie_value_to_hash: (String) -> Hash[String, String]
     def initialize: (String, String, **untyped) -> void
   end

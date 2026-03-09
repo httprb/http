@@ -446,14 +446,12 @@ module HTTP
     attr_accessor keep_alive_timeout: Integer
     attr_accessor timeout_class: Class
     attr_accessor timeout_options: Hash[Symbol, untyped]
-    attr_accessor cookies: Hash[untyped, untyped]
     attr_accessor encoding: Encoding?
     attr_reader follow: Hash[untyped, untyped]?
     attr_reader retriable: Hash[untyped, untyped]?
     attr_reader persistent: String?
 
     def with_headers: (untyped value) -> Options
-    def with_cookies: (untyped value) -> Options
     def with_encoding: (untyped value) -> Options
     def with_features: (untyped value) -> Options
     def with_follow: (untyped value) -> Options
@@ -673,7 +671,7 @@ module HTTP
     extend Forwardable
 
     @content_type: ContentType
-    @cookies: untyped
+    @cookies: Array[HTTP::Cookie]?
 
     attr_reader status: Response::Status
     attr_reader version: String
@@ -698,7 +696,7 @@ module HTTP
     def content_type: () -> ContentType
     def mime_type: () -> String?
     def charset: () -> String?
-    def cookies: () -> untyped
+    def cookies: () -> Array[HTTP::Cookie]
     def chunked?: () -> bool
     def parse: (?untyped? type) -> untyped
     def inspect: () -> String

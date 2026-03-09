@@ -122,7 +122,7 @@ describe HTTP::Session do
 
       assert_equal "text/html", chained.default_options.headers[:accept]
       assert_equal HTTP::Timeout::Global, chained.default_options.timeout_class
-      assert_equal "session_id=abc", chained.default_options.cookies["session_id"]
+      assert_equal "session_id=abc", chained.default_options.headers["Cookie"]
     end
   end
 

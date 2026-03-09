@@ -54,6 +54,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   rejects unknown keys, non-numeric values, string keys, and empty hashes (#754)
 - Bumped min llhttp dependency version
 - **BREAKING** Handle responses in the reverse order from the requests (#776)
+- **BREAKING** `Response#cookies` now returns `Array<HTTP::Cookie>` instead of
+  `HTTP::CookieJar`. The `cookies` option has been removed from `Options`;
+  `Chainable#cookies` now sets the `Cookie` header directly with no implicit
+  merging — the last `.cookies()` call wins (#536)
 
 ### Removed
 

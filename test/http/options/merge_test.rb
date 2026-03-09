@@ -67,7 +67,6 @@ describe HTTP::Options, "merge" do
         nodelay:            false,
         ssl_socket_class:   HTTP::Options.default_ssl_socket_class,
         ssl_context:        nil,
-        cookies:            {},
         encoding:           nil,
         features:           {}
       },

@@ -164,11 +164,20 @@ module HTTP
     # @example
     #   HTTP.cookies(session: "abc123").get("http://example.com")
     #
-    # @param [Hash] cookies cookies to set
+    # @param [Hash, Array<HTTP::Cookie>] cookies cookies to set
     # @return [HTTP::Session]
     # @api public
     def cookies(cookies)
-      branch default_options.with_cookies(cookies)
+      value = cookies.map do |entry|
+        case entry
+        when HTTP::Cookie then entry.cookie_value
+        else
+          name, val = entry
+          HTTP::Cookie.new(name.to_s, val.to_s).cookie_value
+        end
+      end.join("; ")
+
+      headers(Headers::COOKIE => value)
     end
 
     # Force a specific encoding for response body

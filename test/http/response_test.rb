@@ -255,25 +255,26 @@ describe HTTP::Response do
   end
 
   describe "#cookies" do
-    let(:jar) { response.cookies }
+    let(:cookie_list) { response.cookies }
 
     let(:cookies) { ["a=1", "b=2; domain=example.com", "c=3; domain=bad.org"] }
     let(:headers) { { "Set-Cookie" => cookies } }
 
-    it "returns an HTTP::CookieJar" do
-      assert_kind_of HTTP::CookieJar, jar
+    it "returns an Array of HTTP::Cookie" do
+      assert_kind_of Array, cookie_list
+      cookie_list.each { |c| assert_kind_of HTTP::Cookie, c }
     end
 
     it "contains cookies without domain restriction" do
-      assert_equal(1, jar.count { |c| "a" == c.name })
+      assert_equal(1, cookie_list.count { |c| "a" == c.name })
     end
 
     it "contains cookies limited to domain of request uri" do
-      assert_equal(1, jar.count { |c| "b" == c.name })
+      assert_equal(1, cookie_list.count { |c| "b" == c.name })
     end
 
     it "does not contain cookies limited to non-requested uri" do
-      assert_equal(0, jar.count { |c| "c" == c.name })
+      assert_equal(0, cookie_list.count { |c| "c" == c.name })
     end
   end
 
