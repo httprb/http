@@ -137,7 +137,6 @@ module HTTP
     # @api private
     def perform_once(req, options)
       verify_connection!(req.uri)
-
       @state = :dirty
 
       send_request(req, options)
@@ -168,6 +167,8 @@ module HTTP
     # @return [void]
     # @api private
     def send_request(req, options)
+      notify_features(req, options)
+
       @connection ||= HTTP::Connection.new(req, options)
 
       unless @connection.failed_proxy_connect?
@@ -175,9 +176,7 @@ module HTTP
         @connection.read_headers!
       end
     rescue Error => e
-      options.features.each_value do |feature|
-        feature.on_error(req, e)
-      end
+      options.features.each_value { |feature| feature.on_error(req, e) }
       raise
     end
 
@@ -190,6 +189,13 @@ module HTTP
       options.features.values.reverse.inject(res) do |response, feature|
         feature.wrap_response(response)
       end
+    end
+
+    # Notify features of an upcoming request attempt
+    # @return [void]
+    # @api private
+    def notify_features(req, options)
+      options.features.each_value { |feature| feature.on_request(req) }
     end
 
     # Wrap request through feature middleware
