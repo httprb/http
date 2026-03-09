@@ -265,7 +265,7 @@ module HTTP
 
       class CompressedBody < Request::Body
         @body: untyped
-        @compressed: Tempfile?
+        @compressed: untyped
 
         def initialize: (untyped uncompressed_body) -> void
         def size: () -> Integer
@@ -585,6 +585,9 @@ module HTTP
     class UnsupportedSchemeError < RequestError
     end
 
+    class InvalidURIError < RequestError
+    end
+
     USER_AGENT: String
     METHODS: Array[Symbol]
     SCHEMES: Array[Symbol]
@@ -746,12 +749,14 @@ module HTTP
       private
 
       def self.symbolize: (untyped str) -> Symbol
+      def raise: (*untyped) -> bot
 
       public
 
       attr_reader code: Integer
 
       def initialize: (untyped obj) -> void
+      def class: () -> untyped
       def reason: () -> String?
       def to_s: () -> String
       def to_i: () -> Integer
@@ -947,6 +952,41 @@ module HTTP
     def endless_loop?: () -> bool
     def redirect_uri: () -> String?
     def redirect_to: (untyped uri) -> Request
+  end
+
+  class CookieJar
+    include Enumerable[untyped]
+
+    def initialize: () -> void
+    def parse: (String, untyped) -> void
+    def add: (untyped) -> void
+    def delete: (untyped) -> void
+    def each: () { (untyped) -> void } -> void
+           | () -> Enumerator[untyped, void]
+    def empty?: () -> bool
+    def cookies: () -> Array[untyped]
+  end
+
+  class Cookie
+    attr_reader name: String
+    attr_reader value: String
+    attr_reader cookie_value: String
+
+    def self.parse: (String, untyped) -> Array[HTTP::Cookie]
+    def self.cookie_value_to_hash: (String) -> Hash[String, String]
+    def initialize: (String, String, **untyped) -> void
+  end
+
+  module FormData
+    class Multipart
+      def content_type: () -> String
+    end
+
+    class Urlencoded
+      def content_type: () -> String
+    end
+
+    def self.create: (untyped) -> (Multipart | Urlencoded)
   end
 
   class Error < StandardError

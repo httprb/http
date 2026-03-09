@@ -26,6 +26,9 @@ module HTTP
     # The scheme of given URI was not understood
     class UnsupportedSchemeError < RequestError; end
 
+    # The URI given was not valid
+    class InvalidURIError < RequestError; end
+
     # Default User-Agent header value
     USER_AGENT = "http.rb/#{HTTP::VERSION}".freeze
 
@@ -330,8 +333,15 @@ module HTTP
     # @return [void]
     # @api private
     def parse_verb_and_uri!(opts)
-      @verb   = opts.fetch(:verb).to_s.downcase.to_sym
-      @uri    = @uri_normalizer.call(opts.fetch(:uri))
+      @verb = opts.fetch(:verb).to_s.downcase.to_sym
+      uri   = opts.fetch(:uri)
+
+      begin
+        @uri = @uri_normalizer.call(uri)
+      rescue TypeError, Addressable::URI::InvalidURIError
+        raise InvalidURIError, "invalid URI: #{uri.inspect}"
+      end
+
       @scheme = @uri.scheme.to_s.downcase.to_sym if @uri.scheme
     end
 
@@ -340,6 +350,7 @@ module HTTP
     # @api private
     def validate_method_and_scheme!
       raise(UnsupportedMethodError, "unknown method: #{verb}") unless METHODS.include?(@verb)
+      raise(InvalidURIError, "invalid URI: #{@uri}") unless @scheme
       raise(UnsupportedSchemeError, "unknown scheme: #{scheme}") unless SCHEMES.include?(@scheme)
     end
 

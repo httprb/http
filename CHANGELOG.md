@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Raise `HTTP::Request::InvalidURIError` for invalid URIs (nil, empty string,
+  missing scheme, malformed) instead of confusing `UnsupportedSchemeError` or
+  `Addressable::URI::InvalidURIError` (#565)
 - Strip `Authorization` header when following redirects to a different origin
   (scheme, host, or port) to prevent credential leakage (#770)
 - AutoInflate now preserves the response charset encoding instead of

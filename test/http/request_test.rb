@@ -21,10 +21,39 @@ describe HTTP::Request do
     assert_kind_of HTTP::Headers, request.headers
   end
 
-  it "requires URI to have scheme part" do
-    assert_raises(HTTP::Request::UnsupportedSchemeError) do
+  it "raises InvalidURIError for URI without scheme" do
+    err = assert_raises(HTTP::Request::InvalidURIError) do
       HTTP::Request.new(verb: :get, uri: "example.com/")
     end
+    assert_match(/invalid URI/, err.message)
+  end
+
+  it "raises InvalidURIError for nil URI" do
+    err = assert_raises(HTTP::Request::InvalidURIError) do
+      HTTP::Request.new(verb: :get, uri: nil)
+    end
+    assert_match(/invalid URI/, err.message)
+  end
+
+  it "raises InvalidURIError for empty string URI" do
+    err = assert_raises(HTTP::Request::InvalidURIError) do
+      HTTP::Request.new(verb: :get, uri: "")
+    end
+    assert_match(/invalid URI/, err.message)
+  end
+
+  it "raises InvalidURIError for malformed URI" do
+    err = assert_raises(HTTP::Request::InvalidURIError) do
+      HTTP::Request.new(verb: :get, uri: ":")
+    end
+    assert_match(/invalid URI/, err.message)
+  end
+
+  it "raises UnsupportedSchemeError for unsupported scheme" do
+    err = assert_raises(HTTP::Request::UnsupportedSchemeError) do
+      HTTP::Request.new(verb: :get, uri: "ftp://example.com/")
+    end
+    assert_match(/unknown scheme/, err.message)
   end
 
   it "raises UnsupportedMethodError for unknown verbs" do
