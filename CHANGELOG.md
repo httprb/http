@@ -80,6 +80,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `HTTP::URI#request_uri` is no longer delegated to `Addressable::URI`
 - `HTTP::URI#omit` is no longer delegated to `Addressable::URI` and now
   returns `HTTP::URI` instead of `Addressable::URI` (#491)
+- `HTTP::URI#query_values` and `HTTP::URI#query_values=` delegations to
+  `Addressable::URI`. Query parameter merging now uses stdlib
+  `URI.decode_www_form`/`URI.encode_www_form`
 
 ### Changed
 

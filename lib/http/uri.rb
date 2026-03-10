@@ -12,7 +12,7 @@ module HTTP
 
     def_delegators :@uri, :scheme, :normalized_scheme, :user, :password,
                    :authority, :normalized_authority
-    def_delegators :@uri, :path, :path=, :query, :query=, :query_values, :query_values=
+    def_delegators :@uri, :path, :path=, :query, :query=
     def_delegators :@uri, :fragment, :normalized_fragment, :join, :normalize
 
     # Host, either a domain name or IP address

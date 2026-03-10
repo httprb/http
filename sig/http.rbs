@@ -608,8 +608,6 @@ module HTTP
     def path=: (String) -> String
     def query: () -> String?
     def query=: (String?) -> String?
-    def query_values: (?untyped notation) -> untyped
-    def query_values=: (untyped) -> untyped
     def request_uri: () -> String
     def fragment: () -> String?
     def normalized_fragment: () -> String?

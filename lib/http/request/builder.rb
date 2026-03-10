@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "uri"
+
 require "http/form_data"
 require "http/headers"
 require "http/connection"
@@ -126,7 +128,8 @@ module HTTP
       def merge_query_params!(uri)
         return unless @options.params && !@options.params.empty?
 
-        uri.query_values = uri.query_values(Array).to_a.concat(@options.params.to_a)
+        existing = ::URI.decode_www_form(uri.query || "")
+        uri.query = ::URI.encode_www_form(existing.concat(@options.params.to_a))
       end
 
       # Creates request headers
