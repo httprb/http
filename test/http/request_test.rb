@@ -21,29 +21,29 @@ describe HTTP::Request do
     assert_kind_of HTTP::Headers, request.headers
   end
 
-  it "raises InvalidURIError for URI without scheme" do
-    err = assert_raises(HTTP::Request::InvalidURIError) do
+  it "raises InvalidError for URI without scheme" do
+    err = assert_raises(HTTP::URI::InvalidError) do
       HTTP::Request.new(verb: :get, uri: "example.com/")
     end
     assert_match(/invalid URI/, err.message)
   end
 
-  it "raises InvalidURIError for nil URI" do
-    err = assert_raises(HTTP::Request::InvalidURIError) do
+  it "raises ArgumentError for nil URI" do
+    err = assert_raises(ArgumentError) do
       HTTP::Request.new(verb: :get, uri: nil)
     end
-    assert_match(/invalid URI/, err.message)
+    assert_equal "uri is nil", err.message
   end
 
-  it "raises InvalidURIError for empty string URI" do
-    err = assert_raises(HTTP::Request::InvalidURIError) do
+  it "raises ArgumentError for empty string URI" do
+    err = assert_raises(ArgumentError) do
       HTTP::Request.new(verb: :get, uri: "")
     end
-    assert_match(/invalid URI/, err.message)
+    assert_equal "uri is empty", err.message
   end
 
-  it "raises InvalidURIError for malformed URI" do
-    err = assert_raises(HTTP::Request::InvalidURIError) do
+  it "raises InvalidError for malformed URI" do
+    err = assert_raises(HTTP::URI::InvalidError) do
       HTTP::Request.new(verb: :get, uri: ":")
     end
     assert_match(/invalid URI/, err.message)

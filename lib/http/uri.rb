@@ -7,6 +7,9 @@ module HTTP
   class URI
     extend Forwardable
 
+    # The URI given was not valid
+    class InvalidError < HTTP::RequestError; end
+
     def_delegators :@uri, :scheme, :normalized_scheme, :scheme=
     def_delegators :@uri, :user, :normalized_user, :user=
     def_delegators :@uri, :password, :normalized_password, :password=
@@ -77,6 +80,8 @@ module HTTP
       return uri if uri.is_a?(self)
 
       new(Addressable::URI.parse(uri))
+    rescue TypeError, Addressable::URI::InvalidURIError
+      raise InvalidError, "invalid URI: #{uri.inspect}"
     end
 
     # Encodes key/value pairs as application/x-www-form-urlencoded

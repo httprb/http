@@ -562,6 +562,9 @@ module HTTP
   class URI
     extend Forwardable
 
+    class InvalidError < RequestError
+    end
+
     @uri: Addressable::URI
     @hash: Integer
 
@@ -659,9 +662,6 @@ module HTTP
     end
 
     class UnsupportedSchemeError < RequestError
-    end
-
-    class InvalidURIError < RequestError
     end
 
     USER_AGENT: String

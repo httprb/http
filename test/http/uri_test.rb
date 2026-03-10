@@ -138,6 +138,20 @@ describe HTTP::URI do
       # is_a?(self) returns true for subclasses; instance_of? does not
       assert_same sub_uri, HTTP::URI.parse(sub_uri)
     end
+
+    it "raises InvalidError for nil" do
+      err = assert_raises(HTTP::URI::InvalidError) do
+        HTTP::URI.parse(nil)
+      end
+      assert_equal "invalid URI: nil", err.message
+    end
+
+    it "raises InvalidError for malformed URI" do
+      err = assert_raises(HTTP::URI::InvalidError) do
+        HTTP::URI.parse(":")
+      end
+      assert_equal 'invalid URI: ":"', err.message
+    end
   end
 
   describe ".form_encode" do
