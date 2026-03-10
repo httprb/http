@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "addressable/uri"
+require "uri"
 
 module HTTP
   # Wrapper around Addressable::URI with HTTP-specific behavior
@@ -11,7 +12,7 @@ module HTTP
     class InvalidError < HTTP::RequestError; end
 
     def_delegators :@uri, :scheme, :user, :password, :path, :path=,
-                   :query, :query=, :fragment, :join, :normalize
+                   :query, :query=, :fragment, :normalize
 
     # Host, either a domain name or IP address
     #
@@ -219,6 +220,21 @@ module HTTP
         { scheme: scheme, user: user, password: password, host: @uri.host,
           port: @uri.port, path: path, query: query, fragment: fragment }.except(*components)
       )
+    end
+
+    # Resolves another URI against this one per RFC 3986
+    #
+    # @example
+    #   HTTP::URI.parse("http://example.com/foo/").join("bar")
+    #
+    # @param [String, URI] other the URI to resolve
+    #
+    # @api public
+    # @return [HTTP::URI] resolved URI
+    def join(other)
+      base = self.class.percent_encode(String(self))
+      ref  = self.class.percent_encode(String(other))
+      self.class.parse(::URI.join(base, ref)) # steep:ignore
     end
 
     # Checks whether the URI scheme is HTTP

@@ -547,6 +547,51 @@ describe HTTP::URI do
     end
   end
 
+  describe "#join" do
+    it "resolves a relative path" do
+      result = HTTP::URI.parse("http://example.com/foo/").join("bar")
+
+      assert_equal "http://example.com/foo/bar", result.to_s
+    end
+
+    it "resolves an absolute path" do
+      result = HTTP::URI.parse("http://example.com/foo").join("/bar")
+
+      assert_equal "http://example.com/bar", result.to_s
+    end
+
+    it "resolves a full URI" do
+      result = HTTP::URI.parse("http://example.com/foo").join("http://other.com/bar")
+
+      assert_equal "http://other.com/bar", result.to_s
+    end
+
+    it "returns an HTTP::URI instance" do
+      result = HTTP::URI.parse("http://example.com/foo/").join("bar")
+
+      assert_instance_of HTTP::URI, result
+    end
+
+    it "accepts an HTTP::URI as argument" do
+      other = HTTP::URI.parse("http://other.com/bar")
+      result = HTTP::URI.parse("http://example.com/foo").join(other)
+
+      assert_equal "http://other.com/bar", result.to_s
+    end
+
+    it "percent-encodes non-ASCII characters in the base URI" do
+      result = HTTP::URI.parse("http://example.com/K\u00F6nig/").join("bar")
+
+      assert_equal "http://example.com/K%C3%B6nig/bar", result.to_s
+    end
+
+    it "percent-encodes non-ASCII characters in the other URI" do
+      result = HTTP::URI.parse("http://example.com/").join("/K\u00F6nig")
+
+      assert_equal "http://example.com/K%C3%B6nig", result.to_s
+    end
+  end
+
   describe "#http?" do
     it "returns false for non-HTTP/HTTPS schemes" do
       uri = HTTP::URI.parse("ftp://example.com")
