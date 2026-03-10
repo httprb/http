@@ -302,6 +302,68 @@ describe HTTP::URI do
     end
   end
 
+  describe "#origin" do
+    it "returns scheme and host for HTTP URIs" do
+      assert_equal "http://example.com", http_uri.origin
+    end
+
+    it "returns scheme and host for HTTPS URIs" do
+      assert_equal "https://example.com", https_uri.origin
+    end
+
+    it "includes non-default port" do
+      uri = HTTP::URI.parse("http://example.com:8080")
+
+      assert_equal "http://example.com:8080", uri.origin
+    end
+
+    it "omits default HTTP port" do
+      uri = HTTP::URI.parse("http://example.com:80")
+
+      assert_equal "http://example.com", uri.origin
+    end
+
+    it "omits default HTTPS port" do
+      uri = HTTP::URI.parse("https://example.com:443")
+
+      assert_equal "https://example.com", uri.origin
+    end
+
+    it "normalizes scheme to lowercase" do
+      uri = HTTP::URI.parse("HTTP://example.com")
+
+      assert_equal "http://example.com", uri.origin
+    end
+
+    it "normalizes host to lowercase" do
+      uri = HTTP::URI.parse("http://EXAMPLE.COM")
+
+      assert_equal "http://example.com", uri.origin
+    end
+
+    it "preserves IPv6 brackets" do
+      assert_equal "https://[2606:2800:220:1:248:1893:25c8:1946]", ipv6_uri.origin
+    end
+
+    it "excludes user info" do
+      uri = HTTP::URI.parse("http://user:pass@example.com")
+
+      assert_equal "http://example.com", uri.origin
+    end
+
+    it "handles URI with no scheme" do
+      uri = HTTP::URI.new(host: "example.com")
+
+      assert_equal "://example.com", uri.origin
+    end
+
+    it "handles URI with no host" do
+      uri = HTTP::URI.new(path: "/foo")
+
+      assert_equal "://", uri.origin
+    end
+  end
+
   describe "#http?" do
     it "returns false for non-HTTP/HTTPS schemes" do
       uri = HTTP::URI.parse("ftp://example.com")

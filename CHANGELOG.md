@@ -74,6 +74,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`normalized_user`, `normalized_password`, `normalized_port`,
   `normalized_path`, `normalized_query`) that were delegated to
   `Addressable::URI` but never used internally
+- `HTTP::URI#origin` is no longer delegated to `Addressable::URI`. The new
+  implementation follows RFC 6454, normalizing scheme and host to lowercase
+  and excluding user info from the origin string
 
 ### Changed
 

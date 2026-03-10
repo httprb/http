@@ -14,7 +14,6 @@ module HTTP
     def_delegators :@uri, :user
     def_delegators :@uri, :password
     def_delegators :@uri, :authority, :normalized_authority
-    def_delegators :@uri, :origin
     def_delegators :@uri, :path, :path=
     def_delegators :@uri, :query, :query=
     def_delegators :@uri, :query_values, :query_values=
@@ -204,6 +203,18 @@ module HTTP
     # @return [Integer] port number
     def port
       @uri.port || @uri.default_port
+    end
+
+    # The origin (scheme + host + port) per RFC 6454
+    #
+    # @example
+    #   HTTP::URI.parse("http://example.com").origin # => "http://example.com"
+    #
+    # @api public
+    # @return [String] origin of the URI
+    def origin
+      port_suffix = ":#{port}" unless port == @uri.default_port
+      "#{String(scheme).downcase}://#{String(@uri.host).downcase}#{port_suffix}"
     end
 
     # Checks whether the URI scheme is HTTP
