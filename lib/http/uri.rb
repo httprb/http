@@ -11,13 +11,10 @@ module HTTP
     class InvalidError < HTTP::RequestError; end
 
     def_delegators :@uri, :scheme, :normalized_scheme
-    def_delegators :@uri, :user
-    def_delegators :@uri, :password
+    def_delegators :@uri, :user, :password
     def_delegators :@uri, :authority, :normalized_authority
     def_delegators :@uri, :path, :path=
-    def_delegators :@uri, :query, :query=
-    def_delegators :@uri, :query_values, :query_values=
-    def_delegators :@uri, :request_uri
+    def_delegators :@uri, :query, :query=, :query_values, :query_values=
     def_delegators :@uri, :fragment, :normalized_fragment
     def_delegators :@uri, :omit, :join, :normalize
 
@@ -215,6 +212,17 @@ module HTTP
     def origin
       port_suffix = ":#{port}" unless port == @uri.default_port
       "#{String(scheme).downcase}://#{String(@uri.host).downcase}#{port_suffix}"
+    end
+
+    # The path and query for use in an HTTP request line
+    #
+    # @example
+    #   HTTP::URI.parse("http://example.com/path?q=1").request_uri # => "/path?q=1"
+    #
+    # @api public
+    # @return [String] request URI string
+    def request_uri
+      "#{'/' if path.empty?}#{path}#{"?#{query}" if query}"
     end
 
     # Checks whether the URI scheme is HTTP

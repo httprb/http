@@ -364,6 +364,36 @@ describe HTTP::URI do
     end
   end
 
+  describe "#request_uri" do
+    it "returns path for a simple URI" do
+      uri = HTTP::URI.parse("http://example.com/path")
+
+      assert_equal "/path", uri.request_uri
+    end
+
+    it "returns path and query" do
+      uri = HTTP::URI.parse("http://example.com/path?q=1")
+
+      assert_equal "/path?q=1", uri.request_uri
+    end
+
+    it "returns / for empty path" do
+      assert_equal "/", http_uri.request_uri
+    end
+
+    it "returns / with query for empty path" do
+      uri = HTTP::URI.parse("http://example.com?q=1")
+
+      assert_equal "/?q=1", uri.request_uri
+    end
+
+    it "preserves trailing ? with empty query" do
+      uri = HTTP::URI.parse("http://example.com/path?")
+
+      assert_equal "/path?", uri.request_uri
+    end
+  end
+
   describe "#http?" do
     it "returns false for non-HTTP/HTTPS schemes" do
       uri = HTTP::URI.parse("ftp://example.com")
