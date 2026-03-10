@@ -126,6 +126,26 @@ end
 Pattern matching is also supported on `HTTP::Response::Status`, `HTTP::Headers`,
 `HTTP::ContentType`, and `HTTP::URI`.
 
+### Base URI
+
+Set a base URI to avoid repeating the scheme and host in every request:
+
+```ruby
+api = HTTP.base_uri("https://api.example.com/v1")
+api.get("users")       # GET https://api.example.com/v1/users
+api.get("users/1")     # GET https://api.example.com/v1/users/1
+```
+
+Relative paths are resolved per [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986#section-5).
+Combine with `persistent` to reuse the connection:
+
+```ruby
+HTTP.base_uri("https://api.example.com/v1").persistent do |http|
+  http.get("users")
+  http.get("posts")
+end
+```
+
 ### Thread Safety
 
 Configured sessions are safe to share across threads:

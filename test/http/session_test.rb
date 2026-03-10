@@ -195,4 +195,26 @@ describe HTTP::Session do
       p_client&.close
     end
   end
+
+  describe "base_uri" do
+    it "returns a Session from base_uri" do
+      chained = session.base_uri(dummy.endpoint)
+
+      assert_kind_of HTTP::Session, chained
+    end
+
+    it "preserves base_uri through chaining" do
+      chained = session.base_uri("https://example.com/api")
+                       .headers("Accept" => "application/json")
+
+      assert_equal "https://example.com/api", chained.default_options.base_uri.to_s
+      assert_equal "application/json", chained.default_options.headers[:accept]
+    end
+
+    it "resolves relative request paths against base_uri" do
+      response = HTTP.base_uri(dummy.endpoint).get("/")
+
+      assert_kind_of HTTP::Response, response
+    end
+  end
 end

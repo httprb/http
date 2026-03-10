@@ -23,6 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `HTTP.base_uri` for setting a base URI that resolves relative request paths
+  per RFC 3986. Supports chaining (`HTTP.base_uri("https://api.example.com/v1")
+  .get("users")`), and integrates with `persistent` connections by deriving the
+  host when omitted (#519, #512, #493)
 - `Feature#on_request` and `Feature#around_request` lifecycle hooks, called
   before/around each request attempt (including retries), for per-attempt side
   effects like instrumentation spans and circuit breakers (#826)

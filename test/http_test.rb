@@ -337,6 +337,56 @@ describe HTTP do
     end
   end
 
+  describe ".base_uri" do
+    it "resolves relative paths against base URI" do
+      response = HTTP.base_uri(dummy.endpoint).get("/")
+
+      assert_match(/<!doctype html>/, response.to_s)
+    end
+
+    it "resolves paths without leading slash" do
+      response = HTTP.base_uri(dummy.endpoint).get("params?foo=bar")
+
+      assert_match(/Params!/, response.to_s)
+    end
+
+    it "ignores base URI for absolute URLs" do
+      response = HTTP.base_uri("https://other.example.com").get(dummy.endpoint)
+
+      assert_match(/<!doctype html>/, response.to_s)
+    end
+
+    it "chains base URIs" do
+      session = HTTP.base_uri("https://example.com").base_uri("api/v1")
+
+      assert_equal "https://example.com/api/v1", session.default_options.base_uri.to_s
+    end
+
+    it "works with other chainable methods" do
+      response = HTTP.base_uri(dummy.endpoint)
+                     .headers("Accept" => "application/json")
+                     .get("/")
+
+      assert_includes response.to_s, "json"
+    end
+
+    it "raises for URI without scheme" do
+      assert_raises(HTTP::Error) { HTTP.base_uri("/users") }
+    end
+
+    it "derives persistent host from base_uri" do
+      p_client = HTTP.base_uri(dummy.endpoint).persistent
+
+      assert_predicate p_client, :persistent?
+    ensure
+      p_client&.close
+    end
+
+    it "raises when persistent host is not given and no base_uri" do
+      assert_raises(ArgumentError) { HTTP.persistent }
+    end
+  end
+
   describe ".persistent" do
     let(:host) { dummy.endpoint }
 
