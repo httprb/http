@@ -57,6 +57,50 @@ describe HTTP::Features::Logging do
     end
   end
 
+  describe "logging the request with non-loggable IO body" do
+    let(:request) do
+      HTTP::Request.new(
+        verb:    :post,
+        uri:     "https://example.com/upload",
+        headers: { content_type: "application/octet-stream" },
+        body:    FakeIO.new("binary data")
+      )
+    end
+
+    it "logs headers without the body" do
+      feature.wrap_request(request)
+
+      expected = <<~OUTPUT
+        ** INFO **
+        > POST https://example.com/upload
+        ** DEBUG **
+        Content-Type: application/octet-stream
+        Host: example.com
+        User-Agent: http.rb/#{HTTP::VERSION}
+      OUTPUT
+      assert_equal expected, logdev.string
+    end
+  end
+
+  describe "logging the request with binary-encoded string body" do
+    let(:binary_data) { String.new("\x89PNG\r\n", encoding: Encoding::BINARY) }
+    let(:request) do
+      HTTP::Request.new(
+        verb:    :post,
+        uri:     "https://example.com/upload",
+        headers: { content_type: "application/octet-stream" },
+        body:    binary_data
+      )
+    end
+
+    it "logs binary stats instead of raw content" do
+      feature.wrap_request(request)
+
+      assert_includes logdev.string, "BINARY DATA (6 bytes)"
+      refute_includes logdev.string, "\x89PNG"
+    end
+  end
+
   describe "logging the response" do
     context "with a string body" do
       let(:response) do
@@ -93,7 +137,7 @@ describe HTTP::Features::Logging do
           closed?:     true
         )
       end
-      let(:body) { HTTP::Response::Body.new(stream) }
+      let(:body) { HTTP::Response::Body.new(stream, encoding: Encoding::UTF_8) }
       let(:response) do
         HTTP::Response.new(
           version: "1.1",
@@ -123,6 +167,61 @@ describe HTTP::Features::Logging do
         wrapped = feature.wrap_response(response)
 
         assert_equal '{"success":true}', wrapped.body.to_s
+      end
+    end
+
+    context "with a binary string body" do
+      let(:binary_data) { String.new("\x89PNG\r\n\x1A\n", encoding: Encoding::BINARY) }
+      let(:response) do
+        HTTP::Response.new(
+          version: "1.1",
+          status:  200,
+          headers: { content_type: "application/octet-stream" },
+          body:    binary_data,
+          request: HTTP::Request.new(verb: :get, uri: "https://example.com")
+        )
+      end
+
+      it "logs binary stats instead of raw content" do
+        feature.wrap_response(response)
+
+        assert_includes logdev.string, "BINARY DATA (8 bytes)"
+        refute_includes logdev.string, "\x89PNG"
+      end
+    end
+
+    context "with a binary streaming body" do
+      let(:chunks) { [String.new("\x89PNG\r\n", encoding: Encoding::BINARY)] }
+      let(:stream) do
+        fake(
+          readpartial: proc { chunks.shift or raise EOFError },
+          close:       nil,
+          closed?:     true
+        )
+      end
+      let(:body) { HTTP::Response::Body.new(stream) }
+      let(:response) do
+        HTTP::Response.new(
+          version: "1.1",
+          status:  200,
+          headers: { content_type: "application/octet-stream" },
+          body:    body,
+          request: HTTP::Request.new(verb: :get, uri: "https://example.com")
+        )
+      end
+
+      it "logs binary stats for each chunk instead of raw content" do
+        wrapped = feature.wrap_response(response)
+        wrapped.body.to_s
+
+        assert_includes logdev.string, "BINARY DATA (6 bytes)"
+        refute_includes logdev.string, "\x89PNG"
+      end
+
+      it "preserves the full body content" do
+        wrapped = feature.wrap_response(response)
+
+        assert_equal String.new("\x89PNG\r\n", encoding: Encoding::BINARY), wrapped.body.to_s
       end
     end
 
@@ -161,6 +260,129 @@ describe HTTP::Features::Logging do
     end
   end
 
+  describe "binary_formatter validation" do
+    it "raises ArgumentError for unsupported values" do
+      err = assert_raises(ArgumentError) do
+        HTTP::Features::Logging.new(binary_formatter: :unsupported)
+      end
+      assert_includes err.message, "binary_formatter must be :stats, :base64, or a callable"
+      assert_includes err.message, ":unsupported"
+    end
+
+    it "accepts :stats" do
+      HTTP::Features::Logging.new(binary_formatter: :stats)
+    end
+
+    it "accepts :base64" do
+      HTTP::Features::Logging.new(binary_formatter: :base64)
+    end
+
+    it "accepts a callable" do
+      HTTP::Features::Logging.new(binary_formatter: ->(data) { data })
+    end
+  end
+
+  describe "binary_formatter option" do
+    context "with :base64 formatter" do
+      let(:feature) do
+        logger           = Logger.new(logdev)
+        logger.formatter = ->(severity, _, _, message) { format("** %s **\n%s\n", severity, message) }
+
+        HTTP::Features::Logging.new(logger: logger, binary_formatter: :base64)
+      end
+
+      let(:binary_data) { String.new("\x89PNG\r\n\x1A\n", encoding: Encoding::BINARY) }
+      let(:response) do
+        HTTP::Response.new(
+          version: "1.1",
+          status:  200,
+          headers: { content_type: "image/png" },
+          body:    binary_data,
+          request: HTTP::Request.new(verb: :get, uri: "https://example.com")
+        )
+      end
+
+      it "logs base64-encoded body" do
+        feature.wrap_response(response)
+
+        assert_includes logdev.string, "BINARY DATA (8 bytes)"
+        assert_includes logdev.string, [binary_data].pack("m0")
+      end
+
+      it "base64-encodes streaming binary chunks" do
+        chunks = [String.new("\xFF\xD8\xFF", encoding: Encoding::BINARY)]
+        stream = fake(
+          readpartial: proc { chunks.shift or raise EOFError },
+          close:       nil,
+          closed?:     true
+        )
+        body = HTTP::Response::Body.new(stream)
+        resp = HTTP::Response.new(
+          version: "1.1",
+          status:  200,
+          headers: { content_type: "image/jpeg" },
+          body:    body,
+          request: HTTP::Request.new(verb: :get, uri: "https://example.com")
+        )
+
+        wrapped = feature.wrap_response(resp)
+        wrapped.body.to_s
+
+        assert_includes logdev.string, "BINARY DATA (3 bytes)"
+        assert_includes logdev.string, ["\xFF\xD8\xFF"].pack("m0")
+      end
+    end
+
+    context "with Proc formatter" do
+      let(:feature) do
+        logger           = Logger.new(logdev)
+        logger.formatter = ->(severity, _, _, message) { format("** %s **\n%s\n", severity, message) }
+
+        formatter = ->(data) { "[#{data.bytesize} bytes hidden]" }
+        HTTP::Features::Logging.new(logger: logger, binary_formatter: formatter)
+      end
+
+      let(:binary_data) { String.new("\x00\x01\x02", encoding: Encoding::BINARY) }
+      let(:response) do
+        HTTP::Response.new(
+          version: "1.1",
+          status:  200,
+          headers: { content_type: "application/octet-stream" },
+          body:    binary_data,
+          request: HTTP::Request.new(verb: :get, uri: "https://example.com")
+        )
+      end
+
+      it "uses the custom formatter" do
+        feature.wrap_response(response)
+
+        assert_includes logdev.string, "[3 bytes hidden]"
+      end
+
+      it "uses the custom formatter for streaming chunks" do
+        chunks = [String.new("\xDE\xAD", encoding: Encoding::BINARY)]
+        stream = fake(
+          readpartial: proc { chunks.shift or raise EOFError },
+          close:       nil,
+          closed?:     true
+        )
+        body = HTTP::Response::Body.new(stream)
+        resp = HTTP::Response.new(
+          version: "1.1",
+          status:  200,
+          headers: { content_type: "application/octet-stream" },
+          body:    body,
+          request: HTTP::Request.new(verb: :get, uri: "https://example.com")
+        )
+
+        wrapped = feature.wrap_response(resp)
+        wrapped.body.to_s
+
+        assert_includes logdev.string, "[2 bytes hidden]"
+      end
+    end
+  end
+
   describe "BodyLogger" do
     let(:logger) do
       logger           = Logger.new(logdev)
@@ -179,6 +401,17 @@ describe HTTP::Features::Logging do
       assert_raises(EOFError) { body_logger.readpartial }
       assert_includes logdev.string, "hello"
       assert_includes logdev.string, "world"
+    end
+
+    it "applies formatter when provided" do
+      chunks = %w[hello world]
+      stream = fake(readpartial: proc { chunks.shift or raise EOFError })
+      formatter = ->(data) { "FORMATTED: #{data}" }
+
+      body_logger = HTTP::Features::Logging::BodyLogger.new(stream, logger, formatter: formatter)
+
+      assert_equal "hello", body_logger.readpartial
+      assert_includes logdev.string, "FORMATTED: hello"
     end
 
     it "exposes the underlying connection" do

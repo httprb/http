@@ -107,6 +107,24 @@ describe HTTP::Response::Body do
     end
   end
 
+  describe "#loggable?" do
+    context "with text encoding" do
+      let(:body) { HTTP::Response::Body.new(connection, encoding: Encoding::UTF_8) }
+
+      it "returns true" do
+        assert_predicate body, :loggable?
+      end
+    end
+
+    context "with binary encoding" do
+      let(:body) { HTTP::Response::Body.new(connection) }
+
+      it "returns false" do
+        refute_predicate body, :loggable?
+      end
+    end
+  end
+
   describe "#inspect" do
     it "includes streaming state" do
       assert_match(/@streaming=false/, body.inspect)

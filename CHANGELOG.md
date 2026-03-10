@@ -27,6 +27,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   per RFC 3986. Supports chaining (`HTTP.base_uri("https://api.example.com/v1")
   .get("users")`), and integrates with `persistent` connections by deriving the
   host when omitted (#519, #512, #493)
+- `Request::Body#loggable?` and `Response::Body#loggable?` predicates, and a
+  `binary_formatter` option for the logging feature. Binary bodies
+  (IO/Enumerable request sources, binary-encoded request strings, and
+  binary-encoded responses) are now formatted instead of dumped raw,
+  preventing unreadable log output when transferring files like images or
+  audio. Available formatters: `:stats` (default, logs byte count),
+  `:base64` (logs base64-encoded content), or a custom `Proc`. Invalid
+  formatter values raise `ArgumentError` (#784)
 - `Feature#on_request` and `Feature#around_request` lifecycle hooks, called
   before/around each request attempt (including retries), for per-attempt side
   effects like instrumentation spans and circuit breakers (#826)

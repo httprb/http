@@ -9,6 +9,17 @@ module HTTP
     #
     #    HTTP.use(logging: {logger: Logger.new(STDOUT)}).get("https://example.com/")
     #
+    # Binary bodies (IO/Enumerable request sources and binary-encoded
+    # responses) are formatted using the +binary_formatter+ option instead
+    # of being dumped raw. Available formatters:
+    #
+    # - +:stats+ (default) — logs <tt>BINARY DATA (N bytes)</tt>
+    # - +:base64+ — logs <tt>BINARY DATA (N bytes)\n<base64></tt>
+    # - +Proc+ — calls the proc with the raw binary string
+    #
+    # @example Custom binary formatter
+    #    HTTP.use(logging: {logger: Logger.new(STDOUT), binary_formatter: :base64})
+    #
     class Logging < Feature
       HTTP::Options.register_feature(:logging, self)
 
@@ -39,12 +50,17 @@ module HTTP
       # @example
       #   Logging.new(logger: Logger.new(STDOUT))
       #
+      # @example With binary formatter
+      #   Logging.new(logger: Logger.new(STDOUT), binary_formatter: :base64)
+      #
       # @param logger [#info, #debug] logger instance
+      # @param binary_formatter [:stats, :base64, #call] how to log binary bodies
       # @return [Logging]
       # @api public
-      def initialize(logger: NullLogger.new)
+      def initialize(logger: NullLogger.new, binary_formatter: :stats)
         super()
         @logger = logger
+        @binary_formatter = validate_binary_formatter!(binary_formatter)
       end
 
       # Logs and returns the request
@@ -57,7 +73,7 @@ module HTTP
       # @api public
       def wrap_request(request)
         logger.info { "> #{request.verb.to_s.upcase} #{request.uri}" }
-        logger.debug { "#{stringify_headers(request.headers)}\n\n#{request.body.source}" }
+        log_request_details(request)
 
         request
       end
@@ -83,11 +99,43 @@ module HTTP
 
       private
 
+      # Validate and return the binary_formatter option
+      # @return [:stats, :base64, #call]
+      # @raise [ArgumentError] if the formatter is not a valid option
+      # @api private
+      def validate_binary_formatter!(formatter)
+        return formatter if formatter == :stats || formatter == :base64 || formatter.respond_to?(:call)
+
+        raise ArgumentError,
+              "binary_formatter must be :stats, :base64, or a callable " \
+              "(got #{formatter.inspect})"
+      end
+
+      # Log request headers and body (when loggable)
+      # @return [void]
+      # @api private
+      def log_request_details(request)
+        headers = stringify_headers(request.headers)
+        if request.body.loggable?
+          source = request.body.source
+          body = source.encoding == Encoding::BINARY ? format_binary(source) : source # steep:ignore
+          logger.debug { "#{headers}\n\n#{body}" }
+        else
+          logger.debug { headers }
+        end
+      end
+
       # Log response with body inline (for non-streaming string bodies)
       # @return [HTTP::Response]
       # @api private
       def log_response_body_inline(response)
-        logger.debug { "#{stringify_headers(response.headers)}\n\n#{response.body}" }
+        body    = response.body
+        headers = stringify_headers(response.headers)
+        if body.respond_to?(:encoding) && body.encoding == Encoding::BINARY # steep:ignore
+          logger.debug { "#{headers}\n\n#{format_binary(body)}" } # steep:ignore
+        else
+          logger.debug { "#{headers}\n\n#{body}" }
+        end
         response
       end
 
@@ -110,8 +158,23 @@ module HTTP
       # @return [HTTP::Response::Body]
       # @api private
       def logged_body(body)
-        stream = BodyLogger.new(body.instance_variable_get(:@stream), logger)
+        formatter = body.loggable? ? nil : method(:format_binary) # steep:ignore
+        stream = BodyLogger.new(body.instance_variable_get(:@stream), logger, formatter: formatter) # steep:ignore
         Response::Body.new(stream, encoding: body.encoding)
+      end
+
+      # Format binary data according to the configured binary_formatter
+      # @return [String]
+      # @api private
+      def format_binary(data)
+        case @binary_formatter
+        when :stats
+          format("BINARY DATA (%d bytes)", data.bytesize)
+        when :base64
+          format("BINARY DATA (%d bytes)\n%s", data.bytesize, [data].pack("m0"))
+        else
+          @binary_formatter.call(data) # steep:ignore
+        end
       end
 
       # Convert headers to a string representation
@@ -139,12 +202,14 @@ module HTTP
         #
         # @param stream [#readpartial] the stream to wrap
         # @param logger [#debug] the logger instance
+        # @param formatter [#call, nil] optional formatter for each chunk
         # @return [BodyLogger]
         # @api public
-        def initialize(stream, logger)
+        def initialize(stream, logger, formatter: nil)
           @stream = stream
           @connection = stream.respond_to?(:connection) ? stream.connection : stream
           @logger = logger
+          @formatter = formatter
         end
 
         # Read a chunk from the underlying stream and log it
@@ -157,7 +222,7 @@ module HTTP
         # @api public
         def readpartial(*)
           chunk = @stream.readpartial(*)
-          @logger.debug { chunk }
+          @logger.debug { @formatter ? @formatter.call(chunk) : chunk } # steep:ignore
           chunk
         end
       end

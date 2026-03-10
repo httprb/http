@@ -37,6 +37,24 @@ module HTTP
         @source.nil?
       end
 
+      # Whether the body content can be accessed for logging
+      #
+      # Returns true for String sources (the content can be inspected).
+      # Returns false for IO streams and Enumerables (which cannot be
+      # read without consuming them), and for nil bodies.
+      #
+      # The logging feature checks the string encoding separately to
+      # decide whether to log the content as text or format it as binary.
+      #
+      # @example
+      #   body.loggable? # => true
+      #
+      # @return [Boolean]
+      # @api public
+      def loggable?
+        @source.is_a?(String)
+      end
+
       # Returns size for the "Content-Length" header
       #
       # @example
