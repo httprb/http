@@ -56,12 +56,14 @@ module HTTP
       ?body: untyped,
       ?follow: bool,
       ?retriable: bool,
+      ?base_uri: String | URI | nil,
       ?persistent: String?,
       ?ssl_context: OpenSSL::SSL::SSLContext?
     ) -> Response
     def timeout: (Numeric | Hash[Symbol, Numeric] | :null options) -> Session
-    def persistent: (String host, ?timeout: Integer) -> Client
-                   | (String host, ?timeout: Integer) { (Client) -> void } -> void
+    def base_uri: (String | URI uri) -> Session
+    def persistent: (?String? host, ?timeout: Integer) -> Client
+                   | (?String? host, ?timeout: Integer) { (Client) -> void } -> void
     def via: (*(String | Integer | Hash[String, String]) proxy) -> Session
     alias through via
     def follow: (?strict: bool, ?max_hops: Integer, ?on_redirect: (^(Response, Request) -> void)?) -> Session
@@ -116,6 +118,7 @@ module HTTP
       ?body: untyped,
       ?follow: bool,
       ?retriable: bool,
+      ?base_uri: String | URI | nil,
       ?persistent: String?,
       ?ssl_context: OpenSSL::SSL::SSLContext?
     ) -> Response
@@ -164,6 +167,7 @@ module HTTP
       ?body: untyped,
       ?follow: bool,
       ?retriable: bool,
+      ?base_uri: String | URI | nil,
       ?persistent: String?,
       ?ssl_context: OpenSSL::SSL::SSLContext?
     ) -> Response
@@ -495,6 +499,7 @@ module HTTP
       ?body: untyped,
       ?follow: bool,
       ?retriable: bool,
+      ?base_uri: String | URI | nil,
       ?persistent: String?,
       ?ssl_context: OpenSSL::SSL::SSLContext?
     ) -> void
@@ -504,6 +509,8 @@ module HTTP
 
     def follow=: (bool value) -> void
     def retriable=: (bool value) -> void
+    def base_uri=: (String | URI | nil value) -> void
+    def base_uri?: () -> bool
     def persistent=: (String? value) -> String?
     def persistent?: () -> bool
     def merge: (Hash[Symbol, untyped] | Options other) -> Options
@@ -530,6 +537,7 @@ module HTTP
     attr_accessor encoding: Encoding?
     attr_reader follow: Hash[Symbol, untyped]?
     attr_reader retriable: Hash[Symbol, untyped]?
+    attr_reader base_uri: URI?
     attr_reader persistent: String?
 
     def with_headers: (Hash[String | Symbol, untyped] | Headers value) -> Options
@@ -537,6 +545,7 @@ module HTTP
     def with_features: (Array[Symbol | Hash[Symbol, untyped]] value) -> Options
     def with_follow: (Hash[Symbol, untyped] | bool value) -> Options
     def with_retriable: (Hash[Symbol, untyped] | bool value) -> Options
+    def with_base_uri: (String | URI value) -> Options
     def with_persistent: (String value) -> Options
     def with_proxy: (Hash[Symbol, untyped] value) -> Options
     def with_params: (Hash[String | Symbol, untyped] value) -> Options
@@ -557,6 +566,9 @@ module HTTP
 
     def assign_options: (Binding env) -> void
     def argument_error!: (String message) -> bot
+    def parse_base_uri: (String | URI value) -> URI
+    def resolve_base_uri: (URI base, URI relative) -> URI
+    def validate_base_uri_and_persistent!: () -> void
   end
 
   class URI
@@ -651,6 +663,7 @@ module HTTP
       private
 
       def make_request_uri: (String | URI uri) -> URI
+      def resolve_against_base: (String uri) -> String
       def merge_query_params!: (URI uri) -> void
       def make_request_headers: () -> Headers
       def make_request_body: (Headers headers) -> untyped

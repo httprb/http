@@ -57,18 +57,45 @@ module HTTP
       )
     end
 
+    # Set a base URI for resolving relative request paths
+    #
+    # The first call must use an absolute URI that includes a scheme
+    # (e.g. "https://example.com"). Once a base URI is set, subsequent chained
+    # calls may use relative paths that are resolved against the existing base.
+    #
+    # @example
+    #   HTTP.base_uri("https://example.com/api/v1").get("users")
+    #
+    # @example Chaining base URIs
+    #   HTTP.base_uri("https://example.com").base_uri("api/v1").get("users")
+    #
+    # @param [String, HTTP::URI] uri the base URI (absolute with scheme when
+    #   no base is set; may be relative when chaining)
+    # @return [HTTP::Session]
+    # @raise [HTTP::Error] if no base URI is set and the given URI has no scheme
+    # @api public
+    def base_uri(uri)
+      branch default_options.with_base_uri(uri)
+    end
+
     # Open a persistent connection to a host
+    #
+    # When no host is given, the origin is derived from the configured base URI.
     #
     # @example
     #   HTTP.persistent("http://example.com").get("/")
     #
-    # @overload persistent(host, timeout: 5)
+    # @example Derive host from base URI
+    #   HTTP.base_uri("https://example.com/api").persistent.get("users")
+    #
+    # @overload persistent(host = nil, timeout: 5)
     #   Flags as persistent
-    #   @param  [String] host
+    #   @param  [String, nil] host connection origin (derived from base URI when nil)
     #   @option [Integer] timeout Keep alive timeout
+    #   @raise  [ArgumentError] if host is nil and no base URI is set
     #   @raise  [Request::Error] if Host is invalid
     #   @return [HTTP::Client] Persistent client
-    # @overload persistent(host, timeout: 5, &block)
+    # @overload persistent(host = nil, timeout: 5, &block)
     #   Executes given block with persistent client and automatically closes
     #   connection at the end of execution.
     #
@@ -94,7 +121,10 @@ module HTTP
     #   @return [Object] result of last expression in the block
     # @return [HTTP::Client, Object]
     # @api public
-    def persistent(host, timeout: 5)
+    def persistent(host = nil, timeout: 5)
+      host ||= default_options.base_uri&.origin
+      raise ArgumentError, "host is required for persistent connections" unless host
+
       options = default_options.merge(keep_alive_timeout: timeout).with_persistent(host)
       p_client = make_client(options)
       return p_client unless block_given?

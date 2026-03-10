@@ -160,6 +160,56 @@ describe HTTP::Client do
     end
   end
 
+  describe "base_uri" do
+    it "resolves relative paths against base URI" do
+      client = StubbedClient.new(base_uri: "https://example.com/api").stub(
+        "https://example.com/api/users" => simple_response("OK")
+      )
+
+      assert_equal "OK", client.get("users").to_s
+    end
+
+    it "resolves absolute paths from host root" do
+      client = StubbedClient.new(base_uri: "https://example.com/api").stub(
+        "https://example.com/users" => simple_response("OK")
+      )
+
+      assert_equal "OK", client.get("/users").to_s
+    end
+
+    it "ignores base_uri for absolute URLs" do
+      client = StubbedClient.new(base_uri: "https://example.com/api").stub(
+        "https://other.com/path" => simple_response("OK")
+      )
+
+      assert_equal "OK", client.get("https://other.com/path").to_s
+    end
+
+    it "handles parent path traversal" do
+      client = StubbedClient.new(base_uri: "https://example.com/api/v1").stub(
+        "https://example.com/api/v2" => simple_response("OK")
+      )
+
+      assert_equal "OK", client.get("../v2").to_s
+    end
+
+    it "handles base URI without trailing slash" do
+      client = StubbedClient.new(base_uri: "https://example.com/api").stub(
+        "https://example.com/api/users" => simple_response("OK")
+      )
+
+      assert_equal "OK", client.get("users").to_s
+    end
+
+    it "handles base URI with trailing slash" do
+      client = StubbedClient.new(base_uri: "https://example.com/api/").stub(
+        "https://example.com/api/users" => simple_response("OK")
+      )
+
+      assert_equal "OK", client.get("users").to_s
+    end
+  end
+
   describe "parsing params" do
     let(:client) { HTTP::Client.new }
 

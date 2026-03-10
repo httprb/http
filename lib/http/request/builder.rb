@@ -81,7 +81,11 @@ module HTTP
       def make_request_uri(uri)
         uri = uri.to_s
 
-        uri = "#{@options.persistent}#{uri}" if @options.persistent? && uri !~ HTTP_OR_HTTPS_RE
+        if @options.base_uri? && uri !~ HTTP_OR_HTTPS_RE
+          uri = resolve_against_base(uri)
+        elsif @options.persistent? && uri !~ HTTP_OR_HTTPS_RE
+          uri = "#{@options.persistent}#{uri}"
+        end
 
         uri = HTTP::URI.parse uri
 
@@ -93,6 +97,26 @@ module HTTP
         uri.path = "/" if uri.path.empty?
 
         uri
+      end
+
+      # Resolve a relative URI against the configured base URI
+      #
+      # Ensures the base URI path has a trailing slash so that relative
+      # paths are appended rather than replacing the last path segment,
+      # per the convention described in RFC 3986 Section 5.
+      #
+      # @param uri [String] the relative URI to resolve
+      # @return [String] the resolved absolute URI
+      # @api private
+      def resolve_against_base(uri)
+        base = @options.base_uri or raise Error, "base_uri is not set"
+
+        unless base.path.end_with?("/")
+          base = base.dup
+          base.path = "#{base.path}/"
+        end
+
+        String(base.join(uri))
       end
 
       # Merge query parameters into URI

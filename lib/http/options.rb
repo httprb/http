@@ -150,6 +150,7 @@ module HTTP
       body: nil,
       follow: nil,
       retriable: nil,
+      base_uri: nil,
       persistent: nil,
       ssl_context: nil
     )

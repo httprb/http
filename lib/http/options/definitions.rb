@@ -90,6 +90,30 @@ module HTTP
         end
     end
 
+    def_option :base_uri, reader_only: true
+
+    # Sets the base URI for resolving relative request paths
+    #
+    # @param [String, HTTP::URI, nil] value
+    # @api private
+    # @return [HTTP::URI, nil]
+    def base_uri=(value)
+      @base_uri = value ? parse_base_uri(value) : nil
+      validate_base_uri_and_persistent!
+    end
+
+    # Checks whether a base URI is set
+    #
+    # @example
+    #   opts = HTTP::Options.new(base_uri: "https://example.com")
+    #   opts.base_uri?
+    #
+    # @api public
+    # @return [Boolean]
+    def base_uri?
+      !base_uri.nil?
+    end
+
     def_option :persistent, reader_only: true
 
     # Sets persistent connection origin
@@ -99,6 +123,7 @@ module HTTP
     # @return [String, nil]
     def persistent=(value)
       @persistent = value ? HTTP::URI.parse(value).origin : nil
+      validate_base_uri_and_persistent!
     end
 
     # Checks whether persistent connection is enabled
@@ -111,6 +136,54 @@ module HTTP
     # @return [Boolean]
     def persistent?
       !persistent.nil?
+    end
+
+    private
+
+    # Parses and validates a base URI value
+    #
+    # @param [String, HTTP::URI] value the base URI to parse
+    # @api private
+    # @return [HTTP::URI]
+    def parse_base_uri(value)
+      uri = HTTP::URI.parse(value)
+
+      base = @base_uri
+      return resolve_base_uri(base, uri) if base
+
+      argument_error!(format("Invalid base URI: %s", value)) unless uri.scheme
+      uri
+    end
+
+    # Resolves a relative URI against an existing base URI
+    #
+    # @param [HTTP::URI] base the existing base URI
+    # @param [HTTP::URI] relative the URI to join
+    # @api private
+    # @return [HTTP::URI]
+    def resolve_base_uri(base, relative)
+      unless base.path.end_with?("/")
+        base = base.dup
+        base.path = "#{base.path}/"
+      end
+
+      HTTP::URI.parse(base.join(relative))
+    end
+
+    # Validates that base URI and persistent origin are compatible
+    #
+    # @api private
+    # @return [void]
+    def validate_base_uri_and_persistent!
+      base = @base_uri
+      persistent = @persistent
+      return unless base && persistent
+      return if base.origin == persistent
+
+      argument_error!(
+        format("Persistence origin (%s) conflicts with base URI origin (%s)",
+               persistent, base.origin)
+      )
     end
   end
 end
