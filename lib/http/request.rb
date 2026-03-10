@@ -147,28 +147,30 @@ module HTTP
 
     # Create a new HTTP request
     #
-    # @option opts [String] :version
-    # @option opts [#to_s] :verb HTTP request method
-    # @option opts [#call] :uri_normalizer (HTTP::URI::NORMALIZER)
-    # @option opts [HTTP::URI, #to_s] :uri
-    # @option opts [Hash] :headers
-    # @option opts [Hash] :proxy
-    # @option opts [String, Enumerable, IO, nil] :body
+    # @param [#to_s] verb HTTP request method
+    # @param [HTTP::URI, #to_s] uri
+    # @param [Hash] headers
+    # @param [Hash] proxy
+    # @param [String, Enumerable, IO, nil] body
+    # @param [String] version
+    # @param [#call] uri_normalizer
     #
     # @example
     #   Request.new(verb: :get, uri: "https://example.com")
     #
     # @return [HTTP::Request]
     # @api public
-    def initialize(opts)
-      @uri_normalizer = opts[:uri_normalizer] || HTTP::URI::NORMALIZER
-      parse_verb_and_uri!(opts)
+    def initialize(verb:, uri:, headers: nil, proxy: {}, body: nil, version: "1.1",
+                   uri_normalizer: nil)
+      @uri_normalizer = uri_normalizer || HTTP::URI::NORMALIZER
+      @verb = verb.to_s.downcase.to_sym
+      parse_uri!(uri)
       validate_method_and_scheme!
 
-      @proxy   = opts[:proxy] || {}
-      @version = opts[:version] || "1.1"
-      @headers = prepare_headers(opts[:headers])
-      @body    = prepare_body(opts[:body])
+      @proxy   = proxy
+      @version = version
+      @headers = prepare_headers(headers)
+      @body    = prepare_body(body)
     end
 
     # Returns new Request with updated uri
@@ -329,20 +331,14 @@ module HTTP
       value
     end
 
-    # Parse verb, URI, and scheme from options
+    # Parse and normalize the URI, setting scheme
     # @return [void]
     # @api private
-    def parse_verb_and_uri!(opts)
-      @verb = opts.fetch(:verb).to_s.downcase.to_sym
-      uri   = opts.fetch(:uri)
-
-      begin
-        @uri = @uri_normalizer.call(uri)
-      rescue TypeError, Addressable::URI::InvalidURIError
-        raise InvalidURIError, "invalid URI: #{uri.inspect}"
-      end
-
+    def parse_uri!(uri)
+      @uri = @uri_normalizer.call(uri)
       @scheme = @uri.scheme.to_s.downcase.to_sym if @uri.scheme
+    rescue TypeError, Addressable::URI::InvalidURIError
+      raise InvalidURIError, "invalid URI: #{uri.inspect}"
     end
 
     # Validate HTTP method and URI scheme

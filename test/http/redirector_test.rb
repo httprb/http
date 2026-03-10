@@ -48,7 +48,7 @@ describe HTTP::Redirector do
 
   describe "#perform" do
     let(:options)    { {} }
-    let(:redirector) { HTTP::Redirector.new(options) }
+    let(:redirector) { HTTP::Redirector.new(**options) }
 
     it "fails with TooManyRedirectsError if max hops reached" do
       req = HTTP::Request.new verb: :head, uri: "http://example.com"
@@ -384,7 +384,7 @@ describe HTTP::Redirector do
             captured_request = request
           end
         }
-        redirector = HTTP::Redirector.new(opts)
+        redirector = HTTP::Redirector.new(**opts)
 
         req = HTTP::Request.new verb: :get, uri: "http://example.com"
         hops = [

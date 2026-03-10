@@ -8,8 +8,8 @@ require "support/servers/runner"
 require "support/ssl_helper"
 
 class DummyServer
-  def initialize(options = {})
-    @ssl        = options[:ssl]
+  def initialize(ssl: false)
+    @ssl        = ssl
     @tcp_server = TCPServer.new("127.0.0.1", 0)
     @port       = @tcp_server.addr[1]
     @memo       = {}

@@ -78,6 +78,12 @@ module LLHttp
   end
 end
 
+# Supplement: Numeric#to_i and #to_f are not in the stdlib RBS
+class Numeric
+  def to_i: () -> Integer
+  def to_f: () -> Float
+end
+
 module IO::WaitReadable
 end
 

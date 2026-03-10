@@ -34,13 +34,12 @@ describe HTTP::Retriable::Performer do
   let(:perform_spy) { { counter: 0 } }
   let(:counter_spy) { perform_spy[:counter] }
 
-  def perform(options = {}, client_arg = client, request_arg = request, &block)
+  def perform(client_arg = client, request_arg = request, **options, &block)
     # by explicitly overwriting the default delay, we make a much faster test suite
-    default_options = { delay: 0 }
-    options = default_options.merge(options)
+    options = { delay: 0 }.merge(options)
 
     HTTP::Retriable::Performer
-      .new(options)
+      .new(**options)
       .perform(client_arg, request_arg) do
         perform_spy[:counter] += 1
         block ? yield : response
@@ -82,13 +81,11 @@ describe HTTP::Retriable::Performer do
     describe "expected status codes" do
       def response(**options)
         HTTP::Response.new(
-          {
-            status:  200,
-            version: "1.1",
-            headers: {},
-            body:    "Hello world!",
-            request: request
-          }.merge(options)
+          status:  200,
+          version: "1.1",
+          headers: {},
+          body:    "Hello world!",
+          request: request, **options
         )
       end
 
@@ -275,7 +272,7 @@ describe HTTP::Retriable::Performer do
     it "does not close the connection if we get a proper response" do
       close_called = false
       mock_client = fake(close: ->(*) { close_called = true })
-      perform({}, mock_client)
+      perform(mock_client)
 
       refute close_called
     end
@@ -285,7 +282,7 @@ describe HTTP::Retriable::Performer do
       mock_client = fake(close: ->(*) { close_count += 1 })
 
       assert_raises(HTTP::OutOfRetriesError) do
-        perform({ should_retry: ->(*) { true }, tries: 3 }, mock_client)
+        perform(mock_client, should_retry: ->(*) { true }, tries: 3)
       end
 
       assert_equal 3, close_count
@@ -296,7 +293,7 @@ describe HTTP::Retriable::Performer do
       mock_client = fake(close: ->(*) { close_count += 1 })
 
       assert_raises(CustomException) do
-        perform({}, mock_client) do
+        perform(mock_client) do
           raise CustomException
         end
       end

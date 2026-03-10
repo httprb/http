@@ -66,7 +66,7 @@ describe HTTP::Response do
 
     it "supports hash pattern matching" do
       matched = case response
-                in { status: HTTP::Response::Status => s, version: "1.1" }
+                in { status: HTTP::Response::Status, version: "1.1" }
                   true
                 else
                   false
@@ -87,7 +87,7 @@ describe HTTP::Response do
 
     it "supports array pattern matching" do
       matched = case response
-                in [200, *, String => b]
+                in [200, *, String]
                   true
                 else
                   false

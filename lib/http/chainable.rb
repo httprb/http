@@ -19,8 +19,8 @@ module HTTP
     # @param (see Client#request)
     # @return [HTTP::Response]
     # @api public
-    def request(verb, uri, opts = {})
-      make_client(default_options).request(verb, uri, opts)
+    def request(verb, uri, **)
+      make_client(default_options).request(verb, uri, **)
     end
 
     # Set timeout on the request
@@ -127,12 +127,12 @@ module HTTP
     # @example
     #   HTTP.follow.get("http://example.com")
     #
-    # @param [Hash] options redirect options
+    # @param options [Hash] redirect options
     # @return [HTTP::Session]
     # @see Redirector#initialize
     # @api public
-    def follow(options = {})
-      branch default_options.with_follow options
+    def follow(**options)
+      branch default_options.with_follow(options)
     end
 
     # Make a request with the given headers
@@ -210,17 +210,12 @@ module HTTP
     #   HTTP.basic_auth(user: "user", pass: "pass").get("http://example.com")
     #
     # @see http://tools.ietf.org/html/rfc2617
-    # @param [#fetch] opts
-    # @option opts [#to_s] :user
-    # @option opts [#to_s] :pass
+    # @param [#to_s] user
+    # @param [#to_s] pass
     # @return [HTTP::Session]
     # @api public
-    def basic_auth(opts)
-      user  = opts.fetch(:user)
-      pass  = opts.fetch(:pass)
-      creds = "#{user}:#{pass}"
-
-      auth("Basic #{encode64(creds)}")
+    def basic_auth(user:, pass:)
+      auth("Basic #{encode64("#{user}:#{pass}")}")
     end
 
     # Get options for HTTP

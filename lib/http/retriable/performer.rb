@@ -24,24 +24,25 @@ module HTTP
         IOError
       ].freeze
 
-      # @param [Hash] opts
-      # @option opts [#to_i] :tries (5)
-      # @option opts [#call, #to_i] :delay (DELAY_PROC)
-      # @option opts [Array(Exception)] :exceptions (RETRIABLE_ERRORS)
-      # @option opts [Array(#to_i)] :retry_statuses
-      # @option opts [#call] :on_retry
-      # @option opts [#to_f] :max_delay (Float::MAX)
-      # @option opts [#call] :should_retry
       # Create a new retry performer
+      #
+      # @param [#to_i] tries maximum number of attempts
+      # @param [#call, #to_i, nil] delay delay between retries
+      # @param [Array<Exception>] exceptions exception classes to retry
+      # @param [Array<#to_i>, nil] retry_statuses status codes to retry
+      # @param [#call] on_retry callback invoked on each retry
+      # @param [#to_f] max_delay maximum delay between retries
+      # @param [#call, nil] should_retry custom retry predicate
       # @api private
       # @return [HTTP::Retriable::Performer]
-      def initialize(opts)
-        @exception_classes = opts.fetch(:exceptions, RETRIABLE_ERRORS)
-        @retry_statuses = opts[:retry_statuses]
-        @tries = opts.fetch(:tries, 5).to_i
-        @on_retry = opts.fetch(:on_retry, ->(*_args) {})
-        @should_retry_proc = opts[:should_retry]
-        @delay_calculator = DelayCalculator.new(opts)
+      def initialize(tries: 5, delay: nil, exceptions: RETRIABLE_ERRORS, retry_statuses: nil,
+                     on_retry: ->(*_args) {}, max_delay: Float::MAX, should_retry: nil)
+        @exception_classes = exceptions
+        @retry_statuses = retry_statuses
+        @tries = tries.to_i
+        @on_retry = on_retry
+        @should_retry_proc = should_retry
+        @delay_calculator = DelayCalculator.new(delay: delay, max_delay: max_delay)
       end
 
       # Execute request with retry logic

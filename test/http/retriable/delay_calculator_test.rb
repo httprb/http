@@ -15,12 +15,12 @@ describe HTTP::Retriable::DelayCalculator do
   end
 
   def call_delay(iterations, **options)
-    HTTP::Retriable::DelayCalculator.new(options).call(iterations, response)
+    HTTP::Retriable::DelayCalculator.new(**options).call(iterations, response)
   end
 
   def call_retry_header(value, **options)
     response.headers["Retry-After"] = value
-    HTTP::Retriable::DelayCalculator.new(options).call(rand(1...100), response)
+    HTTP::Retriable::DelayCalculator.new(**options).call(rand(1...100), response)
   end
 
   it "prevents negative sleep time" do

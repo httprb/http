@@ -238,7 +238,7 @@ module HTTP
     # @return [void]
     # @api private
     def connect_socket(req, options)
-      @socket = options.timeout_class.new(options.timeout_options) # steep:ignore
+      @socket = options.timeout_class.new(**options.timeout_options) # steep:ignore
       @socket.connect(options.socket_class, req.socket_host, req.socket_port, nodelay: options.nodelay)
 
       send_proxy_connect_request(req)

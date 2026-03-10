@@ -322,16 +322,12 @@ describe HTTP do
   end
 
   describe ".basic_auth" do
-    it "fails when options is not a Hash" do
-      assert_raises(NoMethodError) { HTTP.basic_auth "[FOOBAR]" }
-    end
-
     it "fails when :pass is not given" do
-      assert_raises(KeyError) { HTTP.basic_auth user: "[USER]" }
+      assert_raises(ArgumentError) { HTTP.basic_auth(user: "[USER]") }
     end
 
     it "fails when :user is not given" do
-      assert_raises(KeyError) { HTTP.basic_auth pass: "[PASS]" }
+      assert_raises(ArgumentError) { HTTP.basic_auth(pass: "[PASS]") }
     end
 
     it "sets Authorization header with proper BasicAuth value" do
@@ -729,7 +725,7 @@ describe HTTP do
     describe ".#{verb}" do
       it "delegates to #request" do
         mock_client = Minitest::Mock.new
-        mock_client.expect(:request, nil, [verb, "http://example.com/", {}])
+        mock_client.expect(:request, nil, [verb, "http://example.com/"])
         HTTP::Client.stub(:new, mock_client) do
           HTTP.public_send(verb, "http://example.com/")
         end

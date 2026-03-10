@@ -43,14 +43,14 @@ module HTTP
     # @param opts [Hash] request options
     # @return [HTTP::Response] the response
     # @api public
-    def request(verb, uri, opts = {})
+    def request(verb, uri, **opts)
       opts    = @default_options.merge(opts)
       builder = Request::Builder.new(opts)
       req     = builder.build(verb, uri)
       res     = perform(req, opts)
       return res unless opts.follow
 
-      Redirector.new(opts.follow).perform(req, res) do |request|
+      Redirector.new(**opts.follow).perform(req, res) do |request|
         perform(builder.wrap(request), opts)
       end
     end
@@ -123,7 +123,7 @@ module HTTP
     # @return [HTTP::Response] the response
     # @api private
     def perform_with_retry(req, options)
-      Retriable::Performer.new(options.retriable).perform(self, req) do
+      Retriable::Performer.new(**options.retriable).perform(self, req) do
         perform_once(req, options)
       end
     end

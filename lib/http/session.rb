@@ -67,7 +67,7 @@ module HTTP
     # @param opts [Hash] request options
     # @return [HTTP::Response] the response
     # @api public
-    def request(verb, uri, opts = {})
+    def request(verb, uri, **opts)
       cookie_jar = CookieJar.new
       merged  = default_options.merge(opts)
       builder = Request::Builder.new(merged)
@@ -97,7 +97,7 @@ module HTTP
     def perform_redirects(jar, client, req, res, opts)
       builder = Request::Builder.new(opts)
       follow = opts.follow || {} #: Hash[untyped, untyped]
-      Redirector.new(follow).perform(req, res) do |redirect_req|
+      Redirector.new(**follow).perform(req, res) do |redirect_req|
         wrapped = builder.wrap(redirect_req)
         apply_cookies(jar, wrapped)
         response = client.perform(wrapped, opts)

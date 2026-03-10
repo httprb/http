@@ -78,7 +78,7 @@ module HTTP
         logger.debug { stringify_headers(response.headers) }
         return response unless logger.debug?
 
-        Response.new(logged_response_options(response))
+        Response.new(**logged_response_options(response)) # steep:ignore
       end
 
       private

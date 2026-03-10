@@ -12,11 +12,11 @@ module HTTP
       #   HTTP.head("http://example.com")
       #
       # @param [String, URI] uri URI to request
-      # @param [Hash] options request options
+      # @param options [Hash] request options
       # @return [HTTP::Response]
       # @api public
-      def head(uri, options = {})
-        request :head, uri, options
+      def head(uri, **)
+        request(:head, uri, **)
       end
 
       # Get a resource
@@ -25,11 +25,11 @@ module HTTP
       #   HTTP.get("http://example.com")
       #
       # @param [String, URI] uri URI to request
-      # @param [Hash] options request options
+      # @param options [Hash] request options
       # @return [HTTP::Response]
       # @api public
-      def get(uri, options = {})
-        request :get, uri, options
+      def get(uri, **)
+        request(:get, uri, **)
       end
 
       # Post to a resource
@@ -38,11 +38,11 @@ module HTTP
       #   HTTP.post("http://example.com", body: "data")
       #
       # @param [String, URI] uri URI to request
-      # @param [Hash] options request options
+      # @param options [Hash] request options
       # @return [HTTP::Response]
       # @api public
-      def post(uri, options = {})
-        request :post, uri, options
+      def post(uri, **)
+        request(:post, uri, **)
       end
 
       # Put to a resource
@@ -51,11 +51,11 @@ module HTTP
       #   HTTP.put("http://example.com", body: "data")
       #
       # @param [String, URI] uri URI to request
-      # @param [Hash] options request options
+      # @param options [Hash] request options
       # @return [HTTP::Response]
       # @api public
-      def put(uri, options = {})
-        request :put, uri, options
+      def put(uri, **)
+        request(:put, uri, **)
       end
 
       # Delete a resource
@@ -64,11 +64,11 @@ module HTTP
       #   HTTP.delete("http://example.com/resource")
       #
       # @param [String, URI] uri URI to request
-      # @param [Hash] options request options
+      # @param options [Hash] request options
       # @return [HTTP::Response]
       # @api public
-      def delete(uri, options = {})
-        request :delete, uri, options
+      def delete(uri, **)
+        request(:delete, uri, **)
       end
 
       # Echo the request back to the client
@@ -77,11 +77,11 @@ module HTTP
       #   HTTP.trace("http://example.com")
       #
       # @param [String, URI] uri URI to request
-      # @param [Hash] options request options
+      # @param options [Hash] request options
       # @return [HTTP::Response]
       # @api public
-      def trace(uri, options = {})
-        request :trace, uri, options
+      def trace(uri, **)
+        request(:trace, uri, **)
       end
 
       # Return the methods supported on the given URI
@@ -90,11 +90,11 @@ module HTTP
       #   HTTP.options("http://example.com")
       #
       # @param [String, URI] uri URI to request
-      # @param [Hash] options request options
+      # @param options [Hash] request options
       # @return [HTTP::Response]
       # @api public
-      def options(uri, options = {})
-        request :options, uri, options
+      def options(uri, **)
+        request(:options, uri, **)
       end
 
       # Convert to a transparent TCP/IP tunnel
@@ -103,11 +103,11 @@ module HTTP
       #   HTTP.connect("http://example.com")
       #
       # @param [String, URI] uri URI to request
-      # @param [Hash] options request options
+      # @param options [Hash] request options
       # @return [HTTP::Response]
       # @api public
-      def connect(uri, options = {})
-        request :connect, uri, options
+      def connect(uri, **)
+        request(:connect, uri, **)
       end
 
       # Apply partial modifications to a resource
@@ -116,11 +116,11 @@ module HTTP
       #   HTTP.patch("http://example.com/resource", body: "data")
       #
       # @param [String, URI] uri URI to request
-      # @param [Hash] options request options
+      # @param options [Hash] request options
       # @return [HTTP::Response]
       # @api public
-      def patch(uri, options = {})
-        request :patch, uri, options
+      def patch(uri, **)
+        request(:patch, uri, **)
       end
     end
   end

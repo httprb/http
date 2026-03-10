@@ -75,24 +75,25 @@ module HTTP
     # @example
     #   Response.new(status: 200, version: "1.1", request: req)
     #
-    # @option opts [Integer] :status Status code
-    # @option opts [String] :version HTTP version
-    # @option opts [Hash] :headers
-    # @option opts [Hash] :proxy_headers
-    # @option opts [HTTP::Connection] :connection
-    # @option opts [String] :encoding Encoding to use when reading body
-    # @option opts [String] :body
-    # @option opts [HTTP::Request] request The request this is in response to.
-    # @option opts [String] :uri (DEPRECATED) used to populate a missing request
+    # @param [Integer] status Status code
+    # @param [String] version HTTP version
+    # @param [Hash] headers
+    # @param [Hash] proxy_headers
+    # @param [HTTP::Connection, nil] connection
+    # @param [String, nil] encoding Encoding to use when reading body
+    # @param [String, nil] body
+    # @param [HTTP::Request, nil] request The request this is in response to
+    # @param [String, nil] uri (DEPRECATED) used to populate a missing request
     # @return [Response]
     # @api public
-    def initialize(opts)
-      @version       = opts.fetch(:version)
-      @request       = init_request(opts)
-      @status        = HTTP::Response::Status.new(opts.fetch(:status))
-      @headers       = HTTP::Headers.coerce(opts[:headers] || {})
-      @proxy_headers = HTTP::Headers.coerce(opts[:proxy_headers] || {})
-      @body          = init_body(opts)
+    def initialize(status:, version:, headers: {}, proxy_headers: {}, connection: nil,
+                   encoding: nil, body: nil, request: nil, uri: nil)
+      @version       = version
+      @request       = init_request(request, uri)
+      @status        = HTTP::Response::Status.new(status)
+      @headers       = HTTP::Headers.coerce(headers)
+      @proxy_headers = HTTP::Headers.coerce(proxy_headers)
+      @body          = init_body(body, connection, encoding)
     end
 
     # @!method reason
@@ -316,34 +317,32 @@ module HTTP
       Encoding::BINARY
     end
 
-    # Initialize the response body from options
+    # Initialize the response body
     #
     # @return [Body]
     # @api private
-    def init_body(opts)
-      if opts.include?(:body)
-        opts.fetch(:body)
+    def init_body(body, connection, encoding)
+      if body
+        body
       else
-        connection = opts.fetch(:connection)
-        encoding = opts[:encoding] || charset || default_encoding
+        encoding ||= charset || default_encoding
 
         Response::Body.new(connection, encoding: encoding)
       end
     end
 
-    # Initialize an HTTP::Request from options
+    # Initialize an HTTP::Request
     #
     # @return [HTTP::Request]
     # @api private
-    def init_request(opts)
-      raise ArgumentError, ":uri is for backwards compatibilty and conflicts with :request" \
-        if opts[:request] && opts[:uri]
+    def init_request(request, uri)
+      raise ArgumentError, ":uri is for backwards compatibilty and conflicts with :request" if request && uri
 
       # For backwards compatibilty
-      if opts[:uri]
-        HTTP::Request.new(uri: opts[:uri], verb: :get)
+      if uri
+        HTTP::Request.new(uri: uri, verb: :get)
       else
-        opts.fetch(:request)
+        request
       end
     end
   end

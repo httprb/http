@@ -5,7 +5,7 @@ module HTTP
 
   extend Chainable
 
-  def self.[]: (untyped headers) -> Session
+  def self.[]: (Hash[String | Symbol, String] headers) -> Session
 
   module Base64
     def self?.encode64: (String input) -> String
@@ -15,51 +15,75 @@ module HTTP
     include Base64
     include Chainable::Verbs
 
-    PROXY_ARG_MAP: Array[Array[untyped]]
+    PROXY_ARG_MAP: Array[[Symbol, Integer, Class]]
 
     @default_options: Options
 
     module Verbs : _VerbsHost
       interface _VerbsHost
-        def request: (Symbol verb, untyped uri, ?untyped opts) -> Response
+        def request: (verb verb, String | URI uri, **untyped) -> Response
       end
 
-      def head: (untyped uri, ?::Hash[untyped, untyped] options) -> Response
-      def get: (untyped uri, ?::Hash[untyped, untyped] options) -> Response
-      def post: (untyped uri, ?::Hash[untyped, untyped] options) -> Response
-      def put: (untyped uri, ?::Hash[untyped, untyped] options) -> Response
-      def delete: (untyped uri, ?::Hash[untyped, untyped] options) -> Response
-      def trace: (untyped uri, ?::Hash[untyped, untyped] options) -> Response
-      def options: (untyped uri, ?::Hash[untyped, untyped] options) -> Response
-      def connect: (untyped uri, ?::Hash[untyped, untyped] options) -> Response
-      def patch: (untyped uri, ?::Hash[untyped, untyped] options) -> Response
+      def head: (String | URI uri, **untyped opts) -> Response
+      def get: (String | URI uri, **untyped opts) -> Response
+      def post: (String | URI uri, **untyped opts) -> Response
+      def put: (String | URI uri, **untyped opts) -> Response
+      def delete: (String | URI uri, **untyped opts) -> Response
+      def trace: (String | URI uri, **untyped opts) -> Response
+      def options: (String | URI uri, **untyped opts) -> Response
+      def connect: (String | URI uri, **untyped opts) -> Response
+      def patch: (String | URI uri, **untyped opts) -> Response
     end
 
-    def request: (Symbol verb, untyped uri, ?untyped opts) -> Response
-    def timeout: (untyped options) -> Session
-    def persistent: (String host, ?timeout: Integer) ?{ (Client) -> untyped } -> untyped
-    def via: (*untyped proxy) -> Session
+    def request: (
+      verb verb,
+      String | URI uri,
+      ?response: Symbol,
+      ?encoding: Encoding?,
+      ?nodelay: bool,
+      ?keep_alive_timeout: Integer,
+      ?proxy: Hash[Symbol, untyped],
+      ?ssl: Hash[Symbol, untyped],
+      ?headers: Hash[String | Symbol, untyped] | Headers,
+      ?features: Hash[Symbol, untyped],
+      ?timeout_class: Class,
+      ?timeout_options: Hash[Symbol, Numeric],
+      ?socket_class: Class,
+      ?ssl_socket_class: Class,
+      ?params: untyped,
+      ?form: untyped,
+      ?json: untyped,
+      ?body: untyped,
+      ?follow: bool,
+      ?retriable: bool,
+      ?persistent: String?,
+      ?ssl_context: OpenSSL::SSL::SSLContext?
+    ) -> Response
+    def timeout: (Numeric | Hash[Symbol, Numeric] | :null options) -> Session
+    def persistent: (String host, ?timeout: Integer) -> Client
+                   | (String host, ?timeout: Integer) { (Client) -> void } -> void
+    def via: (*(String | Integer | Hash[String, String]) proxy) -> Session
     alias through via
-    def follow: (?::Hash[untyped, untyped] options) -> Session
-    def headers: (untyped headers) -> Session
-    def cookies: (untyped cookies) -> Session
-    def encoding: (untyped encoding) -> Session
-    def accept: (untyped type) -> Session
-    def auth: (untyped value) -> Session
-    def basic_auth: (untyped opts) -> Session
+    def follow: (?strict: bool, ?max_hops: Integer, ?on_redirect: (^(Response, Request) -> void)?) -> Session
+    def headers: (Hash[String | Symbol, untyped] headers) -> Session
+    def cookies: (Hash[String | Symbol, String] | Array[Cookie] cookies) -> Session
+    def encoding: (String | Encoding encoding) -> Session
+    def accept: (String | Symbol type) -> Session
+    def auth: (String value) -> Session
+    def basic_auth: (user: String, pass: String) -> Session
     def default_options: () -> Options
-    def default_options=: (untyped opts) -> Options
+    def default_options=: (Hash[Symbol, untyped] | Options opts) -> Options
     def nodelay: () -> Session
-    def use: (*untyped features) -> Session
+    def use: (*(Symbol | Hash[Symbol, Hash[Symbol, untyped]]) features) -> Session
     def retriable: (**untyped options) -> Session
 
     private
 
     def branch: (Options options) -> Session
     def make_client: (Options options) -> Client
-    def build_proxy_hash: (Array[untyped] proxy) -> Hash[Symbol, untyped]
-    def resolve_timeout_hash: (Hash[Symbol, untyped] options) -> [Class, Hash[Symbol, untyped]]
-    def resolve_global_only: (Numeric? global) -> [Class, Hash[Symbol, untyped]]
+    def build_proxy_hash: (Array[String | Integer | Hash[String, String]] proxy) -> Hash[Symbol, String | Integer | Hash[String, String]]
+    def resolve_timeout_hash: (Hash[Symbol, Numeric] options) -> [Class, Hash[Symbol, Numeric]]
+    def resolve_global_only: (Numeric? global) -> [Class, Hash[Symbol, Numeric]]
   end
 
   class Client
@@ -70,8 +94,31 @@ module HTTP
     @connection: untyped
     @state: Symbol
 
-    def initialize: (?untyped? default_options, **untyped options) -> void
-    def request: (Symbol verb, untyped uri, ?untyped opts) -> Response
+    def initialize: (?Options? default_options, **untyped) -> void
+    def request: (
+      verb verb,
+      String | URI uri,
+      ?response: Symbol,
+      ?encoding: Encoding?,
+      ?nodelay: bool,
+      ?keep_alive_timeout: Integer,
+      ?proxy: Hash[Symbol, untyped],
+      ?ssl: Hash[Symbol, untyped],
+      ?headers: Hash[String | Symbol, untyped] | Headers,
+      ?features: Hash[Symbol, untyped],
+      ?timeout_class: Class,
+      ?timeout_options: Hash[Symbol, Numeric],
+      ?socket_class: Class,
+      ?ssl_socket_class: Class,
+      ?params: untyped,
+      ?form: untyped,
+      ?json: untyped,
+      ?body: untyped,
+      ?follow: bool,
+      ?retriable: bool,
+      ?persistent: String?,
+      ?ssl_context: OpenSSL::SSL::SSLContext?
+    ) -> Response
     def persistent?: () -> bool
     def perform: (Request req, Options options) -> Response
     def close: () -> void
@@ -86,7 +133,7 @@ module HTTP
     def build_response: (Request req, Options options) -> Response
     def build_wrapped_response: (Request req, Options options) -> Response
     def send_request: (Request req, Options options) -> void
-    def verify_connection!: (untyped uri) -> void
+    def verify_connection!: (URI uri) -> void
   end
 
   class Session
@@ -95,16 +142,39 @@ module HTTP
 
     @default_options: Options
 
-    def initialize: (?untyped? default_options, **untyped options) -> void
-    def request: (Symbol verb, untyped uri, ?untyped opts) -> Response
+    def initialize: (?Options? default_options, **untyped) -> void
+    def request: (
+      verb verb,
+      String | URI uri,
+      ?response: Symbol,
+      ?encoding: Encoding?,
+      ?nodelay: bool,
+      ?keep_alive_timeout: Integer,
+      ?proxy: Hash[Symbol, untyped],
+      ?ssl: Hash[Symbol, untyped],
+      ?headers: Hash[String | Symbol, untyped] | Headers,
+      ?features: Hash[Symbol, untyped],
+      ?timeout_class: Class,
+      ?timeout_options: Hash[Symbol, Numeric],
+      ?socket_class: Class,
+      ?ssl_socket_class: Class,
+      ?params: untyped,
+      ?form: untyped,
+      ?json: untyped,
+      ?body: untyped,
+      ?follow: bool,
+      ?retriable: bool,
+      ?persistent: String?,
+      ?ssl_context: OpenSSL::SSL::SSLContext?
+    ) -> Response
     def persistent?: () -> bool
 
     private
 
-    def perform_redirects: (untyped jar, Client client, Request req, Response res, Options opts) -> Response
-    def load_cookies: (untyped jar, Request request) -> void
-    def store_cookies: (untyped jar, Response response) -> void
-    def apply_cookies: (untyped jar, Request request) -> void
+    def perform_redirects: (CookieJar jar, Client client, Request req, Response res, Options opts) -> Response
+    def load_cookies: (CookieJar jar, Request request) -> void
+    def store_cookies: (CookieJar jar, Response response) -> void
+    def apply_cookies: (CookieJar jar, Request request) -> void
   end
 
   class Headers
@@ -143,16 +213,16 @@ module HTTP
     def self.normalizer: () -> Headers::Normalizer
 
     def initialize: () -> void
-    def set: (untyped name, untyped value) -> void
+    def set: (String | Symbol name, String | Array[String] value) -> void
     alias []= set
-    def delete: (untyped name) -> void
-    def add: (untyped name, untyped value) -> void
-    def get: (untyped name) -> Array[String]
-    def []: (untyped name) -> (String | Array[String] | nil)
-    def include?: (untyped name) -> bool
-    def to_h: () -> Hash[String, untyped]
+    def delete: (String | Symbol name) -> void
+    def add: (String | Symbol name, String | Array[String] value) -> void
+    def get: (String | Symbol name) -> Array[String]
+    def []: (String | Symbol name) -> (String | Array[String] | nil)
+    def include?: (String | Symbol name) -> bool
+    def to_h: () -> Hash[String, String | Array[String] | nil]
     alias to_hash to_h
-    def deconstruct_keys: (Array[Symbol]? keys) -> Hash[Symbol, untyped]
+    def deconstruct_keys: (Array[Symbol]? keys) -> Hash[Symbol, String | Array[String] | nil]
     def to_a: () -> Array[Array[String]]
     def inspect: () -> String
     def keys: () -> Array[String]
@@ -167,9 +237,9 @@ module HTTP
 
     private
 
-    def wire_name_for: (untyped name, String lookup_name) -> String
-    def normalize_header: (String name) -> String
-    def validate_value: (untyped value) -> String
+    def wire_name_for: (String | Symbol name, String lookup_name) -> String
+    def normalize_header: (String | Symbol name) -> String
+    def validate_value: (String | Array[String] value) -> String
   end
 
   class Headers
@@ -193,7 +263,7 @@ module HTTP
       end
 
       def initialize: () -> void
-      def call: (String name) -> String
+      def call: (String | Symbol name) -> String
 
       private
 
@@ -218,15 +288,15 @@ module HTTP
     public
 
     def initialize: (?String? mime_type, ?String? charset) -> void
-    def deconstruct_keys: (Array[Symbol]? keys) -> Hash[Symbol, untyped]
+    def deconstruct_keys: (Array[Symbol]? keys) -> Hash[Symbol, String?]
   end
 
   class Feature
-    def wrap_request: (untyped request) -> untyped
-    def wrap_response: (untyped response) -> untyped
-    def on_request: (untyped _request) -> nil
-    def around_request: (untyped request) { (untyped) -> Response } -> Response
-    def on_error: (untyped _request, untyped _error) -> nil
+    def wrap_request: (Request request) -> Request
+    def wrap_response: (Response response) -> Response
+    def on_request: (Request _request) -> nil
+    def around_request: (Request request) { (Request) -> Response } -> Response
+    def on_error: (Request _request, Exception _error) -> nil
   end
 
   module Features
@@ -236,22 +306,23 @@ module HTTP
       attr_reader method: String
 
       def initialize: (?method: String) -> void
-      def wrap_request: (untyped request) -> untyped
-      def deflated_body: (untyped body) -> untyped
+      def wrap_request: (Request request) -> Request
+      def deflated_body: (Request::Body body) -> CompressedBody?
 
       private
 
-      def build_deflated_request: (untyped request) -> Request
+      def build_deflated_request: (Request request) -> Request
 
       public
 
       class CompressedBody < Request::Body
-        @body: untyped
-        @compressed: untyped
+        @body: Request::Body
+        @compressed: Tempfile?
 
-        def initialize: (untyped uncompressed_body) -> void
+        def initialize: (Request::Body uncompressed_body) -> void
         def size: () -> Integer
-        def each: () ?{ (String) -> void } -> untyped
+        def each: () { (String) -> void } -> self
+               | () -> Enumerator[String, self]
         def compress: () ?{ (String) -> void } -> void
 
         private
@@ -264,10 +335,10 @@ module HTTP
         def compress: () ?{ (String) -> void } -> void
 
         class BlockIO
-          @block: untyped
+          @block: Proc
 
-          def initialize: (untyped block) -> void
-          def write: (String data) -> untyped
+          def initialize: (Proc block) -> void
+          def write: (String data) -> Integer
         end
       end
 
@@ -279,13 +350,13 @@ module HTTP
     class AutoInflate < Feature
       SUPPORTED_ENCODING: Set[String]
 
-      def wrap_response: (untyped response) -> untyped
-      def stream_for: (untyped connection, ?encoding: Encoding) -> Response::Body
+      def wrap_response: (Response response) -> Response
+      def stream_for: (Connection? connection, ?encoding: Encoding) -> Response::Body
 
       private
 
-      def inflated_response_options: (untyped response) -> Hash[Symbol, untyped]
-      def supported_encoding?: (untyped response) -> bool
+      def inflated_response_options: (Response response) -> Hash[Symbol, untyped]
+      def supported_encoding?: (Response response) -> bool
     end
 
     class Instrumentation < Feature
@@ -294,8 +365,8 @@ module HTTP
       attr_reader error_name: String
 
       def initialize: (?instrumenter: untyped, ?namespace: String) -> void
-      def around_request: (untyped request) { (untyped) -> Response } -> Response
-      def on_error: (untyped request, untyped error) -> untyped
+      def around_request: (Request request) { (Request) -> Response } -> Response
+      def on_error: (Request request, Exception error) -> void
 
       class NullInstrumenter
         def instrument: (String name, ?Hash[Symbol, untyped] payload) ?{ (Hash[Symbol, untyped]) -> void } -> untyped
@@ -321,13 +392,13 @@ module HTTP
       attr_reader logger: untyped
 
       def initialize: (?logger: untyped) -> void
-      def wrap_request: (untyped request) -> untyped
-      def wrap_response: (untyped response) -> untyped
+      def wrap_request: (Request request) -> Request
+      def wrap_response: (Response response) -> Response
 
       private
 
-      def log_response_body_inline: (untyped response) -> untyped
-      def logged_response_options: (untyped response) -> Hash[Symbol, untyped]
+      def log_response_body_inline: (Response response) -> Response
+      def logged_response_options: (Response response) -> Hash[Symbol, untyped]
       def logged_body: (Response::Body body) -> Response::Body
       def stringify_headers: (Headers headers) -> String
 
@@ -335,37 +406,37 @@ module HTTP
         attr_reader connection: untyped
 
         def initialize: (untyped stream, untyped logger) -> void
-        def readpartial: (*untyped) -> String
+        def readpartial: (?Integer size, ?String? outbuf) -> String
       end
     end
 
     class NormalizeUri < Feature
-      attr_reader normalizer: untyped
+      attr_reader normalizer: ^(String | URI) -> URI
 
-      def initialize: (?normalizer: untyped) -> void
+      def initialize: (?normalizer: ^(String | URI) -> URI) -> void
     end
 
     class RaiseError < Feature
       @ignore: Array[Integer]
 
       def initialize: (?ignore: Array[Integer]) -> void
-      def wrap_response: (untyped response) -> untyped
+      def wrap_response: (Response response) -> Response
     end
   end
 
   module MimeType
-    def self.register_adapter: (untyped type, untyped adapter) -> untyped
-    def self.[]: (untyped type) -> untyped
-    def self.register_alias: (untyped type, untyped shortcut) -> untyped
-    def self.normalize: (untyped type) -> String
+    def self.register_adapter: (String | Symbol type, untyped adapter) -> void
+    def self.[]: (String | Symbol type) -> untyped
+    def self.register_alias: (String | Symbol type, String | Symbol shortcut) -> void
+    def self.normalize: (String | Symbol type) -> String
 
     self.@adapters: Hash[String, untyped]
-    self.@aliases: Hash[Symbol, String]
+    self.@aliases: Hash[String | Symbol, String]
 
     private
 
     def self.adapters: () -> Hash[String, untyped]
-    def self.aliases: () -> Hash[Symbol, String]
+    def self.aliases: () -> Hash[String | Symbol, String]
 
     class Adapter
       include Singleton
@@ -400,91 +471,91 @@ module HTTP
 
     private
 
-    def self.def_option: (untyped name, ?reader_only: bool) ?{ (untyped) -> untyped } -> void
-    def self.def_option_accessor: (untyped name, reader_only: bool) -> void
+    def self.def_option: (String | Symbol name, ?reader_only: bool) ?{ (untyped) -> untyped } -> void
+    def self.def_option_accessor: (String | Symbol name, reader_only: bool) -> void
 
     public
 
     def initialize: (
-      ?response: untyped,
+      ?response: Symbol,
       ?encoding: Encoding?,
       ?nodelay: bool,
       ?keep_alive_timeout: Integer,
-      ?proxy: Hash[untyped, untyped],
-      ?ssl: untyped,
-      ?headers: untyped,
-      ?features: Hash[untyped, untyped],
+      ?proxy: Hash[Symbol, untyped],
+      ?ssl: Hash[Symbol, untyped],
+      ?headers: Hash[String | Symbol, untyped] | Headers,
+      ?features: Hash[Symbol, untyped],
       ?timeout_class: Class,
-      ?timeout_options: Hash[Symbol, untyped],
+      ?timeout_options: Hash[Symbol, Numeric],
       ?socket_class: Class,
       ?ssl_socket_class: Class,
       ?params: untyped,
       ?form: untyped,
       ?json: untyped,
       ?body: untyped,
-      ?follow: untyped,
-      ?retriable: untyped,
+      ?follow: bool,
+      ?retriable: bool,
       ?persistent: String?,
-      ?ssl_context: untyped
+      ?ssl_context: OpenSSL::SSL::SSLContext?
     ) -> void
-    def features=: (untyped features) -> untyped
+    def features=: (Hash[Symbol, untyped] features) -> Hash[Symbol, Feature]
 
     attr_reader features: Hash[Symbol, Feature]
 
-    def follow=: (untyped value) -> untyped
-    def retriable=: (untyped value) -> untyped
-    def persistent=: (untyped value) -> String?
+    def follow=: (bool value) -> void
+    def retriable=: (bool value) -> void
+    def persistent=: (String? value) -> String?
     def persistent?: () -> bool
-    def merge: (untyped other) -> Options
-    def to_hash: () -> Hash[untyped, untyped]
+    def merge: (Hash[Symbol, untyped] | Options other) -> Options
+    def to_hash: () -> Hash[Symbol, untyped]
     def dup: () ?{ (Options) -> void } -> Options
     def feature: (Symbol name) -> untyped
 
     # Dynamic options generated by def_option
     attr_accessor headers: Headers
-    attr_accessor proxy: Hash[untyped, untyped]
+    attr_accessor proxy: Hash[Symbol, untyped]
     attr_accessor params: untyped
     attr_accessor form: untyped
     attr_accessor json: untyped
     attr_accessor body: untyped
-    attr_accessor response: untyped
+    attr_accessor response: Symbol
     attr_accessor socket_class: Class
     attr_accessor nodelay: bool
     attr_accessor ssl_socket_class: Class
-    attr_accessor ssl_context: untyped
-    attr_accessor ssl: untyped
+    attr_accessor ssl_context: OpenSSL::SSL::SSLContext?
+    attr_accessor ssl: Hash[Symbol, untyped]
     attr_accessor keep_alive_timeout: Integer
     attr_accessor timeout_class: Class
-    attr_accessor timeout_options: Hash[Symbol, untyped]
+    attr_accessor timeout_options: Hash[Symbol, Numeric]
     attr_accessor encoding: Encoding?
-    attr_reader follow: Hash[untyped, untyped]?
-    attr_reader retriable: Hash[untyped, untyped]?
+    attr_reader follow: Hash[Symbol, untyped]?
+    attr_reader retriable: Hash[Symbol, untyped]?
     attr_reader persistent: String?
 
-    def with_headers: (untyped value) -> Options
-    def with_encoding: (untyped value) -> Options
-    def with_features: (untyped value) -> Options
-    def with_follow: (untyped value) -> Options
-    def with_retriable: (untyped value) -> Options
-    def with_persistent: (untyped value) -> Options
-    def with_proxy: (untyped value) -> Options
-    def with_params: (untyped value) -> Options
+    def with_headers: (Hash[String | Symbol, untyped] | Headers value) -> Options
+    def with_encoding: (String | Encoding value) -> Options
+    def with_features: (Array[Symbol | Hash[Symbol, untyped]] value) -> Options
+    def with_follow: (Hash[Symbol, untyped] | bool value) -> Options
+    def with_retriable: (Hash[Symbol, untyped] | bool value) -> Options
+    def with_persistent: (String value) -> Options
+    def with_proxy: (Hash[Symbol, untyped] value) -> Options
+    def with_params: (Hash[String | Symbol, untyped] value) -> Options
     def with_form: (untyped value) -> Options
     def with_json: (untyped value) -> Options
     def with_body: (untyped value) -> Options
-    def with_response: (untyped value) -> Options
-    def with_socket_class: (untyped value) -> Options
-    def with_nodelay: (untyped value) -> Options
-    def with_ssl_socket_class: (untyped value) -> Options
-    def with_ssl_context: (untyped value) -> Options
-    def with_ssl: (untyped value) -> Options
-    def with_keep_alive_timeout: (untyped value) -> Options
-    def with_timeout_class: (untyped value) -> Options
-    def with_timeout_options: (untyped value) -> Options
+    def with_response: (Symbol value) -> Options
+    def with_socket_class: (Class value) -> Options
+    def with_nodelay: (bool value) -> Options
+    def with_ssl_socket_class: (Class value) -> Options
+    def with_ssl_context: (OpenSSL::SSL::SSLContext? value) -> Options
+    def with_ssl: (Hash[Symbol, untyped] value) -> Options
+    def with_keep_alive_timeout: (Integer value) -> Options
+    def with_timeout_class: (Class value) -> Options
+    def with_timeout_options: (Hash[Symbol, Numeric] value) -> Options
 
     private
 
-    def assign_options: (untyped env) -> void
+    def assign_options: (Binding env) -> void
     def argument_error!: (String message) -> bot
   end
 
@@ -500,17 +571,17 @@ module HTTP
     HTTP_SCHEME: String
     HTTPS_SCHEME: String
     PERCENT_ENCODE: Regexp
-    NORMALIZER: ^(untyped) -> URI
+    NORMALIZER: ^(String | URI) -> URI
 
     def self.parse: (untyped uri) -> URI
     def self.form_encode: (untyped form_values, ?sort: bool) -> String
-    def self.percent_encode: (untyped string) -> untyped
+    def self.percent_encode: (String? string) -> String?
 
-    def initialize: (?untyped options_or_uri) -> void
+    def initialize: (?Hash[Symbol, untyped] | Addressable::URI options_or_uri) -> void
     def ==: (untyped other) -> bool
     def eql?: (untyped other) -> bool
     def hash: () -> Integer
-    def host=: (untyped new_host) -> void
+    def host=: (String? new_host) -> void
     def port: () -> Integer?
     def http?: () -> bool
     def https?: () -> bool
@@ -518,34 +589,34 @@ module HTTP
     def to_s: () -> String
     alias to_str to_s
     def inspect: () -> String
-    def deconstruct_keys: (Array[Symbol]? keys) -> Hash[Symbol, untyped]
+    def deconstruct_keys: (Array[Symbol]? keys) -> Hash[Symbol, String? | Integer?]
 
     # Delegated methods from Addressable::URI
     def scheme: () -> String?
-    def scheme=: (untyped) -> untyped
+    def scheme=: (String?) -> String?
     def normalized_scheme: () -> String?
     def normalized_authority: () -> String?
     def user: () -> String?
-    def user=: (untyped) -> untyped
+    def user=: (String?) -> String?
     def password: () -> String?
-    def password=: (untyped) -> untyped
+    def password=: (String?) -> String?
     def normalized_port: () -> Integer?
-    def port=: (untyped) -> untyped
+    def port=: (Integer?) -> Integer?
     def path: () -> String
-    def path=: (untyped) -> untyped
+    def path=: (String) -> String
     def normalized_path: () -> String
     def query: () -> String?
-    def query=: (untyped) -> untyped
-    def query_values: (?untyped? notation) -> untyped
+    def query=: (String?) -> String?
+    def query_values: (?untyped notation) -> untyped
     def query_values=: (untyped) -> untyped
     def normalized_query: () -> String?
     def request_uri: () -> String
-    def request_uri=: (untyped) -> untyped
+    def request_uri=: (String) -> String
     def fragment: () -> String?
     def normalized_fragment: () -> String?
-    def fragment=: (untyped) -> untyped
+    def fragment=: (String?) -> String?
     def omit: (*Symbol) -> URI
-    def join: (untyped) -> URI
+    def join: (String | URI) -> URI
     def normalize: () -> URI
     def origin: () -> String
     def default_port: () -> Integer?
@@ -554,6 +625,11 @@ module HTTP
 
     def process_ipv6_brackets: (untyped raw_host, ?brackets: bool) -> untyped
   end
+
+  # Supported HTTP method verbs
+  type verb = :options | :get | :head | :post | :put | :delete | :trace | :connect
+            | :propfind | :proppatch | :mkcol | :copy | :move | :lock | :unlock
+            | :orderpatch | :acl | :report | :patch | :search | :mkcalendar | :purge
 
   class Request
     extend Forwardable
@@ -566,12 +642,12 @@ module HTTP
       @options: Options
 
       def initialize: (Options options) -> void
-      def build: (Symbol verb, untyped uri) -> Request
+      def build: (verb verb, String | URI uri) -> Request
       def wrap: (Request request) -> Request
 
       private
 
-      def make_request_uri: (untyped uri) -> URI
+      def make_request_uri: (String | URI uri) -> URI
       def merge_query_params!: (URI uri) -> void
       def make_request_headers: () -> Headers
       def make_request_body: (Headers headers) -> untyped
@@ -589,22 +665,22 @@ module HTTP
     end
 
     USER_AGENT: String
-    METHODS: Array[Symbol]
+    METHODS: Array[verb]
     SCHEMES: Array[Symbol]
     PORTS: Hash[Symbol, Integer]
 
-    attr_reader verb: Symbol
+    attr_reader verb: verb
     attr_reader scheme: Symbol
-    attr_reader uri_normalizer: untyped
+    attr_reader uri_normalizer: ^(String | URI) -> URI
     attr_reader uri: URI
-    attr_reader proxy: Hash[untyped, untyped]
+    attr_reader proxy: Hash[Symbol, untyped]
     attr_reader body: Request::Body
     attr_reader headers: Headers
     attr_reader version: String
 
-    def initialize: (untyped opts) -> void
-    def redirect: (untyped uri, ?Symbol verb) -> Request
-    def stream: (untyped socket) -> void
+    def initialize: (verb: String | Symbol, uri: String | URI, ?headers: Hash[String | Symbol, untyped] | Headers, ?proxy: Hash[Symbol, untyped], ?body: untyped, ?version: String, ?uri_normalizer: (^(String | URI) -> URI)?) -> void
+    def redirect: (String | URI uri, ?verb | Symbol verb) -> Request
+    def stream: (Timeout::Null socket) -> void
     def using_proxy?: () -> bool
     def using_authenticated_proxy?: () -> bool
     def headline: () -> String
@@ -620,13 +696,13 @@ module HTTP
     def default_host_header_value: () -> String
     def prepare_body: (untyped body) -> Request::Body
     def prepare_headers: (untyped headers) -> Headers
-    def parse_verb_and_uri!: (untyped opts) -> void
+    def parse_uri!: (String | URI uri) -> void
     def validate_method_and_scheme!: () -> void
 
     module Proxy : _ProxyHost
       interface _ProxyHost
         def headers: () -> Headers
-        def proxy: () -> Hash[untyped, untyped]
+        def proxy: () -> Hash[Symbol, untyped]
         def host: () -> untyped
         def version: () -> String
         def using_authenticated_proxy?: () -> bool
@@ -635,7 +711,7 @@ module HTTP
       def include_proxy_headers: () -> void
       def include_proxy_authorization_header: () -> void
       def proxy_authorization_header: () -> String
-      def connect_using_proxy: (untyped socket) -> void
+      def connect_using_proxy: (Timeout::Null socket) -> void
       def proxy_connect_header: () -> String
       def proxy_connect_headers: () -> Headers
 
@@ -663,9 +739,9 @@ module HTTP
       def validate_source_type!: () -> void
 
       class ProcIO
-        @block: untyped
+        @block: Proc
 
-        def initialize: (untyped block) -> void
+        def initialize: (Proc block) -> void
         def write: (String data) -> Integer
       end
     end
@@ -677,11 +753,11 @@ module HTTP
       CHUNKED_END: String
 
       @body: Request::Body
-      @socket: untyped
+      @socket: Timeout::Null
       @headers: Headers
       @request_header: Array[String]
 
-      def initialize: (untyped socket, untyped body, untyped headers, untyped headline) -> void
+      def initialize: (Timeout::Null socket, Request::Body? body, Headers headers, String headline) -> void
       def add_headers: () -> void
       def stream: () -> void
       def connect_through_proxy: () -> void
@@ -694,7 +770,7 @@ module HTTP
 
       private
 
-      def write: (untyped data) -> void
+      def write: (String data) -> void
     end
   end
 
@@ -709,19 +785,19 @@ module HTTP
     attr_reader headers: Headers
     attr_reader body: Response::Body
     attr_reader request: Request
-    attr_reader proxy_headers: untyped
+    attr_reader proxy_headers: Headers
 
-    def initialize: (untyped opts) -> void
+    def initialize: (status: Integer | Symbol, version: String, ?headers: Hash[String | Symbol, untyped] | Headers, ?proxy_headers: Hash[String | Symbol, untyped] | Headers, ?connection: Connection?, ?encoding: Encoding?, ?body: untyped, ?request: Request?, ?uri: URI?) -> void
     def reason: () -> String?
     def code: () -> Integer
     def to_s: () -> String
     alias to_str to_s
-    def readpartial: (*untyped args) -> String
-    def connection: () -> untyped
+    def readpartial: (?Integer size, ?String? outbuf) -> String
+    def connection: () -> Connection?
     def uri: () -> URI
-    def to_a: () -> Array[untyped]
+    def to_a: () -> [Integer, Hash[String, String | Array[String] | nil], String]
     alias deconstruct to_a
-    def deconstruct_keys: (Array[Symbol]? keys) -> Hash[Symbol, untyped]
+    def deconstruct_keys: (Array[Symbol]? keys) -> Hash[Symbol, Status | String | Headers | Body | Request?]
     def flush: () -> Response
     def content_length: () -> Integer?
     def content_type: () -> ContentType
@@ -735,8 +811,8 @@ module HTTP
     private
 
     def default_encoding: () -> Encoding
-    def init_request: (untyped opts) -> Request
-    def init_body: (untyped opts) -> Response::Body
+    def init_request: (Request? request, URI? uri) -> Request?
+    def init_body: (Response::Body? body, Connection? connection, (String | Encoding)? encoding) -> Response::Body
 
     class Status
       include Comparable
@@ -746,12 +822,12 @@ module HTTP
       SYMBOLS: Hash[Integer, Symbol]
       SYMBOL_CODES: Hash[Symbol, Integer]
 
-      def self.coerce: (untyped object) -> Status
-      def self.[]: (untyped object) -> Status
+      def self.coerce: (String | Symbol | Numeric object) -> Status
+      def self.[]: (String | Symbol | Numeric object) -> Status
 
       private
 
-      def self.symbolize: (untyped str) -> Symbol
+      def self.symbolize: (String str) -> Symbol
 
       public
 
@@ -760,7 +836,7 @@ module HTTP
       def initialize: (untyped obj) -> void
       def to_i: () -> Integer
       def to_int: () -> Integer
-      def <=>: (untyped other) -> Integer?
+      def <=>: (Numeric | Status other) -> Integer?
       def hash: () -> Integer
       def reason: () -> String?
       def to_s: () -> String
@@ -771,7 +847,7 @@ module HTTP
       def server_error?: () -> bool
       def to_sym: () -> Symbol?
       def inspect: () -> String
-      def deconstruct_keys: (Array[Symbol]? keys) -> Hash[Symbol, untyped]
+      def deconstruct_keys: (Array[Symbol]? keys) -> Hash[Symbol, Integer | String?]
     end
 
     class Body
@@ -785,8 +861,8 @@ module HTTP
       attr_reader connection: untyped
       attr_reader encoding: Encoding
 
-      def initialize: (untyped stream, ?encoding: untyped) -> void
-      def readpartial: (*untyped args) -> String
+      def initialize: (untyped stream, ?encoding: String | Encoding) -> void
+      def readpartial: (?Integer size, ?String? outbuf) -> String
       def each: () { (String) -> void } -> void
              | () -> Enumerator[String, void]
       def to_s: () -> untyped
@@ -797,7 +873,7 @@ module HTTP
       private
 
       def read_contents: () -> String
-      def find_encoding: (untyped encoding) -> untyped
+      def find_encoding: (String | Encoding encoding) -> untyped
     end
 
     class Inflater
@@ -806,7 +882,7 @@ module HTTP
       attr_reader connection: untyped
 
       def initialize: (untyped connection) -> void
-      def readpartial: (*untyped args) -> String
+      def readpartial: (?Integer size, ?String? outbuf) -> String
 
       private
 
@@ -819,7 +895,7 @@ module HTTP
       @message_finished: bool
       @chunk: untyped
 
-      attr_reader parser: untyped
+      attr_reader parser: LLHttp::Parser
       attr_reader headers: Headers
       attr_reader status_code: Integer?
       attr_reader http_version: String?
@@ -837,12 +913,12 @@ module HTTP
       def read: (Integer size) -> String?
 
       class Handler < LLHttp::Delegate
-        @target: untyped
+        @target: Parser
         @reading_header_value: bool
         @field_value: String
         @field: String
 
-        def initialize: (untyped target) -> void
+        def initialize: (Parser target) -> void
         def reset: () -> void
         def on_header_field: (String field) -> void
         def on_header_value: (String value) -> void
@@ -899,8 +975,8 @@ module HTTP
     def init_state: (Options options) -> void
     def check_premature_eof: (bool eof) -> void
     def connect_socket: (Request req, Options options) -> void
-    def start_tls: (untyped req, untyped options) -> void
-    def send_proxy_connect_request: (untyped req) -> void
+    def start_tls: (Request req, Options options) -> void
+    def send_proxy_connect_request: (Request req) -> void
     def handle_proxy_connect_response: () -> void
     def reset_timer: () -> void
     def set_keep_alive: () -> void
@@ -914,8 +990,8 @@ module HTTP
 
       private
 
-      def start_tls: (untyped req, untyped options) -> void
-      def send_proxy_connect_request: (untyped req) -> void
+      def start_tls: (Request req, Options options) -> void
+      def send_proxy_connect_request: (Request req) -> void
       def handle_proxy_connect_response: () -> void
       def reset_timer: () -> void
       def set_keep_alive: () -> void
@@ -936,15 +1012,15 @@ module HTTP
     UNSAFE_VERBS: Set[Symbol]
     SEE_OTHER_ALLOWED_VERBS: Set[Symbol]
 
-    @on_redirect: untyped
+    @on_redirect: (^(Response, Request) -> void)?
     @request: Request
     @response: Response
-    @visited: Array[untyped]
+    @visited: Array[String]
 
     attr_reader strict: bool
     attr_reader max_hops: Integer
 
-    def initialize: (?Hash[untyped, untyped] opts) -> void
+    def initialize: (?strict: bool, ?max_hops: Integer, ?on_redirect: (^(Response, Request) -> void)?) -> void
     def perform: (Request request, Response response) { (Request) -> Response } -> Response
 
     private
@@ -953,20 +1029,20 @@ module HTTP
     def too_many_hops?: () -> bool
     def endless_loop?: () -> bool
     def redirect_uri: () -> String?
-    def redirect_to: (untyped uri) -> Request
+    def redirect_to: (String? uri) -> Request
   end
 
   class CookieJar
-    include Enumerable[untyped]
+    include Enumerable[Cookie]
 
     def initialize: () -> void
-    def parse: (String, untyped) -> void
-    def add: (untyped) -> void
-    def delete: (untyped) -> void
-    def each: () { (untyped) -> void } -> void
-           | () -> Enumerator[untyped, void]
+    def parse: (String, String) -> void
+    def add: (Cookie) -> void
+    def delete: (Cookie) -> void
+    def each: () { (Cookie) -> void } -> void
+           | () -> Enumerator[Cookie, void]
     def empty?: () -> bool
-    def cookies: () -> Array[untyped]
+    def cookies: () -> Array[Cookie]
   end
 
   class Cookie
@@ -974,7 +1050,7 @@ module HTTP
     attr_reader value: String
     attr_reader cookie_value: String
 
-    def self.parse: (String, untyped) -> Array[HTTP::Cookie]
+    def self.parse: (String, URI) -> Array[HTTP::Cookie]
     def self.cookie_value_to_hash: (String) -> Hash[String, String]
     def initialize: (String, String, **untyped) -> void
   end
@@ -1016,8 +1092,8 @@ module HTTP
   end
 
   class StatusError < ResponseError
-    attr_reader response: untyped
-    def initialize: (untyped response) -> void
+    attr_reader response: Response
+    def initialize: (Response response) -> void
   end
 
   class ParseError < ResponseError
@@ -1036,32 +1112,32 @@ module HTTP
   end
 
   class OutOfRetriesError < Error
-    attr_accessor response: untyped
-    attr_writer cause: untyped
+    attr_accessor response: Response?
+    attr_writer cause: Exception?
     def cause: () -> Exception?
   end
 
   module Timeout
     class Null
-      attr_reader options: Hash[untyped, untyped]
+      attr_reader options: Hash[Symbol, Numeric]
       attr_reader socket: untyped
 
-      def initialize: (?untyped options) -> void
-      def connect: (untyped socket_class, untyped host, untyped port, ?nodelay: bool) -> void
+      def initialize: (**Numeric) -> void
+      def connect: (untyped socket_class, String host, Integer port, ?nodelay: bool) -> void
       def connect_ssl: () -> void
       def close: () -> void
-      def closed?: () -> untyped
-      def start_tls: (untyped host, untyped ssl_socket_class, untyped ssl_context) -> untyped
+      def closed?: () -> bool
+      def start_tls: (String host, untyped ssl_socket_class, OpenSSL::SSL::SSLContext ssl_context) -> void
       def readpartial: (Integer size, ?String? buffer) -> (String | Symbol)
       def write: (String data) -> Integer
       def <<: (String data) -> Integer
 
       private
 
-      def read_timeout: () -> untyped
-      def write_timeout: () -> untyped
-      def rescue_readable: (?untyped timeout) { () -> untyped } -> untyped
-      def rescue_writable: (?untyped timeout) { () -> untyped } -> untyped
+      def read_timeout: () -> Numeric?
+      def write_timeout: () -> Numeric?
+      def rescue_readable: (?Numeric? timeout) { () -> untyped } -> untyped
+      def rescue_writable: (?Numeric? timeout) { () -> untyped } -> untyped
     end
 
     class PerOperation < Null
@@ -1070,19 +1146,19 @@ module HTTP
       CONNECT_TIMEOUT: Numeric
       KEYS: Hash[Symbol, Symbol]
 
-      def self.normalize_options: (Hash[Symbol, untyped] options) -> Hash[Symbol, Numeric]
+      def self.normalize_options: (Hash[Symbol, Numeric] options) -> Hash[Symbol, Numeric]
 
       private
 
-      def self.extract_global_timeout!: (Hash[Symbol, untyped] options) -> Numeric?
-      def self.resolve_timeout_value!: (Hash[Symbol, untyped] options, Symbol short, Symbol long) -> Numeric
+      def self.extract_global_timeout!: (Hash[Symbol, Numeric] options) -> Numeric?
+      def self.resolve_timeout_value!: (Hash[Symbol, Numeric] options, Symbol short, Symbol long) -> Numeric
 
-      attr_reader read_timeout: untyped
-      attr_reader write_timeout: untyped
-      attr_reader connect_timeout: untyped
+      attr_reader read_timeout: Numeric
+      attr_reader write_timeout: Numeric
+      attr_reader connect_timeout: Numeric
 
-      def initialize: (*untyped args) -> void
-      def connect: (untyped socket_class, untyped host, untyped port, ?nodelay: bool) -> void
+      def initialize: (?read_timeout: Numeric, ?write_timeout: Numeric, ?connect_timeout: Numeric) -> void
+      def connect: (untyped socket_class, String host, Integer port, ?nodelay: bool) -> void
       def readpartial: (Integer size, ?String? buffer) -> (String | Symbol)
       def write: (String data) -> Integer
     end
@@ -1097,9 +1173,9 @@ module HTTP
       @write_timeout: Numeric?
       @connect_timeout: Numeric?
 
-      def initialize: (*untyped args) -> void
+      def initialize: (global_timeout: Numeric, ?read_timeout: Numeric?, ?write_timeout: Numeric?, ?connect_timeout: Numeric?) -> void
       def reset_counter: () -> Numeric
-      def connect: (untyped socket_class, untyped host, untyped port, ?nodelay: bool) -> void
+      def connect: (untyped socket_class, String host, Integer port, ?nodelay: bool) -> void
       def readpartial: (Integer size, ?String? buffer) -> (String | Symbol)
       def write: (String data) -> (Integer | Symbol)
 
@@ -1109,7 +1185,7 @@ module HTTP
       def write_nonblock: (String data) -> untyped
       def perform_io: (?Numeric? per_op_timeout) { () -> untyped } -> untyped
       def handle_io_result: (untyped result) -> untyped
-      def wait_for_io: (untyped result, ?Numeric? per_op_timeout) -> void
+      def wait_for_io: (Symbol result, ?Numeric? per_op_timeout) -> void
       def wait_readable_or_timeout: (?Numeric? per_op) -> void
       def wait_writable_or_timeout: (?Numeric? per_op) -> void
       def effective_timeout: (Numeric? per_op_timeout) -> Numeric
@@ -1120,29 +1196,29 @@ module HTTP
 
   module Retriable
     class Performer
-      RETRIABLE_ERRORS: Array[untyped]
+      RETRIABLE_ERRORS: Array[singleton(Exception)]
 
-      @exception_classes: Array[untyped]
+      @exception_classes: Array[singleton(Exception)]
       @retry_statuses: untyped
       @tries: Integer
-      @on_retry: untyped
+      @on_retry: ^(Request, Exception?, Response?) -> void
       @should_retry_proc: untyped
       @delay_calculator: DelayCalculator
 
-      def initialize: (untyped opts) -> void
-      def perform: (untyped client, untyped req) { () -> untyped } -> untyped
-      def calculate_delay: (Integer iteration, untyped response) -> Float
+      def initialize: (?tries: Integer, ?delay: (Numeric | ^(Integer) -> Numeric)?, ?exceptions: Array[singleton(Exception)], ?retry_statuses: untyped, ?on_retry: ^(Request, Exception?, Response?) -> void, ?max_delay: Numeric, ?should_retry: (^(Request, Exception?, Response?, Integer) -> bool)?) -> void
+      def perform: (Client client, Request req) { () -> Response? } -> untyped
+      def calculate_delay: (Integer iteration, Response? response) -> Float
 
       private
 
-      def retry_attempt: (untyped client, untyped req, untyped err, untyped res, untyped attempt) -> void
-      def finish_attempt: (untyped client, untyped err) -> void
-      def try_request: () { () -> untyped } -> untyped
-      def retry_request?: (untyped req, untyped err, untyped res, untyped attempt) -> bool
-      def retry_exception?: (untyped err) -> bool
+      def retry_attempt: (Client client, Request req, Exception? err, Response? res, Integer attempt) -> void
+      def finish_attempt: (Client client, Exception err) -> void
+      def try_request: () { () -> Response? } -> [Exception?, Response?]
+      def retry_request?: (Request req, Exception? err, Response? res, Integer attempt) -> bool
+      def retry_exception?: (Exception err) -> bool
       def retry_response?: (untyped res) -> bool
-      def wait_for_retry_or_raise: (untyped req, untyped err, untyped res, untyped attempt) -> void
-      def out_of_retries_error: (untyped request, untyped response, untyped exception) -> OutOfRetriesError
+      def wait_for_retry_or_raise: (Request req, Exception? err, Response? res, Integer attempt) -> void
+      def out_of_retries_error: (Request request, Response? response, Exception? exception) -> OutOfRetriesError
     end
 
     class DelayCalculator
@@ -1150,16 +1226,16 @@ module HTTP
 
       @max_delay: Float
       @delay_proc: untyped
-      @delay: untyped
+      @delay: Numeric?
 
-      def initialize: (untyped opts) -> void
-      def call: (untyped iteration, untyped response) -> Float
+      def initialize: (?delay: (Numeric | ^(Integer) -> Numeric)?, ?max_delay: Numeric) -> void
+      def call: (Integer iteration, Response? response) -> Float
 
       private
 
-      def delay_from_retry_header: (untyped value) -> Numeric
-      def calculate_delay_from_iteration: (untyped iteration) -> Numeric
-      def ensure_delay_in_bounds: (untyped delay) -> Float
+      def delay_from_retry_header: (String | Array[String] value) -> Numeric
+      def calculate_delay_from_iteration: (Integer iteration) -> untyped
+      def ensure_delay_in_bounds: (Numeric delay) -> Float
     end
   end
 end

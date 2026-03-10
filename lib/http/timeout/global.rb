@@ -16,16 +16,19 @@ module HTTP
       # @example
       #   HTTP::Timeout::Global.new(global_timeout: 5)
       #
-      # @param [Array] args
+      # @param [Numeric] global_timeout Global timeout in seconds
+      # @param [Numeric, nil] read_timeout Read timeout in seconds
+      # @param [Numeric, nil] write_timeout Write timeout in seconds
+      # @param [Numeric, nil] connect_timeout Connect timeout in seconds
       # @api public
       # @return [HTTP::Timeout::Global]
-      def initialize(*args)
+      def initialize(global_timeout:, read_timeout: nil, write_timeout: nil, connect_timeout: nil)
         super
 
-        @timeout = @time_left = options.fetch(:global_timeout)
-        @read_timeout    = options[:read_timeout]
-        @write_timeout   = options[:write_timeout]
-        @connect_timeout = options[:connect_timeout]
+        @timeout = @time_left = global_timeout
+        @read_timeout    = read_timeout
+        @write_timeout   = write_timeout
+        @connect_timeout = connect_timeout
       end
 
       # Resets the time left counter to initial timeout

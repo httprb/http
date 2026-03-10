@@ -30,10 +30,10 @@ module HTTP
       # @example
       #   HTTP::Timeout::Null.new(read_timeout: 5)
       #
-      # @param [Hash] options
+      # @param options [Hash] timeout options
       # @api public
       # @return [HTTP::Timeout::Null]
-      def initialize(options = {})
+      def initialize(**options)
         @options = options
       end
 

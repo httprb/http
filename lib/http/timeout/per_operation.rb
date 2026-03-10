@@ -84,15 +84,17 @@ module HTTP
       # @example
       #   HTTP::Timeout::PerOperation.new(read_timeout: 5)
       #
-      # @param [Array] args
+      # @param [Numeric] read_timeout Read timeout in seconds
+      # @param [Numeric] write_timeout Write timeout in seconds
+      # @param [Numeric] connect_timeout Connect timeout in seconds
       # @api public
       # @return [HTTP::Timeout::PerOperation]
-      def initialize(*args)
+      def initialize(read_timeout: READ_TIMEOUT, write_timeout: WRITE_TIMEOUT, connect_timeout: CONNECT_TIMEOUT)
         super
 
-        @read_timeout = options.fetch(:read_timeout, READ_TIMEOUT)
-        @write_timeout = options.fetch(:write_timeout, WRITE_TIMEOUT)
-        @connect_timeout = options.fetch(:connect_timeout, CONNECT_TIMEOUT)
+        @read_timeout = read_timeout
+        @write_timeout = write_timeout
+        @connect_timeout = connect_timeout
       end
 
       # Connects to a socket with connect timeout

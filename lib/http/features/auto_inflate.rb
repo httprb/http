@@ -18,7 +18,7 @@ module HTTP
       def wrap_response(response)
         return response unless supported_encoding?(response)
 
-        Response.new(inflated_response_options(response))
+        Response.new(**inflated_response_options(response)) # steep:ignore
       end
 
       # Returns an inflating body stream for a connection

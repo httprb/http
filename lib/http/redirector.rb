@@ -48,15 +48,15 @@ module HTTP
     # @example
     #   HTTP::Redirector.new(strict: true, max_hops: 5)
     #
-    # @param [Hash] opts
-    # @option opts [Boolean] :strict (true) redirector hops policy
-    # @option opts [#to_i] :max_hops (5) maximum allowed amount of hops
+    # @param [Boolean] strict (true) redirector hops policy
+    # @param [#to_i] max_hops (5) maximum allowed amount of hops
+    # @param [#call, nil] on_redirect optional redirect callback
     # @api public
     # @return [HTTP::Redirector]
-    def initialize(opts = {})
-      @strict      = opts.fetch(:strict, true)
-      @max_hops    = Integer(opts.fetch(:max_hops, 5))
-      @on_redirect = opts.fetch(:on_redirect, nil)
+    def initialize(strict: true, max_hops: 5, on_redirect: nil)
+      @strict      = strict
+      @max_hops    = Integer(max_hops)
+      @on_redirect = on_redirect
     end
 
     # Follows redirects until non-redirect response found

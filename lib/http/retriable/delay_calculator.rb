@@ -7,13 +7,14 @@ module HTTP
     class DelayCalculator
       # Initializes the delay calculator
       #
-      # @param [Hash] opts
+      # @param [#call, Numeric, nil] delay delay value or proc
+      # @param [#to_f] max_delay maximum delay cap
       # @api private
       # @return [HTTP::Retriable::DelayCalculator]
-      def initialize(opts)
-        @max_delay = opts.fetch(:max_delay, Float::MAX).to_f
-        if (delay = opts[:delay]).respond_to?(:call)
-          @delay_proc = opts.fetch(:delay)
+      def initialize(delay: nil, max_delay: Float::MAX)
+        @max_delay = max_delay.to_f
+        if delay.respond_to?(:call)
+          @delay_proc = delay
         else
           @delay = delay
         end
