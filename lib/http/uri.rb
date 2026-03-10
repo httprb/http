@@ -10,17 +10,16 @@ module HTTP
     # The URI given was not valid
     class InvalidError < HTTP::RequestError; end
 
-    def_delegators :@uri, :scheme, :normalized_scheme, :scheme=
-    def_delegators :@uri, :user, :normalized_user, :user=
-    def_delegators :@uri, :password, :normalized_password, :password=
-    def_delegators :@uri, :authority, :normalized_authority, :authority=
-    def_delegators :@uri, :origin, :origin=
-    def_delegators :@uri, :normalized_port, :port=
-    def_delegators :@uri, :path, :normalized_path, :path=
-    def_delegators :@uri, :query, :normalized_query, :query=
+    def_delegators :@uri, :scheme, :normalized_scheme
+    def_delegators :@uri, :user
+    def_delegators :@uri, :password
+    def_delegators :@uri, :authority, :normalized_authority
+    def_delegators :@uri, :origin
+    def_delegators :@uri, :path, :path=
+    def_delegators :@uri, :query, :query=
     def_delegators :@uri, :query_values, :query_values=
-    def_delegators :@uri, :request_uri, :request_uri=
-    def_delegators :@uri, :fragment, :normalized_fragment, :fragment=
+    def_delegators :@uri, :request_uri
+    def_delegators :@uri, :fragment, :normalized_fragment
     def_delegators :@uri, :omit, :join, :normalize
 
     # Host, either a domain name or IP address

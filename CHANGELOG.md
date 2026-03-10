@@ -67,6 +67,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   body chunks are now logged as they are streamed, preserving
   `response.body.each` (#785)
 
+### Removed
+
+- `HTTP::URI` setter methods (`scheme=`, `user=`, `password=`, `authority=`,
+  `origin=`, `port=`, `request_uri=`, `fragment=`) and normalized accessors
+  (`normalized_user`, `normalized_password`, `normalized_port`,
+  `normalized_path`, `normalized_query`) that were delegated to
+  `Addressable::URI` but never used internally
+
 ### Changed
 
 - **BREAKING** `HTTP::Response::Status` no longer inherits from `Delegator`.

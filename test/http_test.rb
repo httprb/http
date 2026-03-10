@@ -753,13 +753,12 @@ describe HTTP do
 
       it "raises if custom URI Normalizer returns invalid host" do
         normalizer = lambda do |uri|
-          uri.port = nil
           uri.instance_variable_set(:@host, "example\ncom")
           uri
         end
         client = HTTP.use(normalize_uri: { normalizer: normalizer })
         err = assert_raises(HTTP::RequestError) { client.get(dummy.endpoint) }
-        assert_equal 'Invalid host: "example\ncom"', err.message
+        assert_match(/Invalid host: "example\\ncom/, err.message)
       end
 
       it "uses the default URI normalizer" do

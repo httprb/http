@@ -600,28 +600,19 @@ module HTTP
 
     # Delegated methods from Addressable::URI
     def scheme: () -> String?
-    def scheme=: (String?) -> String?
     def normalized_scheme: () -> String?
     def normalized_authority: () -> String?
     def user: () -> String?
-    def user=: (String?) -> String?
     def password: () -> String?
-    def password=: (String?) -> String?
-    def normalized_port: () -> Integer?
-    def port=: (Integer?) -> Integer?
     def path: () -> String
     def path=: (String) -> String
-    def normalized_path: () -> String
     def query: () -> String?
     def query=: (String?) -> String?
     def query_values: (?untyped notation) -> untyped
     def query_values=: (untyped) -> untyped
-    def normalized_query: () -> String?
     def request_uri: () -> String
-    def request_uri=: (String) -> String
     def fragment: () -> String?
     def normalized_fragment: () -> String?
-    def fragment=: (String?) -> String?
     def omit: (*Symbol) -> URI
     def join: (String | URI) -> URI
     def normalize: () -> URI
