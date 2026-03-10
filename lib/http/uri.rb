@@ -10,10 +10,8 @@ module HTTP
     # The URI given was not valid
     class InvalidError < HTTP::RequestError; end
 
-    def_delegators :@uri, :scheme, :normalized_scheme, :user, :password,
-                   :authority, :normalized_authority
-    def_delegators :@uri, :path, :path=, :query, :query=
-    def_delegators :@uri, :fragment, :normalized_fragment, :join, :normalize
+    def_delegators :@uri, :scheme, :user, :password, :path, :path=,
+                   :query, :query=, :fragment, :join, :normalize
 
     # Host, either a domain name or IP address
     #
@@ -44,20 +42,6 @@ module HTTP
     # Pattern matching characters requiring percent-encoding
     # @private
     PERCENT_ENCODE = /[^\x21-\x7E]+/
-
-    # Default URI normalizer
-    # @private
-    NORMALIZER = lambda do |uri|
-      uri = HTTP::URI.parse uri
-
-      HTTP::URI.new(
-        scheme:    uri.normalized_scheme,
-        authority: uri.normalized_authority,
-        path:      uri.path.empty? ? "/" : percent_encode(Addressable::URI.normalize_path(uri.path)),
-        query:     percent_encode(uri.query),
-        fragment:  uri.normalized_fragment
-      )
-    end
 
     # Parse the given URI string, returning an HTTP::URI object
     #
@@ -330,3 +314,5 @@ module HTTP
     end
   end
 end
+
+require "http/uri/normalizer"

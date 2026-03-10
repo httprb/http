@@ -83,6 +83,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `HTTP::URI#query_values` and `HTTP::URI#query_values=` delegations to
   `Addressable::URI`. Query parameter merging now uses stdlib
   `URI.decode_www_form`/`URI.encode_www_form`
+- `HTTP::URI` delegations for `normalized_scheme`, `normalized_authority`,
+  `normalized_fragment`, and `authority` to `Addressable::URI`. The URI
+  normalizer now inlines these operations directly
 
 ### Changed
 

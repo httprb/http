@@ -201,40 +201,146 @@ describe HTTP::URI do
     end
   end
 
+  describe ".remove_dot_segments" do
+    def remove_dot_segments(path)
+      HTTP::URI.send(:remove_dot_segments, path)
+    end
+
+    it "resolves parent directory references" do
+      assert_equal "/a/c", remove_dot_segments("/a/b/../c")
+    end
+
+    it "removes current directory references" do
+      assert_equal "/a/b/c", remove_dot_segments("/a/./b/c")
+    end
+
+    it "resolves multiple parent references" do
+      assert_equal "/c", remove_dot_segments("/a/b/../../c")
+    end
+
+    it "clamps parent references above root" do
+      assert_equal "/a", remove_dot_segments("/../a")
+    end
+
+    it "preserves paths without dot segments" do
+      assert_equal "/a/b/c", remove_dot_segments("/a/b/c")
+    end
+
+    it "preserves trailing slash after parent reference" do
+      assert_equal "/a/", remove_dot_segments("/a/b/..")
+    end
+
+    it "resolves current directory at end of path" do
+      assert_equal "/a/b/", remove_dot_segments("/a/b/.")
+    end
+
+    it "handles standalone dot" do
+      assert_equal "", remove_dot_segments(".")
+    end
+
+    it "handles standalone dot-dot" do
+      assert_equal "", remove_dot_segments("..")
+    end
+
+    it "handles leading dot-slash prefix" do
+      assert_equal "a", remove_dot_segments("./a")
+    end
+
+    it "handles leading dot-dot-slash prefix" do
+      assert_equal "a", remove_dot_segments("../a")
+    end
+
+    it "handles empty path" do
+      assert_equal "", remove_dot_segments("")
+    end
+
+    it "pops empty segment when dot-dot follows double slash" do
+      assert_equal "/", remove_dot_segments("//..")
+    end
+  end
+
   describe "NORMALIZER" do
     it "normalizes an empty path to /" do
-      normalizer = HTTP::URI::NORMALIZER
-      result = normalizer.call("http://example.com")
+      result = HTTP::URI::NORMALIZER.call("http://example.com")
 
       assert_equal "/", result.path
     end
 
     it "preserves non-empty paths" do
-      normalizer = HTTP::URI::NORMALIZER
-      result = normalizer.call("http://example.com/foo/bar")
+      result = HTTP::URI::NORMALIZER.call("http://example.com/foo/bar")
 
       assert_equal "/foo/bar", result.path
     end
 
+    it "removes dot segments from paths" do
+      result = HTTP::URI::NORMALIZER.call("http://example.com/a/b/../c")
+
+      assert_equal "/a/c", result.path
+    end
+
     it "percent-encodes non-ASCII characters in paths" do
-      normalizer = HTTP::URI::NORMALIZER
-      result = normalizer.call("http://example.com/p\u00E4th")
+      result = HTTP::URI::NORMALIZER.call("http://example.com/p\u00E4th")
 
       assert_includes result.path, "%"
     end
 
     it "percent-encodes non-ASCII characters in query strings" do
-      normalizer = HTTP::URI::NORMALIZER
-      result = normalizer.call("http://example.com/?q=v\u00E4lue")
+      result = HTTP::URI::NORMALIZER.call("http://example.com/?q=v\u00E4lue")
 
       assert_includes result.query, "%"
     end
 
     it "returns an HTTP::URI instance" do
-      normalizer = HTTP::URI::NORMALIZER
-      result = normalizer.call("http://example.com/path")
+      assert_instance_of HTTP::URI, HTTP::URI::NORMALIZER.call("http://example.com/path")
+    end
 
-      assert_instance_of HTTP::URI, result
+    it "lowercases the scheme" do
+      result = HTTP::URI::NORMALIZER.call("HTTP://example.com")
+
+      assert_equal "http", result.scheme
+    end
+
+    it "lowercases the host" do
+      result = HTTP::URI::NORMALIZER.call("http://EXAMPLE.COM")
+
+      assert_equal "example.com", result.host
+    end
+
+    it "omits default HTTP port" do
+      result = HTTP::URI::NORMALIZER.call("http://example.com:80/path")
+
+      assert_equal "http://example.com/path", result.to_s
+    end
+
+    it "omits default HTTPS port" do
+      result = HTTP::URI::NORMALIZER.call("https://example.com:443/path")
+
+      assert_equal "https://example.com/path", result.to_s
+    end
+
+    it "preserves non-default port" do
+      result = HTTP::URI::NORMALIZER.call("http://example.com:8080/path")
+
+      assert_equal "http://example.com:8080/path", result.to_s
+    end
+
+    it "preserves IPv6 host" do
+      result = HTTP::URI::NORMALIZER.call("http://[::1]:8080/path")
+
+      assert_equal "http://[::1]:8080/path", result.to_s
+    end
+
+    it "preserves user info" do
+      result = HTTP::URI::NORMALIZER.call("http://user:pass@example.com/path")
+
+      assert_equal "user", result.user
+      assert_equal "pass", result.password
+    end
+
+    it "preserves fragment" do
+      result = HTTP::URI::NORMALIZER.call("http://example.com/path#frag")
+
+      assert_equal "frag", result.fragment
     end
   end
 

@@ -580,6 +580,10 @@ module HTTP
     PERCENT_ENCODE: Regexp
     NORMALIZER: ^(String | URI) -> URI
 
+    DOT_SEGMENTS: Array[String]
+
+    def self.remove_dot_segments: (String path) -> String
+
     def self.parse: (untyped uri) -> URI
     def self.form_encode: (untyped form_values, ?sort: bool) -> String
     def self.percent_encode: (String? string) -> String?
@@ -600,8 +604,6 @@ module HTTP
 
     # Delegated methods from Addressable::URI
     def scheme: () -> String?
-    def normalized_scheme: () -> String?
-    def normalized_authority: () -> String?
     def user: () -> String?
     def password: () -> String?
     def path: () -> String
@@ -610,7 +612,6 @@ module HTTP
     def query=: (String?) -> String?
     def request_uri: () -> String
     def fragment: () -> String?
-    def normalized_fragment: () -> String?
     def omit: (*Symbol) -> URI
     def join: (String | URI) -> URI
     def normalize: () -> URI
