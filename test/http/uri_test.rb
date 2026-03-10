@@ -394,6 +394,53 @@ describe HTTP::URI do
     end
   end
 
+  describe "#omit" do
+    let(:full_uri) { HTTP::URI.parse("http://user:pass@example.com:8080/path?q=1#frag") }
+
+    it "returns an HTTP::URI instance" do
+      assert_instance_of HTTP::URI, full_uri.omit(:fragment)
+    end
+
+    it "removes the fragment component" do
+      assert_nil full_uri.omit(:fragment).fragment
+    end
+
+    it "removes multiple components" do
+      result = full_uri.omit(:query, :fragment)
+
+      assert_nil result.query
+      assert_nil result.fragment
+    end
+
+    it "preserves all other components when omitting fragment" do
+      result = full_uri.omit(:fragment)
+
+      assert_equal "http", result.scheme
+      assert_equal "user", result.user
+      assert_equal "pass", result.password
+      assert_equal "example.com", result.host
+      assert_equal 8080, result.port
+      assert_equal "/path", result.path
+      assert_equal "q=1", result.query
+    end
+
+    it "does not add default port when omitting components" do
+      uri = HTTP::URI.parse("http://example.com/path#frag")
+
+      assert_equal "http://example.com/path", uri.omit(:fragment).to_s
+    end
+
+    it "preserves IPv6 host when omitting components" do
+      uri = HTTP::URI.parse("https://[::1]:8080/path#frag")
+
+      assert_equal "https://[::1]:8080/path", uri.omit(:fragment).to_s
+    end
+
+    it "returns unchanged URI when no components given" do
+      assert_equal full_uri.to_s, full_uri.omit.to_s
+    end
+  end
+
   describe "#http?" do
     it "returns false for non-HTTP/HTTPS schemes" do
       uri = HTTP::URI.parse("ftp://example.com")

@@ -10,13 +10,10 @@ module HTTP
     # The URI given was not valid
     class InvalidError < HTTP::RequestError; end
 
-    def_delegators :@uri, :scheme, :normalized_scheme
-    def_delegators :@uri, :user, :password
-    def_delegators :@uri, :authority, :normalized_authority
-    def_delegators :@uri, :path, :path=
-    def_delegators :@uri, :query, :query=, :query_values, :query_values=
-    def_delegators :@uri, :fragment, :normalized_fragment
-    def_delegators :@uri, :omit, :join, :normalize
+    def_delegators :@uri, :scheme, :normalized_scheme, :user, :password,
+                   :authority, :normalized_authority
+    def_delegators :@uri, :path, :path=, :query, :query=, :query_values, :query_values=
+    def_delegators :@uri, :fragment, :normalized_fragment, :join, :normalize
 
     # Host, either a domain name or IP address
     #
@@ -223,6 +220,21 @@ module HTTP
     # @return [String] request URI string
     def request_uri
       "#{'/' if path.empty?}#{path}#{"?#{query}" if query}"
+    end
+
+    # Returns a new URI with the specified components removed
+    #
+    # @example
+    #   HTTP::URI.parse("http://example.com#frag").omit(:fragment)
+    #
+    # @param components [Symbol] URI components to remove
+    # @api public
+    # @return [HTTP::URI] new URI without the specified components
+    def omit(*components)
+      self.class.new(
+        { scheme: scheme, user: user, password: password, host: @uri.host,
+          port: @uri.port, path: path, query: query, fragment: fragment }.except(*components)
+      )
     end
 
     # Checks whether the URI scheme is HTTP

@@ -78,6 +78,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   implementation follows RFC 6454, normalizing scheme and host to lowercase
   and excluding user info from the origin string
 - `HTTP::URI#request_uri` is no longer delegated to `Addressable::URI`
+- `HTTP::URI#omit` is no longer delegated to `Addressable::URI` and now
+  returns `HTTP::URI` instead of `Addressable::URI` (#491)
 
 ### Changed
 
