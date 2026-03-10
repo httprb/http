@@ -47,6 +47,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Thread-safety: `Headers::Normalizer` cache is now per-thread via
+  `Thread.current`, eliminating a potential race condition when multiple
+  threads share a normalizer instance
 - Instrumentation feature now correctly starts a new span for each retry
   attempt, fixing `NoMethodError` with `ActiveSupport::Notifications` when
   using `.retriable` with the instrumentation feature (#826)

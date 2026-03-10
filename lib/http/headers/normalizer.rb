@@ -11,16 +11,8 @@ module HTTP
       # Pattern matching header name part separators (hyphens and underscores)
       NAME_PARTS_SEPARATOR_RE = /[-_]/
 
-      # Creates a new Normalizer with an empty cache
-      #
-      # @example
-      #   normalizer = HTTP::Headers::Normalizer.new
-      #
-      # @return [Normalizer]
-      # @api public
-      def initialize
-        @cache = {} #: Hash[String, String]
-      end
+      # Thread-local cache key for normalized header names
+      CACHE_KEY = :http_headers_normalizer_cache
 
       # Normalizes a header name to canonical form
       #
@@ -31,7 +23,8 @@ module HTTP
       # @api public
       def call(name)
         name  = name.to_s
-        value = (@cache[name] ||= normalize_header(name))
+        cache = (Thread.current[CACHE_KEY] ||= {})
+        value = (cache[name] ||= normalize_header(name))
 
         value.dup
       end

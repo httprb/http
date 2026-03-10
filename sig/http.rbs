@@ -248,25 +248,10 @@ module HTTP
 
   class Headers
     class Normalizer
-      CANONICAL_NAME_RE: Regexp
       COMPLIANT_NAME_RE: Regexp
       NAME_PARTS_SEPARATOR_RE: Regexp
+      CACHE_KEY: Symbol
 
-      @cache: Cache
-
-      class Cache
-        MAX_SIZE: Integer
-
-        @store: Hash[String, String]
-
-        def initialize: () -> void
-        def get: (String key) -> String?
-        alias [] get
-        def set: (String key, String value) -> String
-        alias []= set
-      end
-
-      def initialize: () -> void
       def call: (String | Symbol name) -> String
 
       private

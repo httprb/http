@@ -6,6 +6,8 @@ describe HTTP::Headers::Normalizer do
   cover "HTTP::Headers::Normalizer*"
   let(:normalizer) { HTTP::Headers::Normalizer.new }
 
+  before { Thread.current[HTTP::Headers::Normalizer::CACHE_KEY] = nil }
+
   describe "#call" do
     it "normalizes the header" do
       assert_equal "Content-Type", normalizer.call("content_type")
