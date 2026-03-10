@@ -395,21 +395,28 @@ module HTTP
 
       attr_reader logger: untyped
 
-      def initialize: (?logger: untyped) -> void
+      @binary_formatter: :stats | :base64 | ^(String) -> String
+
+      def initialize: (?logger: untyped, ?binary_formatter: :stats | :base64 | ^(String) -> String) -> void
       def wrap_request: (Request request) -> Request
       def wrap_response: (Response response) -> Response
 
       private
 
+      def validate_binary_formatter!: (:stats | :base64 | ^(String) -> String formatter) -> (:stats | :base64 | ^(String) -> String)
+      def log_request_details: (Request request) -> void
       def log_response_body_inline: (Response response) -> Response
       def logged_response_options: (Response response) -> Hash[Symbol, untyped]
       def logged_body: (Response::Body body) -> Response::Body
+      def format_binary: (String data) -> String
       def stringify_headers: (Headers headers) -> String
 
       class BodyLogger
         attr_reader connection: untyped
 
-        def initialize: (untyped stream, untyped logger) -> void
+        @formatter: (^(String) -> String)?
+
+        def initialize: (untyped stream, untyped logger, ?formatter: (^(String) -> String)?) -> void
         def readpartial: (?Integer size, ?String? outbuf) -> String
       end
     end
@@ -741,6 +748,7 @@ module HTTP
 
       def initialize: (untyped source) -> void
       def empty?: () -> bool
+      def loggable?: () -> bool
       def size: () -> Integer
       def each: () { (String) -> void } -> self
              | () -> Enumerator[String, self]
@@ -881,6 +889,7 @@ module HTTP
       def to_s: () -> untyped
       alias to_str to_s
       def stream!: () -> untyped
+      def loggable?: () -> bool
       def inspect: () -> String
 
       private

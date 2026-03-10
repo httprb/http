@@ -124,6 +124,48 @@ describe HTTP::Request::Body do
     end
   end
 
+  describe "#loggable?" do
+    context "when body is a text string" do
+      let(:body) { "text content" }
+
+      it "returns true" do
+        assert_predicate subject_under_test, :loggable?
+      end
+    end
+
+    context "when body is a binary-encoded string" do
+      let(:body) { String.new("\x89PNG\r\n", encoding: Encoding::BINARY) }
+
+      it "returns true" do
+        assert_predicate subject_under_test, :loggable?
+      end
+    end
+
+    context "when body is nil" do
+      let(:body) { nil }
+
+      it "returns false" do
+        refute_predicate subject_under_test, :loggable?
+      end
+    end
+
+    context "when body is an IO" do
+      let(:body) { FakeIO.new("IO body") }
+
+      it "returns false" do
+        refute_predicate subject_under_test, :loggable?
+      end
+    end
+
+    context "when body is an Enumerable" do
+      let(:body) { %w[bees cows] }
+
+      it "returns false" do
+        refute_predicate subject_under_test, :loggable?
+      end
+    end
+  end
+
   describe "#each" do
     let(:chunks) do
       subject_under_test.enum_for(:each).map(&:dup)
@@ -323,6 +365,10 @@ describe HTTP::Request::Body do
       chunks = subject_under_test.enum_for(:each).map(&:dup)
 
       assert_equal ["subclass body"], chunks
+    end
+
+    it "is loggable" do
+      assert_predicate subject_under_test, :loggable?
     end
   end
 

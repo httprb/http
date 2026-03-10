@@ -115,6 +115,20 @@ module HTTP
         @streaming = true
       end
 
+      # Whether the body content is suitable for logging
+      #
+      # Returns true when the body encoding is not binary. Binary responses
+      # (images, audio, compressed data) produce unreadable log output.
+      #
+      # @example
+      #   body.loggable? # => true
+      #
+      # @return [Boolean]
+      # @api public
+      def loggable?
+        @encoding != Encoding::BINARY
+      end
+
       # Easier to interpret string inspect
       #
       # @example
