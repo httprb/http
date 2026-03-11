@@ -102,10 +102,8 @@ module HTTP
       # @api public
       # @return [void]
       def connect(socket_class, host, port, nodelay: false)
-        ::Timeout.timeout(@connect_timeout, ConnectTimeoutError) do
-          @socket = socket_class.open(host, port)
-          @socket.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1) if nodelay
-        end
+        @socket = open_socket(socket_class, host, port, connect_timeout: @connect_timeout)
+        @socket.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1) if nodelay
       end
 
       # Starts an SSL connection with connect timeout

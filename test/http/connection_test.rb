@@ -39,6 +39,21 @@ describe HTTP::Connection do
         HTTP::Connection.new(req, tls_opts)
       end
     end
+
+    it "converts IO::TimeoutError to ConnectTimeoutError" do
+      io_timeout_socket = fake(
+        connect: ->(*) { raise IO::TimeoutError, "Connect timed out!" },
+        close:   nil,
+        closed?: false
+      )
+      io_timeout_class = fake(new: io_timeout_socket)
+      io_opts = HTTP::Options.new(timeout_class: io_timeout_class)
+
+      err = assert_raises(HTTP::ConnectTimeoutError) do
+        HTTP::Connection.new(req, io_opts)
+      end
+      assert_equal "Connect timed out!", err.message
+    end
   end
 
   describe "#read_headers!" do

@@ -47,6 +47,9 @@ module HTTP
     def initialize(req, options)
       init_state(options)
       connect_socket(req, options)
+    rescue IO::TimeoutError => e
+      close
+      raise ConnectTimeoutError, e.message, e.backtrace
     rescue IOError, SocketError, SystemCallError => e
       raise ConnectionError, "failed to connect: #{e}", e.backtrace
     rescue TimeoutError

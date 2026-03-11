@@ -1,12 +1,19 @@
 # frozen_string_literal: true
 
 require "io/wait"
+require "timeout"
 
 module HTTP
   # Namespace for timeout handlers
   module Timeout
     # Base timeout handler with no timeout enforcement
     class Null
+      # Whether TCPSocket natively supports connect_timeout and
+      # Happy Eyeballs (RFC 8305). Available in Ruby 3.4+.
+      #
+      # @api private
+      NATIVE_CONNECT_TIMEOUT = RUBY_VERSION >= "3.4"
+
       # Timeout configuration options
       #
       # @example
@@ -53,7 +60,7 @@ module HTTP
       # @api public
       # @return [void]
       def connect(socket_class, host, port, nodelay: false)
-        @socket = socket_class.open(host, port)
+        @socket = open_socket(socket_class, host, port)
         @socket.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1) if nodelay
       end
 
@@ -163,6 +170,55 @@ module HTTP
       rescue IO::WaitWritable
         retry if @socket.to_io.wait_writable(timeout)
         raise TimeoutError, "Write timed out after #{timeout} seconds"
+      end
+
+      # Opens a TCP socket, using native connect_timeout when available
+      #
+      # On Ruby 3.4+ with TCPSocket, passes connect_timeout natively to
+      # enable proper Happy Eyeballs (RFC 8305) support. Falls back to
+      # Timeout.timeout on older Rubies or with custom socket classes.
+      #
+      # @param [Class] socket_class socket class to create
+      # @param [String] host remote hostname
+      # @param [Integer] port remote port
+      # @param [Numeric, nil] connect_timeout timeout in seconds
+      # @return [Object] the connected socket
+      # @api private
+      def open_socket(socket_class, host, port, connect_timeout: nil)
+        if connect_timeout
+          ::Timeout.timeout(connect_timeout, ConnectTimeoutError) do
+            open_with_timeout(socket_class, host, port, connect_timeout)
+          end
+        else
+          socket_class.open(host, port)
+        end
+      rescue IO::TimeoutError
+        raise ConnectTimeoutError, "Connect timed out after #{connect_timeout} seconds"
+      end
+
+      # Opens a socket, passing connect_timeout natively when supported
+      #
+      # @param [Class] socket_class socket class to create
+      # @param [String] host remote hostname
+      # @param [Integer] port remote port
+      # @param [Numeric] connect_timeout timeout in seconds
+      # @return [Object] the connected socket
+      # @api private
+      def open_with_timeout(socket_class, host, port, connect_timeout)
+        if native_timeout?(socket_class)
+          socket_class.open(host, port, connect_timeout: connect_timeout)
+        else
+          socket_class.open(host, port)
+        end
+      end
+
+      # Whether the socket class supports native connect_timeout
+      #
+      # @param [Class] socket_class socket class to check
+      # @return [Boolean]
+      # @api private
+      def native_timeout?(socket_class)
+        NATIVE_CONNECT_TIMEOUT && socket_class.is_a?(Class) && socket_class <= TCPSocket
       end
     end
   end

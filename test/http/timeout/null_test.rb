@@ -155,4 +155,79 @@ describe HTTP::Timeout::Null do
       end
     end
   end
+
+  describe "NATIVE_CONNECT_TIMEOUT" do
+    it "is true on Ruby 3.4+" do
+      assert_equal RUBY_VERSION >= "3.4", HTTP::Timeout::Null::NATIVE_CONNECT_TIMEOUT
+    end
+  end
+
+  describe "#open_socket (private)" do
+    it "opens a socket without timeout" do
+      tcp_socket = fake(closed?: false)
+      socket_class = fake(open: tcp_socket)
+
+      result = timeout.send(:open_socket, socket_class, "example.com", 80)
+
+      assert_same tcp_socket, result
+    end
+
+    it "passes connect_timeout natively when native timeout is supported" do
+      received_args = nil
+      stub_open = lambda do |*args, **kwargs|
+        received_args = [args, kwargs]
+        fake(closed?: false)
+      end
+
+      timeout.stub(:native_timeout?, true) do
+        TCPSocket.stub(:open, stub_open) do
+          timeout.send(:open_socket, TCPSocket, "127.0.0.1", 1, connect_timeout: 5)
+        end
+      end
+
+      assert_equal [["127.0.0.1", 1], { connect_timeout: 5 }], received_args
+    end
+
+    it "does not pass connect_timeout to non-TCPSocket classes" do
+      received_args = nil
+      tcp_socket = fake(closed?: false)
+      socket_class = fake(open: proc { |*args|
+        received_args = args
+        tcp_socket
+      })
+
+      timeout.send(:open_socket, socket_class, "example.com", 80, connect_timeout: 5)
+
+      assert_equal ["example.com", 80], received_args
+    end
+
+    it "converts IO::TimeoutError to ConnectTimeoutError" do
+      socket_class = fake(open: proc { |*| raise IO::TimeoutError, "Connect timed out!" })
+
+      err = assert_raises(HTTP::ConnectTimeoutError) do
+        timeout.send(:open_socket, socket_class, "example.com", 80, connect_timeout: 5)
+      end
+      assert_match(/Connect timed out/, err.message)
+    end
+  end
+
+  describe "#native_timeout? (private)" do
+    if RUBY_VERSION >= "3.4"
+      it "returns true for TCPSocket on Ruby 3.4+" do
+        assert timeout.send(:native_timeout?, TCPSocket)
+      end
+    else
+      it "returns false for TCPSocket on Ruby < 3.4" do
+        refute timeout.send(:native_timeout?, TCPSocket)
+      end
+    end
+
+    it "returns false for non-TCPSocket classes" do
+      refute timeout.send(:native_timeout?, OpenSSL::SSL::SSLSocket)
+    end
+
+    it "returns false for non-class objects" do
+      refute timeout.send(:native_timeout?, fake(open: nil))
+    end
+  end
 end

@@ -1164,6 +1164,8 @@ module HTTP
 
   module Timeout
     class Null
+      NATIVE_CONNECT_TIMEOUT: bool
+
       attr_reader options: Hash[Symbol, Numeric]
       attr_reader socket: untyped
 
@@ -1183,6 +1185,9 @@ module HTTP
       def write_timeout: () -> Numeric?
       def rescue_readable: (?Numeric? timeout) { () -> untyped } -> untyped
       def rescue_writable: (?Numeric? timeout) { () -> untyped } -> untyped
+      def open_socket: (untyped socket_class, String host, Integer port, ?connect_timeout: Numeric?) -> untyped
+      def open_with_timeout: (untyped socket_class, String host, Integer port, Numeric connect_timeout) -> untyped
+      def native_timeout?: (untyped socket_class) -> bool
     end
 
     class PerOperation < Null

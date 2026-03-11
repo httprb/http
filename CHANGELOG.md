@@ -49,6 +49,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   supporting MD5, SHA-256, MD5-sess, and SHA-256-sess algorithms with
   quality-of-protection negotiation. Works as a chainable feature:
   `HTTP.digest_auth(user: "admin", pass: "secret").get(url)` ([#448])
+- Happy Eyeballs (RFC 8305) support via Ruby 3.4's native `TCPSocket`
+  implementation. Connection attempts now try multiple addresses (IPv6 and
+  IPv4) concurrently, improving reliability on dual-stack networks. Connect
+  timeouts are passed natively to `TCPSocket` instead of using
+  `Timeout.timeout`, avoiding `Thread.raise` interference with the Happy
+  Eyeballs state machine. ([#739])
 - `HTTP.base_uri` for setting a base URI that resolves relative request paths
   per RFC 3986. Supports chaining (`HTTP.base_uri("https://api.example.com/v1")
   .get("users")`), and integrates with `persistent` connections by deriving the

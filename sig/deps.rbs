@@ -91,6 +91,10 @@ module IO::WaitWritable
 end
 
 class IO
+  # Missing from rbs core (available since Ruby 3.2)
+  class TimeoutError < IOError
+  end
+
   class EAGAINWaitReadable < Errno::EAGAIN
     include IO::WaitReadable
   end
