@@ -25,6 +25,7 @@ matcher:
     - HTTP::URI*
     - HTTP::Headers*
     - HTTP::Redirector*
+    - HTTP::Features::Caching*
     - HTTP::Features::RaiseError*
     - HTTP::Base64*
   ignore:

@@ -78,6 +78,7 @@ end
 
 require "http/features/auto_inflate"
 require "http/features/auto_deflate"
+require "http/features/caching"
 require "http/features/digest_auth"
 require "http/features/instrumentation"
 require "http/features/logging"
