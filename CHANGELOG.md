@@ -48,6 +48,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- HTTP caching feature (`HTTP.use(:caching)`) that stores and reuses responses
+  according to RFC 7234. Supports `Cache-Control` (`max-age`, `no-cache`,
+  `no-store`), `Expires`, `ETag` / `If-None-Match`, and
+  `Last-Modified` / `If-Modified-Since` for freshness checks and conditional
+  revalidation. Ships with a default in-memory store; custom stores can be
+  passed via `store:` option. Only GET and HEAD responses are cached. ([#223])
 - `HTTP.digest_auth(user:, pass:)` for HTTP Digest Authentication (RFC 2617 /
   RFC 7616). Automatically handles 401 challenges with digest credentials,
   supporting MD5, SHA-256, MD5-sess, and SHA-256-sess algorithms with

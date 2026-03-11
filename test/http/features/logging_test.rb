@@ -57,6 +57,34 @@ describe HTTP::Features::Logging do
     end
   end
 
+  describe "logging the request with string header names" do
+    let(:request) do
+      HTTP::Request.new(
+        verb:    :post,
+        uri:     "https://example.com/",
+        headers: { "X-Custom_Header" => "value1", "X-Another.Header" => "value2" },
+        body:    "hello"
+      )
+    end
+
+    it "preserves original header names without canonicalization" do
+      feature.wrap_request(request)
+
+      expected = <<~OUTPUT
+        ** INFO **
+        > POST https://example.com/
+        ** DEBUG **
+        X-Custom_Header: value1
+        X-Another.Header: value2
+        Host: example.com
+        User-Agent: http.rb/#{HTTP::VERSION}
+
+        hello
+      OUTPUT
+      assert_equal expected, logdev.string
+    end
+  end
+
   describe "logging the request with non-loggable IO body" do
     let(:request) do
       HTTP::Request.new(

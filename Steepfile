@@ -12,6 +12,7 @@ target :lib do
   library "singleton"
   library "socket"
   library "tempfile"
+  library "time"
   library "timeout"
   library "securerandom"
   library "uri"

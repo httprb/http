@@ -349,6 +349,65 @@ module HTTP
       def supported_encoding?: (Response response) -> bool
     end
 
+    class Caching < Feature
+      CACHEABLE_METHODS: Set[Symbol]
+
+      attr_reader store: untyped
+
+      def initialize: (?store: untyped) -> void
+      def around_request: (Request request) { (Request) -> Response } -> Response
+      def wrap_response: (Response response) -> Response
+
+      private
+
+      def revalidate_entry: (Entry entry, Response response, Request request) -> Response
+      def store_and_freeze_response: (Response response) -> Response
+      def build_entry: (Response response, String body_string) -> Entry
+      def cacheable_request?: (Request request) -> bool
+      def cacheable_response?: (Response response) -> bool
+      def freshness_info?: (Response response, Array[String] directives) -> bool
+      def parse_cache_control: (Headers headers) -> Array[String]
+      def add_conditional_headers: (Request request, Entry entry) -> Request
+      def build_cached_response: (Entry entry, Request request) -> Response
+      def now: () -> Time
+
+      public
+
+      class Entry
+        attr_reader status: Integer
+        attr_reader version: String
+        attr_reader headers: Headers
+        attr_reader proxy_headers: Headers
+        attr_reader body: String
+        attr_reader request_uri: URI
+        attr_reader stored_at: Time
+
+        def initialize: (status: Integer, version: String, headers: Headers, proxy_headers: Headers, body: String, request_uri: URI, stored_at: Time) -> void
+        def fresh?: () -> bool
+        def revalidate!: () -> Time
+        def update_headers!: (Headers response_headers) -> void
+
+        private
+
+        def age: () -> Float
+        def max_age: () -> Integer?
+        def expires_at: () -> Time?
+        def no_cache?: () -> bool
+      end
+
+      class InMemoryStore
+        @cache: Hash[String, Entry]
+
+        def initialize: () -> void
+        def lookup: (Request request) -> Entry?
+        def store: (Request request, Entry entry) -> Entry
+
+        private
+
+        def cache_key: (Request request) -> String
+      end
+    end
+
     class Instrumentation < Feature
       attr_reader instrumenter: untyped
       attr_reader name: String
