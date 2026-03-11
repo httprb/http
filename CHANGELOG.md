@@ -47,6 +47,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `HTTP::URI.form_encode` now encodes newlines as `%0A` instead of
+  `%0D%0A` (#449)
 - Thread-safety: `Headers::Normalizer` cache is now per-thread via
   `Thread.current`, eliminating a potential race condition when multiple
   threads share a normalizer instance
@@ -89,6 +91,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `HTTP::URI#join` is no longer delegated to `Addressable::URI` and now
   returns `HTTP::URI` instead of `Addressable::URI`. Uses stdlib `URI.join`
   with automatic percent-encoding of non-ASCII characters (#491)
+- `HTTP::URI.form_encode` no longer delegates to `Addressable::URI`. Uses
+  stdlib `URI.encode_www_form` instead
 
 ### Changed
 

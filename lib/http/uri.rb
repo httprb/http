@@ -72,7 +72,9 @@ module HTTP
     # @api public
     # @return [String] encoded value
     def self.form_encode(form_values, sort: false)
-      Addressable::URI.form_encode(form_values, sort)
+      return ::URI.encode_www_form(form_values) unless sort
+
+      ::URI.encode_www_form(form_values.sort_by { |k, _| String(k) })
     end
 
     # Percent-encode matching characters in a string

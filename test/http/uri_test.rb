@@ -162,6 +162,16 @@ describe HTTP::URI do
       assert_equal "z=1&a=2", unsorted
       assert_equal "a=2&z=1", sorted
     end
+
+    it "encodes newlines as %0A" do
+      assert_equal "text=hello%0Aworld", HTTP::URI.form_encode({ text: "hello\nworld" })
+    end
+
+    it "sorts by string representation of keys" do
+      result = HTTP::URI.form_encode([[2, "b"], [10, "a"]], sort: true)
+
+      assert_equal "10=a&2=b", result
+    end
   end
 
   describe ".percent_encode" do
