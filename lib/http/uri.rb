@@ -94,28 +94,28 @@ module HTTP
       end
     end
 
-    # Creates an HTTP::URI instance from the given options
+    # Creates an HTTP::URI instance from the given keyword arguments
     #
     # @example
     #   HTTP::URI.new(scheme: "http", host: "example.com")
     #
-    # @param [Hash] options component hash
-    #
-    # @option options [String, #to_str] :scheme URI scheme
-    # @option options [String, #to_str] :user for basic authentication
-    # @option options [String, #to_str] :password for basic authentication
-    # @option options [String, #to_str] :host name component
-    # @option options [String, #to_str] :port network port to connect to
-    # @option options [String, #to_str] :path component to request
-    # @option options [String, #to_str] :query component distinct from path
-    # @option options [String, #to_str] :fragment component at the end of the URI
+    # @param [String, #to_str] scheme URI scheme
+    # @param [String, #to_str] user for basic authentication
+    # @param [String, #to_str] password for basic authentication
+    # @param [String, #to_str] host name component
+    # @param [Integer, #to_i] port network port to connect to
+    # @param [String, #to_str] path component to request
+    # @param [String, #to_str] query component distinct from path
+    # @param [String, #to_str] fragment component at the end of the URI
     #
     # @api public
     # @return [HTTP::URI] new URI instance
-    def initialize(options = {})
-      raise TypeError, "expected Hash for options, got #{options.class}" unless options.is_a?(Hash)
-
-      @uri = Addressable::URI.new(options)
+    def initialize(scheme: nil, user: nil, password: nil, host: nil,
+                   port: nil, path: nil, query: nil, fragment: nil)
+      @uri = Addressable::URI.new(
+        scheme: scheme, user: user, password: password, host: host,
+        port: port, path: path, query: query, fragment: fragment
+      )
       @host = process_ipv6_brackets(@uri.host)
       @normalized_host = process_ipv6_brackets(@uri.normalized_host)
     end
@@ -218,8 +218,8 @@ module HTTP
     # @return [HTTP::URI] new URI without the specified components
     def omit(*components)
       self.class.new(
-        { scheme: scheme, user: user, password: password, host: @uri.host,
-          port: @uri.port, path: path, query: query, fragment: fragment }.except(*components)
+        **{ scheme: scheme, user: user, password: password, host: @uri.host,
+            port: @uri.port, path: path, query: query, fragment: fragment }.except(*components)
       )
     end
 
@@ -235,7 +235,7 @@ module HTTP
     def join(other)
       base = self.class.percent_encode(String(self))
       ref  = self.class.percent_encode(String(other))
-      self.class.parse(::URI.join(base, ref)) # steep:ignore
+      self.class.parse(::URI.join(base, ref))
     end
 
     # Checks whether the URI scheme is HTTP

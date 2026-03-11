@@ -40,11 +40,21 @@ module HTTP
     #
     # @param verb [Symbol] the HTTP method
     # @param uri [#to_s] the URI to request
-    # @param opts [Hash] request options
     # @return [HTTP::Response] the response
     # @api public
-    def request(verb, uri, **opts)
-      opts    = @default_options.merge(opts)
+    def request(verb, uri,
+                headers: nil, params: nil, form: nil, json: nil, body: nil,
+                response: nil, encoding: nil, follow: nil, ssl: nil, ssl_context: nil,
+                proxy: nil, nodelay: nil, features: nil, retriable: nil,
+                socket_class: nil, ssl_socket_class: nil, timeout_class: nil,
+                timeout_options: nil, keep_alive_timeout: nil, base_uri: nil, persistent: nil)
+      opts = { headers: headers, params: params, form: form, json: json, body: body,
+               response: response, encoding: encoding, follow: follow, ssl: ssl,
+               ssl_context: ssl_context, proxy: proxy, nodelay: nodelay, features: features,
+               retriable: retriable, socket_class: socket_class, ssl_socket_class: ssl_socket_class,
+               timeout_class: timeout_class, timeout_options: timeout_options,
+               keep_alive_timeout: keep_alive_timeout, base_uri: base_uri, persistent: persistent }.compact
+      opts = @default_options.merge(opts)
       builder = Request::Builder.new(opts)
       req     = builder.build(verb, uri)
       res     = perform(req, opts)

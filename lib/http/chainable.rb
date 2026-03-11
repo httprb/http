@@ -157,12 +157,15 @@ module HTTP
     # @example
     #   HTTP.follow.get("http://example.com")
     #
-    # @param options [Hash] redirect options
+    # @param [Boolean] strict (true) redirector hops policy
+    # @param [Integer] max_hops (5) maximum allowed redirect hops
+    # @param [#call, nil] on_redirect optional redirect callback
     # @return [HTTP::Session]
     # @see Redirector#initialize
     # @api public
-    def follow(**options)
-      branch default_options.with_follow(options)
+    def follow(strict: nil, max_hops: nil, on_redirect: nil)
+      opts = { strict: strict, max_hops: max_hops, on_redirect: on_redirect }.compact
+      branch default_options.with_follow(opts)
     end
 
     # Make a request with the given headers
@@ -313,8 +316,11 @@ module HTTP
     # @param (see Performer#initialize)
     # @return [HTTP::Session]
     # @api public
-    def retriable(**options)
-      branch default_options.with_retriable(options.empty? || options)
+    def retriable(tries: nil, delay: nil, exceptions: nil, retry_statuses: nil,
+                  on_retry: nil, max_delay: nil, should_retry: nil)
+      opts = { tries: tries, delay: delay, exceptions: exceptions, retry_statuses: retry_statuses,
+               on_retry: on_retry, max_delay: max_delay, should_retry: should_retry }.compact
+      branch default_options.with_retriable(opts.empty? || opts)
     end
 
     private

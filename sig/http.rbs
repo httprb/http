@@ -54,8 +54,8 @@ module HTTP
       ?form: untyped,
       ?json: untyped,
       ?body: untyped,
-      ?follow: bool,
-      ?retriable: bool,
+      ?follow: bool | Hash[Symbol, untyped],
+      ?retriable: bool | Hash[Symbol, untyped],
       ?base_uri: String | URI | nil,
       ?persistent: String?,
       ?ssl_context: OpenSSL::SSL::SSLContext?
@@ -77,7 +77,7 @@ module HTTP
     def default_options=: (Hash[Symbol, untyped] | Options opts) -> Options
     def nodelay: () -> Session
     def use: (*(Symbol | Hash[Symbol, Hash[Symbol, untyped]]) features) -> Session
-    def retriable: (**untyped options) -> Session
+    def retriable: (?tries: Integer?, ?delay: (Numeric | ^(Integer) -> Numeric)?, ?exceptions: Array[singleton(Exception)]?, ?retry_statuses: untyped, ?on_retry: (^(Request, Exception?, Response?) -> void)?, ?max_delay: Numeric?, ?should_retry: (^(Request, Exception?, Response?, Integer) -> bool)?) -> Session
 
     private
 
@@ -116,8 +116,8 @@ module HTTP
       ?form: untyped,
       ?json: untyped,
       ?body: untyped,
-      ?follow: bool,
-      ?retriable: bool,
+      ?follow: bool | Hash[Symbol, untyped],
+      ?retriable: bool | Hash[Symbol, untyped],
       ?base_uri: String | URI | nil,
       ?persistent: String?,
       ?ssl_context: OpenSSL::SSL::SSLContext?
@@ -165,8 +165,8 @@ module HTTP
       ?form: untyped,
       ?json: untyped,
       ?body: untyped,
-      ?follow: bool,
-      ?retriable: bool,
+      ?follow: bool | Hash[Symbol, untyped],
+      ?retriable: bool | Hash[Symbol, untyped],
       ?base_uri: String | URI | nil,
       ?persistent: String?,
       ?ssl_context: OpenSSL::SSL::SSLContext?
@@ -489,8 +489,8 @@ module HTTP
       ?form: untyped,
       ?json: untyped,
       ?body: untyped,
-      ?follow: bool,
-      ?retriable: bool,
+      ?follow: bool | Hash[Symbol, untyped],
+      ?retriable: bool | Hash[Symbol, untyped],
       ?base_uri: String | URI | nil,
       ?persistent: String?,
       ?ssl_context: OpenSSL::SSL::SSLContext?
@@ -586,9 +586,10 @@ module HTTP
 
     def self.parse: (untyped uri) -> URI
     def self.form_encode: (untyped form_values, ?sort: bool) -> String
-    def self.percent_encode: (String? string) -> String?
+    def self.percent_encode: (String string) -> String
+                           | (String? string) -> String?
 
-    def initialize: (?Hash[Symbol, untyped] options) -> void
+    def initialize: (?scheme: String?, ?user: String?, ?password: String?, ?host: String?, ?port: Integer?, ?path: String?, ?query: String?, ?fragment: String?) -> void
     def ==: (untyped other) -> bool
     def eql?: (untyped other) -> bool
     def hash: () -> Integer
@@ -620,7 +621,7 @@ module HTTP
 
     private
 
-    def process_ipv6_brackets: (untyped raw_host, ?brackets: bool) -> untyped
+    def process_ipv6_brackets: (untyped raw_host, ?brackets: bool) -> String?
   end
 
   # Supported HTTP method verbs
@@ -1119,7 +1120,7 @@ module HTTP
       attr_reader options: Hash[Symbol, Numeric]
       attr_reader socket: untyped
 
-      def initialize: (**Numeric) -> void
+      def initialize: (?read_timeout: Numeric?, ?write_timeout: Numeric?, ?connect_timeout: Numeric?, ?global_timeout: Numeric?) -> void
       def connect: (untyped socket_class, String host, Integer port, ?nodelay: bool) -> void
       def connect_ssl: () -> void
       def close: () -> void

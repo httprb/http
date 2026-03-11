@@ -30,11 +30,15 @@ module HTTP
       # @example
       #   HTTP::Timeout::Null.new(read_timeout: 5)
       #
-      # @param options [Hash] timeout options
+      # @param [Numeric, nil] read_timeout Read timeout in seconds
+      # @param [Numeric, nil] write_timeout Write timeout in seconds
+      # @param [Numeric, nil] connect_timeout Connect timeout in seconds
+      # @param [Numeric, nil] global_timeout Global timeout in seconds
       # @api public
       # @return [HTTP::Timeout::Null]
-      def initialize(**options)
-        @options = options
+      def initialize(read_timeout: nil, write_timeout: nil, connect_timeout: nil, global_timeout: nil)
+        @options = { read_timeout: read_timeout, write_timeout: write_timeout,
+                     connect_timeout: connect_timeout, global_timeout: global_timeout }.compact
       end
 
       # Connects to a socket

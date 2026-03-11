@@ -118,7 +118,7 @@ module HTTP
         headers = stringify_headers(request.headers)
         if request.body.loggable?
           source = request.body.source
-          body = source.encoding == Encoding::BINARY ? format_binary(source) : source # steep:ignore
+          body = source.encoding == Encoding::BINARY ? format_binary(source) : source
           logger.debug { "#{headers}\n\n#{body}" }
         else
           logger.debug { headers }
@@ -131,7 +131,7 @@ module HTTP
       def log_response_body_inline(response)
         body    = response.body
         headers = stringify_headers(response.headers)
-        if body.respond_to?(:encoding) && body.encoding == Encoding::BINARY # steep:ignore
+        if body.respond_to?(:encoding) && body.encoding == Encoding::BINARY
           logger.debug { "#{headers}\n\n#{format_binary(body)}" } # steep:ignore
         else
           logger.debug { "#{headers}\n\n#{body}" }

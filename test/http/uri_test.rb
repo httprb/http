@@ -75,9 +75,8 @@ describe HTTP::URI do
   end
 
   describe "#initialize" do
-    it "raises TypeError for invalid argument" do
-      err = assert_raises(TypeError) { HTTP::URI.new(42) }
-      assert_match(/expected Hash/, err.message)
+    it "raises ArgumentError for positional argument" do
+      assert_raises(ArgumentError) { HTTP::URI.new(42) }
     end
   end
 
@@ -676,36 +675,27 @@ describe HTTP::URI do
   end
 
   describe "#initialize" do
-    it "accepts a Hash of options" do
+    it "accepts keyword arguments" do
       uri = HTTP::URI.new(scheme: "http", host: "example.com")
 
       assert_equal "http", uri.scheme
       assert_equal "example.com", uri.host
     end
 
-    it "raises TypeError for an Addressable::URI" do
+    it "raises ArgumentError for an Addressable::URI" do
       addr_uri = Addressable::URI.parse("http://example.com")
 
-      assert_raises(TypeError) { HTTP::URI.new(addr_uri) }
+      assert_raises(ArgumentError) { HTTP::URI.new(addr_uri) }
     end
 
-    it "includes the class name in TypeError message" do
-      err = assert_raises(TypeError) { HTTP::URI.new(42) }
-      assert_includes err.message, "Integer"
+    it "raises ArgumentError for a positional argument" do
+      assert_raises(ArgumentError) { HTTP::URI.new(42) }
     end
 
-    it "works with no arguments (default empty Hash)" do
+    it "works with no arguments" do
       uri = HTTP::URI.new
 
       assert_instance_of HTTP::URI, uri
-    end
-
-    it "accepts a Hash subclass" do
-      subclass = Class.new(Hash)
-      opts = subclass[scheme: "http", host: "example.com"]
-      uri = HTTP::URI.new(opts)
-
-      assert_equal "http://example.com", uri.to_s
     end
   end
 
