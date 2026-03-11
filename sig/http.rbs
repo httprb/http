@@ -1039,6 +1039,7 @@ module HTTP
     def follow_redirects: () { (Request) -> Response } -> void
     def too_many_hops?: () -> bool
     def endless_loop?: () -> bool
+    def visit_key: () -> String
     def redirect_uri: () -> String?
     def redirect_to: (String? uri) -> Request
   end

@@ -462,7 +462,7 @@ describe HTTP::Redirector do
       assert flushed, "expected response.flush to be called during redirect"
     end
 
-    it "tracks visited URLs with verb and URI" do
+    it "tracks visited URLs with verb, URI, and cookies" do
       req = HTTP::Request.new verb: :head, uri: "http://example.com"
       # This request visits the same URL twice, triggering EndlessRedirectError
       res = redirect_response(301, "http://example.com")
@@ -471,6 +471,26 @@ describe HTTP::Redirector do
         redirector.perform(req, res) { redirect_response(301, "http://example.com") }
       end
       assert_kind_of HTTP::Redirector::TooManyRedirectsError, err
+    end
+
+    it "does not falsely detect endless loop when cookies change between visits" do
+      req = HTTP::Request.new verb: :get, uri: "http://example.com"
+      res = redirect_response(302, "http://example.com")
+
+      call_count = 0
+      result = redirector.perform(req, res) do |redirect_req|
+        call_count += 1
+        # Simulate Session applying a cookie to the redirect request
+        redirect_req.headers.set("Cookie", "auth=ok")
+        if call_count == 1
+          redirect_response(302, "http://example.com")
+        else
+          simple_response(200, "authenticated")
+        end
+      end
+
+      assert_equal 2, call_count
+      assert_equal "authenticated", result.to_s
     end
 
     it "raises StateError with descriptive message when no Location header" do

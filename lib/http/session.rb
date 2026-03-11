@@ -111,6 +111,7 @@ module HTTP
       Redirector.new(**follow).perform(req, res) do |redirect_req|
         wrapped = builder.wrap(redirect_req)
         apply_cookies(jar, wrapped)
+        apply_cookies(jar, redirect_req)
         response = client.perform(wrapped, opts)
         store_cookies(jar, response)
         response

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Redirect loop detection now considers cookies, so a redirect back to the
+  same URL with different cookies is no longer falsely detected as an endless
+  loop. Fixes cookie-dependent redirect flows where a server sets a cookie on
+  one hop and expects it on the next. ([#544])
+
 ### Changed
 
 - **BREAKING** Convert options hash parameters to explicit keyword arguments

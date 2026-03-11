@@ -173,6 +173,12 @@ describe HTTP::Session do
       refute_includes response.to_s, "temp="
     end
 
+    it "breaks redirect loop when cookie changes the server response" do
+      response = HTTP.follow.get("#{dummy.endpoint}/cookie-loop")
+
+      assert_equal "authenticated", response.to_s
+    end
+
     it "does not set Cookie header when no cookies present" do
       response = HTTP.follow.get("#{dummy.endpoint}/redirect-no-cookies")
 

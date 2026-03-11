@@ -85,7 +85,7 @@ module HTTP
     # @api private
     # @return [void]
     def follow_redirects
-      @visited << "#{@request.verb} #{@request.uri}"
+      @visited << visit_key
 
       raise TooManyRedirectsError if too_many_hops?
       raise EndlessRedirectError  if endless_loop?
@@ -120,6 +120,17 @@ module HTTP
     # @return [Boolean]
     def endless_loop?
       @visited.count(@visited.last) > 1
+    end
+
+    # Build a visit key for the current request
+    #
+    # Includes verb, URI, and Cookie header so that requests to the same URL
+    # with different cookies are not falsely detected as an endless loop.
+    #
+    # @api private
+    # @return [String]
+    def visit_key
+      "#{@request.verb} #{@request.uri} #{@request.headers[Headers::COOKIE]}"
     end
 
     # Redirect policy for follow

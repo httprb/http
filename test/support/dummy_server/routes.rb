@@ -163,5 +163,16 @@ class DummyServer
       res.status      = 301
       res["Location"] = "http://#{@server.addr}:#{@server.port}/echo-cookies"
     end
+
+    get "/cookie-loop" do |req, res|
+      if req.cookies.any? { |c| c.name == "auth" && c.value == "ok" }
+        res.status = 200
+        res.body   = "authenticated"
+      else
+        res.status = 302
+        res["Location"] = "http://#{@server.addr}:#{@server.port}/cookie-loop"
+        res["Set-Cookie"] = "auth=ok; path=/"
+      end
+    end
   end
 end
