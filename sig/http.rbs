@@ -1160,9 +1160,6 @@ module HTTP
     end
 
     class PerOperation < Null
-      READ_TIMEOUT: Numeric
-      WRITE_TIMEOUT: Numeric
-      CONNECT_TIMEOUT: Numeric
       KEYS: Hash[Symbol, Symbol]
 
       def self.normalize_options: (Hash[Symbol, Numeric] options) -> Hash[Symbol, Numeric]
@@ -1172,11 +1169,11 @@ module HTTP
       def self.extract_global_timeout!: (Hash[Symbol, Numeric] options) -> Numeric?
       def self.resolve_timeout_value!: (Hash[Symbol, Numeric] options, Symbol short, Symbol long) -> Numeric
 
-      attr_reader read_timeout: Numeric
-      attr_reader write_timeout: Numeric
-      attr_reader connect_timeout: Numeric
+      attr_reader read_timeout: Numeric?
+      attr_reader write_timeout: Numeric?
+      attr_reader connect_timeout: Numeric?
 
-      def initialize: (?read_timeout: Numeric, ?write_timeout: Numeric, ?connect_timeout: Numeric) -> void
+      def initialize: (?read_timeout: Numeric?, ?write_timeout: Numeric?, ?connect_timeout: Numeric?) -> void
       def connect: (untyped socket_class, String host, Integer port, ?nodelay: bool) -> void
       def readpartial: (Integer size, ?String? buffer) -> (String | Symbol)
       def write: (String data) -> Integer

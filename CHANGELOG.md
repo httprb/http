@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   same URL with different cookies is no longer falsely detected as an endless
   loop. Fixes cookie-dependent redirect flows where a server sets a cookie on
   one hop and expects it on the next. ([#544])
+- Per-operation timeouts (`HTTP.timeout(read: n, write: n, connect: n)`) no
+  longer default unspecified values to 0.25 seconds. Omitted timeouts now mean
+  no timeout for that operation, matching the behavior when no timeout is
+  configured at all. ([#579])
 
 ### Changed
 

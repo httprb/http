@@ -8,13 +8,6 @@ module HTTP
   module Timeout
     # Timeout handler with separate timeouts for connect, read, and write
     class PerOperation < Null
-      # Default connect timeout in seconds
-      CONNECT_TIMEOUT = 0.25
-      # Default write timeout in seconds
-      WRITE_TIMEOUT = 0.25
-      # Default read timeout in seconds
-      READ_TIMEOUT = 0.25
-
       # Mapping of shorthand option keys to their full forms
       KEYS = %i[read write connect].to_h { |k| [k, :"#{k}_timeout"] }.freeze
 
@@ -84,12 +77,12 @@ module HTTP
       # @example
       #   HTTP::Timeout::PerOperation.new(read_timeout: 5)
       #
-      # @param [Numeric] read_timeout Read timeout in seconds
-      # @param [Numeric] write_timeout Write timeout in seconds
-      # @param [Numeric] connect_timeout Connect timeout in seconds
+      # @param [Numeric, nil] read_timeout Read timeout in seconds (nil for no timeout)
+      # @param [Numeric, nil] write_timeout Write timeout in seconds (nil for no timeout)
+      # @param [Numeric, nil] connect_timeout Connect timeout in seconds (nil for no timeout)
       # @api public
       # @return [HTTP::Timeout::PerOperation]
-      def initialize(read_timeout: READ_TIMEOUT, write_timeout: WRITE_TIMEOUT, connect_timeout: CONNECT_TIMEOUT)
+      def initialize(read_timeout: nil, write_timeout: nil, connect_timeout: nil)
         super
 
         @read_timeout = read_timeout
