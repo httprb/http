@@ -121,6 +121,9 @@ module HTTP
         end
       end
 
+      # I/O wait result symbols returned by non-blocking operations
+      WAIT_RESULTS = %i[wait_readable wait_writable].freeze
+
       # Read data from the socket
       #
       # @example
@@ -136,7 +139,7 @@ module HTTP
           result = @socket.read_nonblock(size, buffer, exception: false)
 
           return :eof   if result.nil?
-          return result if result != :wait_readable
+          return result unless WAIT_RESULTS.include?(result)
 
           raise TimeoutError, "Read timed out after #{@read_timeout} seconds" if timeout
 
@@ -150,7 +153,7 @@ module HTTP
           # timeout. Else, the first timeout was a proper timeout.
           # This hack has to be done because io/wait#wait_readable doesn't provide a value for when
           # the socket is closed by the server, and HTTP::Parser doesn't provide the limit for the chunks.
-          timeout = true unless @socket.to_io.wait_readable(@read_timeout)
+          timeout = true unless wait_for_io(result, @read_timeout)
         end
       end
 
@@ -166,11 +169,27 @@ module HTTP
         timeout = false
         loop do
           result = @socket.write_nonblock(data, exception: false)
-          return result unless result == :wait_writable
+          return result unless WAIT_RESULTS.include?(result)
 
           raise TimeoutError, "Write timed out after #{@write_timeout} seconds" if timeout
 
-          timeout = true unless @socket.to_io.wait_writable(@write_timeout)
+          timeout = true unless wait_for_io(result, @write_timeout)
+        end
+      end
+
+      private
+
+      # Waits for I/O readiness based on the result type
+      #
+      # @param [Symbol] result the I/O wait type (:wait_readable or :wait_writable)
+      # @param [Numeric, nil] timeout per-operation timeout limit
+      # @return [Object, nil] the socket if ready, nil on timeout
+      # @api private
+      def wait_for_io(result, timeout)
+        if result == :wait_readable
+          @socket.to_io.wait_readable(timeout)
+        else
+          @socket.to_io.wait_writable(timeout)
         end
       end
     end

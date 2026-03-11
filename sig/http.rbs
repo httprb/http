@@ -1193,6 +1193,7 @@ module HTTP
 
     class PerOperation < Null
       KEYS: Hash[Symbol, Symbol]
+      WAIT_RESULTS: Array[Symbol]
 
       def self.normalize_options: (Hash[Symbol, Numeric] options) -> Hash[Symbol, Numeric]
 
@@ -1209,6 +1210,10 @@ module HTTP
       def connect: (untyped socket_class, String host, Integer port, ?nodelay: bool) -> void
       def readpartial: (Integer size, ?String? buffer) -> (String | Symbol)
       def write: (String data) -> Integer
+
+      private
+
+      def wait_for_io: (Symbol result, Numeric? timeout) -> untyped
     end
 
     class Global < Null

@@ -20,6 +20,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   longer default unspecified values to 0.25 seconds. Omitted timeouts now mean
   no timeout for that operation, matching the behavior when no timeout is
   configured at all. ([#579])
+- Per-operation timeout handler now correctly handles `:wait_writable` from
+  `read_nonblock` and `:wait_readable` from `write_nonblock` on SSL sockets
+  during TLS renegotiation. Previously these symbols were returned as data
+  instead of being waited on. ([#358])
 
 ### Changed
 

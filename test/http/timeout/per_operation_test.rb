@@ -146,6 +146,37 @@ describe HTTP::Timeout::PerOperation do
         assert_equal :eof, timeout.readpartial(10)
       end
     end
+
+    context "when read returns :wait_writable then data (SSL renegotiation)" do
+      it "waits for writable then retries" do
+        call_count = 0
+        socket = fake(
+          to_io:         io,
+          closed?:       false,
+          read_nonblock: ->(*) { (call_count += 1) == 1 ? :wait_writable : "data" }
+        )
+        timeout.instance_variable_set(:@socket, socket)
+
+        assert_equal "data", timeout.readpartial(10)
+      end
+    end
+
+    context "when read returns :wait_writable and times out" do
+      it "raises TimeoutError" do
+        io_with_nil_wait = fake(wait_readable: nil, wait_writable: nil)
+        socket = fake(
+          to_io:         io_with_nil_wait,
+          closed?:       false,
+          read_nonblock: :wait_writable
+        )
+        timeout.instance_variable_set(:@socket, socket)
+
+        err = assert_raises(HTTP::TimeoutError) do
+          timeout.readpartial(10)
+        end
+        assert_match(/Read timed out/, err.message)
+      end
+    end
   end
 
   describe "#write" do
@@ -156,6 +187,37 @@ describe HTTP::Timeout::PerOperation do
           to_io:          io_with_nil_wait,
           closed?:        false,
           write_nonblock: :wait_writable
+        )
+        timeout.instance_variable_set(:@socket, socket)
+
+        err = assert_raises(HTTP::TimeoutError) do
+          timeout.write("data")
+        end
+        assert_match(/Write timed out/, err.message)
+      end
+    end
+
+    context "when write returns :wait_readable then completes (SSL renegotiation)" do
+      it "waits for readable then retries" do
+        call_count = 0
+        socket = fake(
+          to_io:          io,
+          closed?:        false,
+          write_nonblock: ->(*) { (call_count += 1) == 1 ? :wait_readable : 4 }
+        )
+        timeout.instance_variable_set(:@socket, socket)
+
+        assert_equal 4, timeout.write("data")
+      end
+    end
+
+    context "when write returns :wait_readable and times out" do
+      it "raises TimeoutError" do
+        io_with_nil_wait = fake(wait_readable: nil, wait_writable: nil)
+        socket = fake(
+          to_io:          io_with_nil_wait,
+          closed?:        false,
+          write_nonblock: :wait_readable
         )
         timeout.instance_variable_set(:@socket, socket)
 
