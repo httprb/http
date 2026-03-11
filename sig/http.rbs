@@ -919,6 +919,7 @@ module HTTP
 
       def initialize: () -> void
       def reset: () -> void
+      def reset_for_informational: () -> void
       def add: (String data) -> Parser
       alias << add
       def mark_header_finished: () -> void

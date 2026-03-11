@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- HTTP 1xx informational responses (e.g. `100 Continue`) are now transparently
+  skipped, returning the final response. This was a regression introduced when
+  the parser was migrated from http-parser to llhttp. ([#667])
 - Redirect loop detection now considers cookies, so a redirect back to the
   same URL with different cookies is no longer falsely detected as an endless
   loop. Fixes cookie-dependent redirect flows where a server sets a cookie on

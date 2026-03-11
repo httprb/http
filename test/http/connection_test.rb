@@ -58,6 +58,56 @@ describe HTTP::Connection do
     end
   end
 
+  describe "#read_headers! with 1xx informational response" do
+    it "skips 100 Continue and returns the final response" do
+      call_count = 0
+      responses = [
+        "HTTP/1.1 100 Continue\r\n\r\nHTTP/1.1 200 OK\r\nContent-Length: 5\r\n\r\nhello",
+        :eof
+      ]
+      info_socket = fake(
+        connect:     nil,
+        close:       nil,
+        readpartial: proc {
+          idx = [call_count, responses.length - 1].min
+          responses[idx].tap { call_count += 1 }
+        }
+      )
+      info_timeout_class = fake(new: info_socket)
+      info_opts = HTTP::Options.new(timeout_class: info_timeout_class)
+      conn = HTTP::Connection.new(req, info_opts)
+      conn.instance_variable_set(:@pending_response, true)
+
+      conn.read_headers!
+
+      assert_equal 200, conn.status_code
+      assert_equal "5", conn.headers["Content-Length"]
+    end
+
+    it "skips 100 Continue when response arrives in small chunks" do
+      raw = "HTTP/1.1 100 Continue\r\n\r\nHTTP/1.1 200 OK\r\nContent-Length: 5\r\n\r\nhello"
+      chunks = raw.chars + [:eof]
+      call_count = 0
+      chunked_socket = fake(
+        connect:     nil,
+        close:       nil,
+        readpartial: proc {
+          idx = [call_count, chunks.length - 1].min
+          chunks[idx].tap { call_count += 1 }
+        }
+      )
+      chunked_timeout_class = fake(new: chunked_socket)
+      chunked_opts = HTTP::Options.new(timeout_class: chunked_timeout_class)
+      conn = HTTP::Connection.new(req, chunked_opts)
+      conn.instance_variable_set(:@pending_response, true)
+
+      conn.read_headers!
+
+      assert_equal 200, conn.status_code
+      assert_equal "5", conn.headers["Content-Length"]
+    end
+  end
+
   describe "#send_request" do
     context "when a response is already pending" do
       it "raises StateError" do

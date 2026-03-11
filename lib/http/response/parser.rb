@@ -65,6 +65,19 @@ module HTTP
       # @api private
       alias << add
 
+      # Reset parser state for informational (1xx) responses
+      # @return [void]
+      # @api private
+      def reset_for_informational
+        @handler.reset
+        @header_finished = false
+        @message_finished = false
+        @headers = Headers.new
+        @chunk = nil
+        @status_code = nil
+        @http_version = nil
+      end
+
       # Mark headers as finished
       # @return [void]
       # @api private
@@ -186,7 +199,11 @@ module HTTP
         # @return [void]
         # @api private
         def on_message_complete
-          @target.mark_message_finished
+          if Integer(@target.status_code) < 200
+            @target.reset_for_informational
+          else
+            @target.mark_message_finished
+          end
         end
 
         private
