@@ -597,8 +597,13 @@ module HTTP
     NORMALIZER: ^(String | URI) -> URI
 
     DOT_SEGMENTS: Array[String]
+    SINGLE_DOT_SEGMENT: Regexp
+    DOUBLE_DOT_SEGMENT: Regexp
+    LAST_SEGMENT: Regexp
+    FIRST_SEGMENT: Regexp
 
     def self.remove_dot_segments: (String path) -> String
+    def self.reduce_dot_segment: (String input, String output) -> void
 
     def self.parse: (untyped uri) -> URI
     def self.form_encode: (untyped form_values, ?sort: bool) -> String
@@ -627,6 +632,7 @@ module HTTP
 
     private
 
+    def authority_string: () -> String
     def process_ipv6_brackets: (untyped raw_host, ?brackets: bool) -> String?
     def normalize_host: (String? host) -> String?
 
