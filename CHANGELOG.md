@@ -44,6 +44,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `HTTP.digest_auth(user:, pass:)` for HTTP Digest Authentication (RFC 2617 /
+  RFC 7616). Automatically handles 401 challenges with digest credentials,
+  supporting MD5, SHA-256, MD5-sess, and SHA-256-sess algorithms with
+  quality-of-protection negotiation. Works as a chainable feature:
+  `HTTP.digest_auth(user: "admin", pass: "secret").get(url)` ([#448])
 - `HTTP.base_uri` for setting a base URI that resolves relative request paths
   per RFC 3986. Supports chaining (`HTTP.base_uri("https://api.example.com/v1")
   .get("users")`), and integrates with `persistent` connections by deriving the

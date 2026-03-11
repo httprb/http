@@ -73,6 +73,7 @@ module HTTP
     def accept: (String | Symbol type) -> Session
     def auth: (String value) -> Session
     def basic_auth: (user: String, pass: String) -> Session
+    def digest_auth: (user: String, pass: String) -> Session
     def default_options: () -> Options
     def default_options=: (Hash[Symbol, untyped] | Options opts) -> Options
     def nodelay: () -> Session
@@ -417,6 +418,31 @@ module HTTP
 
       def initialize: (?ignore: Array[Integer]) -> void
       def wrap_response: (Response response) -> Response
+    end
+
+    class DigestAuth < Feature
+      ALGORITHMS: Hash[String, singleton(Digest::MD5) | singleton(Digest::SHA256)]
+      WWW_AUTHENTICATE: String
+
+      @user: String
+      @pass: String
+
+      def initialize: (user: String, pass: String) -> void
+      def around_request: (Request request) { (Request) -> Response } -> Response
+
+      private
+
+      def digest_challenge?: (Response response) -> bool
+      def authorize: (Request request, Response response) -> Request
+      def parse_challenge: (String header) -> Hash[String, String]
+      def build_auth: (Request request, Hash[String, String] challenge) -> String
+      def compute_auth_header: (String algorithm, String? qop, String nonce, String cnonce, String nonce_count, String uri, String ha1, String ha2, Hash[String, String] challenge) -> String
+      def select_qop: (String? qop_str) -> String?
+      def compute_ha1: (String algorithm, String realm, String nonce, String cnonce) -> String
+      def compute_ha2: (String algorithm, String method, String uri) -> String
+      def compute_response: (String algorithm, String ha1, String ha2, nonce: String, nonce_count: String, cnonce: String, qop: String?) -> String
+      def hex_digest: (String algorithm, String data) -> String
+      def build_header: (username: String, realm: String, nonce: String, uri: String, qop: String?, nonce_count: String, cnonce: String, response: String, opaque: String?, algorithm: String) -> String
     end
   end
 

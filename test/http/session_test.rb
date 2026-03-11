@@ -116,6 +116,12 @@ describe HTTP::Session do
       assert_kind_of HTTP::Session, chained
     end
 
+    it "returns a Session from digest_auth" do
+      chained = session.digest_auth(user: "admin", pass: "secret")
+
+      assert_kind_of HTTP::Session, chained
+    end
+
     it "preserves options through chaining" do
       chained = session.headers("Accept" => "text/html")
                        .timeout(10)

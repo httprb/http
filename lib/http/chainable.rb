@@ -251,6 +251,23 @@ module HTTP
       auth("Basic #{encode64("#{user}:#{pass}")}")
     end
 
+    # Enable HTTP Digest authentication
+    #
+    # Automatically handles 401 Digest challenges by computing the digest
+    # response and retrying the request with proper credentials.
+    #
+    # @example
+    #   HTTP.digest_auth(user: "admin", pass: "secret").get("http://example.com")
+    #
+    # @see https://datatracker.ietf.org/doc/html/rfc2617
+    # @param [#to_s] user
+    # @param [#to_s] pass
+    # @return [HTTP::Session]
+    # @api public
+    def digest_auth(user:, pass:)
+      use(digest_auth: { user: user, pass: pass })
+    end
+
     # Get options for HTTP
     #
     # @example

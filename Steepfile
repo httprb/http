@@ -13,6 +13,7 @@ target :lib do
   library "socket"
   library "tempfile"
   library "timeout"
+  library "securerandom"
   library "uri"
   library "zlib"
 end
