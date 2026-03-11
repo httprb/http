@@ -56,7 +56,7 @@ module HTTP
       ?body: untyped,
       ?follow: bool | Hash[Symbol, untyped],
       ?retriable: bool | Hash[Symbol, untyped],
-      ?base_uri: String | URI | nil,
+      ?base_uri: String | URI?,
       ?persistent: String?,
       ?ssl_context: OpenSSL::SSL::SSLContext?
     ) -> Response
@@ -118,7 +118,7 @@ module HTTP
       ?body: untyped,
       ?follow: bool | Hash[Symbol, untyped],
       ?retriable: bool | Hash[Symbol, untyped],
-      ?base_uri: String | URI | nil,
+      ?base_uri: String | URI?,
       ?persistent: String?,
       ?ssl_context: OpenSSL::SSL::SSLContext?
     ) -> Response
@@ -167,7 +167,7 @@ module HTTP
       ?body: untyped,
       ?follow: bool | Hash[Symbol, untyped],
       ?retriable: bool | Hash[Symbol, untyped],
-      ?base_uri: String | URI | nil,
+      ?base_uri: String | URI?,
       ?persistent: String?,
       ?ssl_context: OpenSSL::SSL::SSLContext?
     ) -> Response
@@ -222,11 +222,11 @@ module HTTP
     def delete: (String | Symbol name) -> void
     def add: (String | Symbol name, String | Array[String] value) -> void
     def get: (String | Symbol name) -> Array[String]
-    def []: (String | Symbol name) -> (String | Array[String] | nil)
+    def []: (String | Symbol name) -> (String | Array[String]?)
     def include?: (String | Symbol name) -> bool
-    def to_h: () -> Hash[String, String | Array[String] | nil]
+    def to_h: () -> Hash[String, String | Array[String]?]
     alias to_hash to_h
-    def deconstruct_keys: (Array[Symbol]? keys) -> Hash[Symbol, String | Array[String] | nil]
+    def deconstruct_keys: (Array[Symbol]? keys) -> Hash[Symbol, String | Array[String]?]
     def to_a: () -> Array[Array[String]]
     def inspect: () -> String
     def keys: () -> Array[String]
@@ -491,7 +491,7 @@ module HTTP
       ?body: untyped,
       ?follow: bool | Hash[Symbol, untyped],
       ?retriable: bool | Hash[Symbol, untyped],
-      ?base_uri: String | URI | nil,
+      ?base_uri: String | URI?,
       ?persistent: String?,
       ?ssl_context: OpenSSL::SSL::SSLContext?
     ) -> void
@@ -501,7 +501,7 @@ module HTTP
 
     def follow=: (bool value) -> void
     def retriable=: (bool value) -> void
-    def base_uri=: (String | URI | nil value) -> void
+    def base_uri=: (String | URI? value) -> void
     def base_uri?: () -> bool
     def persistent=: (String? value) -> String?
     def persistent?: () -> bool
@@ -569,6 +569,7 @@ module HTTP
 
     @raw_host: String?
     @hash: Integer
+    self.@addressable_loaded: bool
     @scheme: String?
     @user: String?
     @password: String?
@@ -592,7 +593,7 @@ module HTTP
     HTTPS_SCHEME: String
     PERCENT_ENCODE: Regexp
     NEEDS_ADDRESSABLE: Regexp
-    DEFAULT_PORTS: Hash[String, Integer]
+    DEFAULT_PORTS: Hash[String?, Integer]
     NORMALIZER: ^(String | URI) -> URI
 
     DOT_SEGMENTS: Array[String]
@@ -632,6 +633,8 @@ module HTTP
     def self.parse_components: (String uri_string) -> Hash[Symbol, untyped]
     def self.parse_with_stdlib: (String uri_string) -> Hash[Symbol, untyped]?
     def self.parse_with_addressable: (String uri_string) -> Hash[Symbol, untyped]
+    def self.require_addressable: () -> void
+    def self.idna_to_ascii: (String host) -> String
   end
 
   # Supported HTTP method verbs
@@ -802,7 +805,7 @@ module HTTP
     def readpartial: (?Integer size, ?String? outbuf) -> String
     def connection: () -> Connection?
     def uri: () -> URI
-    def to_a: () -> [Integer, Hash[String, String | Array[String] | nil], String]
+    def to_a: () -> [Integer, Hash[String, String | Array[String]?], String]
     alias deconstruct to_a
     def deconstruct_keys: (Array[Symbol]? keys) -> Hash[Symbol, Status | String | Headers | Body | Request?]
     def flush: () -> Response

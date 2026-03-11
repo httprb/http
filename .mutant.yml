@@ -29,3 +29,5 @@ matcher:
     - HTTP::Base64*
   ignore:
     - HTTP::URI.parse_with_addressable
+    - HTTP::URI.require_addressable
+    - HTTP::URI.idna_to_ascii

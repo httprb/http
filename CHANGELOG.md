@@ -18,11 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `Response.new`, `Redirector.new`, `Retriable::Performer.new`,
   `Retriable::DelayCalculator.new`, and `Timeout::Null.new` (and subclasses).
   `HTTP::URI.new` also no longer accepts `Addressable::URI` objects.
-- Reimplement `HTTP::URI` with native component storage instead of delegating
-  to `Addressable::URI`. ASCII URIs are now parsed with Ruby's stdlib `URI`,
-  with Addressable used only as a fallback for non-ASCII (IRI) strings. This
-  removes most of the runtime dependency on the `addressable` gem while
-  preserving full URI functionality.
+- **BREAKING** `addressable` is no longer a runtime dependency. It is now
+  lazy-loaded only when parsing non-ASCII (IRI) URIs or normalizing
+  internationalized hostnames. Install the `addressable` gem if you need
+  non-ASCII URI support. ASCII-only URIs use Ruby's stdlib `URI` parser
+  exclusively.
 - **BREAKING** Extract request building into `HTTP::Request::Builder`. The
   `build_request` method has been removed from `Client`, `Session`, and the
   top-level `HTTP` module. Use `HTTP::Request::Builder.new(options).build(verb, uri)`

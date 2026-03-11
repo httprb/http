@@ -12,6 +12,7 @@ group :development do
 end
 
 group :test do
+  gem "addressable", "~> 2.8"
   gem "logger"
 
   gem "rubocop",             "~> 1.85"

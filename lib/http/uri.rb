@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require "addressable/uri"
 require "uri"
 
 module HTTP
@@ -260,7 +259,7 @@ module HTTP
     # @api public
     # @return [Integer, nil] default port or nil for unknown schemes
     def default_port
-      DEFAULT_PORTS[@scheme&.downcase] # steep:ignore
+      DEFAULT_PORTS[@scheme&.downcase]
     end
 
     # The origin (scheme + host + port) per RFC 6454
@@ -387,14 +386,14 @@ module HTTP
     def to_s # rubocop:disable Metrics/CyclomaticComplexity,Metrics/MethodLength
       str = +""
       str << "#{@scheme}:" if @scheme
-      if @raw_host
+      if (raw_host = @raw_host)
         str << "//"
-        if @user
-          str << @user # steep:ignore
+        if (user = @user)
+          str << user
           str << ":#{@password}" if @password
           str << "@"
         end
-        str << @raw_host # steep:ignore
+        str << raw_host
         str << ":#{@port}" if @port
       end
       str << @path
@@ -427,6 +426,30 @@ module HTTP
       hash = { scheme: @scheme, host: @host, port: port, path: @path,
                query: @query, fragment: @fragment, user: @user, password: @password }
       keys ? hash.slice(*keys) : hash
+    end
+
+    # Loads the addressable gem on first use
+    #
+    # @api private
+    # @return [void]
+    # @raise [LoadError] if addressable gem is not installed
+    def self.require_addressable
+      return if defined?(@addressable_loaded)
+
+      require "addressable/uri"
+      @addressable_loaded = true
+    end
+
+    # Convert a hostname to ASCII via IDNA (requires addressable)
+    #
+    # @param [String] host hostname to encode
+    # @api private
+    # @return [String] ASCII-encoded hostname
+    def self.idna_to_ascii(host)
+      return host if host.ascii_only?
+
+      require_addressable
+      Addressable::IDNA.to_ascii(host) # steep:ignore
     end
 
     private
@@ -463,10 +486,10 @@ module HTTP
     def normalize_host(host)
       return nil unless host
 
-      h = host.gsub(/%(\h{2})/) { Regexp.last_match(1).to_i(16).chr } # steep:ignore
+      h = host.gsub(/%\h{2}/) { |match| match.delete_prefix("%").to_i(16).chr }
       h = h.delete_suffix(".")
       h = h.downcase
-      Addressable::IDNA.to_ascii(h) # steep:ignore
+      self.class.idna_to_ascii(h)
     end
 
     # Parse a URI string into component parts
@@ -507,11 +530,12 @@ module HTTP
     # @api private
     # @return [Hash] URI components
     private_class_method def self.parse_with_addressable(uri_string)
-      parsed = Addressable::URI.parse(uri_string)
+      require_addressable
+      parsed = Addressable::URI.parse(uri_string) # steep:ignore
       { scheme: parsed.scheme, user: parsed.user, password: parsed.password,
         host: parsed.host, port: parsed.port, path: parsed.path,
         query: parsed.query, fragment: parsed.fragment }
-    rescue Addressable::URI::InvalidURIError
+    rescue Addressable::URI::InvalidURIError # steep:ignore
       raise InvalidError, "invalid URI: #{uri_string.inspect}"
     end
   end

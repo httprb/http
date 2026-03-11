@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
+require "addressable/uri"
 
 describe HTTP::URI do
   cover "HTTP::URI*"
