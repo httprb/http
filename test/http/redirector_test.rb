@@ -530,10 +530,11 @@ describe HTTP::Redirector do
       end
     end
 
-    context "with Authorization header" do
-      it "preserves Authorization when redirecting to same origin" do
+    context "with sensitive headers" do
+      it "preserves Authorization and Cookie when redirecting to same origin" do
         req = HTTP::Request.new verb: :get, uri: "http://example.com"
         req.headers.set("Authorization", "Bearer secret")
+        req.headers.set("Cookie", "session=abc")
         hops = [
           redirect_response(301, "http://example.com/other"),
           simple_response(200, "done")
@@ -541,13 +542,15 @@ describe HTTP::Redirector do
 
         redirector.perform(req, hops.shift) do |request|
           assert_equal "Bearer secret", request.headers["Authorization"]
+          assert_equal "session=abc", request.headers["Cookie"]
           hops.shift
         end
       end
 
-      it "strips Authorization when redirecting to different host" do
+      it "strips Authorization and Cookie when redirecting to different host" do
         req = HTTP::Request.new verb: :get, uri: "http://example.com"
         req.headers.set("Authorization", "Bearer secret")
+        req.headers.set("Cookie", "session=abc")
         hops = [
           redirect_response(301, "http://other.example.com/"),
           simple_response(200, "done")
@@ -555,13 +558,15 @@ describe HTTP::Redirector do
 
         redirector.perform(req, hops.shift) do |request|
           assert_nil request.headers["Authorization"]
+          assert_nil request.headers["Cookie"]
           hops.shift
         end
       end
 
-      it "strips Authorization when redirecting to different scheme" do
+      it "strips Authorization and Cookie when redirecting to different scheme" do
         req = HTTP::Request.new verb: :get, uri: "http://example.com"
         req.headers.set("Authorization", "Bearer secret")
+        req.headers.set("Cookie", "session=abc")
         hops = [
           redirect_response(301, "https://example.com/"),
           simple_response(200, "done")
@@ -569,13 +574,15 @@ describe HTTP::Redirector do
 
         redirector.perform(req, hops.shift) do |request|
           assert_nil request.headers["Authorization"]
+          assert_nil request.headers["Cookie"]
           hops.shift
         end
       end
 
-      it "strips Authorization when redirecting to different port" do
+      it "strips Authorization and Cookie when redirecting to different port" do
         req = HTTP::Request.new verb: :get, uri: "http://example.com"
         req.headers.set("Authorization", "Bearer secret")
+        req.headers.set("Cookie", "session=abc")
         hops = [
           redirect_response(301, "http://example.com:8080/"),
           simple_response(200, "done")
@@ -583,6 +590,7 @@ describe HTTP::Redirector do
 
         redirector.perform(req, hops.shift) do |request|
           assert_nil request.headers["Authorization"]
+          assert_nil request.headers["Cookie"]
           hops.shift
         end
       end

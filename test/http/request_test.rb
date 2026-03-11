@@ -288,14 +288,18 @@ describe HTTP::Request do
       end
     end
 
-    context "with Authorization header" do
-      let(:headers) { { accept: "text/html", authorization: "Bearer token123" } }
+    context "with sensitive headers" do
+      let(:headers) { { accept: "text/html", authorization: "Bearer token123", cookie: "session=abc" } }
 
       context "when redirecting to same origin" do
         let(:redirected) { request.redirect "/other-path" }
 
         it "preserves Authorization header" do
           assert_equal "Bearer token123", redirected.headers["Authorization"]
+        end
+
+        it "preserves Cookie header" do
+          assert_equal "session=abc", redirected.headers["Cookie"]
         end
       end
 
@@ -305,6 +309,10 @@ describe HTTP::Request do
         it "strips Authorization header" do
           assert_nil redirected.headers["Authorization"]
         end
+
+        it "strips Cookie header" do
+          assert_nil redirected.headers["Cookie"]
+        end
       end
 
       context "when redirecting to different scheme" do
@@ -312,6 +320,10 @@ describe HTTP::Request do
 
         it "strips Authorization header" do
           assert_nil redirected.headers["Authorization"]
+        end
+
+        it "strips Cookie header" do
+          assert_nil redirected.headers["Cookie"]
         end
       end
 
@@ -321,6 +333,10 @@ describe HTTP::Request do
         it "strips Authorization header" do
           assert_nil redirected.headers["Authorization"]
         end
+
+        it "strips Cookie header" do
+          assert_nil redirected.headers["Cookie"]
+        end
       end
 
       context "when redirecting to schema-less URL with different host" do
@@ -328,6 +344,10 @@ describe HTTP::Request do
 
         it "strips Authorization header" do
           assert_nil redirected.headers["Authorization"]
+        end
+
+        it "strips Cookie header" do
+          assert_nil redirected.headers["Cookie"]
         end
       end
     end

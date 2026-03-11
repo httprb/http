@@ -90,8 +90,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Raise `HTTP::URI::InvalidError` for malformed or schemeless URIs and
   `ArgumentError` for nil or empty URIs, instead of confusing
   `UnsupportedSchemeError` or `Addressable::URI::InvalidURIError` (#565)
-- Strip `Authorization` header when following redirects to a different origin
-  (scheme, host, or port) to prevent credential leakage (#770)
+- Strip `Authorization` and `Cookie` headers when following redirects to a
+  different origin (scheme, host, or port) to prevent credential leakage
+  (#516, #770)
 - AutoInflate now preserves the response charset encoding instead of
   defaulting to `Encoding::BINARY` (#535)
 - `LocalJumpError` when using instrumentation with instrumenters that

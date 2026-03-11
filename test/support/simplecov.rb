@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-return if ENV["MUTANT"]
+return if ENV["MUTANT"] || ENV["NOCOV"]
 
 require "simplecov"
 
