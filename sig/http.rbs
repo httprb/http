@@ -564,20 +564,35 @@ module HTTP
   end
 
   class URI
-    extend Forwardable
-
     class InvalidError < RequestError
     end
 
-    @uri: Addressable::URI
+    @raw_host: String?
     @hash: Integer
+    @scheme: String?
+    @user: String?
+    @password: String?
+    @host: String?
+    @normalized_host: String?
+    @port: Integer?
+    @path: String
+    @query: String?
+    @fragment: String?
 
+    attr_reader scheme: String?
+    attr_reader user: String?
+    attr_reader password: String?
     attr_reader host: String?
     attr_reader normalized_host: String?
+    attr_reader fragment: String?
+    attr_accessor path: String
+    attr_accessor query: String?
 
     HTTP_SCHEME: String
     HTTPS_SCHEME: String
     PERCENT_ENCODE: Regexp
+    NEEDS_ADDRESSABLE: Regexp
+    DEFAULT_PORTS: Hash[String, Integer]
     NORMALIZER: ^(String | URI) -> URI
 
     DOT_SEGMENTS: Array[String]
@@ -595,6 +610,12 @@ module HTTP
     def hash: () -> Integer
     def host=: (String? new_host) -> void
     def port: () -> Integer?
+    def default_port: () -> Integer?
+    def origin: () -> String
+    def request_uri: () -> String
+    def omit: (*Symbol) -> URI
+    def join: (String | URI) -> URI
+    def normalize: () -> URI
     def http?: () -> bool
     def https?: () -> bool
     def dup: () -> URI
@@ -603,25 +624,14 @@ module HTTP
     def inspect: () -> String
     def deconstruct_keys: (Array[Symbol]? keys) -> Hash[Symbol, String? | Integer?]
 
-    # Delegated methods from Addressable::URI
-    def scheme: () -> String?
-    def user: () -> String?
-    def password: () -> String?
-    def path: () -> String
-    def path=: (String) -> String
-    def query: () -> String?
-    def query=: (String?) -> String?
-    def request_uri: () -> String
-    def fragment: () -> String?
-    def omit: (*Symbol) -> URI
-    def join: (String | URI) -> URI
-    def normalize: () -> URI
-    def origin: () -> String
-    def default_port: () -> Integer?
-
     private
 
     def process_ipv6_brackets: (untyped raw_host, ?brackets: bool) -> String?
+    def normalize_host: (String? host) -> String?
+
+    def self.parse_components: (String uri_string) -> Hash[Symbol, untyped]
+    def self.parse_with_stdlib: (String uri_string) -> Hash[Symbol, untyped]?
+    def self.parse_with_addressable: (String uri_string) -> Hash[Symbol, untyped]
   end
 
   # Supported HTTP method verbs

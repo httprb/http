@@ -34,7 +34,7 @@ module HTTP
     # @api private
     # @return [String] path with dot segments removed
     def self.remove_dot_segments(path) # rubocop:disable Metrics/MethodLength
-      input  = +path
+      input  = path.dup
       output = +""
 
       until input.empty?

@@ -27,3 +27,5 @@ matcher:
     - HTTP::Redirector*
     - HTTP::Features::RaiseError*
     - HTTP::Base64*
+  ignore:
+    - HTTP::URI.parse_with_addressable

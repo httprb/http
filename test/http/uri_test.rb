@@ -56,7 +56,7 @@ describe HTTP::URI do
       assert_equal example_ipv6_address, http_uri.normalized_host
     end
 
-    it "ensures IPv6 addresses are bracketed in the inner Addressable::URI" do
+    it "ensures IPv6 addresses are bracketed in the raw host" do
       assert_equal "example.com", http_uri.host
       assert_equal "example.com", http_uri.normalized_host
 
@@ -64,7 +64,7 @@ describe HTTP::URI do
 
       assert_equal example_ipv6_address, http_uri.host
       assert_equal example_ipv6_address, http_uri.normalized_host
-      assert_equal "[#{example_ipv6_address}]", http_uri.instance_variable_get(:@uri).host
+      assert_equal "[#{example_ipv6_address}]", http_uri.instance_variable_get(:@raw_host)
     end
   end
 
@@ -765,6 +765,426 @@ describe HTTP::URI do
       http_uri.host = "not-an-ip"
 
       assert_equal "not-an-ip", http_uri.host
+    end
+  end
+
+  describe ".parse (TypeError/NoMethodError rescue)" do
+    it "raises InvalidError with message containing inspect for non-stringable objects" do
+      obj = Object.new
+      def obj.to_str
+        raise NoMethodError
+      end
+
+      err = assert_raises(HTTP::URI::InvalidError) do
+        HTTP::URI.parse(obj)
+      end
+      assert_kind_of HTTP::URI::InvalidError, err
+      assert_includes err.message, "invalid URI: "
+      assert_includes err.message, obj.inspect
+      refute_equal obj.inspect, err.message
+    end
+
+    it "raises InvalidError for an object whose to_str raises TypeError" do
+      obj = Object.new
+      def obj.to_str
+        raise TypeError
+      end
+
+      err = assert_raises(HTTP::URI::InvalidError) do
+        HTTP::URI.parse(obj)
+      end
+      assert_kind_of HTTP::URI::InvalidError, err
+      assert_includes err.message, obj.inspect
+      refute_equal obj.inspect, err.message
+    end
+  end
+
+  describe ".parse via parse_components" do
+    it "parses a non-ASCII URI with all components via Addressable" do
+      uri = HTTP::URI.parse("http://us\u00E9r:p\u00E4ss@ex\u00E4mple.com:9090/p\u00E4th?q=v\u00E4l#fr\u00E4g")
+
+      assert_equal "us\u00E9r", uri.user
+      assert_equal "p\u00E4ss", uri.password
+      assert_equal 9090, uri.port
+      assert_includes String(uri), "fr\u00E4g"
+    end
+
+    it "parses an ASCII URI via stdlib" do
+      uri = HTTP::URI.parse("http://example.com/path?q=1#frag")
+
+      assert_equal "http", uri.scheme
+      assert_equal "example.com", uri.host
+      assert_equal "/path", uri.path
+      assert_equal "q=1", uri.query
+      assert_equal "frag", uri.fragment
+    end
+
+    it "strips default port when parsing ASCII URI via stdlib" do
+      uri = HTTP::URI.parse("http://example.com:80/path")
+
+      assert_equal "http://example.com/path", uri.to_s
+    end
+
+    it "falls back to Addressable when stdlib fails on ASCII input" do
+      uri = HTTP::URI.parse("http://example.com/path with spaces")
+
+      assert_equal "http", uri.scheme
+      assert_equal "example.com", uri.host
+    end
+
+    it "raises InvalidError for invalid non-ASCII URI via Addressable" do
+      err = assert_raises(HTTP::URI::InvalidError) do
+        HTTP::URI.parse("ht\u00FCtp://[invalid")
+      end
+      assert_kind_of HTTP::URI::InvalidError, err
+      assert_includes err.message, "invalid URI:"
+      assert_includes err.message, "invalid"
+    end
+
+    it "raises InvalidError for stdlib-invalid URI with correct message" do
+      err = assert_raises(HTTP::URI::InvalidError) do
+        HTTP::URI.parse("http://exam ple.com")
+      end
+      assert_kind_of HTTP::URI::InvalidError, err
+      assert_includes err.message, "invalid URI:"
+      assert_includes err.message, "exam ple.com"
+    end
+
+    it "parses non-ASCII URI preserving fragment" do
+      uri = HTTP::URI.parse("http://ex\u00E4mple.com/path#sec\u00F6tion")
+
+      assert_equal "sec\u00F6tion", uri.fragment
+    end
+
+    it "parses non-ASCII URI preserving user without password" do
+      uri = HTTP::URI.parse("http://\u00FCser@ex\u00E4mple.com/")
+
+      assert_equal "\u00FCser", uri.user
+      assert_nil uri.password
+    end
+
+    it "routes ASCII control characters to Addressable" do
+      uri = HTTP::URI.parse("http://example.com/?\x00\x7F\n")
+
+      assert_equal "\x00\x7F\n", uri.query
+    end
+  end
+
+  describe "#to_s" do
+    it "serializes scheme-only URI" do
+      uri = HTTP::URI.new(scheme: "http")
+
+      assert_equal "http:", uri.to_s
+    end
+
+    it "omits scheme prefix when scheme is nil" do
+      uri = HTTP::URI.new(host: "example.com", path: "/path")
+
+      assert_equal "//example.com/path", uri.to_s
+    end
+
+    it "serializes URI with user and password" do
+      uri = HTTP::URI.new(scheme: "http", user: "admin", password: "secret", host: "example.com")
+
+      assert_equal "http://admin:secret@example.com", uri.to_s
+    end
+
+    it "serializes URI with user but no password" do
+      uri = HTTP::URI.new(scheme: "http", user: "admin", host: "example.com")
+
+      assert_equal "http://admin@example.com", uri.to_s
+    end
+
+    it "serializes URI with explicit port" do
+      uri = HTTP::URI.new(scheme: "http", host: "example.com", port: 8080)
+
+      assert_equal "http://example.com:8080", uri.to_s
+    end
+
+    it "serializes URI with query" do
+      uri = HTTP::URI.new(scheme: "http", host: "example.com", path: "/path", query: "a=1")
+
+      assert_equal "http://example.com/path?a=1", uri.to_s
+    end
+
+    it "serializes URI with fragment" do
+      uri = HTTP::URI.new(scheme: "http", host: "example.com", path: "/path", fragment: "sec")
+
+      assert_equal "http://example.com/path#sec", uri.to_s
+    end
+
+    it "serializes URI with all components" do
+      uri = HTTP::URI.new(
+        scheme: "http", user: "u", password: "p", host: "h.com",
+        port: 9090, path: "/x", query: "q=1", fragment: "f"
+      )
+
+      assert_equal "http://u:p@h.com:9090/x?q=1#f", uri.to_s
+    end
+
+    it "serializes path-only URI" do
+      uri = HTTP::URI.new(path: "/just/a/path")
+
+      assert_equal "/just/a/path", uri.to_s
+    end
+
+    it "serializes URI without host omitting //" do
+      uri = HTTP::URI.new(scheme: "mailto", path: "user@example.com")
+
+      assert_equal "mailto:user@example.com", uri.to_s
+    end
+
+    it "serializes query-only URI without host" do
+      uri = HTTP::URI.new(path: "/p", query: "q=1")
+
+      assert_equal "/p?q=1", uri.to_s
+    end
+
+    it "serializes fragment-only URI without host" do
+      uri = HTTP::URI.new(path: "/p", fragment: "f")
+
+      assert_equal "/p#f", uri.to_s
+    end
+  end
+
+  describe "#normalize" do
+    it "lowercases the scheme" do
+      uri = HTTP::URI.new(scheme: "HTTP", host: "example.com")
+
+      assert_equal "http", uri.normalize.scheme
+    end
+
+    it "lowercases the host" do
+      uri = HTTP::URI.new(scheme: "http", host: "EXAMPLE.COM")
+
+      assert_equal "example.com", uri.normalize.host
+    end
+
+    it "strips default port" do
+      uri = HTTP::URI.new(scheme: "http", host: "example.com", port: 80, path: "/path")
+
+      assert_nil uri.normalize.instance_variable_get(:@port)
+    end
+
+    it "preserves non-default port" do
+      uri = HTTP::URI.parse("http://example.com:8080/path")
+      normalized = uri.normalize
+
+      assert_equal 8080, normalized.instance_variable_get(:@port)
+    end
+
+    it "normalizes empty path to / when host is present" do
+      uri = HTTP::URI.new(scheme: "http", host: "example.com")
+
+      assert_equal "/", uri.normalize.path
+    end
+
+    it "preserves non-empty path" do
+      uri = HTTP::URI.parse("http://example.com/foo")
+
+      assert_equal "/foo", uri.normalize.path
+    end
+
+    it "preserves user" do
+      uri = HTTP::URI.parse("http://myuser@example.com/")
+
+      assert_equal "myuser", uri.normalize.user
+    end
+
+    it "preserves password" do
+      uri = HTTP::URI.parse("http://u:mypass@example.com/")
+
+      assert_equal "mypass", uri.normalize.password
+    end
+
+    it "preserves query" do
+      uri = HTTP::URI.parse("http://example.com/?q=val")
+
+      assert_equal "q=val", uri.normalize.query
+    end
+
+    it "preserves fragment" do
+      uri = HTTP::URI.parse("http://example.com/#frag")
+
+      assert_equal "frag", uri.normalize.fragment
+    end
+
+    it "handles nil scheme" do
+      uri = HTTP::URI.new(host: "example.com")
+
+      assert_nil uri.normalize.scheme
+    end
+
+    it "handles nil host" do
+      uri = HTTP::URI.new(scheme: "http", path: "/path")
+
+      assert_nil uri.normalize.host
+    end
+
+    it "does not normalize empty path to / without host" do
+      uri = HTTP::URI.new(scheme: "http")
+
+      assert_equal "", uri.normalize.path
+    end
+
+    it "returns a complete normalized string" do
+      uri = HTTP::URI.parse("HTTP://USER:PASS@EXAMPLE.COM:8080/path?q=1#frag")
+      normalized = uri.normalize
+
+      assert_equal "http://USER:PASS@example.com:8080/path?q=1#frag", String(normalized)
+    end
+  end
+
+  describe "#normalized_host" do
+    it "lowercases the host" do
+      uri = HTTP::URI.new(host: "EXAMPLE.COM")
+
+      assert_equal "example.com", uri.normalized_host
+    end
+
+    it "decodes percent-encoded characters" do
+      uri = HTTP::URI.new(host: "%65%78ample.com")
+
+      assert_equal "example.com", uri.normalized_host
+    end
+
+    it "decodes multiple percent-encoded characters" do
+      uri = HTTP::URI.new(host: "%65%78%61mple.com")
+
+      assert_equal "example.com", uri.normalized_host
+    end
+
+    it "strips trailing dot from domain" do
+      uri = HTTP::URI.new(host: "example.com.")
+
+      assert_equal "example.com", uri.normalized_host
+    end
+
+    it "returns nil for nil host" do
+      uri = HTTP::URI.new
+
+      assert_nil uri.normalized_host
+    end
+
+    it "encodes IDN non-ASCII hostnames to ASCII" do
+      uri = HTTP::URI.new(host: "ex\u00E4mple.com")
+
+      assert_equal "xn--exmple-cua.com", uri.normalized_host
+    end
+
+    it "does not IDN-encode already-ASCII hostnames" do
+      uri = HTTP::URI.new(host: "example.com")
+
+      assert_equal "example.com", uri.normalized_host
+    end
+  end
+
+  describe "#host= normalized_host update" do
+    it "applies normalize_host to the new host" do
+      uri = HTTP::URI.parse("http://example.com")
+      uri.host = "NEW-HOST.COM."
+
+      assert_equal "new-host.com", uri.normalized_host
+    end
+  end
+
+  describe "#default_port" do
+    it "returns default port for uppercase scheme" do
+      uri = HTTP::URI.new(scheme: "HTTP")
+
+      assert_equal 80, uri.default_port
+    end
+
+    it "returns nil for unknown scheme" do
+      uri = HTTP::URI.new(scheme: "ftp")
+
+      assert_nil uri.default_port
+    end
+
+    it "returns default port for ws scheme" do
+      uri = HTTP::URI.new(scheme: "ws")
+
+      assert_equal 80, uri.default_port
+    end
+
+    it "returns default port for wss scheme" do
+      uri = HTTP::URI.new(scheme: "wss")
+
+      assert_equal 443, uri.default_port
+    end
+  end
+
+  describe "#origin" do
+    it "lowercases an uppercase scheme via String().downcase" do
+      uri = HTTP::URI.new(scheme: "HTTP", host: "example.com")
+
+      assert_equal "http://example.com", uri.origin
+    end
+  end
+
+  describe "#process_ipv6_brackets" do
+    it "returns nil host as nil" do
+      uri = HTTP::URI.new(host: nil)
+
+      assert_nil uri.host
+    end
+
+    it "does not strip brackets from IPv4 addresses" do
+      uri = HTTP::URI.new(host: "192.168.1.1")
+
+      assert_equal "192.168.1.1", uri.host
+      assert_equal "192.168.1.1", uri.instance_variable_get(:@raw_host)
+    end
+
+    it "does not bracket IPv4 addresses in host=" do
+      uri = HTTP::URI.parse("http://example.com")
+      uri.host = "10.0.0.1"
+
+      assert_equal "http://10.0.0.1", uri.to_s
+    end
+  end
+
+  describe ".parse error messages" do
+    it "uses inspect in the rescue for TypeError/NoMethodError" do
+      obj = Object.new
+      def obj.to_s
+        "CUSTOM_TO_S"
+      end
+
+      def obj.to_str
+        raise NoMethodError
+      end
+
+      err = assert_raises(HTTP::URI::InvalidError) do
+        HTTP::URI.parse(obj)
+      end
+
+      refute_includes err.message, "CUSTOM_TO_S"
+    end
+  end
+
+  describe "#dup vs super" do
+    it "does not copy memoized hash ivar" do
+      uri = HTTP::URI.parse("http://example.com")
+      uri.hash # memoize @hash
+
+      duped = uri.dup
+
+      refute duped.instance_variable_defined?(:@hash)
+    end
+  end
+
+  describe "#normalize port stripping" do
+    it "strips port 443 for https" do
+      uri = HTTP::URI.new(scheme: "https", host: "example.com", port: 443, path: "/")
+
+      assert_nil uri.normalize.instance_variable_get(:@port)
+    end
+
+    it "does not strip non-default port" do
+      uri = HTTP::URI.new(scheme: "http", host: "example.com", port: 9090, path: "/")
+
+      assert_equal 9090, uri.normalize.instance_variable_get(:@port)
     end
   end
 end
