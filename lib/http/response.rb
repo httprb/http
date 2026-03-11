@@ -220,10 +220,12 @@ module HTTP
       # and a Content-Length header field, the Transfer-Encoding overrides the Content-Length.
       return nil if @headers.include?(Headers::TRANSFER_ENCODING)
 
-      value = @headers[Headers::CONTENT_LENGTH]
-      return nil unless value
+      # RFC 7230 Section 3.3.2: If multiple Content-Length values are present,
+      # they must all be identical; otherwise treat as invalid.
+      values = @headers.get(Headers::CONTENT_LENGTH).uniq
+      return nil unless values.one?
 
-      Integer(value, exception: false)
+      Integer(values.first, exception: false)
     end
 
     # Parsed Content-Type header

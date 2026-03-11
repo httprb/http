@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `Response#content_length` now handles duplicate `Content-Length` headers per
+  RFC 7230 Section 3.3.2. When all values are identical, they are collapsed into
+  a single valid value. When values conflict, `nil` is returned instead of
+  raising `TypeError`. ([#566])
 - HTTP 1xx informational responses (e.g. `100 Continue`) are now transparently
   skipped, returning the final response. This was a regression introduced when
   the parser was migrated from http-parser to llhttp. ([#667])

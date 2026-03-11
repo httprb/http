@@ -120,6 +120,32 @@ describe HTTP::Response do
       end
     end
 
+    context "with duplicate identical Content-Length" do
+      let(:headers) do
+        h = HTTP::Headers.new
+        h.add("Content-Length", "5")
+        h.add("Content-Length", "5")
+        h
+      end
+
+      it "returns the deduplicated value" do
+        assert_equal 5, response.content_length
+      end
+    end
+
+    context "with conflicting Content-Length values" do
+      let(:headers) do
+        h = HTTP::Headers.new
+        h.add("Content-Length", "5")
+        h.add("Content-Length", "10")
+        h
+      end
+
+      it "returns nil" do
+        assert_nil response.content_length
+      end
+    end
+
     context "with Transfer-Encoding header" do
       let(:headers) { { "Transfer-Encoding" => "chunked", "Content-Length" => "5" } }
 
