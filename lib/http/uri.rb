@@ -56,8 +56,13 @@ module HTTP
     def self.parse(uri)
       return uri if uri.is_a?(self)
 
-      new(Addressable::URI.parse(uri))
-    rescue TypeError, Addressable::URI::InvalidURIError
+      addr = Addressable::URI.parse(uri)
+      new(
+        scheme: addr.scheme, user: addr.user, password: addr.password,
+        host: addr.host, port: addr.port, path: addr.path,
+        query: addr.query, fragment: addr.fragment
+      )
+    rescue TypeError, NoMethodError, Addressable::URI::InvalidURIError
       raise InvalidError, "invalid URI: #{uri.inspect}"
     end
 
@@ -94,29 +99,23 @@ module HTTP
     # @example
     #   HTTP::URI.new(scheme: "http", host: "example.com")
     #
-    # @param [Hash, Addressable::URI] options_or_uri
+    # @param [Hash] options component hash
     #
-    # @option options_or_uri [String, #to_str] :scheme URI scheme
-    # @option options_or_uri [String, #to_str] :user for basic authentication
-    # @option options_or_uri [String, #to_str] :password for basic authentication
-    # @option options_or_uri [String, #to_str] :host name component
-    # @option options_or_uri [String, #to_str] :port network port to connect to
-    # @option options_or_uri [String, #to_str] :path component to request
-    # @option options_or_uri [String, #to_str] :query component distinct from path
-    # @option options_or_uri [String, #to_str] :fragment component at the end of the URI
+    # @option options [String, #to_str] :scheme URI scheme
+    # @option options [String, #to_str] :user for basic authentication
+    # @option options [String, #to_str] :password for basic authentication
+    # @option options [String, #to_str] :host name component
+    # @option options [String, #to_str] :port network port to connect to
+    # @option options [String, #to_str] :path component to request
+    # @option options [String, #to_str] :query component distinct from path
+    # @option options [String, #to_str] :fragment component at the end of the URI
     #
     # @api public
     # @return [HTTP::URI] new URI instance
-    def initialize(options_or_uri = {})
-      case options_or_uri
-      when Hash
-        @uri = Addressable::URI.new(options_or_uri)
-      when Addressable::URI
-        @uri = options_or_uri
-      else
-        raise TypeError, "expected Hash for options, got #{options_or_uri.class}"
-      end
+    def initialize(options = {})
+      raise TypeError, "expected Hash for options, got #{options.class}" unless options.is_a?(Hash)
 
+      @uri = Addressable::URI.new(options)
       @host = process_ipv6_brackets(@uri.host)
       @normalized_host = process_ipv6_brackets(@uri.normalized_host)
     end
@@ -271,7 +270,10 @@ module HTTP
     # @api public
     # @return [HTTP::URI] duplicated URI
     def dup
-      self.class.new @uri.dup
+      self.class.new(
+        scheme: scheme, user: user, password: password, host: @uri.host,
+        port: @uri.port, path: path, query: query, fragment: fragment
+      )
     end
 
     # Convert an HTTP::URI to a String

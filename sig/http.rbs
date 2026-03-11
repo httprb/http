@@ -588,7 +588,7 @@ module HTTP
     def self.form_encode: (untyped form_values, ?sort: bool) -> String
     def self.percent_encode: (String? string) -> String?
 
-    def initialize: (?Hash[Symbol, untyped] | Addressable::URI options_or_uri) -> void
+    def initialize: (?Hash[Symbol, untyped] options) -> void
     def ==: (untyped other) -> bool
     def eql?: (untyped other) -> bool
     def hash: () -> Integer

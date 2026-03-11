@@ -119,6 +119,27 @@ describe HTTP::URI do
     it "returns an HTTP::URI instance" do
       assert_instance_of HTTP::URI, http_uri.dup
     end
+
+    it "preserves all URI components" do
+      uri = HTTP::URI.parse("http://user:pass@example.com:8080/path?q=1#frag")
+      duped = uri.dup
+
+      assert_equal "http", duped.scheme
+      assert_equal "user", duped.user
+      assert_equal "pass", duped.password
+      assert_equal "example.com", duped.host
+      assert_equal 8080, duped.port
+      assert_equal "/path", duped.path
+      assert_equal "q=1", duped.query
+      assert_equal "frag", duped.fragment
+    end
+
+    it "preserves IPv6 host with brackets" do
+      duped = ipv6_uri.dup
+
+      assert_equal example_ipv6_address, duped.host
+      assert_equal "https://[#{example_ipv6_address}]", duped.to_s
+    end
   end
 
   describe ".parse" do
@@ -662,11 +683,10 @@ describe HTTP::URI do
       assert_equal "example.com", uri.host
     end
 
-    it "accepts an Addressable::URI" do
+    it "raises TypeError for an Addressable::URI" do
       addr_uri = Addressable::URI.parse("http://example.com")
-      uri = HTTP::URI.new(addr_uri)
 
-      assert_equal "http://example.com", uri.to_s
+      assert_raises(TypeError) { HTTP::URI.new(addr_uri) }
     end
 
     it "includes the class name in TypeError message" do
@@ -678,6 +698,14 @@ describe HTTP::URI do
       uri = HTTP::URI.new
 
       assert_instance_of HTTP::URI, uri
+    end
+
+    it "accepts a Hash subclass" do
+      subclass = Class.new(Hash)
+      opts = subclass[scheme: "http", host: "example.com"]
+      uri = HTTP::URI.new(opts)
+
+      assert_equal "http://example.com", uri.to_s
     end
   end
 

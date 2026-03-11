@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **BREAKING** `HTTP::URI.new` no longer accepts `Addressable::URI` objects;
+  pass a component Hash instead (e.g., `HTTP::URI.new(scheme: "http", host: "example.com")`)
 - **BREAKING** Convert options hash parameters to keyword arguments across the
   public API. Methods like `HTTP.get(url, body: "data")` continue to work, but
   passing an explicit hash (e.g., `HTTP.get(url, {body: "data"})`) is no longer
