@@ -19,6 +19,7 @@ module HTTP
         "SHA-256-sess" => Digest::SHA256
       }.freeze
 
+      # WWW-Authenticate header name
       # @api private
       WWW_AUTHENTICATE = "WWW-Authenticate"
 

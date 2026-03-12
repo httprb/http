@@ -124,11 +124,55 @@ describe HTTP::Connection do
   end
 
   describe "#send_request" do
-    context "when a response is already pending" do
-      it "raises StateError" do
+    context "when a response is already pending (boolean)" do
+      let(:socket) { fake(connect: nil, close: nil, closed?: false, write: lambda(&:bytesize)) }
+
+      it "closes the connection and proceeds" do
         connection.instance_variable_set(:@pending_response, true)
         new_req = HTTP::Request.new(verb: :get, uri: "http://example.com/", headers: {})
-        assert_raises(HTTP::StateError) { connection.send_request(new_req) }
+        connection.send_request(new_req)
+
+        assert connection.instance_variable_get(:@pending_response)
+      end
+    end
+
+    context "when a Response with large content_length is pending" do
+      let(:socket) { fake(connect: nil, close: nil, closed?: false, write: lambda(&:bytesize)) }
+
+      it "closes the connection instead of flushing" do
+        response = fake(content_length: HTTP::Connection::MAX_FLUSH_SIZE + 1, flush: nil)
+        connection.instance_variable_set(:@pending_response, response)
+        new_req = HTTP::Request.new(verb: :get, uri: "http://example.com/", headers: {})
+        connection.send_request(new_req)
+
+        assert connection.instance_variable_get(:@pending_response)
+      end
+    end
+
+    context "when flushing the pending response raises" do
+      let(:socket) { fake(connect: nil, close: nil, closed?: false, write: lambda(&:bytesize)) }
+
+      it "closes the connection and proceeds" do
+        response = fake(content_length: nil, flush: -> { raise "boom" })
+        connection.instance_variable_set(:@pending_response, response)
+        new_req = HTTP::Request.new(verb: :get, uri: "http://example.com/", headers: {})
+        connection.send_request(new_req)
+
+        assert connection.instance_variable_get(:@pending_response)
+      end
+    end
+
+    context "when a Response with small body is pending" do
+      let(:socket) { fake(connect: nil, close: nil, closed?: false, write: lambda(&:bytesize)) }
+
+      it "flushes the response body" do
+        flushed = false
+        response = fake(content_length: 100, flush: -> { flushed = true })
+        connection.instance_variable_set(:@pending_response, response)
+        new_req = HTTP::Request.new(verb: :get, uri: "http://example.com/", headers: {})
+        connection.send_request(new_req)
+
+        assert flushed
       end
     end
 

@@ -759,7 +759,8 @@ describe HTTP::Client do
         finish_response:        nil,
         keep_alive?:            true,
         expired?:               false,
-        close:                  nil
+        close:                  nil,
+        "pending_response=":    ->(*) {}
       )
       client.instance_variable_set(:@connection, conn)
       client.instance_variable_set(:@state, :clean)

@@ -37,11 +37,13 @@ module ConnectionReuseTests
             end
           end
 
-          context "when trying to read a stale body" do
-            it "errors" do
-              client.get("#{server.endpoint}/not-found")
-              err = assert_raises(HTTP::StateError) { client.get(server.endpoint) }
-              assert_match(/Tried to send a request/, err.message)
+          context "when previous response body was not read" do
+            it "auto-flushes and completes the next request" do
+              first_res = client.get(server.endpoint)
+              second_res = client.get(server.endpoint)
+
+              assert_equal "<!doctype html>", first_res.body.to_s
+              assert_equal "<!doctype html>", second_res.body.to_s
             end
           end
 

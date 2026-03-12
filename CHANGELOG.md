@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Persistent connections now auto-flush unread response bodies before sending
+  the next request, instead of raising `StateError`. Bodies up to 1 MiB are
+  drained transparently; larger bodies cause the connection to close and reopen.
+  This prevents the silent body clobbering described in [#371], where an unread
+  response body would return `""` after a subsequent request. ([#371])
 - `Response#content_length` now handles duplicate `Content-Length` headers per
   RFC 7230 Section 3.3.2. When all values are identical, they are collapsed into
   a single valid value. When values conflict, `nil` is returned instead of
@@ -193,4 +198,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `Request` and `Response`. Use `request.headers["..."]` and
   `response.headers["..."]` instead (#537)
 
+[#371]: https://github.com/httprb/http/issues/371
 [unreleased]: https://github.com/httprb/http/compare/v5.3.0...main

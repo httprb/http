@@ -1042,6 +1042,7 @@ module HTTP
     include Connection::Internals
 
     BUFFER_SIZE: Integer
+    MAX_FLUSH_SIZE: Integer
     KEEP_ALIVE: String
     CLOSE: String
     HTTP_1_0: String
@@ -1050,7 +1051,7 @@ module HTTP
     @persistent: bool
     @keep_alive_timeout: Float
     @pending_request: bool
-    @pending_response: bool
+    @pending_response: bool | Response
     @failed_proxy_connect: bool
     @buffer: String
     @parser: Response::Parser
@@ -1062,6 +1063,7 @@ module HTTP
 
     def initialize: (Request req, Options options) -> void
     def failed_proxy_connect?: () -> bool
+    def pending_response=: (bool | Response) -> void
     def send_request: (Request req) -> void
     def readpartial: (?Integer size, ?String? outbuf) -> String
     def read_headers!: () -> void
@@ -1090,10 +1092,13 @@ module HTTP
       interface _InternalsHost
         def failed_proxy_connect?: () -> bool
         def read_headers!: () -> void
+        def close: () -> void
       end
 
       private
 
+      def flush_pending_response: () -> void
+      def flush_or_close_response: (Response response) -> void
       def start_tls: (Request req, Options options) -> void
       def send_proxy_connect_request: (Request req) -> void
       def handle_proxy_connect_response: () -> void

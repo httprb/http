@@ -6,6 +6,34 @@ module HTTP
     module Internals
       private
 
+      # Flush the pending response body so the connection can be reused
+      # @return [void]
+      # @api private
+      def flush_pending_response
+        response = @pending_response
+        unless response.respond_to?(:flush)
+          close
+          return
+        end
+
+        flush_or_close_response(response)
+      rescue
+        close
+      end
+
+      # Flush the response or close if the body exceeds the size limit
+      # @param response [HTTP::Response] the response to flush
+      # @return [void]
+      # @api private
+      def flush_or_close_response(response)
+        content_length = response.content_length
+        if content_length && content_length > MAX_FLUSH_SIZE
+          close
+        else
+          response.flush
+        end
+      end
+
       # Sets up SSL context and starts TLS if needed
       # @param (see Connection#initialize)
       # @return [void]

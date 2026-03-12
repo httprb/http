@@ -19,6 +19,11 @@ module HTTP
     # Attempt to read this much data
     BUFFER_SIZE = 16_384
 
+    # Maximum response body size (in bytes) to auto-flush when reusing
+    # a connection. Bodies larger than this cause the connection to close
+    # instead, to avoid blocking on huge downloads.
+    MAX_FLUSH_SIZE = 1_048_576
+
     # HTTP/1.0
     HTTP_1_0 = "1.0"
 
@@ -77,6 +82,16 @@ module HTTP
       @failed_proxy_connect
     end
 
+    # Set the pending response for auto-flushing before the next request
+    #
+    # @example
+    #   connection.pending_response = response
+    #
+    # @param [HTTP::Response, false] response
+    # @return [void]
+    # @api public
+    attr_writer :pending_response
+
     # Send a request to the server
     #
     # @example
@@ -86,9 +101,7 @@ module HTTP
     # @return [nil]
     # @api public
     def send_request(req)
-      if @pending_response
-        raise StateError, "Tried to send a request while one is pending already. Make sure you read off the body."
-      end
+      flush_pending_response if @pending_response
 
       if @pending_request
         raise StateError, "Tried to send a request while a response is pending. Make sure you read off the body."

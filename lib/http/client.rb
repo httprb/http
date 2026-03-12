@@ -206,7 +206,7 @@ module HTTP
         connection:    @connection,
         encoding:      options.encoding,
         request:       req
-      )
+      ).tap { |res| @connection.pending_response = res }
     end
 
     # Verify our request isn't going to be made against another URI
