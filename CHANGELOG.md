@@ -77,7 +77,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `HTTP.base_uri` for setting a base URI that resolves relative request paths
   per RFC 3986. Supports chaining (`HTTP.base_uri("https://api.example.com/v1")
   .get("users")`), and integrates with `persistent` connections by deriving the
-  host when omitted (#519, #512, #493)
+  host when omitted ([#519], [#512], [#493])
 - `Request::Body#loggable?` and `Response::Body#loggable?` predicates, and a
   `binary_formatter` option for the logging feature. Binary bodies
   (IO/Enumerable request sources, binary-encoded request strings, and
@@ -85,41 +85,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   preventing unreadable log output when transferring files like images or
   audio. Available formatters: `:stats` (default, logs byte count),
   `:base64` (logs base64-encoded content), or a custom `Proc`. Invalid
-  formatter values raise `ArgumentError` (#784)
+  formatter values raise `ArgumentError` ([#784])
 - `Feature#on_request` and `Feature#around_request` lifecycle hooks, called
   before/around each request attempt (including retries), for per-attempt side
-  effects like instrumentation spans and circuit breakers (#826)
+  effects like instrumentation spans and circuit breakers ([#826])
 - Pattern matching support (`deconstruct_keys`) for Response, Response::Status,
-  Headers, ContentType, and URI (#642)
+  Headers, ContentType, and URI ([#642])
 - Combined global and per-operation timeouts: global and per-operation timeouts
   are no longer mutually exclusive. Use
   `HTTP.timeout(global: 60, read: 30, write: 30, connect: 5)` to set both a
-  global request timeout and individual operation limits (#773)
+  global request timeout and individual operation limits ([#773])
 
 ### Fixed
 
 - `HTTP::URI.form_encode` now encodes newlines as `%0A` instead of
-  `%0D%0A` (#449)
+  `%0D%0A` ([#449])
 - Thread-safety: `Headers::Normalizer` cache is now per-thread via
   `Thread.current`, eliminating a potential race condition when multiple
   threads share a normalizer instance
 - Instrumentation feature now correctly starts a new span for each retry
   attempt, fixing `NoMethodError` with `ActiveSupport::Notifications` when
-  using `.retriable` with the instrumentation feature (#826)
+  using `.retriable` with the instrumentation feature ([#826])
 - Raise `HTTP::URI::InvalidError` for malformed or schemeless URIs and
   `ArgumentError` for nil or empty URIs, instead of confusing
-  `UnsupportedSchemeError` or `Addressable::URI::InvalidURIError` (#565)
+  `UnsupportedSchemeError` or `Addressable::URI::InvalidURIError` ([#565])
 - Strip `Authorization` and `Cookie` headers when following redirects to a
   different origin (scheme, host, or port) to prevent credential leakage
-  (#516, #770)
+  ([#516], [#770])
 - AutoInflate now preserves the response charset encoding instead of
-  defaulting to `Encoding::BINARY` (#535)
+  defaulting to `Encoding::BINARY` ([#535])
 - `LocalJumpError` when using instrumentation with instrumenters that
   unconditionally yield in `#instrument` (e.g., `ActiveSupport::Notifications`)
-  (#673)
+  ([#673])
 - Logging feature no longer eagerly consumes the response body at debug level;
   body chunks are now logged as they are streamed, preserving
-  `response.body.each` (#785)
+  `response.body.each` ([#785])
 
 ### Removed
 
@@ -133,7 +133,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and excluding user info from the origin string
 - `HTTP::URI#request_uri` is no longer delegated to `Addressable::URI`
 - `HTTP::URI#omit` is no longer delegated to `Addressable::URI` and now
-  returns `HTTP::URI` instead of `Addressable::URI` (#491)
+  returns `HTTP::URI` instead of `Addressable::URI` ([#491])
 - `HTTP::URI#query_values` and `HTTP::URI#query_values=` delegations to
   `Addressable::URI`. Query parameter merging now uses stdlib
   `URI.decode_www_form`/`URI.encode_www_form`
@@ -142,7 +142,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   normalizer now inlines these operations directly
 - `HTTP::URI#join` is no longer delegated to `Addressable::URI` and now
   returns `HTTP::URI` instead of `Addressable::URI`. Uses stdlib `URI.join`
-  with automatic percent-encoding of non-ASCII characters (#491)
+  with automatic percent-encoding of non-ASCII characters ([#491])
 - `HTTP::URI.form_encode` no longer delegates to `Addressable::URI`. Uses
   stdlib `URI.encode_www_form` instead
 
@@ -168,19 +168,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `HTTP::Options` into `HTTP::Client#perform`, eliminating the need for
   separate `Retriable::Client` and `Retriable::Session` classes
 - Improved error message when request body size cannot be determined to suggest
-  setting `Content-Length` explicitly or using chunked `Transfer-Encoding` (#560)
+  setting `Content-Length` explicitly or using chunked `Transfer-Encoding` ([#560])
 - **BREAKING** `Connection#readpartial` now raises `EOFError` instead of
   returning `nil` at end-of-stream, and supports an `outbuf` parameter,
   conforming to the `IO#readpartial` API. `Body#readpartial` and
-  `Inflater#readpartial` also raise `EOFError` (#618)
+  `Inflater#readpartial` also raise `EOFError` ([#618])
 - **BREAKING** Stricter timeout options parsing: `.timeout()` with a Hash now
-  rejects unknown keys, non-numeric values, string keys, and empty hashes (#754)
+  rejects unknown keys, non-numeric values, string keys, and empty hashes ([#754])
 - Bumped min llhttp dependency version
-- **BREAKING** Handle responses in the reverse order from the requests (#776)
+- **BREAKING** Handle responses in the reverse order from the requests ([#776])
 - **BREAKING** `Response#cookies` now returns `Array<HTTP::Cookie>` instead of
   `HTTP::CookieJar`. The `cookies` option has been removed from `Options`;
   `Chainable#cookies` now sets the `Cookie` header directly with no implicit
-  merging — the last `.cookies()` call wins (#536)
+  merging — the last `.cookies()` call wins ([#536])
 - Cookie jar management during redirects moved from `Redirector` to `Session`.
   `Redirector` is now a pure redirect-following engine with no cookie
   awareness; `Session#request` manages cookies across redirect hops
@@ -189,14 +189,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `HTTP::Options.new(response: :body)` continues to work, but
   `HTTP::Options.new({response: :body})` must be updated to
   `HTTP::Options.new(**options)`. Invalid option names now raise
-  `ArgumentError` automatically (#447)
+  `ArgumentError` automatically ([#447])
 
 ### Removed
 
 - **BREAKING** Drop Ruby 2.x support
 - **BREAKING** Remove `Headers::Mixin` and the `[]`/`[]=` delegators on
   `Request` and `Response`. Use `request.headers["..."]` and
-  `response.headers["..."]` instead (#537)
+  `response.headers["..."]` instead ([#537])
 
+[#223]: https://github.com/httprb/http/issues/223
+[#358]: https://github.com/httprb/http/issues/358
 [#371]: https://github.com/httprb/http/issues/371
+[#447]: https://github.com/httprb/http/issues/447
+[#448]: https://github.com/httprb/http/issues/448
+[#449]: https://github.com/httprb/http/issues/449
+[#491]: https://github.com/httprb/http/issues/491
+[#493]: https://github.com/httprb/http/pull/493
+[#512]: https://github.com/httprb/http/issues/512
+[#516]: https://github.com/httprb/http/issues/516
+[#519]: https://github.com/httprb/http/issues/519
+[#535]: https://github.com/httprb/http/issues/535
+[#536]: https://github.com/httprb/http/issues/536
+[#537]: https://github.com/httprb/http/issues/537
+[#544]: https://github.com/httprb/http/issues/544
+[#560]: https://github.com/httprb/http/pull/560
+[#565]: https://github.com/httprb/http/issues/565
+[#566]: https://github.com/httprb/http/issues/566
+[#579]: https://github.com/httprb/http/issues/579
+[#618]: https://github.com/httprb/http/pull/618
+[#642]: https://github.com/httprb/http/issues/642
+[#667]: https://github.com/httprb/http/issues/667
+[#673]: https://github.com/httprb/http/issues/673
+[#739]: https://github.com/httprb/http/issues/739
+[#754]: https://github.com/httprb/http/pull/754
+[#770]: https://github.com/httprb/http/issues/770
+[#773]: https://github.com/httprb/http/issues/773
+[#776]: https://github.com/httprb/http/issues/776
+[#784]: https://github.com/httprb/http/issues/784
+[#785]: https://github.com/httprb/http/issues/785
+[#826]: https://github.com/httprb/http/issues/826
 [unreleased]: https://github.com/httprb/http/compare/v5.3.0...main
