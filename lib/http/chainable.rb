@@ -13,14 +13,24 @@ module HTTP
 
     # Make an HTTP request with the given verb
     #
-    # @example
+    # @example Without a block
     #   HTTP.request(:get, "http://example.com")
     #
+    # @example With a block (auto-closes connection)
+    #   HTTP.request(:get, "http://example.com") { |res| res.status }
+    #
     # @param (see Client#request)
-    # @return [HTTP::Response]
+    # @yieldparam response [HTTP::Response] the response
+    # @return [HTTP::Response, Object] the response, or block return value
     # @api public
-    def request(verb, uri, **)
-      make_client(default_options).request(verb, uri, **)
+    def request(verb, uri, **, &block)
+      client   = make_client(default_options)
+      response = client.request(verb, uri, **)
+      return response unless block
+
+      yield response
+    ensure
+      client&.close if block
     end
 
     # Set timeout on the request

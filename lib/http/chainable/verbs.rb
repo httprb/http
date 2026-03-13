@@ -13,10 +13,11 @@ module HTTP
       #
       # @param [String, URI] uri URI to request
       # @param options [Hash] request options
-      # @return [HTTP::Response]
+      # @yieldparam response [HTTP::Response] the response
+      # @return [HTTP::Response, Object] the response, or block return value
       # @api public
-      def head(uri, **)
-        request(:head, uri, **)
+      def head(uri, **, &)
+        request(:head, uri, **, &) # steep:ignore
       end
 
       # Get a resource
@@ -26,10 +27,11 @@ module HTTP
       #
       # @param [String, URI] uri URI to request
       # @param options [Hash] request options
-      # @return [HTTP::Response]
+      # @yieldparam response [HTTP::Response] the response
+      # @return [HTTP::Response, Object] the response, or block return value
       # @api public
-      def get(uri, **)
-        request(:get, uri, **)
+      def get(uri, **, &)
+        request(:get, uri, **, &) # steep:ignore
       end
 
       # Post to a resource
@@ -39,10 +41,11 @@ module HTTP
       #
       # @param [String, URI] uri URI to request
       # @param options [Hash] request options
-      # @return [HTTP::Response]
+      # @yieldparam response [HTTP::Response] the response
+      # @return [HTTP::Response, Object] the response, or block return value
       # @api public
-      def post(uri, **)
-        request(:post, uri, **)
+      def post(uri, **, &)
+        request(:post, uri, **, &) # steep:ignore
       end
 
       # Put to a resource
@@ -52,10 +55,11 @@ module HTTP
       #
       # @param [String, URI] uri URI to request
       # @param options [Hash] request options
-      # @return [HTTP::Response]
+      # @yieldparam response [HTTP::Response] the response
+      # @return [HTTP::Response, Object] the response, or block return value
       # @api public
-      def put(uri, **)
-        request(:put, uri, **)
+      def put(uri, **, &)
+        request(:put, uri, **, &) # steep:ignore
       end
 
       # Delete a resource
@@ -65,10 +69,11 @@ module HTTP
       #
       # @param [String, URI] uri URI to request
       # @param options [Hash] request options
-      # @return [HTTP::Response]
+      # @yieldparam response [HTTP::Response] the response
+      # @return [HTTP::Response, Object] the response, or block return value
       # @api public
-      def delete(uri, **)
-        request(:delete, uri, **)
+      def delete(uri, **, &)
+        request(:delete, uri, **, &) # steep:ignore
       end
 
       # Echo the request back to the client
@@ -78,10 +83,11 @@ module HTTP
       #
       # @param [String, URI] uri URI to request
       # @param options [Hash] request options
-      # @return [HTTP::Response]
+      # @yieldparam response [HTTP::Response] the response
+      # @return [HTTP::Response, Object] the response, or block return value
       # @api public
-      def trace(uri, **)
-        request(:trace, uri, **)
+      def trace(uri, **, &)
+        request(:trace, uri, **, &) # steep:ignore
       end
 
       # Return the methods supported on the given URI
@@ -91,10 +97,11 @@ module HTTP
       #
       # @param [String, URI] uri URI to request
       # @param options [Hash] request options
-      # @return [HTTP::Response]
+      # @yieldparam response [HTTP::Response] the response
+      # @return [HTTP::Response, Object] the response, or block return value
       # @api public
-      def options(uri, **)
-        request(:options, uri, **)
+      def options(uri, **, &)
+        request(:options, uri, **, &) # steep:ignore
       end
 
       # Convert to a transparent TCP/IP tunnel
@@ -104,10 +111,11 @@ module HTTP
       #
       # @param [String, URI] uri URI to request
       # @param options [Hash] request options
-      # @return [HTTP::Response]
+      # @yieldparam response [HTTP::Response] the response
+      # @return [HTTP::Response, Object] the response, or block return value
       # @api public
-      def connect(uri, **)
-        request(:connect, uri, **)
+      def connect(uri, **, &)
+        request(:connect, uri, **, &) # steep:ignore
       end
 
       # Apply partial modifications to a resource
@@ -117,10 +125,11 @@ module HTTP
       #
       # @param [String, URI] uri URI to request
       # @param options [Hash] request options
-      # @return [HTTP::Response]
+      # @yieldparam response [HTTP::Response] the response
+      # @return [HTTP::Response, Object] the response, or block return value
       # @api public
-      def patch(uri, **)
-        request(:patch, uri, **)
+      def patch(uri, **, &)
+        request(:patch, uri, **, &) # steep:ignore
       end
     end
   end

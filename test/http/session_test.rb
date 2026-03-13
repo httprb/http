@@ -46,6 +46,56 @@ describe HTTP::Session do
     end
   end
 
+  describe "#request with block" do
+    it "yields the response and returns block value" do
+      result = session.get(dummy.endpoint) { |res| res.status.code }
+
+      assert_equal 200, result
+    end
+
+    it "closes the client after the block" do
+      closed = false
+      original_make = session.method(:make_client) # steep:ignore
+      session.define_singleton_method(:make_client) do |opts|
+        client = original_make.call(opts)
+        original_close = client.method(:close)
+        client.define_singleton_method(:close) do
+          closed = true
+          original_close.call
+        end
+        client
+      end
+
+      session.get(dummy.endpoint, &:status)
+
+      assert closed, "expected close to have been called"
+    end
+
+    it "closes the client even when the block raises" do
+      closed = false
+      original_make = session.method(:make_client) # steep:ignore
+      session.define_singleton_method(:make_client) do |opts|
+        client = original_make.call(opts)
+        original_close = client.method(:close)
+        client.define_singleton_method(:close) do
+          closed = true
+          original_close.call
+        end
+        client
+      end
+
+      assert_raises(RuntimeError) { session.get(dummy.endpoint) { raise "boom" } }
+
+      assert closed, "expected close to have been called on error"
+    end
+
+    it "handles nil client when make_client raises" do
+      session.define_singleton_method(:make_client) { |*| raise "boom" }
+
+      assert_raises(RuntimeError) { session.get(dummy.endpoint) { nil } }
+    end
+  end
+
   describe "Request::Builder" do
     it "builds an HTTP::Request from session options" do
       builder = HTTP::Request::Builder.new(session.default_options)

@@ -58,21 +58,25 @@ module HTTP
     # A fresh {Client} is created for each request, ensuring thread safety.
     # Manages cookies across redirect hops when following redirects.
     #
-    # @example
+    # @example Without a block
     #   session = HTTP::Session.new
     #   session.request(:get, "https://example.com")
     #
+    # @example With a block (auto-closes connection)
+    #   session = HTTP::Session.new
+    #   session.request(:get, "https://example.com") { |res| res.status }
+    #
     # @param verb [Symbol] the HTTP method
     # @param uri [#to_s] the URI to request
-    # @return [HTTP::Response] the response
+    # @yieldparam response [HTTP::Response] the response
+    # @return [HTTP::Response, Object] the response, or block return value
     # @api public
     def request(verb, uri,
                 headers: nil, params: nil, form: nil, json: nil, body: nil,
                 response: nil, encoding: nil, follow: nil, ssl: nil, ssl_context: nil,
                 proxy: nil, nodelay: nil, features: nil, retriable: nil,
                 socket_class: nil, ssl_socket_class: nil, timeout_class: nil,
-                timeout_options: nil, keep_alive_timeout: nil, base_uri: nil, persistent: nil)
-      cookie_jar = CookieJar.new
+                timeout_options: nil, keep_alive_timeout: nil, base_uri: nil, persistent: nil, &block)
       merged = default_options.merge(
         { headers: headers, params: params, form: form, json: json, body: body,
           response: response, encoding: encoding, follow: follow, ssl: ssl,
@@ -81,9 +85,29 @@ module HTTP
           timeout_class: timeout_class, timeout_options: timeout_options,
           keep_alive_timeout: keep_alive_timeout, base_uri: base_uri, persistent: persistent }.compact
       )
-      builder = Request::Builder.new(merged)
-      client  = make_client(default_options)
+      client = make_client(default_options)
+      res    = perform_request(client, verb, uri, merged)
 
+      return res unless block
+
+      yield res
+    ensure
+      client&.close if block
+    end
+
+    private
+
+    # Execute a request with cookie management
+    #
+    # @param client [HTTP::Client] the client to perform the request
+    # @param verb [Symbol] the HTTP method
+    # @param uri [#to_s] the URI to request
+    # @param merged [HTTP::Options] the merged options
+    # @return [HTTP::Response] the response
+    # @api private
+    def perform_request(client, verb, uri, merged)
+      cookie_jar = CookieJar.new
+      builder = Request::Builder.new(merged)
       req = builder.build(verb, uri)
       load_cookies(cookie_jar, req)
       res = client.perform(req, merged)
@@ -93,8 +117,6 @@ module HTTP
 
       perform_redirects(cookie_jar, client, req, res, merged)
     end
-
-    private
 
     # Follow redirects with cookie management
     #

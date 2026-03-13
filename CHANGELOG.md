@@ -57,6 +57,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Block form for verb methods and `request` that auto-closes the connection
+  after the block returns. `HTTP.get(url) { |response| response.status }` yields
+  the response, closes the underlying connection, and returns the block's value.
+  Works with all verb methods and chained options. ([#270])
 - HTTP caching feature (`HTTP.use(:caching)`) that stores and reuses responses
   according to RFC 7234. Supports `Cache-Control` (`max-age`, `no-cache`,
   `no-store`), `Expires`, `ETag` / `If-None-Match`, and
@@ -198,6 +202,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `Request` and `Response`. Use `request.headers["..."]` and
   `response.headers["..."]` instead ([#537])
 
+[#270]: https://github.com/httprb/http/issues/270
 [#223]: https://github.com/httprb/http/issues/223
 [#358]: https://github.com/httprb/http/issues/358
 [#371]: https://github.com/httprb/http/issues/371

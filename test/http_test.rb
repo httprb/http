@@ -79,6 +79,73 @@ describe HTTP do
     end
   end
 
+  context "with a block" do
+    it "yields the response" do
+      HTTP.get(dummy.endpoint) do |response|
+        assert_match(/<!doctype html>/, response.to_s)
+      end
+    end
+
+    it "returns the block value" do
+      result = HTTP.get(dummy.endpoint) { |response| response.status.code }
+
+      assert_equal 200, result
+    end
+
+    it "closes the connection after the block" do
+      client = nil
+      HTTP.stub(:make_client, lambda { |opts|
+        client = HTTP::Client.new(opts)
+        original_close = client.method(:close)
+        client.define_singleton_method(:close) do
+          @test_closed = true
+          original_close.call
+        end
+        client.define_singleton_method(:test_closed?) { @test_closed == true }
+        client
+      }) do
+        HTTP.get(dummy.endpoint, &:status)
+      end
+
+      assert_predicate client, :test_closed?, "expected close to have been called"
+    end
+
+    it "closes the connection even when the block raises" do
+      client = nil
+
+      HTTP.stub(:make_client, lambda { |opts|
+        client = HTTP::Client.new(opts)
+        original_close = client.method(:close)
+        client.define_singleton_method(:close) do
+          @test_closed = true
+          original_close.call
+        end
+        client.define_singleton_method(:test_closed?) { @test_closed == true }
+        client
+      }) do
+        assert_raises(RuntimeError) do
+          HTTP.get(dummy.endpoint) { raise "boom" }
+        end
+      end
+
+      assert_predicate client, :test_closed?, "expected close to have been called on error"
+    end
+
+    it "works with chained options" do
+      result = HTTP.headers("Accept" => "application/json").get(dummy.endpoint) do |response|
+        response.status.code
+      end
+
+      assert_equal 200, result
+    end
+
+    it "handles nil client when make_client raises" do
+      HTTP.stub(:make_client, ->(*) { raise "boom" }) do
+        assert_raises(RuntimeError) { HTTP.get(dummy.endpoint) { nil } }
+      end
+    end
+  end
+
   describe ".via" do
     context "anonymous proxy" do
       run_server(:proxy) { ProxyServer.new }

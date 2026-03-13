@@ -22,17 +22,27 @@ module HTTP
     module Verbs : _VerbsHost
       interface _VerbsHost
         def request: (verb verb, String | URI uri, **untyped) -> Response
+                   | [T] (verb verb, String | URI uri, **untyped) { (Response) -> T } -> T
       end
 
       def head: (String | URI uri, **untyped opts) -> Response
+              | [T] (String | URI uri, **untyped opts) { (Response) -> T } -> T
       def get: (String | URI uri, **untyped opts) -> Response
+             | [T] (String | URI uri, **untyped opts) { (Response) -> T } -> T
       def post: (String | URI uri, **untyped opts) -> Response
+              | [T] (String | URI uri, **untyped opts) { (Response) -> T } -> T
       def put: (String | URI uri, **untyped opts) -> Response
+             | [T] (String | URI uri, **untyped opts) { (Response) -> T } -> T
       def delete: (String | URI uri, **untyped opts) -> Response
+                | [T] (String | URI uri, **untyped opts) { (Response) -> T } -> T
       def trace: (String | URI uri, **untyped opts) -> Response
+               | [T] (String | URI uri, **untyped opts) { (Response) -> T } -> T
       def options: (String | URI uri, **untyped opts) -> Response
+                 | [T] (String | URI uri, **untyped opts) { (Response) -> T } -> T
       def connect: (String | URI uri, **untyped opts) -> Response
+                 | [T] (String | URI uri, **untyped opts) { (Response) -> T } -> T
       def patch: (String | URI uri, **untyped opts) -> Response
+               | [T] (String | URI uri, **untyped opts) { (Response) -> T } -> T
     end
 
     def request: (
@@ -60,6 +70,31 @@ module HTTP
       ?persistent: String?,
       ?ssl_context: OpenSSL::SSL::SSLContext?
     ) -> Response
+                | [T] (
+      verb verb,
+      String | URI uri,
+      ?response: Symbol,
+      ?encoding: Encoding?,
+      ?nodelay: bool,
+      ?keep_alive_timeout: Integer,
+      ?proxy: Hash[Symbol, untyped],
+      ?ssl: Hash[Symbol, untyped],
+      ?headers: Hash[String | Symbol, untyped] | Headers,
+      ?features: Hash[Symbol, untyped],
+      ?timeout_class: Class,
+      ?timeout_options: Hash[Symbol, Numeric],
+      ?socket_class: Class,
+      ?ssl_socket_class: Class,
+      ?params: untyped,
+      ?form: untyped,
+      ?json: untyped,
+      ?body: untyped,
+      ?follow: bool | Hash[Symbol, untyped],
+      ?retriable: bool | Hash[Symbol, untyped],
+      ?base_uri: String | URI?,
+      ?persistent: String?,
+      ?ssl_context: OpenSSL::SSL::SSLContext?
+    ) { (Response) -> T } -> T
     def timeout: (Numeric | Hash[Symbol, Numeric] | :null options) -> Session
     def base_uri: (String | URI uri) -> Session
     def persistent: (?String? host, ?timeout: Integer) -> Client
@@ -172,10 +207,36 @@ module HTTP
       ?persistent: String?,
       ?ssl_context: OpenSSL::SSL::SSLContext?
     ) -> Response
+                | [T] (
+      verb verb,
+      String | URI uri,
+      ?response: Symbol,
+      ?encoding: Encoding?,
+      ?nodelay: bool,
+      ?keep_alive_timeout: Integer,
+      ?proxy: Hash[Symbol, untyped],
+      ?ssl: Hash[Symbol, untyped],
+      ?headers: Hash[String | Symbol, untyped] | Headers,
+      ?features: Hash[Symbol, untyped],
+      ?timeout_class: Class,
+      ?timeout_options: Hash[Symbol, Numeric],
+      ?socket_class: Class,
+      ?ssl_socket_class: Class,
+      ?params: untyped,
+      ?form: untyped,
+      ?json: untyped,
+      ?body: untyped,
+      ?follow: bool | Hash[Symbol, untyped],
+      ?retriable: bool | Hash[Symbol, untyped],
+      ?base_uri: String | URI?,
+      ?persistent: String?,
+      ?ssl_context: OpenSSL::SSL::SSLContext?
+    ) { (Response) -> T } -> T
     def persistent?: () -> bool
 
     private
 
+    def perform_request: (Client client, verb verb, untyped uri, Options merged) -> Response
     def perform_redirects: (CookieJar jar, Client client, Request req, Response res, Options opts) -> Response
     def load_cookies: (CookieJar jar, Request request) -> void
     def store_cookies: (CookieJar jar, Response response) -> void
