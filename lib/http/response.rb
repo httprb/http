@@ -278,8 +278,7 @@ module HTTP
 
       encoding = @headers.get(Headers::TRANSFER_ENCODING)
 
-      # TODO: "chunked" is frozen in the request writer. How about making it accessible?
-      encoding.last == "chunked"
+      encoding.last == Headers::CHUNKED
     end
 
     # Parse response body with corresponding MIME type adapter

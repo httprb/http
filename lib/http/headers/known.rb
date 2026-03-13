@@ -72,6 +72,9 @@ module HTTP
     # Currently defined methods are: chunked, compress, deflate, gzip, identity.
     TRANSFER_ENCODING = "Transfer-Encoding"
 
+    # Chunked transfer coding value for Transfer-Encoding
+    CHUNKED = "chunked"
+
     # Indicates what additional content codings have been applied to the
     # entity-body.
     CONTENT_ENCODING = "Content-Encoding"

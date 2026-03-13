@@ -206,6 +206,7 @@ module HTTP
     PROXY_AUTHORIZATION: String
     SET_COOKIE: String
     TRANSFER_ENCODING: String
+    CHUNKED: String
     CONTENT_ENCODING: String
     USER_AGENT: String
     VARY: String
@@ -851,7 +852,6 @@ module HTTP
     class Writer
       CRLF: String
       ZERO: String
-      CHUNKED: String
       CHUNKED_END: String
 
       @body: Request::Body

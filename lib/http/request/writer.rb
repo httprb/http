@@ -12,9 +12,6 @@ module HTTP
       # Chunked data terminator
       ZERO = "0"
 
-      # Chunked transfer encoding
-      CHUNKED = "chunked"
-
       # End of a chunked transfer
       CHUNKED_END = "#{ZERO}#{CRLF}#{CRLF}".freeze
 
@@ -163,7 +160,7 @@ module HTTP
       # @return [Boolean]
       # @api public
       def chunked?
-        @headers[Headers::TRANSFER_ENCODING] == CHUNKED
+        @headers[Headers::TRANSFER_ENCODING] == Headers::CHUNKED
       end
 
       private
