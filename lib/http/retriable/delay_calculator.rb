@@ -12,7 +12,7 @@ module HTTP
       # @api private
       # @return [HTTP::Retriable::DelayCalculator]
       def initialize(delay: nil, max_delay: Float::MAX)
-        @max_delay = max_delay.to_f
+        @max_delay = Float(max_delay)
         if delay.respond_to?(:call)
           @delay_proc = delay
         else
@@ -52,11 +52,11 @@ module HTTP
       # @api private
       # @return [Numeric]
       def delay_from_retry_header(value)
-        value = value.to_s.strip
+        value = String(value).strip
 
         case value
         when RFC2822_DATE_REGEX then DateTime.rfc2822(value).to_time - Time.now.utc
-        when /^\d+$/            then value.to_i
+        when /\A\d+$/           then value.to_i
         else 0
         end
       end

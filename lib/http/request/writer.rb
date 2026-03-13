@@ -77,7 +77,7 @@ module HTTP
       def add_body_type_headers
         return if @headers[Headers::CONTENT_LENGTH] || chunked? || (
           @body.source.nil? && %w[GET HEAD DELETE CONNECT].any? do |method|
-            @request_header[0].start_with?("#{method} ")
+            @request_header.fetch(0).start_with?("#{method} ")
           end
         )
 

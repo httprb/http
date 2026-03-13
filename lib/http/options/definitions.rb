@@ -122,7 +122,7 @@ module HTTP
     # @api private
     # @return [String, nil]
     def persistent=(value)
-      @persistent = value ? HTTP::URI.parse(value).origin : nil
+      @persistent = value ? URI.parse(value).origin : nil
       validate_base_uri_and_persistent!
     end
 
@@ -146,7 +146,7 @@ module HTTP
     # @api private
     # @return [HTTP::URI]
     def parse_base_uri(value)
-      uri = HTTP::URI.parse(value)
+      uri = URI.parse(value)
 
       base = @base_uri
       return resolve_base_uri(base, uri) if base
@@ -167,7 +167,7 @@ module HTTP
         base.path = "#{base.path}/"
       end
 
-      HTTP::URI.parse(base.join(relative))
+      URI.parse(base.join(relative))
     end
 
     # Validates that base URI and persistent origin are compatible

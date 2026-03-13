@@ -181,7 +181,7 @@ module HTTP
     # @api public
     # @return [Hash]
     def to_hash
-      self.class.defined_options.to_h { |opt_name| [opt_name, send(opt_name)] }
+      self.class.defined_options.to_h { |opt_name| [opt_name, public_send(opt_name)] }
     end
 
     # Duplicates the options object
@@ -221,8 +221,8 @@ module HTTP
     def assign_options(env)
       self.class.defined_options.each do |name|
         value = env.local_variable_get(name)
-        value = HTTP::Headers.coerce(value) if name == :headers
-        send(:"#{name}=", value)
+        value = Headers.coerce(value) if name == :headers
+        __send__(:"#{name}=", value)
       end
     end
 

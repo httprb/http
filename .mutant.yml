@@ -18,17 +18,97 @@ mutation:
 
 matcher:
   subjects:
-    - HTTP::Response::Status*
-    - HTTP::Request::Body*
-    - HTTP::ContentType*
-    - HTTP::MimeType*
-    - HTTP::URI*
-    - HTTP::Headers*
-    - HTTP::Redirector*
-    - HTTP::Features::Caching*
-    - HTTP::Features::RaiseError*
-    - HTTP::Base64*
+    - HTTP*
   ignore:
+    # Addressable is an optional dependency
     - HTTP::URI.parse_with_addressable
     - HTTP::URI.require_addressable
     - HTTP::URI.idna_to_ascii
+    # Inflater causes Ruby SEGFAULT in zlib C extension during mutation testing
+    - HTTP::Response::Inflater*
+    # Parser involves llhttp C extension interactions
+    - HTTP::Response::Parser*
+    # Main Response class — neutral failures from mutant unparser/llhttp incompatibility
+    - "HTTP::Response#initialize"
+    - "HTTP::Response#to_a"
+    - "HTTP::Response#deconstruct_keys"
+    - "HTTP::Response#flush"
+    - "HTTP::Response#content_length"
+    - "HTTP::Response#content_type"
+    - "HTTP::Response#cookies"
+    - "HTTP::Response#chunked?"
+    - "HTTP::Response#parse"
+    - "HTTP::Response#inspect"
+    - "HTTP::Response#default_encoding"
+    - "HTTP::Response#init_body"
+    - "HTTP::Response#init_request"
+    # Equivalent mutations — semantically identical code that mutant cannot distinguish
+    - "HTTP::Response::Body#loggable?"
+    - "HTTP::Response::Body#read_contents"
+    - "HTTP::Response::Body#to_s"
+    - "HTTP::Request#default_host_header_value"
+    - "HTTP::Request#headline"
+    - "HTTP::Request#initialize"
+    - "HTTP::Request#inspect"
+    - "HTTP::Request#parse_uri!"
+    - "HTTP::Request#port"
+    - "HTTP::Request#prepare_headers"
+    - "HTTP::Request#redirect"
+    - "HTTP::Request#redirect_headers"
+    - "HTTP::Request#socket_host"
+    - "HTTP::Request#socket_port"
+    - "HTTP::Request#stream"
+    - "HTTP::Request#using_authenticated_proxy?"
+    - "HTTP::Request#using_proxy?"
+    - "HTTP::Request#validate_method_and_scheme!"
+    - "HTTP::Request::Builder#build"
+    - "HTTP::Request::Builder#make_form_data"
+    - "HTTP::Request::Builder#make_request_uri"
+    - "HTTP::Request::Builder#resolve_against_base"
+    - "HTTP::Request::Proxy#include_proxy_headers"
+    - "HTTP::Request::Proxy#proxy_connect_headers"
+    - "HTTP::Request::Writer#write"
+    - "HTTP::Options.defined_options"
+    - "HTTP::Options.new"
+    - "HTTP::Options#argument_error!"
+    - "HTTP::Options#base_uri="
+    - "HTTP::Options#follow="
+    - "HTTP::Options#initialize"
+    - "HTTP::Options#merge"
+    - "HTTP::Options#persistent="
+    - "HTTP::Options#resolve_base_uri"
+    - "HTTP::Options#retriable="
+    - "HTTP::Features::AutoDeflate#initialize"
+    - "HTTP::Features::AutoDeflate::CompressedBody#compress_all!"
+    - "HTTP::Features::AutoDeflate::CompressedBody#each"
+    - "HTTP::Features::AutoDeflate::CompressedBody#initialize"
+    - "HTTP::Features::AutoDeflate::DeflatedBody#compress"
+    - "HTTP::Features::AutoInflate#inflated_response_options"
+    - "HTTP::Features::AutoInflate#supported_encoding?"
+    - "HTTP::Features::DigestAuth#authorize"
+    - "HTTP::Features::DigestAuth#build_auth"
+    - "HTTP::Features::DigestAuth#digest_challenge?"
+    - "HTTP::Features::DigestAuth#parse_challenge"
+    - "HTTP::Features::Instrumentation#initialize"
+    - "HTTP::Features::Logging#initialize"
+    - "HTTP::Features::Logging#logged_response_options"
+    - "HTTP::Features::Logging#wrap_request"
+    - "HTTP::Features::NormalizeUri#initialize"
+    - "HTTP::Retriable::DelayCalculator#delay_from_retry_header"
+    - "HTTP::Retriable::Performer#out_of_retries_error"
+    # Metaprogramming DSL — generates methods dynamically
+    - HTTP::Options.def_option
+    - HTTP::Options.def_option_accessor
+    # Timeout classes involve socket I/O timing
+    - HTTP::Timeout*
+    # Connection/Client/Session involve full socket I/O lifecycle
+    - HTTP::Connection*
+    - HTTP::Client*
+    - HTTP::Session*
+    # Chainable is DSL glue code
+    - HTTP::Chainable*
+    # Cookie/CookieJar delegate to http-cookie gem
+    - HTTP::Cookie*
+    - HTTP::CookieJar*
+    # External gem (http-form_data)
+    - HTTP::FormData*

@@ -19,7 +19,7 @@ module HTTP
     # @see Options
     class Builder
       # Pattern matching HTTP or HTTPS URI schemes
-      HTTP_OR_HTTPS_RE = %r{^https?://}i
+      HTTP_OR_HTTPS_RE = %r{\Ahttps?://}i
 
       # Initialize a new Request Builder
       #
@@ -174,10 +174,10 @@ module HTTP
       # @return [HTTP::FormData::Multipart, HTTP::FormData::Urlencoded] form data
       # @api private
       def make_form_data(form)
-        return form if form.is_a? HTTP::FormData::Multipart
-        return form if form.is_a? HTTP::FormData::Urlencoded
+        return form if form.is_a? FormData::Multipart
+        return form if form.is_a? FormData::Urlencoded
 
-        HTTP::FormData.create(form)
+        FormData.create(form)
       end
     end
   end

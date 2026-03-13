@@ -35,7 +35,7 @@ module HTTP
       # @return [String]
       # @api public
       def proxy_authorization_header
-        digest = encode64("#{proxy[:proxy_username]}:#{proxy[:proxy_password]}")
+        digest = encode64(format("%s:%s", proxy.fetch(:proxy_username), proxy.fetch(:proxy_password)))
         "Basic #{digest}"
       end
 
@@ -47,7 +47,7 @@ module HTTP
       # @return [void]
       # @api public
       def connect_using_proxy(socket)
-        Request::Writer.new(socket, nil, proxy_connect_headers, proxy_connect_header).connect_through_proxy
+        Writer.new(socket, nil, proxy_connect_headers, proxy_connect_header).connect_through_proxy
       end
 
       # Compute HTTP request header SSL proxy connection
@@ -69,7 +69,7 @@ module HTTP
       # @return [HTTP::Headers]
       # @api public
       def proxy_connect_headers
-        connect_headers = HTTP::Headers.coerce(
+        connect_headers = Headers.coerce(
           Headers::HOST       => headers[Headers::HOST],
           Headers::USER_AGENT => headers[Headers::USER_AGENT]
         )

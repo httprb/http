@@ -31,6 +31,27 @@ describe HTTP::Response do
     it "returns a Rack-like array" do
       assert_equal [200, headers, body], response.to_a
     end
+
+    it "returns an Integer status code" do
+      assert_instance_of Integer, response.to_a.fetch(0)
+    end
+
+    it "returns a plain Hash for headers" do
+      result = response.to_a.fetch(1)
+
+      assert_instance_of Hash, result
+      refute_instance_of HTTP::Headers, result
+    end
+
+    it "returns a String for body" do
+      conn = fake(sequence_id: 0, readpartial: proc { raise EOFError }, body_completed?: true)
+      resp = HTTP::Response.new(status: 200, version: "1.1", headers: headers,
+                                connection: conn, request: request)
+      result = resp.to_a.fetch(2)
+
+      assert_instance_of String, result
+      refute_instance_of HTTP::Response::Body, result
+    end
   end
 
   describe "#deconstruct_keys" do
@@ -209,13 +230,13 @@ describe HTTP::Response do
 
   describe "#parse" do
     let(:headers)   { { "Content-Type" => content_type } }
-    let(:body)      { '{"foo":"bar"}' }
+    let(:body)      { '{"foo":"100%s"}' }
 
     context "with known content type" do
       let(:content_type) { "application/json" }
 
       it "returns parsed body" do
-        assert_equal({ "foo" => "bar" }, response.parse)
+        assert_equal({ "foo" => "100%s" }, response.parse)
       end
     end
 
@@ -231,11 +252,11 @@ describe HTTP::Response do
       let(:content_type) { "application/deadbeef" }
 
       it "ignores mime_type of response" do
-        assert_equal({ "foo" => "bar" }, response.parse("application/json"))
+        assert_equal({ "foo" => "100%s" }, response.parse("application/json"))
       end
 
       it "supports mime type aliases" do
-        assert_equal({ "foo" => "bar" }, response.parse(:json))
+        assert_equal({ "foo" => "100%s" }, response.parse(:json))
       end
     end
 
@@ -245,6 +266,12 @@ describe HTTP::Response do
 
       it "raises HTTP::ParseError" do
         assert_raises(HTTP::ParseError) { response.parse }
+      end
+
+      it "preserves the original error message" do
+        err = assert_raises(HTTP::ParseError) { response.parse }
+
+        assert_includes err.message, "application/deadbeef"
       end
     end
   end
@@ -357,8 +384,8 @@ describe HTTP::Response do
     end
 
     context "with both a :request and :uri" do
-      it "raises ArgumentError" do
-        assert_raises(ArgumentError) do
+      it "raises ArgumentError with a descriptive message" do
+        err = assert_raises(ArgumentError) do
           HTTP::Response.new(
             status:  200,
             version: "1.1",
@@ -368,6 +395,8 @@ describe HTTP::Response do
             request: request
           )
         end
+
+        assert_includes err.message, ":uri"
       end
     end
   end
@@ -404,6 +433,60 @@ describe HTTP::Response do
       it "returns a body with a default UTF_8 encoding" do
         assert_equal Encoding::UTF_8, response.body.to_s.encoding
       end
+    end
+
+    context "with Content-Type: text/html (non-JSON)" do
+      let(:headers) { { "Content-Type" => "text/html" } }
+
+      it "returns a body with default binary encoding" do
+        assert_equal Encoding::BINARY, response.body.to_s.encoding
+      end
+    end
+
+    context "with Content-Type: text/html; charset=utf-8" do
+      let(:headers) { { "Content-Type" => "text/html; charset=utf-8" } }
+
+      it "uses charset for body encoding" do
+        assert_equal Encoding::UTF_8, response.body.to_s.encoding
+      end
+    end
+
+    context "with explicit encoding" do
+      let(:headers) { {} }
+
+      it "passes encoding to the body" do
+        conn = fake(sequence_id: 0, readpartial: proc { chunks.shift || raise(EOFError) },
+                    body_completed?: proc { chunks.empty? })
+        resp = HTTP::Response.new(
+          status: 200, version: "1.1", headers: headers,
+          request: request, connection: conn, encoding: "UTF-8"
+        )
+
+        assert_equal Encoding::UTF_8, resp.body.to_s.encoding
+      end
+    end
+  end
+
+  describe "#initialize defaults" do
+    it "defaults headers to empty" do
+      resp = HTTP::Response.new(status: 200, version: "1.1", body: "ok", request: request)
+
+      assert_empty resp.headers
+    end
+
+    it "defaults proxy_headers to empty" do
+      resp = HTTP::Response.new(status: 200, version: "1.1", body: "ok", request: request)
+
+      assert_empty resp.proxy_headers
+    end
+
+    it "passes proxy_headers through to accessor" do
+      resp = HTTP::Response.new(
+        status: 200, version: "1.1", body: "ok", request: request,
+        proxy_headers: { "Via" => "1.1 proxy" }
+      )
+
+      assert_equal "1.1 proxy", resp.proxy_headers["Via"]
     end
   end
 end

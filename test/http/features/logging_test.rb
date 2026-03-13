@@ -30,6 +30,14 @@ describe HTTP::Features::Logging do
     end
   end
 
+  describe "default initialization" do
+    it "uses NullLogger when no logger is provided" do
+      feature = HTTP::Features::Logging.new
+
+      assert_instance_of HTTP::Features::Logging::NullLogger, feature.logger
+    end
+  end
+
   describe "logging the request" do
     let(:request) do
       HTTP::Request.new(
@@ -54,6 +62,12 @@ describe HTTP::Features::Logging do
         {"hello": "world!"}
       OUTPUT
       assert_equal expected, logdev.string
+    end
+
+    it "returns the request" do
+      result = feature.wrap_request(request)
+
+      assert_same request, result
     end
   end
 
@@ -154,25 +168,35 @@ describe HTTP::Features::Logging do
         OUTPUT
         assert_equal expected, logdev.string
       end
+
+      it "returns the same response object for inline bodies" do
+        result = feature.wrap_response(response)
+
+        assert_same response, result
+      end
     end
 
     context "with a streaming body" do
       let(:chunks) { %w[{"suc cess" :true}] }
+      let(:connection_obj) { Object.new }
       let(:stream) do
         fake(
           readpartial: proc { chunks.shift or raise EOFError },
           close:       nil,
-          closed?:     true
+          closed?:     true,
+          connection:  connection_obj
         )
       end
       let(:body) { HTTP::Response::Body.new(stream, encoding: Encoding::UTF_8) }
+      let(:request_obj) { HTTP::Request.new(verb: :get, uri: "https://example.com") }
       let(:response) do
         HTTP::Response.new(
-          version: "1.1",
-          status:  200,
-          headers: { content_type: "application/json" },
-          body:    body,
-          request: HTTP::Request.new(verb: :get, uri: "https://example.com")
+          version:       "1.1",
+          status:        200,
+          headers:       { content_type: "application/json" },
+          proxy_headers: { "X-Via" => "proxy" },
+          body:          body,
+          request:       request_obj
         )
       end
 
@@ -196,6 +220,98 @@ describe HTTP::Features::Logging do
 
         assert_equal '{"success":true}', wrapped.body.to_s
       end
+
+      it "returns a new response with the same status" do
+        wrapped = feature.wrap_response(response)
+
+        assert_equal response.status.code, wrapped.status.code
+      end
+
+      it "returns a new response with the same version" do
+        wrapped = feature.wrap_response(response)
+
+        assert_equal "1.1", wrapped.version
+      end
+
+      it "returns a new response with the same headers" do
+        wrapped = feature.wrap_response(response)
+
+        assert_equal response.headers.to_h, wrapped.headers.to_h
+      end
+
+      it "returns a new response with the same proxy_headers" do
+        wrapped = feature.wrap_response(response)
+
+        assert_equal({ "X-Via" => "proxy" }, wrapped.proxy_headers.to_h)
+      end
+
+      it "returns a new response preserving the request" do
+        wrapped = feature.wrap_response(response)
+
+        assert_same request_obj, wrapped.request
+      end
+
+      it "returns a different response object wrapping the body" do
+        wrapped = feature.wrap_response(response)
+
+        refute_same response, wrapped
+      end
+
+      it "preserves the body encoding" do
+        wrapped = feature.wrap_response(response)
+
+        assert_equal Encoding::UTF_8, wrapped.body.encoding
+      end
+
+      it "wraps the underlying stream, not the body object" do
+        wrapped = feature.wrap_response(response)
+        wrapped.body.to_s
+
+        # The original body should not be marked as streaming, because the
+        # BodyLogger should wrap the underlying stream directly
+        assert_nil body.instance_variable_get(:@streaming)
+      end
+
+      it "logs headers for streaming responses" do
+        feature.wrap_response(response)
+
+        assert_includes logdev.string, "Content-Type: application/json"
+      end
+
+      it "preserves the connection on the wrapped response" do
+        wrapped = feature.wrap_response(response)
+
+        assert_same connection_obj, wrapped.connection
+      end
+    end
+
+    context "with a body that does not respond to :encoding" do
+      let(:body_obj) do
+        obj = Object.new
+        obj.define_singleton_method(:to_s) { "inline content" }
+        obj
+      end
+      let(:response) do
+        HTTP::Response.new(
+          version: "1.1",
+          status:  200,
+          headers: { content_type: "text/plain" },
+          body:    body_obj,
+          request: HTTP::Request.new(verb: :get, uri: "https://example.com")
+        )
+      end
+
+      it "logs the body without error" do
+        feature.wrap_response(response)
+
+        assert_includes logdev.string, "inline content"
+      end
+
+      it "returns the same response object" do
+        result = feature.wrap_response(response)
+
+        assert_same response, result
+      end
     end
 
     context "with a binary string body" do
@@ -215,6 +331,12 @@ describe HTTP::Features::Logging do
 
         assert_includes logdev.string, "BINARY DATA (8 bytes)"
         refute_includes logdev.string, "\x89PNG"
+      end
+
+      it "includes the headers in the log output" do
+        feature.wrap_response(response)
+
+        assert_includes logdev.string, "Content-Type: application/octet-stream"
       end
     end
 
@@ -250,6 +372,37 @@ describe HTTP::Features::Logging do
         wrapped = feature.wrap_response(response)
 
         assert_equal String.new("\x89PNG\r\n", encoding: Encoding::BINARY), wrapped.body.to_s
+      end
+    end
+
+    context "with a Response::Body subclass" do
+      let(:subclass) { Class.new(HTTP::Response::Body) }
+      let(:chunks) { %w[hello world] }
+      let(:connection_obj) { Object.new }
+      let(:stream) do
+        fake(
+          readpartial: proc { chunks.shift or raise EOFError },
+          close:       nil,
+          closed?:     true,
+          connection:  connection_obj
+        )
+      end
+      let(:body) { subclass.new(stream, encoding: Encoding::UTF_8) }
+      let(:response) do
+        HTTP::Response.new(
+          version: "1.1",
+          status:  200,
+          headers: { content_type: "text/plain" },
+          body:    body,
+          request: HTTP::Request.new(verb: :get, uri: "https://example.com")
+        )
+      end
+
+      it "treats subclasses the same as Response::Body" do
+        wrapped = feature.wrap_response(response)
+
+        refute_same response, wrapped
+        assert_equal "helloworld", wrapped.body.to_s
       end
     end
 
@@ -429,6 +582,19 @@ describe HTTP::Features::Logging do
       assert_raises(EOFError) { body_logger.readpartial }
       assert_includes logdev.string, "hello"
       assert_includes logdev.string, "world"
+    end
+
+    it "forwards arguments to the underlying stream" do
+      received_args = nil
+      stream = fake(readpartial: proc { |*args|
+        received_args = args
+        "data"
+      })
+
+      body_logger = HTTP::Features::Logging::BodyLogger.new(stream, logger)
+      body_logger.readpartial(1024)
+
+      assert_equal [1024], received_args
     end
 
     it "applies formatter when provided" do

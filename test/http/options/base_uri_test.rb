@@ -21,11 +21,17 @@ describe HTTP::Options, "base_uri" do
     end
 
     it "raises for URI without scheme" do
-      assert_raises(HTTP::Error) { opts.with_base_uri("/users") }
+      err = assert_raises(HTTP::Error) { opts.with_base_uri("/users") }
+
+      assert_includes err.message, "Invalid base URI"
+      assert_includes err.message, "/users"
     end
 
     it "raises for protocol-relative URI" do
-      assert_raises(HTTP::Error) { opts.with_base_uri("//example.com/users") }
+      err = assert_raises(HTTP::Error) { opts.with_base_uri("//example.com/users") }
+
+      assert_includes err.message, "Invalid base URI"
+      assert_includes err.message, "//example.com/users"
     end
 
     it "does not modify the original options" do
@@ -77,6 +83,13 @@ describe HTTP::Options, "base_uri" do
 
       assert_equal "https://example.com/api/v2", result.base_uri.to_s
     end
+
+    it "does not mutate the intermediate base URI when chaining" do
+      intermediate = opts.with_base_uri("https://example.com/api")
+      intermediate.with_base_uri("v2")
+
+      assert_equal "https://example.com/api", intermediate.base_uri.to_s
+    end
   end
 
   describe "persistent and base_uri interaction" do
@@ -91,14 +104,16 @@ describe HTTP::Options, "base_uri" do
       with_base = opts.with_base_uri("https://example.com/api")
 
       err = assert_raises(HTTP::Error) { with_base.with_persistent("https://other.com") }
-      assert_match(/conflicts/, err.message)
+      assert_includes err.message, "https://other.com"
+      assert_includes err.message, "base URI origin (https://example.com)"
     end
 
     it "raises when base_uri origin conflicts with persistent" do
       with_persistent = opts.with_persistent("https://example.com")
 
       err = assert_raises(HTTP::Error) { with_persistent.with_base_uri("https://other.com/api") }
-      assert_match(/conflicts/, err.message)
+      assert_includes err.message, "https://example.com"
+      assert_includes err.message, "base URI origin (https://other.com)"
     end
 
     it "allows setting both via constructor when origins match" do

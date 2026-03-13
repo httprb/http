@@ -100,7 +100,7 @@ module HTTP
       # @api private
       def parse_challenge(header)
         params = {} #: Hash[String, String]
-        header.sub(/^Digest\s+/i, "").scan(/(\w+)=(?:"([^"]*)"|([\w-]+))/) do |match|
+        header.sub(/\ADigest\s+/i, "").scan(/(\w+)=(?:"([^"]*)"|([\w-]+))/) do |match|
           key = match[0] #: String
           params[key] = format("%s", match[1] || match[2])
         end
@@ -119,9 +119,9 @@ module HTTP
         nonce       = challenge.fetch("nonce")
         cnonce      = SecureRandom.hex(16)
         nonce_count = "00000001"
-        uri         = request.uri.request_uri.to_s
+        uri         = String(request.uri.request_uri)
         ha1 = compute_ha1(algorithm, challenge.fetch("realm"), nonce, cnonce)
-        ha2 = compute_ha2(algorithm, request.verb.to_s.upcase, uri)
+        ha2 = compute_ha2(algorithm, String(request.verb).upcase, uri)
 
         compute_auth_header(algorithm, qop, nonce, cnonce, nonce_count, uri, ha1, ha2, challenge)
       end
@@ -201,7 +201,7 @@ module HTTP
       # @return [String] hex digest
       # @api private
       def hex_digest(algorithm, data)
-        ALGORITHMS.fetch(algorithm.sub(/-sess$/i, "")).hexdigest(data)
+        ALGORITHMS.fetch(algorithm.sub(/-sess\z/i, "")).hexdigest(data)
       end
 
       # Build the Digest Authorization header string

@@ -13,6 +13,14 @@ describe HTTP::Timeout::Null do
     timeout.instance_variable_set(:@socket, socket)
   end
 
+  describe "#initialize" do
+    it "stores provided options compacted" do
+      t = HTTP::Timeout::Null.new(read_timeout: 5, write_timeout: 10)
+
+      assert_equal({ read_timeout: 5, write_timeout: 10 }, t.options)
+    end
+  end
+
   describe "#start_tls" do
     context "when ssl socket does not respond to hostname= or sync_close=" do
       it "skips hostname= and sync_close=" do

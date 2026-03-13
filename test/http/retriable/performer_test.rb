@@ -8,6 +8,12 @@ unless defined?(CustomException)
   end
 end
 
+# Subclass for testing is_a? vs instance_of? in retry_exception?
+unless defined?(CustomSubException)
+  class CustomSubException < HTTP::TimeoutError
+  end
+end
+
 describe HTTP::Retriable::Performer do
   cover "HTTP::Retriable::Performer*"
   let(:client) do
@@ -53,12 +59,49 @@ describe HTTP::Retriable::Performer do
     [t2 - t1, result]
   end
 
+  describe "#initialize" do
+    it "coerces tries to integer" do
+      performer = HTTP::Retriable::Performer.new(tries: 3.7)
+
+      assert_equal 3, performer.instance_variable_get(:@tries)
+    end
+
+    it "coerces string tries via to_i" do
+      performer = HTTP::Retriable::Performer.new(tries: "3")
+
+      assert_equal 3, performer.instance_variable_get(:@tries)
+    end
+
+    it "truncates float-like string tries via to_i" do
+      performer = HTTP::Retriable::Performer.new(tries: "3.7")
+
+      assert_equal 3, performer.instance_variable_get(:@tries)
+    end
+
+    it "uses default delay when none is provided" do
+      performer = HTTP::Retriable::Performer.new
+      delay = performer.calculate_delay(1, nil)
+
+      assert_operator delay, :>=, 0
+    end
+  end
+
   describe "#perform" do
     describe "expected exception" do
       it "retries the request" do
         assert_raises HTTP::OutOfRetriesError do
           perform(exceptions: [CustomException], tries: 2) do
             raise CustomException
+          end
+        end
+
+        assert_equal 2, counter_spy
+      end
+
+      it "retries subclasses of listed exceptions" do
+        assert_raises HTTP::OutOfRetriesError do
+          perform(exceptions: [HTTP::TimeoutError], tries: 2) do
+            raise CustomSubException
           end
         end
 
@@ -95,6 +138,30 @@ describe HTTP::Retriable::Performer do
         end
 
         assert_equal 2, counter_spy
+      end
+
+      it "does not retry when Range does not cover the status" do
+        result = perform(retry_statuses: [400...500], tries: 2) do
+          response(status: 200)
+        end
+
+        assert_equal 200, result.status.to_i
+      end
+
+      it "does not retry when Numeric does not match the status" do
+        result = perform(retry_statuses: [500], tries: 2) do
+          response(status: 200)
+        end
+
+        assert_equal 200, result.status.to_i
+      end
+
+      it "does not retry when proc returns false" do
+        result = perform(retry_statuses: [->(s) { s >= 500 }], tries: 2) do
+          response(status: 200)
+        end
+
+        assert_equal 200, result.status.to_i
       end
 
       describe "status codes can be expressed in many ways" do
@@ -202,6 +269,16 @@ describe HTTP::Retriable::Performer do
           end
         end
       end
+
+      it "respects max_delay option" do
+        time, = measure_wait do
+          assert_raises(HTTP::OutOfRetriesError) do
+            perform(delay: 100, max_delay: 0.02, tries: 3, should_retry: ->(*) { true })
+          end
+        end
+
+        assert_in_delta 0.04, time, timing_slack
+      end
     end
 
     describe "should_retry option" do
@@ -230,6 +307,22 @@ describe HTTP::Retriable::Performer do
         assert_equal 5, counter_spy
       end
 
+      it "passes the exception to should_retry proc" do
+        received_err = nil
+        retry_proc = proc do |_req, err, _res, _attempt|
+          received_err = err
+          false
+        end
+
+        assert_raises CustomException do
+          perform(should_retry: retry_proc) do
+            raise CustomException
+          end
+        end
+
+        assert_kind_of CustomException, received_err
+      end
+
       it "raises the original error if not retryable" do
         retry_proc = ->(*) { false }
 
@@ -253,6 +346,28 @@ describe HTTP::Retriable::Performer do
 
         assert_equal 5, counter_spy
       end
+    end
+  end
+
+  describe "#calculate_delay" do
+    it "passes the response to the delay calculator" do
+      responses_seen = []
+
+      performer = HTTP::Retriable::Performer.new(delay: 0, retry_statuses: [200], tries: 2)
+      calculator = performer.instance_variable_get(:@delay_calculator)
+      original_call = calculator.method(:call)
+      calculator.define_singleton_method(:call) do |iteration, resp|
+        responses_seen << resp
+        original_call.call(iteration, resp)
+      end
+
+      begin
+        performer.perform(client, request) { response }
+      rescue HTTP::OutOfRetriesError
+        nil
+      end
+
+      assert_equal response, responses_seen.first
     end
   end
 
@@ -302,6 +417,33 @@ describe HTTP::Retriable::Performer do
     end
   end
 
+  describe "response flushing on exhausted retries" do
+    it "flushes the response when retries are exhausted with a response" do
+      flushed = false
+      flush_response = HTTP::Response.new(
+        status:  503,
+        version: "1.1",
+        headers: {},
+        body:    "Service Unavailable",
+        request: request
+      )
+      flush_response.define_singleton_method(:flush) do
+        flushed = true
+        self
+      end
+
+      begin
+        HTTP::Retriable::Performer
+          .new(delay: 0, retry_statuses: [503], tries: 2)
+          .perform(client, request) { flush_response }
+      rescue HTTP::OutOfRetriesError
+        nil
+      end
+
+      assert flushed, "expected response to be flushed on final attempt"
+    end
+  end
+
   describe HTTP::OutOfRetriesError do
     it "has the original exception as a cause if available" do
       err = nil
@@ -325,6 +467,73 @@ describe HTTP::Retriable::Performer do
       end
 
       assert_equal response, err.response
+    end
+
+    it "has a message containing the verb and URI" do
+      err = nil
+      begin
+        perform(exceptions: [CustomException]) do
+          raise CustomException
+        end
+      rescue HTTP::OutOfRetriesError => e
+        err = e
+      end
+
+      assert_includes err.message, "GET"
+      assert_includes err.message, "http://example.com"
+      assert_includes err.message, "failed"
+    end
+
+    it "includes the status in the message when a response is present" do
+      err = nil
+      begin
+        perform(retry_statuses: [200], tries: 2)
+      rescue HTTP::OutOfRetriesError => e
+        err = e
+      end
+
+      assert_includes err.message, "200"
+      assert_includes err.message, "GET"
+      assert_includes err.message, "http://example.com"
+    end
+
+    it "includes the exception in the message when an exception is present" do
+      err = nil
+      begin
+        perform(exceptions: [CustomException]) do
+          raise CustomException, "something went wrong"
+        end
+      rescue HTTP::OutOfRetriesError => e
+        err = e
+      end
+
+      assert_includes err.message, "something went wrong"
+    end
+
+    it "does not include the status when no response is present" do
+      err = nil
+      begin
+        perform(exceptions: [CustomException]) do
+          raise CustomException
+        end
+      rescue HTTP::OutOfRetriesError => e
+        err = e
+      end
+
+      refute_includes err.message, " with "
+    end
+
+    it "does not include the exception when no exception is present" do
+      err = nil
+      begin
+        perform(retry_statuses: [200], tries: 2)
+      rescue HTTP::OutOfRetriesError => e
+        err = e
+      end
+
+      # Message should end with the status, not have ":<exception>" appended
+      assert_match(/failed with [\w ]+\z/, err.message)
+      assert_includes err.message, " with "
     end
   end
 end

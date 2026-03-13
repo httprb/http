@@ -148,7 +148,7 @@ module HTTP
       def retry_response?(res)
         return false unless @retry_statuses
 
-        response_status = res.status.to_i
+        response_status = Integer(res.status)
         retry_matchers = [@retry_statuses].flatten
 
         retry_matchers.any? do |matcher|
@@ -182,12 +182,12 @@ module HTTP
       # @api private
       # @return [HTTP::OutOfRetriesError]
       def out_of_retries_error(request, response, exception)
-        message = "#{request.verb.to_s.upcase} <#{request.uri}> failed"
+        message = format("%s <%s> failed", String(request.verb).upcase, request.uri)
 
         message += " with #{response.status}" if response
         message += ":#{exception}" if exception
 
-        HTTP::OutOfRetriesError.new(message).tap do |ex|
+        OutOfRetriesError.new(message).tap do |ex|
           ex.cause = exception
           ex.response = response
         end

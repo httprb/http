@@ -72,7 +72,7 @@ module HTTP
       # @return [HTTP::Request]
       # @api public
       def wrap_request(request)
-        logger.info { "> #{request.verb.to_s.upcase} #{request.uri}" }
+        logger.info { format("> %s %s", String(request.verb).upcase, request.uri) }
         log_request_details(request)
 
         request
@@ -158,7 +158,7 @@ module HTTP
       # @return [HTTP::Response::Body]
       # @api private
       def logged_body(body)
-        formatter = body.loggable? ? nil : method(:format_binary) # steep:ignore
+        formatter = (method(:format_binary) unless body.loggable?) # steep:ignore
         stream = BodyLogger.new(body.instance_variable_get(:@stream), logger, formatter: formatter) # steep:ignore
         Response::Body.new(stream, encoding: body.encoding)
       end

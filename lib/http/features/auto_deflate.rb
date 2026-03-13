@@ -32,7 +32,7 @@ module HTTP
       def initialize(method: "gzip")
         super()
 
-        @method = method.to_s
+        @method = String(method)
 
         raise Error, "Only gzip and deflate methods are supported" unless VALID_METHODS.include?(@method)
       end

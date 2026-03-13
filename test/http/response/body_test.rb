@@ -14,7 +14,10 @@ describe HTTP::Response::Body do
   let(:chunks) { ["Hello, ", "World!"] }
 
   it "streams bodies from responses" do
-    assert_equal "Hello, World!", body.to_s
+    result = body.to_s
+
+    assert_equal "Hello, World!", result
+    assert_equal Encoding::UTF_8, result.encoding
   end
 
   context "when body empty" do
@@ -98,11 +101,26 @@ describe HTTP::Response::Body do
   end
 
   describe "#to_s" do
+    it "returns the same string on subsequent calls" do
+      first  = body.to_s
+      second = body.to_s
+
+      assert_equal "Hello, World!", first
+      assert_same first, second
+    end
+
     context "when an error occurs during reading" do
       let(:connection) { fake(readpartial: proc { raise IOError, "read error" }) }
 
       it "re-raises the error and resets contents" do
         assert_raises(IOError) { body.to_s }
+      end
+
+      it "raises StateError on subsequent call after error" do
+        assert_raises(IOError) { body.to_s }
+
+        err = assert_raises(HTTP::StateError) { body.to_s }
+        assert_match(/body is being streamed/, err.message)
       end
     end
   end
@@ -125,9 +143,46 @@ describe HTTP::Response::Body do
     end
   end
 
+  describe "#connection" do
+    context "when stream responds to :connection" do
+      it "returns the stream's connection" do
+        inner_conn = Object.new
+        stream = fake(
+          connection:  inner_conn,
+          readpartial: proc { raise EOFError }
+        )
+        b = HTTP::Response::Body.new(stream)
+
+        assert_same inner_conn, b.connection
+      end
+    end
+
+    context "when stream does not respond to :connection" do
+      it "returns the stream itself" do
+        stream = fake(readpartial: proc { raise EOFError })
+        b = HTTP::Response::Body.new(stream)
+
+        assert_same stream, b.connection
+      end
+    end
+  end
+
+  describe "#initialize" do
+    it "explicitly initializes @streaming" do
+      assert body.instance_variable_defined?(:@streaming)
+    end
+
+    it "explicitly initializes @contents" do
+      assert body.instance_variable_defined?(:@contents)
+    end
+  end
+
   describe "#inspect" do
-    it "includes streaming state" do
-      assert_match(/@streaming=false/, body.inspect)
+    it "includes class name, hex object_id, and streaming state" do
+      result = body.inspect
+      hex_id = body.object_id.to_s(16)
+
+      assert_equal "#<HTTP::Response::Body:#{hex_id} @streaming=false>", result
     end
   end
 

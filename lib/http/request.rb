@@ -279,7 +279,7 @@ module HTTP
     # @return [String]
     # @api public
     def inspect
-      "#<#{self.class}/#{@version} #{verb.to_s.upcase} #{uri}>"
+      format("#<%s/%s %s %s>", self.class, @version, String(verb).upcase, uri)
     end
 
     private
@@ -341,7 +341,7 @@ module HTTP
       raise ArgumentError, "uri is empty" if uri.is_a?(String) && uri.empty?
 
       @uri = @uri_normalizer.call(uri)
-      @scheme = @uri.scheme.to_s.downcase.to_sym if @uri.scheme
+      @scheme = String(@uri.scheme).downcase.to_sym if @uri.scheme
     end
 
     # Validate HTTP method and URI scheme
@@ -357,14 +357,14 @@ module HTTP
     # @return [HTTP::Request::Body]
     # @api private
     def prepare_body(body)
-      body.is_a?(Request::Body) ? body : Request::Body.new(body)
+      body.is_a?(Body) ? body : Body.new(body)
     end
 
     # Build headers with default values
     # @return [HTTP::Headers]
     # @api private
     def prepare_headers(headers)
-      headers = HTTP::Headers.coerce(headers || {})
+      headers = Headers.coerce(headers || {})
 
       headers[Headers::HOST]       ||= default_host_header_value
       headers[Headers::USER_AGENT] ||= USER_AGENT
