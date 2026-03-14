@@ -219,6 +219,19 @@ describe HTTP::Response::Body do
     end
   end
 
+  context "when inflater receives non-gzip data marked as gzip" do
+    let(:body) do
+      inflater = HTTP::Response::Inflater.new(connection)
+      HTTP::Response::Body.new(inflater, encoding: Encoding::UTF_8)
+    end
+
+    let(:chunks) { [" "] }
+
+    it "does not raise Zlib::BufError" do
+      assert_equal "", body.to_s
+    end
+  end
+
   context "when inflater receives EOFError without prior data" do
     it "closes the zstream and re-raises" do
       conn = fake(readpartial: proc { raise EOFError })

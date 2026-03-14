@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `Inflater` no longer raises `Zlib::BufError` when a response declares
+  `Content-Encoding: gzip` (or deflate) but the body is not valid compressed
+  data. This commonly occurred when following redirects with `auto_inflate`
+  enabled, because the redirect response had a `Content-Encoding` header but a
+  non-compressed body. ([#621])
 - Persistent connections now auto-flush unread response bodies before sending
   the next request, instead of raising `StateError`. Bodies up to 1 MiB are
   drained transparently; larger bodies cause the connection to close and reopen.
@@ -223,6 +228,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#566]: https://github.com/httprb/http/issues/566
 [#579]: https://github.com/httprb/http/issues/579
 [#618]: https://github.com/httprb/http/pull/618
+[#621]: https://github.com/httprb/http/issues/621
 [#642]: https://github.com/httprb/http/issues/642
 [#667]: https://github.com/httprb/http/issues/667
 [#673]: https://github.com/httprb/http/issues/673

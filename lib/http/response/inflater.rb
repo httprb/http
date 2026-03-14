@@ -40,7 +40,7 @@ module HTTP
         zstream.inflate(chunk)
       rescue EOFError
         unless zstream.closed?
-          zstream.finish if zstream.total_in.positive?
+          zstream.finished? ? zstream.finish : zstream.reset
           zstream.close
         end
 
