@@ -90,6 +90,10 @@ module HTTP
 
     # Open a persistent connection to a host
     #
+    # Returns an {HTTP::Session} that pools persistent {HTTP::Client}
+    # instances by origin. This allows connection reuse within the same
+    # origin and transparent cross-origin redirect handling.
+    #
     # When no host is given, the origin is derived from the configured base URI.
     #
     # @example
@@ -104,10 +108,10 @@ module HTTP
     #   @option [Integer] timeout Keep alive timeout
     #   @raise  [ArgumentError] if host is nil and no base URI is set
     #   @raise  [Request::Error] if Host is invalid
-    #   @return [HTTP::Client] Persistent client
+    #   @return [HTTP::Session] Persistent session
     # @overload persistent(host = nil, timeout: 5, &block)
-    #   Executes given block with persistent client and automatically closes
-    #   connection at the end of execution.
+    #   Executes given block with persistent session and automatically closes
+    #   all connections at the end of execution.
     #
     #   @example
     #
@@ -127,21 +131,21 @@ module HTTP
     #       end
     #
     #
-    #   @yieldparam [HTTP::Client] client Persistent client
+    #   @yieldparam [HTTP::Session] session Persistent session
     #   @return [Object] result of last expression in the block
-    # @return [HTTP::Client, Object]
+    # @return [HTTP::Session, Object]
     # @api public
     def persistent(host = nil, timeout: 5)
       host ||= default_options.base_uri&.origin
       raise ArgumentError, "host is required for persistent connections" unless host
 
       options = default_options.merge(keep_alive_timeout: timeout).with_persistent(host)
-      p_client = make_client(options)
-      return p_client unless block_given?
+      session = branch(options)
+      return session unless block_given?
 
-      yield p_client
+      yield session
     ensure
-      p_client&.close
+      session&.close if block_given?
     end
 
     # Make a request through an HTTP proxy

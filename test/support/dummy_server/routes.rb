@@ -174,5 +174,18 @@ class DummyServer
         res["Set-Cookie"] = "auth=ok; path=/"
       end
     end
+
+    get "/cross-origin-redirect" do |req, res|
+      target = req.query["target"]
+      res.status      = 302
+      res["Location"] = target
+    end
+
+    get "/cross-origin-redirect-with-cookie" do |req, res|
+      target = req.query["target"]
+      res.status      = 302
+      res["Location"] = target
+      res["Set-Cookie"] = "from_origin=yes; path=/"
+    end
   end
 end

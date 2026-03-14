@@ -249,12 +249,31 @@ describe HTTP::Session do
   end
 
   describe "persistent" do
-    it "returns an HTTP::Client" do
-      p_client = HTTP::Session.new.persistent(dummy.endpoint)
+    it "returns an HTTP::Session" do
+      session = HTTP::Session.new.persistent(dummy.endpoint)
 
-      assert_kind_of HTTP::Client, p_client
+      assert_kind_of HTTP::Session, session
     ensure
-      p_client&.close
+      session&.close
+    end
+  end
+
+  describe "#close" do
+    it "closes all pooled clients" do
+      session = HTTP.persistent(dummy.endpoint)
+      session.get("/")
+
+      clients = session.instance_variable_get(:@clients)
+
+      refute_empty clients
+
+      session.close
+
+      assert_empty clients
+    end
+
+    it "is safe to call on non-persistent sessions" do
+      session.close
     end
   end
 
@@ -277,6 +296,85 @@ describe HTTP::Session do
       response = HTTP.base_uri(dummy.endpoint).get("/")
 
       assert_kind_of HTTP::Response, response
+    end
+  end
+
+  describe "persistent cross-origin redirects" do
+    run_server(:dummy2) { DummyServer.new }
+
+    it "follows redirects to a different origin" do
+      target = "#{dummy2.endpoint}/"
+      response = HTTP.persistent(dummy.endpoint).follow
+                     .get("#{dummy.endpoint}/cross-origin-redirect?target=#{target}")
+
+      assert_equal 200, response.status.code
+      assert_equal "<!doctype html>", response.to_s
+    end
+
+    it "follows redirects back to the original origin" do
+      bounce_back = "#{dummy.endpoint}/"
+      target = "#{dummy2.endpoint}/cross-origin-redirect?target=#{bounce_back}"
+      response = HTTP.persistent(dummy.endpoint).follow
+                     .get("#{dummy.endpoint}/cross-origin-redirect?target=#{target}")
+
+      assert_equal 200, response.status.code
+      assert_equal "<!doctype html>", response.to_s
+    end
+
+    it "pools clients per origin" do
+      target = "#{dummy2.endpoint}/"
+
+      HTTP.persistent(dummy.endpoint) do |http|
+        session = http.follow
+        session.get("#{dummy.endpoint}/cross-origin-redirect?target=#{target}")
+        clients = session.instance_variable_get(:@clients)
+
+        assert_equal 2, clients.size
+        assert_includes clients.keys, URI.parse(dummy.endpoint).origin
+        assert_includes clients.keys, URI.parse(dummy2.endpoint).origin
+
+        session.close
+      end
+    end
+
+    it "manages cookies across cross-origin redirect hops" do
+      target = "#{dummy2.endpoint}/echo-cookies"
+      session = HTTP.persistent(dummy.endpoint).follow
+      response = session.get("#{dummy.endpoint}/cross-origin-redirect-with-cookie?target=#{target}")
+
+      assert_equal 200, response.status.code
+      assert_equal "from_origin=yes", response.to_s
+    ensure
+      session&.close
+    end
+
+    it "reuses pooled connections within the same origin" do
+      HTTP.persistent(dummy.endpoint) do |http|
+        http.get(dummy.endpoint)
+        http.get(dummy.endpoint)
+
+        clients = http.instance_variable_get(:@clients)
+
+        assert_equal 1, clients.size
+      end
+    end
+
+    it "closes all pooled connections with block form of get" do
+      closed_origins = []
+      session = HTTP.persistent(dummy.endpoint).follow
+
+      target = "#{dummy2.endpoint}/"
+      session.get("#{dummy.endpoint}/cross-origin-redirect?target=#{target}") do |_res|
+        session.instance_variable_get(:@clients).each_value do |client|
+          original_close = client.method(:close)
+          client.define_singleton_method(:close) do
+            closed_origins << default_options.persistent
+            original_close.call
+          end
+        end
+      end
+
+      assert_equal 2, closed_origins.size
     end
   end
 end

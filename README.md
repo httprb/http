@@ -165,13 +165,23 @@ threads.each(&:join)
 Chainable configuration methods (`.headers`, `.timeout`, `.auth`, etc.) return
 an `HTTP::Session`, which creates a fresh `HTTP::Client` for every request.
 
-Persistent connections (`HTTP.persistent`) return an `HTTP::Client`, which is
-**not** thread-safe. For thread-safe persistent connections, use the
+Persistent connections (`HTTP.persistent`) return an `HTTP::Session` that pools
+one `HTTP::Client` per origin. The session itself is **not** thread-safe. For
+thread-safe persistent connections, use the
 [connection_pool](https://rubygems.org/gems/connection_pool) gem:
 
 ```ruby
 pool = ConnectionPool.new(size: 5) { HTTP.persistent("https://example.com") }
 pool.with { |http| http.get("/path") }
+```
+
+Cross-origin redirects are handled transparently — the session opens a separate
+persistent connection for each origin encountered during a redirect chain:
+
+```ruby
+HTTP.persistent("https://example.com").follow do |http|
+  http.get("/moved-to-other-domain")  # follows redirect across origins
+end
 ```
 
 ## Supported Ruby Versions

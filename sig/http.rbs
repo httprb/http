@@ -97,8 +97,8 @@ module HTTP
     ) { (Response) -> T } -> T
     def timeout: (Numeric | Hash[Symbol, Numeric] | :null options) -> Session
     def base_uri: (String | URI uri) -> Session
-    def persistent: (?String? host, ?timeout: Integer) -> Client
-                   | (?String? host, ?timeout: Integer) { (Client) -> void } -> void
+    def persistent: (?String? host, ?timeout: Integer) -> Session
+                   | [T] (?String? host, ?timeout: Integer) { (Session) -> T } -> T
     def via: (*(String | Integer | Hash[String, String]) proxy) -> Session
     alias through via
     def follow: (?strict: bool, ?max_hops: Integer, ?on_redirect: (^(Response, Request) -> void)?) -> Session
@@ -180,8 +180,10 @@ module HTTP
     include Chainable
 
     @default_options: Options
+    @clients: Hash[String, Client]
 
     def initialize: (?Options? default_options, **untyped) -> void
+    def close: () -> void
     def request: (
       verb verb,
       String | URI uri,
@@ -236,8 +238,11 @@ module HTTP
 
     private
 
-    def perform_request: (Client client, verb verb, untyped uri, Options merged) -> Response
+    def perform_request: (Client? client, verb verb, untyped uri, Options merged) -> Response
     def perform_redirects: (CookieJar jar, Client client, Request req, Response res, Options opts) -> Response
+    def redirect_client: (Client client, Request request) -> Client
+    def client_for_origin: (String origin) -> Client
+    def options_for_origin: (String origin) -> Options
     def load_cookies: (CookieJar jar, Request request) -> void
     def store_cookies: (CookieJar jar, Response response) -> void
     def apply_cookies: (CookieJar jar, Request request) -> void

@@ -460,8 +460,8 @@ describe HTTP do
     context "with host only given" do
       let(:persistent_client) { HTTP.persistent host }
 
-      it "returns an HTTP::Client" do
-        assert_kind_of HTTP::Client, persistent_client
+      it "returns an HTTP::Session" do
+        assert_kind_of HTTP::Session, persistent_client
       end
 
       it "is persistent" do
@@ -476,13 +476,13 @@ describe HTTP do
 
       it "auto-closes connection" do
         closed = false
-        HTTP.persistent host do |pclient|
-          original_close = pclient.method(:close)
-          pclient.define_singleton_method(:close) do
+        HTTP.persistent host do |session|
+          original_close = session.method(:close)
+          session.define_singleton_method(:close) do
             closed = true
             original_close.call
           end
-          pclient.get("/")
+          session.get("/")
         end
 
         assert closed, "expected close to have been called"
@@ -490,7 +490,7 @@ describe HTTP do
     end
 
     context "when initialization raises" do
-      it "handles nil client in ensure" do
+      it "handles nil session in ensure" do
         opts = HTTP.default_options
 
         opts.stub(:merge, ->(*) { raise "boom" }) do

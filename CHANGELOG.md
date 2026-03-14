@@ -38,9 +38,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `read_nonblock` and `:wait_readable` from `write_nonblock` on SSL sockets
   during TLS renegotiation. Previously these symbols were returned as data
   instead of being waited on. ([#358])
+- Persistent sessions now follow cross-origin redirects instead of raising
+  `StateError`. `HTTP.persistent` returns an `HTTP::Session` that pools one
+  `HTTP::Client` per origin, so redirects to a different domain transparently
+  open (and reuse) a separate persistent connection. Cookie management is
+  preserved across all hops. ([#557])
 
 ### Changed
 
+- **BREAKING** `HTTP.persistent` now returns an `HTTP::Session` instead of an
+  `HTTP::Client`. The session pools persistent clients per origin and exposes
+  the same chainable API (`get`, `post`, `headers`, `follow`, etc.) plus a
+  `close` method that shuts down all pooled connections. Code that called
+  `HTTP::Client`-only methods on the return value will need updating. ([#557])
 - **BREAKING** Convert options hash parameters to explicit keyword arguments
   across the public API. Methods like `HTTP.get(url, body: "data")` continue to
   work, but passing an explicit hash (e.g., `HTTP.get(url, {body: "data"})`) is
@@ -223,6 +233,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#536]: https://github.com/httprb/http/issues/536
 [#537]: https://github.com/httprb/http/issues/537
 [#544]: https://github.com/httprb/http/issues/544
+[#557]: https://github.com/httprb/http/issues/557
 [#560]: https://github.com/httprb/http/pull/560
 [#565]: https://github.com/httprb/http/issues/565
 [#566]: https://github.com/httprb/http/issues/566

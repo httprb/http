@@ -15,12 +15,22 @@ module HTTP
   # They hold an immutable {Options} object and create a new {Client}
   # for each request, making them safe to share across threads.
   #
+  # When configured for persistent connections (via {Chainable#persistent}),
+  # the session maintains a pool of {Client} instances keyed by origin,
+  # enabling connection reuse within the same origin and transparent
+  # cross-origin redirect handling.
+  #
   # @example Reuse a configured session across threads
   #   session = HTTP.headers("Accept" => "application/json").timeout(10)
   #   threads = 5.times.map do
   #     Thread.new { session.get("https://example.com") }
   #   end
   #   threads.each(&:join)
+  #
+  # @example Persistent session with cross-origin redirects
+  #   HTTP.persistent("https://example.com").follow do |http|
+  #     http.get("/redirect-to-other-domain")  # follows cross-origin redirect
+  #   end
   #
   # @see Chainable
   # @see Client
@@ -51,11 +61,32 @@ module HTTP
     # @api public
     def initialize(default_options = nil, **)
       @default_options = HTTP::Options.new(default_options, **)
+      @clients = {}
     end
 
-    # Make an HTTP request by creating a new {Client}
+    # Close all persistent connections held by this session
     #
-    # A fresh {Client} is created for each request, ensuring thread safety.
+    # When the session is persistent, this closes every pooled {Client}
+    # and clears the pool. Safe to call on non-persistent sessions (no-op).
+    #
+    # @example
+    #   session = HTTP.persistent("https://example.com")
+    #   session.get("/")
+    #   session.close
+    #
+    # @return [void]
+    # @api public
+    def close
+      @clients.each_value(&:close)
+      @clients.clear
+    end
+
+    # Make an HTTP request
+    #
+    # For non-persistent sessions a fresh {Client} is created for each
+    # request, ensuring thread safety. For persistent sessions the pooled
+    # {Client} for the request's origin is reused.
+    #
     # Manages cookies across redirect hops when following redirects.
     #
     # @example Without a block
@@ -85,21 +116,23 @@ module HTTP
           timeout_class: timeout_class, timeout_options: timeout_options,
           keep_alive_timeout: keep_alive_timeout, base_uri: base_uri, persistent: persistent }.compact
       )
-      client = make_client(default_options)
+      client = persistent? ? nil : make_client(default_options)
       res    = perform_request(client, verb, uri, merged)
 
       return res unless block
 
       yield res
     ensure
-      client&.close if block
+      if block
+        persistent? ? close : client&.close
+      end
     end
 
     private
 
     # Execute a request with cookie management
     #
-    # @param client [HTTP::Client] the client to perform the request
+    # @param client [HTTP::Client, nil] the client (nil when persistent; looked up from pool)
     # @param verb [Symbol] the HTTP method
     # @param uri [#to_s] the URI to request
     # @param merged [HTTP::Options] the merged options
@@ -109,6 +142,7 @@ module HTTP
       cookie_jar = CookieJar.new
       builder = Request::Builder.new(merged)
       req = builder.build(verb, uri)
+      client ||= client_for_origin(req.uri.origin)
       load_cookies(cookie_jar, req)
       res = client.perform(req, merged)
       store_cookies(cookie_jar, res)
@@ -120,8 +154,13 @@ module HTTP
 
     # Follow redirects with cookie management
     #
+    # For persistent sessions, each redirect hop may target a different
+    # origin. The session looks up (or creates) a pooled {Client} for
+    # the redirect target's origin, allowing cross-origin redirects
+    # without raising {StateError}.
+    #
     # @param jar [HTTP::CookieJar] the cookie jar
-    # @param client [HTTP::Client] the client to perform requests
+    # @param client [HTTP::Client] the client for the initial request
     # @param req [HTTP::Request] the original request
     # @param res [HTTP::Response] the initial redirect response
     # @param opts [HTTP::Options] the merged options
@@ -134,10 +173,45 @@ module HTTP
         wrapped = builder.wrap(redirect_req)
         apply_cookies(jar, wrapped)
         apply_cookies(jar, redirect_req)
-        response = client.perform(wrapped, opts)
+        response = redirect_client(client, wrapped).perform(wrapped, opts)
         store_cookies(jar, response)
         response
       end
+    end
+
+    # Return the appropriate client for a redirect hop
+    #
+    # @param client [HTTP::Client] the client for the original request
+    # @param request [HTTP::Request] the redirect request
+    # @return [HTTP::Client] the client for the redirect target
+    # @api private
+    def redirect_client(client, request)
+      persistent? ? client_for_origin(request.uri.origin) : client
+    end
+
+    # Return a pooled persistent {Client} for the given origin
+    #
+    # Creates a new {Client} if one does not already exist for this origin.
+    # For the session's primary persistent origin, the default options are
+    # used directly. For other origins (e.g. redirect targets), the
+    # persistent origin is overridden and base_uri is cleared.
+    #
+    # @param origin [String] the URI origin (scheme + host + port)
+    # @return [HTTP::Client] a persistent client for the origin
+    # @api private
+    def client_for_origin(origin)
+      @clients[origin] ||= make_client(options_for_origin(origin))
+    end
+
+    # Build {Options} for a persistent client targeting the given origin
+    #
+    # @param origin [String] the URI origin
+    # @return [HTTP::Options] options configured for this origin
+    # @api private
+    def options_for_origin(origin)
+      return default_options if origin == default_options.persistent
+
+      default_options.merge(persistent: origin, base_uri: nil)
     end
 
     # Load cookies from the request's Cookie header into the jar
