@@ -56,12 +56,13 @@ module HTTP
     #   session = HTTP::Session.new(headers: {"Accept" => "application/json"})
     #
     # @param default_options [HTTP::Options, nil] existing options instance
+    # @param clients [Hash, nil] shared connection pool (internal use)
     # @param options [Hash] keyword options (see HTTP::Options#initialize)
     # @return [HTTP::Session] a new session instance
     # @api public
-    def initialize(default_options = nil, **)
+    def initialize(default_options = nil, clients: nil, **)
       @default_options = HTTP::Options.new(default_options, **)
-      @clients = {}
+      @clients = clients || {}
     end
 
     # Close all persistent connections held by this session
@@ -129,6 +130,23 @@ module HTTP
     end
 
     private
+
+    # Create a new session with the given options
+    #
+    # When the current session is persistent, the child session shares the
+    # same connection pool so that chaining methods like {Chainable#headers}
+    # or {Chainable#auth} do not break connection reuse.
+    #
+    # @param options [HTTP::Options] options for the new session
+    # @return [HTTP::Session]
+    # @api private
+    def branch(options)
+      if persistent?
+        self.class.new(options, clients: @clients)
+      else
+        self.class.new(options)
+      end
+    end
 
     # Execute a request with cookie management
     #

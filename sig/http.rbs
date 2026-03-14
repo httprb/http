@@ -182,7 +182,7 @@ module HTTP
     @default_options: Options
     @clients: Hash[String, Client]
 
-    def initialize: (?Options? default_options, **untyped) -> void
+    def initialize: (?Options? default_options, ?clients: Hash[String, Client]?, **untyped) -> void
     def close: () -> void
     def request: (
       verb verb,
@@ -238,6 +238,7 @@ module HTTP
 
     private
 
+    def branch: (Options options) -> Session
     def perform_request: (Client? client, verb verb, untyped uri, Options merged) -> Response
     def perform_redirects: (CookieJar jar, Client client, Request req, Response res, Options opts) -> Response
     def redirect_client: (Client client, Request request) -> Client

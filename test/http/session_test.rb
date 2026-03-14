@@ -277,6 +277,49 @@ describe HTTP::Session do
     end
   end
 
+  describe "persistent connection reuse with chaining" do
+    it "reuses connections when chaining headers on a persistent session" do
+      session = HTTP.persistent(dummy.endpoint)
+
+      sock1 = session.headers("Accept" => "application/json").get("#{dummy.endpoint}/socket/1").to_s
+      sock2 = session.headers("Accept" => "text/html").get("#{dummy.endpoint}/socket/2").to_s
+
+      refute_equal "", sock1
+      assert_equal sock1, sock2
+    ensure
+      session&.close
+    end
+
+    it "reuses connections when chaining auth on a persistent session" do
+      session = HTTP.persistent(dummy.endpoint)
+
+      sock1 = session.auth("Bearer token").get("#{dummy.endpoint}/socket/1").to_s
+      sock2 = session.auth("Bearer token").get("#{dummy.endpoint}/socket/2").to_s
+
+      refute_equal "", sock1
+      assert_equal sock1, sock2
+    ensure
+      session&.close
+    end
+
+    it "shares the connection pool across chained sessions" do
+      session = HTTP.persistent(dummy.endpoint)
+      chained = session.headers("Accept" => "application/json")
+
+      assert_same session.instance_variable_get(:@clients),
+                  chained.instance_variable_get(:@clients)
+    ensure
+      session&.close
+    end
+
+    it "does not share pool for non-persistent sessions" do
+      chained = session.headers("Accept" => "application/json")
+
+      refute_same session.instance_variable_get(:@clients),
+                  chained.instance_variable_get(:@clients)
+    end
+  end
+
   describe "base_uri" do
     it "returns a Session from base_uri" do
       chained = session.base_uri(dummy.endpoint)

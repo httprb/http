@@ -43,6 +43,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `HTTP::Client` per origin, so redirects to a different domain transparently
   open (and reuse) a separate persistent connection. Cookie management is
   preserved across all hops. ([#557])
+- Chaining configuration methods (`.headers`, `.auth`, `.cookies`, etc.) on a
+  persistent session no longer breaks connection reuse. Child sessions created
+  by chaining now share the parent's connection pool, so
+  `HTTP.persistent(host).headers(...).get(path)` reuses the same underlying
+  TCP connection across calls. ([#372])
 
 ### Changed
 
@@ -221,6 +226,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#223]: https://github.com/httprb/http/issues/223
 [#358]: https://github.com/httprb/http/issues/358
 [#371]: https://github.com/httprb/http/issues/371
+[#372]: https://github.com/httprb/http/issues/372
 [#447]: https://github.com/httprb/http/issues/447
 [#448]: https://github.com/httprb/http/issues/448
 [#449]: https://github.com/httprb/http/issues/449
