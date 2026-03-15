@@ -1,2 +1,3 @@
 --markup-provider=kramdown
 --markup=markdown
+--files CHANGELOG.md,CONTRIBUTING.md,SECURITY.md,UPGRADING.md

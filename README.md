@@ -208,7 +208,19 @@ exist at the time of a major release, support for that Ruby version may be
 dropped.
 
 
+## Upgrading
+
+See [UPGRADING.md] for a detailed migration guide between major versions.
+
+
+## Security
+
+See [SECURITY.md] for reporting vulnerabilities.
+
+
 ## Contributing to http.rb
+
+See [CONTRIBUTING.md] for guidelines, or the quick version:
 
 - Fork http.rb on GitHub
 - Make your changes
@@ -243,6 +255,9 @@ See LICENSE.txt for further details.
 
 [//]: # (links)
 
+[contributing.md]: https://github.com/httprb/http/blob/main/CONTRIBUTING.md
 [documentation]: https://github.com/httprb/http/wiki
-[requests]: https://docs.python-requests.org/en/latest/
 [llhttp]: https://llhttp.org/
+[requests]: https://docs.python-requests.org/en/latest/
+[security.md]: https://github.com/httprb/http/blob/main/SECURITY.md
+[upgrading.md]: https://github.com/httprb/http/blob/main/UPGRADING.md

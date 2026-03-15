@@ -22,10 +22,11 @@ Gem::Specification.new do |spec|
   spec.metadata["source_code_uri"]       = "#{spec.homepage}/tree/v#{spec.version}"
   spec.metadata["bug_tracker_uri"]       = "#{spec.homepage}/issues"
   spec.metadata["changelog_uri"]         = "#{spec.homepage}/blob/v#{spec.version}/CHANGELOG.md"
+  spec.metadata["documentation_uri"]     = "https://www.rubydoc.info/gems/http/#{spec.version}"
   spec.metadata["rubygems_mfa_required"] = "true"
 
   spec.files = IO.popen(%w[git ls-files -z], chdir: __dir__, err: IO::NULL) do |ls|
-    extras = %w[CHANGELOG.md LICENSE.txt README.md SECURITY.md] << File.basename(__FILE__)
+    extras = %w[CHANGELOG.md CONTRIBUTING.md LICENSE.txt README.md SECURITY.md UPGRADING.md] << File.basename(__FILE__)
 
     ls.readlines("\x0", chomp: true).select do |f|
       f.start_with?("lib/", "test/") || extras.include?(f)
