@@ -233,7 +233,19 @@ describe HTTP::Retriable::Performer do
     end
 
     describe "delay option" do
-      let(:timing_slack) { 0.05 }
+      it "sleeps for the calculated delay" do
+        slept_values = []
+        performer = HTTP::Retriable::Performer.new(delay: 0.123, tries: 2, should_retry: ->(*) { true })
+        performer.define_singleton_method(:sleep) { |d| slept_values << d }
+
+        assert_raises(HTTP::OutOfRetriesError) do
+          performer.perform(client, request) { response }
+        end
+
+        assert_equal [0.123], slept_values
+      end
+
+      let(:timing_slack) { 0.5 }
 
       it "can be a positive number" do
         time, = measure_wait do

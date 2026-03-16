@@ -15,15 +15,15 @@ class DummyServer
       end
     end
 
-    get "/sleep" do |_, res|
-      sleep 0.05
+    get "/sleep" do |_req, res|
+      sleep 0.02
 
       res.status = 200
       res.body   = "hello"
     end
 
-    post "/sleep" do |_, res|
-      sleep 0.05
+    post "/sleep" do |_req, res|
+      sleep 0.02
 
       res.status = 200
       res.body   = "hello"
@@ -31,26 +31,33 @@ class DummyServer
 
     ["", "/1", "/2"].each do |path|
       get "/socket#{path}" do |req, res|
-        self.class.sockets << req.instance_variable_get(:@socket)
-        res.status  = 200
-        res.body    = req.instance_variable_get(:@socket).object_id.to_s
+        socket = req.socket
+        self.class.sockets << socket
+        res.status = 200
+        res.body   = socket.object_id.to_s
       end
     end
 
     get "/params" do |req, res|
-      next not_found(req, res) unless "foo=bar" == req.query_string
-
-      res.status = 200
-      res.body   = "Params!"
+      if "foo=bar" == query_string(req)
+        res.status = 200
+        res.body   = "Params!"
+      else
+        res.status = 404
+        res.body   = "#{req.unparsed_uri} not found"
+      end
     end
 
     get "/multiple-params" do |req, res|
-      params = URI.decode_www_form(req.query_string).group_by(&:first).transform_values { |v| v.map(&:last) }
+      params = URI.decode_www_form(query_string(req)).group_by(&:first).transform_values { |v| v.map(&:last) }
 
-      next not_found(req, res) unless { "foo" => ["bar"], "baz" => ["quux"] } == params
-
-      res.status = 200
-      res.body   = "More Params!"
+      if { "foo" => ["bar"], "baz" => ["quux"] } == params
+        res.status = 200
+        res.body   = "More Params!"
+      else
+        res.status = 404
+        res.body   = "#{req.unparsed_uri} not found"
+      end
     end
 
     get "/proxy" do |_req, res|
@@ -65,16 +72,16 @@ class DummyServer
 
     get "/redirect-301" do |_req, res|
       res.status      = 301
-      res["Location"] = "http://#{@server.addr}:#{@server.port}/"
+      res["Location"] = "http://#{server_addr}:#{server_port}/"
     end
 
     get "/redirect-302" do |_req, res|
       res.status      = 302
-      res["Location"] = "http://#{@server.addr}:#{@server.port}/"
+      res["Location"] = "http://#{server_addr}:#{server_port}/"
     end
 
     post "/form" do |req, res|
-      if "testing-form" == req.query["example"]
+      if "testing-form" == query_params(req)["example"]
         res.status = 200
         res.body   = "passed :)"
       else
@@ -84,7 +91,7 @@ class DummyServer
     end
 
     post "/body" do |req, res|
-      if "testing-body" == req.body
+      if "testing-body" == request_body(req)
         res.status = 200
         res.body   = "passed :)"
       else
@@ -110,13 +117,14 @@ class DummyServer
     end
 
     get "/cookies" do |req, res|
-      res["Set-Cookie"] = "foo=bar"
-      res.body = req.cookies.map { |c| [c.name, c.value].join ": " }.join("\n")
+      cookies = request_cookies(req)
+      res.cookies << SetCookie.new("foo", "bar")
+      res.body = cookies.map { |c| [c.name, c.value].join ": " }.join("\n")
     end
 
     post "/echo-body" do |req, res|
       res.status = 200
-      res.body   = req.body
+      res.body   = request_body(req)
     end
 
     get "/héllö-wörld".b do |_req, res|
@@ -126,66 +134,68 @@ class DummyServer
 
     get "/echo-cookies" do |req, res|
       res.status = 200
-      res.body   = req.cookies.map { |c| "#{c.name}=#{c.value}" }.join("; ")
+      cookies = request_cookies(req)
+      res.body = cookies.map { |c| "#{c.name}=#{c.value}" }.join("; ")
     end
 
     get "/redirect-with-cookie" do |_req, res|
       res.status      = 301
-      res["Location"] = "http://#{@server.addr}:#{@server.port}/echo-cookies"
-      res["Set-Cookie"] = "from_redirect=yes; path=/"
+      res["Location"] = "http://#{server_addr}:#{server_port}/echo-cookies"
+      res.cookies << SetCookie.new("from_redirect", "yes", "/")
     end
 
     get "/redirect-cookie-chain/1" do |_req, res|
       res.status      = 301
-      res["Location"] = "http://#{@server.addr}:#{@server.port}/redirect-cookie-chain/2"
-      res["Set-Cookie"] = "first=1; path=/"
+      res["Location"] = "http://#{server_addr}:#{server_port}/redirect-cookie-chain/2"
+      res.cookies << SetCookie.new("first", "1", "/")
     end
 
     get "/redirect-cookie-chain/2" do |_req, res|
       res.status      = 301
-      res["Location"] = "http://#{@server.addr}:#{@server.port}/echo-cookies"
-      res["Set-Cookie"] = "second=2; path=/"
+      res["Location"] = "http://#{server_addr}:#{server_port}/echo-cookies"
+      res.cookies << SetCookie.new("second", "2", "/")
     end
 
     get "/redirect-set-then-delete/1" do |_req, res|
       res.status      = 301
-      res["Location"] = "http://#{@server.addr}:#{@server.port}/redirect-set-then-delete/2"
-      res["Set-Cookie"] = "temp=present; path=/"
+      res["Location"] = "http://#{server_addr}:#{server_port}/redirect-set-then-delete/2"
+      res.cookies << SetCookie.new("temp", "present", "/")
     end
 
     get "/redirect-set-then-delete/2" do |_req, res|
       res.status      = 301
-      res["Location"] = "http://#{@server.addr}:#{@server.port}/echo-cookies"
-      res["Set-Cookie"] = "temp=; path=/"
+      res["Location"] = "http://#{server_addr}:#{server_port}/echo-cookies"
+      res.cookies << SetCookie.new("temp", "", "/")
     end
 
     get "/redirect-no-cookies" do |_req, res|
       res.status      = 301
-      res["Location"] = "http://#{@server.addr}:#{@server.port}/echo-cookies"
+      res["Location"] = "http://#{server_addr}:#{server_port}/echo-cookies"
     end
 
     get "/cookie-loop" do |req, res|
-      if req.cookies.any? { |c| c.name == "auth" && c.value == "ok" }
+      cookies = request_cookies(req)
+      if cookies.any? { |c| c.name == "auth" && c.value == "ok" }
         res.status = 200
         res.body   = "authenticated"
       else
         res.status = 302
-        res["Location"] = "http://#{@server.addr}:#{@server.port}/cookie-loop"
-        res["Set-Cookie"] = "auth=ok; path=/"
+        res["Location"] = "http://#{server_addr}:#{server_port}/cookie-loop"
+        res.cookies << SetCookie.new("auth", "ok", "/")
       end
     end
 
     get "/cross-origin-redirect" do |req, res|
-      target = req.query["target"]
+      target = query_params(req)["target"]
       res.status      = 302
       res["Location"] = target
     end
 
     get "/cross-origin-redirect-with-cookie" do |req, res|
-      target = req.query["target"]
+      target = query_params(req)["target"]
       res.status      = 302
       res["Location"] = target
-      res["Set-Cookie"] = "from_origin=yes; path=/"
+      res.cookies << SetCookie.new("from_origin", "yes", "/")
     end
   end
 end

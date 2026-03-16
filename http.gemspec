@@ -40,10 +40,10 @@ Gem::Specification.new do |spec|
   spec.add_dependency "http-cookie",    "~> 1.0"
   spec.add_dependency "http-form_data", "~> 2.2"
 
-  # Use native llhttp for MRI (more performant) and llhttp-ffi for other interpreters (better compatibility)
-  if RUBY_ENGINE == "ruby"
-    spec.add_dependency "llhttp", "~> 0.6.1"
-  else
+  if RUBY_ENGINE == "jruby"
+    spec.platform = "java" if ENV["HTTP_PLATFORM"] == "java"
     spec.add_dependency "llhttp-ffi", "~> 0.5.1"
+  else
+    spec.add_dependency "llhttp", "~> 0.6.1"
   end
 end

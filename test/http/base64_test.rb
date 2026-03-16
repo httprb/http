@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require "base64"
 
 describe HTTP::Base64 do
   cover "HTTP::Base64*"
@@ -16,10 +15,10 @@ describe HTTP::Base64 do
       assert_equal "aGVsbG8=", encoder.send(:encode64, "hello")
     end
 
-    it "produces output decodable by standard Base64" do
+    it "produces output that round-trips back to the original input" do
       input = "user:password"
 
-      assert_equal input, Base64.strict_decode64(encoder.send(:encode64, input))
+      assert_equal input, encoder.send(:encode64, input).unpack1("m0")
     end
 
     it "encodes empty string" do

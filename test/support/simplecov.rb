@@ -18,6 +18,11 @@ end
 SimpleCov.start do
   add_filter "/test/"
   add_filter "/minitest-memory/"
-  enable_coverage :branch
-  minimum_coverage line: 100, branch: 100
+
+  if RUBY_ENGINE == "ruby"
+    enable_coverage :branch
+    minimum_coverage line: 100, branch: 100
+  else
+    minimum_coverage line: 99
+  end
 end

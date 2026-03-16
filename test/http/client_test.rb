@@ -407,7 +407,7 @@ describe HTTP::Client do
 
         assert_raises(HTTP::TimeoutError) do
           client.use(test_feature: feature_instance)
-                .timeout(0.025)
+                .timeout(0.01)
                 .request(:post, sleep_url)
         end
 
@@ -420,7 +420,7 @@ describe HTTP::Client do
         sleep_url = "#{dummy.endpoint}/sleep"
         feature_instance = feature_class.new
 
-        TCPSocket.stub(:open, ->(*) { sleep 1 }) do
+        TCPSocket.stub(:open, ->(*) { sleep 0.1 }) do
           assert_raises(HTTP::ConnectTimeoutError) do
             client.use(test_feature: feature_instance)
                   .timeout(0.001)

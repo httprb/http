@@ -15,6 +15,7 @@ class DummyServer
     @memo       = {}
     @servlet    = Servlet.new(self, @memo)
     @running    = false
+    @ready      = Queue.new
     ssl_context if @ssl
   end
 
@@ -32,9 +33,14 @@ class DummyServer
     @ssl ? "https" : "http"
   end
 
+  def wait_ready
+    @ready.pop
+  end
+
   def start
-    server = @ssl ? ssl_server : @tcp_server
+    server = @ssl ? OpenSSL::SSL::SSLServer.new(@tcp_server, ssl_context) : @tcp_server
     @running = true
+    @ready << true
 
     while @running
       begin
@@ -48,6 +54,11 @@ class DummyServer
     # Server socket closed during shutdown
   end
 
+  def reset
+    @memo.clear
+    Servlet.sockets.clear
+  end
+
   def shutdown
     @running = false
     @tcp_server.close
@@ -59,30 +70,90 @@ class DummyServer
     @ssl_context ||= SSLHelper.server_context
   end
 
-  private
+  # Simple HTTP request object for route handlers
+  Request = Struct.new(:request_method, :path, :query_string, :unparsed_uri,
+                       :headers, :body, :socket) do
+    def [](name)
+      headers.each { |k, v| return v if k.casecmp?(name) }
+      nil
+    end
 
-  def ssl_server
-    OpenSSL::SSL::SSLServer.new(@tcp_server, ssl_context)
+    def cookies
+      cookie_header = self["Cookie"]
+      return [] unless cookie_header
+
+      cookie_header.split("; ").map do |pair|
+        name, value = pair.split("=", 2)
+        DummyServer::Cookie.new(name, value || "")
+      end
+    end
   end
+
+  # Simple HTTP response object for route handlers
+  class Response
+    attr_accessor :status
+    attr_accessor :body
+    attr_accessor :cookies
+
+    def initialize
+      @status  = 200
+      @body    = ""
+      @headers = {}
+      @cookies = []
+    end
+
+    def []=(name, value)
+      @headers[name] = value
+    end
+
+    def [](name)
+      @headers[name]
+    end
+
+    def serialize(head_request: false)
+      lines = ["HTTP/1.1 #{status} #{STATUS_TEXT.fetch(status, 'Unknown')}"]
+
+      cookies.each do |cookie|
+        value = "#{cookie.name}=#{cookie.value}"
+        value += "; path=#{cookie.path}" if cookie.path
+        lines << "Set-Cookie: #{value}"
+      end
+
+      @headers.each { |k, v| lines << "#{k}: #{v}" }
+
+      body_bytes = body.to_s.b
+      lines << "Content-Length: #{body_bytes.bytesize}" unless @headers.key?("Content-Length")
+
+      header_str = lines.join("\r\n") << "\r\n\r\n"
+      head_request ? header_str : header_str << body_bytes
+    end
+
+    STATUS_TEXT = {
+      200 => "OK", 204 => "No Content", 301 => "Moved Permanently",
+      302 => "Found", 400 => "Bad Request", 404 => "Not Found",
+      407 => "Proxy Authentication Required", 500 => "Internal Server Error"
+    }.freeze
+  end
+
+  Cookie    = Struct.new(:name, :value)
+  SetCookie = Struct.new(:name, :value, :path)
+
+  private
 
   def handle_connection(client)
     loop do
       request = read_request(client)
       break unless request
 
-      Thread.pass
-      respond(client, request)
+      response = Response.new
+      @servlet.service(request, response)
+      client.write(response.serialize(head_request: request.request_method == "HEAD"))
+      break unless response["Connection"]&.casecmp?("keep-alive")
     end
-  rescue IOError, Errno::ECONNRESET, Errno::EPIPE, Errno::EPROTOTYPE, OpenSSL::SSL::SSLError
+  rescue IOError, Errno::EBADF, Errno::ECONNRESET, Errno::EPIPE, Errno::EPROTOTYPE, OpenSSL::SSL::SSLError
     # Connection closed or SSL error
   ensure
     client.close rescue nil # rubocop:disable Style/RescueModifier
-  end
-
-  def respond(client, request)
-    response = Response.new
-    @servlet.dispatch(request, response)
-    client.write(response.serialize(head_request: request.request_method == "HEAD"))
   end
 
   def read_request(client)
@@ -90,16 +161,16 @@ class DummyServer
     return unless line
 
     method, uri, = line.split(" ", 3)
-    return bad_request(client) unless uri.ascii_only?
+    return bad_request(client) unless uri&.ascii_only?
 
     raw_path, query_string = uri.split("?", 2)
     headers = read_headers(client)
 
-    Request.new({
-      request_method: method, request_path: percent_decode(raw_path),
+    Request.new(
+      request_method: method, path: percent_decode(raw_path),
       query_string: query_string, headers: headers,
       body: read_body(client, headers), socket: client, unparsed_uri: uri
-    })
+    )
   end
 
   def read_headers(client)
@@ -108,13 +179,13 @@ class DummyServer
       break if header_line == "\r\n"
 
       key, value = header_line.split(": ", 2)
-      headers[key.downcase] = value.strip
+      headers[key] = value.strip if key && value
     end
     headers
   end
 
   def read_body(client, headers)
-    content_length = headers["content-length"]
+    content_length = headers["Content-Length"]
     client.read(content_length.to_i) if content_length
   end
 

@@ -4,22 +4,23 @@ class DummyServer
   class Servlet
     post "/encoded-body" do |req, res|
       res.status = 200
+      body = request_body(req)
 
-      res.body = case req["Accept-Encoding"]
+      res.body = case request_header(req, "Accept-Encoding")
                  when "gzip"
                    res["Content-Encoding"] = "gzip"
                    StringIO.open do |out|
                      Zlib::GzipWriter.wrap(out) do |gz|
-                       gz.write "#{req.body}-gzipped"
+                       gz.write "#{body}-gzipped"
                        gz.finish
                        out.tap(&:rewind).read
                      end
                    end
                  when "deflate"
                    res["Content-Encoding"] = "deflate"
-                   Zlib::Deflate.deflate("#{req.body}-deflated")
+                   Zlib::Deflate.deflate("#{body}-deflated")
                  else
-                   "#{req.body}-raw"
+                   "#{body}-raw"
                  end
     end
 
@@ -27,7 +28,7 @@ class DummyServer
       res.status = 204
       res.body   = ""
 
-      case req["Accept-Encoding"]
+      case request_header(req, "Accept-Encoding")
       when "gzip"
         res["Content-Encoding"] = "gzip"
       when "deflate"

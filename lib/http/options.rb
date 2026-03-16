@@ -231,7 +231,9 @@ module HTTP
     # @api private
     # @return [void]
     def argument_error!(message)
-      raise(Error, message, caller(1..-1))
+      error = Error.new(message)
+      error.set_backtrace(caller(1) || [])
+      raise error
     end
   end
 end

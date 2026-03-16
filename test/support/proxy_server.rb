@@ -2,7 +2,6 @@
 
 require "socket"
 require "uri"
-require "base64"
 
 require "support/servers/runner"
 
@@ -10,9 +9,10 @@ class ProxyServer
   Target = Struct.new(:host, :port, :path, :query)
 
   def initialize
-    @tcp_server = TCPServer.new("127.0.0.1", 0)
-    @port       = @tcp_server.addr[1]
-    @running    = false
+    @tcp_server     = TCPServer.new("127.0.0.1", 0)
+    @port           = @tcp_server.addr[1]
+    @ready          = Queue.new
+    @shutdown_read, @shutdown_write = IO.pipe
   end
 
   def addr
@@ -21,20 +21,32 @@ class ProxyServer
 
   attr_reader :port
 
-  def start
-    @running = true
+  def wait_ready
+    @ready.pop
+  end
 
-    while @running
+  def start
+    @ready << true
+
+    loop do
+      readable, = IO.select([@tcp_server, @shutdown_read])
+      break unless readable
+      break if readable.include?(@shutdown_read)
+
       client = @tcp_server.accept
-      Thread.new(client) { |c| handle_request(c) }
+      Thread.new(client) do |c|
+        Thread.current.report_on_exception = false
+        handle_request(c)
+      end
     end
   rescue IOError, Errno::EBADF
     # Server socket closed during shutdown
   end
 
   def shutdown
-    @running = false
-    @tcp_server.close
+    @shutdown_write.close
+    @tcp_server.close rescue nil # rubocop:disable Style/RescueModifier
+    @shutdown_read.close rescue nil # rubocop:disable Style/RescueModifier
   rescue
     nil
   end
@@ -55,7 +67,7 @@ class ProxyServer
     else
       forward_and_respond(client, method, target, body, version)
     end
-  rescue IOError, Errno::ECONNRESET, Errno::EPIPE, URI::InvalidURIError
+  rescue IOError, Errno::ECONNRESET, Errno::EPIPE, Errno::EBADF, URI::InvalidURIError
     # Connection closed
   ensure
     client.close rescue nil # rubocop:disable Style/RescueModifier
@@ -145,10 +157,13 @@ class ProxyServer
   end
 
   def relay_tunnel(client, target)
-    [
+    threads = [
       Thread.new { copy_stream(client, target) },
       Thread.new { copy_stream(target, client) }
-    ].each(&:join)
+    ]
+    threads.each { |t| t.join(5) }
+  ensure
+    threads&.each { |t| t.kill if t.alive? }
   end
 
   def copy_stream(source, destination)
@@ -180,7 +195,7 @@ class AuthProxyServer < ProxyServer
 
     if auth
       encoded = auth.sub(/^Basic\s+/, "")
-      user, pass = Base64.decode64(encoded).split(":", 2)
+      user, pass = encoded.unpack1("m0").split(":", 2)
       return if user == "username" && pass == "password"
     end
 

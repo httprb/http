@@ -28,17 +28,19 @@ describe HTTP::Headers::Normalizer do
       assert normalized_headers.none?(&:frozen?)
     end
 
-    it "allocates minimal memory for normalization of the same header" do
-      normalizer.call("accept") # Ensure normalizer is pre-allocated
+    if RUBY_ENGINE == "ruby"
+      it "allocates minimal memory for normalization of the same header" do
+        normalizer.call("accept") # Ensure normalizer is pre-allocated
 
-      # On first call it is expected to allocate during normalization
-      assert_allocations(Array: 1, MatchData: 1, String: 6) do
-        normalizer.call("content_type")
-      end
+        # On first call it is expected to allocate during normalization
+        assert_allocations(Array: 1, MatchData: 1, String: 6) do
+          normalizer.call("content_type")
+        end
 
-      # On subsequent call it is expected to only allocate copy of a cached string
-      assert_allocations(Array: 0, MatchData: 0, String: 1) do
-        normalizer.call("content_type")
+        # On subsequent call it is expected to only allocate copy of a cached string
+        assert_allocations(Array: 0, MatchData: 0, String: 1) do
+          normalizer.call("content_type")
+        end
       end
     end
 

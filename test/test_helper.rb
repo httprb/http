@@ -4,7 +4,7 @@ require_relative "support/simplecov"
 
 require "minitest/autorun"
 require "minitest/mock"
-require "minitest/memory"
+require "minitest/memory" if RUBY_ENGINE == "ruby"
 require "minitest/strict"
 
 require "http"
@@ -42,6 +42,6 @@ end
 module Minitest
   class Spec
     include FakeHelper
-    include Minitest::Memory
+    include Minitest::Memory if RUBY_ENGINE == "ruby"
   end
 end

@@ -23,14 +23,17 @@ group :test do
   gem "simplecov",      require: false
   gem "simplecov-lcov", require: false
 
-  gem "minitest-memory"
+  gem "minitest-memory", platform: :mri
   gem "minitest-mock"
   gem "minitest-strict"
 
   gem "mutant-minitest"
 
-  gem "steep"
   gem "yardstick"
+end
+
+group :sig do
+  gem "steep"
 end
 
 group :doc do

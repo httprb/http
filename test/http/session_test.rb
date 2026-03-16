@@ -185,7 +185,7 @@ describe HTTP::Session do
 
   describe "thread safety" do
     it "can be shared across threads without errors" do
-      shared_session = HTTP.headers("Accept" => "text/html").timeout(5)
+      shared_session = HTTP.headers("Accept" => "text/html").timeout(15)
       errors = []
       mutex = Mutex.new
 

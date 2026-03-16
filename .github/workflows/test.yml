@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 env:
-  BUNDLE_WITHOUT: "development"
+  BUNDLE_WITHOUT: "development:sig"
 
 jobs:
   test:
@@ -27,3 +27,4 @@ jobs:
 
       - name: bundle exec rake test
         run: bundle exec rake test
+        timeout-minutes: 10
