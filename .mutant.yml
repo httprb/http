@@ -111,5 +111,3 @@ matcher:
     # Cookie/CookieJar delegate to http-cookie gem
     - HTTP::Cookie*
     - HTTP::CookieJar*
-    # External gem (http-form_data)
-    - HTTP::FormData*

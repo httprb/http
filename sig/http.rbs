@@ -1234,15 +1234,208 @@ module HTTP
   end
 
   module FormData
+    CRLF: String
+
+    class Error < StandardError
+    end
+
+    type formdata = Multipart | Urlencoded
+
+    # Selects encoder type based on given data
+    def self.create: (untyped data, ?encoder: _Encoder?) -> formdata
+
+    # Coerces obj to Hash
+    def self.ensure_hash: (untyped obj) -> Hash[untyped, untyped]
+
+    # Coerces obj to an Enumerable of key-value pairs
+    def self.ensure_data: (untyped obj) -> untyped
+
+    private
+
+    # Checks if data contains multipart data
+    def self.multipart?: (untyped data) -> bool
+
+    interface _Encoder
+      def call: (untyped data) -> String
+    end
+
+    module Readable
+      @io: StringIO | CompositeIO
+
+      # Returns IO content as a String
+      def to_s: () -> String
+
+      # Reads and returns part of IO content
+      def read: (?Integer? length, ?String? outbuf) -> String?
+
+      # Returns IO size in bytes
+      def size: () -> Integer
+
+      # Rewinds the IO to the beginning
+      def rewind: () -> (Integer | void)
+    end
+
+    class Part
+      include Readable
+
+      # Returns the content type of this part
+      attr_reader content_type: String?
+
+      # Returns the filename of this part
+      attr_reader filename: String?
+
+      # Creates a new Part with the given body and options
+      def initialize: (_ToS body, ?content_type: String?, ?filename: String?) -> void
+    end
+
+    class File < Part
+      DEFAULT_MIME: String
+
+      @autoclose: bool
+
+      # Creates a new File from a path or IO object
+      def initialize: (String | Pathname | untyped path_or_io, ?Hash[Symbol, untyped]? opts) -> void
+
+      # Closes the underlying IO if it was opened by this instance
+      def close: () -> void
+
+      private
+
+      # Wraps path_or_io into an IO object
+      def make_io: (String | Pathname | untyped path_or_io) -> untyped
+
+      # Determines filename for the given IO
+      def filename_for: (untyped io) -> String
+    end
+
+    class CompositeIO
+      @index: Integer
+      @ios: Array[untyped]
+      @size: Integer?
+
+      # Creates a new CompositeIO from an array of IO-like objects
+      def initialize: (Array[untyped] ios) -> void
+
+      # Reads and returns content across multiple IO objects
+      def read: (?Integer? length, ?String? outbuf) -> String?
+
+      # Returns sum of all IO sizes
+      def size: () -> Integer
+
+      # Rewinds all IO objects and resets cursor
+      def rewind: () -> void
+
+      private
+
+      # Yields chunks with total length up to `length`
+      def read_chunks: (Integer? length) { (String chunk) -> void } -> void
+
+      # Reads chunk from current IO with length up to `max_length`
+      def readpartial: (Integer? max_length) -> String?
+
+      # Advances cursor to the next IO object
+      def advance_io: () -> void
+    end
+
     class Multipart
+      include Readable
+
+      DEFAULT_CONTENT_TYPE: String
+
+      # Returns the multipart boundary string
+      attr_reader boundary: String
+
+      @content_type: _ToS
+
+      # Creates a new Multipart form data instance
+      def initialize: (untyped data, ?boundary: _ToS, ?content_type: _ToS) -> void
+
+      # Generates a boundary string for multipart form data
+      def self.generate_boundary: () -> String
+
+      # Returns MIME type for the Content-Type header
       def content_type: () -> String
+
+      # Returns form data content size for Content-Length
+      alias content_length size
+
+      private
+
+      @glue: String?
+      @tail: String?
+
+      # Returns the boundary glue between parts
+      def glue: () -> String
+
+      # Returns the closing boundary tail
+      def tail: () -> String
+
+      # Coerces data into an array of Param objects
+      def parts: (untyped data) -> Array[Param]
+
+      class Param
+        include Readable
+
+        @name: String
+        @part: Part
+
+        # Initializes body part with headers and data
+        def initialize: (untyped name, untyped value) -> void
+
+        private
+
+        # Builds the MIME header for this part
+        def header: () -> String
+
+        # Builds Content-Disposition parameters string
+        def parameters: () -> String
+      end
     end
 
     class Urlencoded
+      include Readable
+
+      self.@encoder: _Encoder?
+
+      # Sets custom form data encoder implementation
+      def self.encoder=: (untyped implementation) -> void
+
+      # Returns form data encoder implementation
+      def self.encoder: () -> _Encoder
+
+      # Default encoder for urlencoded form data
+      module DefaultEncoder
+        # Recursively encodes form data value
+        def self.encode: (untyped value, ?String? prefix) -> String
+
+        alias self.call self.encode
+
+        private
+
+        # Encodes an Array value
+        def self.encode_array: (Array[untyped] value, String? prefix) -> String
+
+        # Encodes an Array of key-value pairs
+        def self.encode_pairs: (Array[untyped] pairs) -> String
+
+        # Encodes a Hash value
+        def self.encode_hash: (Hash[untyped, untyped] hash, String? prefix) -> String
+
+        # URL-encodes a value
+        def self.escape: (untyped value) -> String
+      end
+
+      # Creates a new Urlencoded form data instance
+      def initialize: (untyped data, ?encoder: _Encoder?) -> void
+
+      # Returns MIME type for the Content-Type header
       def content_type: () -> String
+
+      # Returns form data content size for Content-Length
+      alias content_length size
     end
 
-    def self.create: (untyped) -> (Multipart | Urlencoded)
+    VERSION: String
   end
 
   class Error < StandardError

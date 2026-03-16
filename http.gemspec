@@ -29,7 +29,7 @@ Gem::Specification.new do |spec|
     extras = %w[CHANGELOG.md CONTRIBUTING.md LICENSE.txt README.md SECURITY.md UPGRADING.md] << File.basename(__FILE__)
 
     ls.readlines("\x0", chomp: true).select do |f|
-      f.start_with?("lib/", "test/") || extras.include?(f) || f.eql?("sig/http.rbs")
+      f.start_with?("lib/", "test/", "sig/") || extras.include?(f)
     end
   end
 
@@ -37,8 +37,7 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = ">= 3.2"
 
-  spec.add_dependency "http-cookie",    "~> 1.0"
-  spec.add_dependency "http-form_data", "~> 2.2"
+  spec.add_dependency "http-cookie", "~> 1.0"
 
   if RUBY_ENGINE == "jruby"
     spec.platform = "java" if ENV["HTTP_PLATFORM"] == "java"

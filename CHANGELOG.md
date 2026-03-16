@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Merged `http-form_data` gem into the main `http` gem. The `HTTP::FormData`
+  module (including `Part`, `File`, `Multipart`, `Urlencoded`, and `CompositeIO`)
+  is now shipped directly with `http` instead of being a separate dependency.
+  The public API is unchanged.
+
 ### Fixed
 
 - `Inflater` no longer raises `Zlib::BufError` when a response declares

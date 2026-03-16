@@ -1,3 +1,21 @@
+# Overrides for stdlib RBS signatures
+
+class ::StringIO
+  # Override: Ruby's StringIO#read accepts nil outbuf
+  def read: (?int? length, ?string? buf) -> String?
+end
+
+class ::File
+  # Override: Ruby's File.new accepts keyword args like binmode:
+  def initialize: (string | _ToPath | int file_name, ?string | int mode, ?int perm, **untyped) -> void
+end
+
+class ::Pathname
+  # Override: Ruby's Pathname#open accepts keyword args like binmode:
+  def open: (?string | int mode, ?int perm, **untyped) -> ::File
+          | [T] (?string | int mode, ?int perm, **untyped) { (::File) -> T } -> T
+end
+
 # Stubs for external dependencies without RBS definitions
 
 module Addressable
