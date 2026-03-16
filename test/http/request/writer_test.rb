@@ -126,6 +126,10 @@ describe HTTP::Request::Writer do
         refute_includes io.string, "0\r\n\r\n"
         assert_includes io.string, "content"
       end
+
+      it "returns false from chunked?" do
+        refute_predicate writer, :chunked?
+      end
     end
 
     context "when server won't accept any more data" do

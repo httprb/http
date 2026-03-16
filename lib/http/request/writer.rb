@@ -160,7 +160,7 @@ module HTTP
       # @return [Boolean]
       # @api public
       def chunked?
-        @headers[Headers::TRANSFER_ENCODING] == Headers::CHUNKED
+        @headers[Headers::TRANSFER_ENCODING].eql?(Headers::CHUNKED)
       end
 
       private

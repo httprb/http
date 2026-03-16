@@ -167,6 +167,7 @@ describe HTTP::Retriable::Performer do
       describe "status codes can be expressed in many ways" do
         [
           301,
+          301.0,
           [200, 301, 485],
           250...400,
           [250...Float::INFINITY],

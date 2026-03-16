@@ -70,7 +70,7 @@ module HTTP
 
         response = yield(add_conditional_headers(request, entry))
 
-        return revalidate_entry(entry, response, request) if response.code == 304
+        return revalidate_entry(entry, response, request) if response.status.not_modified?
 
         response
       end

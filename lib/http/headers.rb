@@ -104,7 +104,7 @@ module HTTP
     # @api public
     def delete(name)
       name = normalize_header name
-      @pile.delete_if { |k, _| k == name }
+      @pile.delete_if { |k, _| k.eql?(name) }
     end
 
     # Appends header value(s) to the given name
@@ -143,7 +143,7 @@ module HTTP
     # @api public
     def get(name)
       name = normalize_header name
-      @pile.select { |k, _| k == name }.map { |_, _, v| v }
+      @pile.select { |k, _| k.eql?(name) }.map { |_, _, v| v }
     end
 
     # Smart version of {#get}
@@ -159,7 +159,9 @@ module HTTP
       values = get(name)
       return if values.empty?
 
-      values.one? ? values.first : values
+      return values unless values.one?
+
+      values.join
     end
 
     # Tells whether header with given name is set
@@ -171,7 +173,7 @@ module HTTP
     # @api public
     def include?(name)
       name = normalize_header name
-      @pile.any? { |k, _| k == name }
+      @pile.any? { |k, _| k.eql?(name) }
     end
 
     # Returns Rack-compatible headers Hash
@@ -232,7 +234,7 @@ module HTTP
     def ==(other)
       return false unless other.respond_to? :to_a
 
-      to_a == other.to_a
+      to_a.eql?(other.to_a)
     end
 
     # Calls the given block once for each key/value pair

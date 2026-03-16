@@ -252,6 +252,20 @@ describe HTTP::Request::Body do
       it "returns true" do
         assert_equal body1, body2
       end
+
+      it "compares by value not identity" do
+        a = HTTP::Request::Body.new(String.new("same"))
+        b = HTTP::Request::Body.new(String.new("same"))
+
+        assert_equal a, b
+      end
+
+      it "uses == coercion on sources" do
+        a = HTTP::Request::Body.new([1])
+        b = HTTP::Request::Body.new([1.0])
+
+        assert_equal a, b
+      end
     end
 
     context "when sources are not equivalent" do

@@ -104,7 +104,7 @@ module HTTP
       # @raise [ArgumentError] if the formatter is not a valid option
       # @api private
       def validate_binary_formatter!(formatter)
-        return formatter if formatter == :stats || formatter == :base64 || formatter.respond_to?(:call)
+        return formatter if formatter.eql?(:stats) || formatter.eql?(:base64) || formatter.respond_to?(:call)
 
         raise ArgumentError,
               "binary_formatter must be :stats, :base64, or a callable " \
@@ -118,7 +118,7 @@ module HTTP
         headers = stringify_headers(request.headers)
         if request.body.loggable?
           source = request.body.source
-          body = source.encoding == Encoding::BINARY ? format_binary(source) : source
+          body = source.encoding.eql?(Encoding::BINARY) ? format_binary(source) : source
           logger.debug { "#{headers}\n\n#{body}" }
         else
           logger.debug { headers }
@@ -131,7 +131,7 @@ module HTTP
       def log_response_body_inline(response)
         body    = response.body
         headers = stringify_headers(response.headers)
-        if body.respond_to?(:encoding) && body.encoding == Encoding::BINARY
+        if body.respond_to?(:encoding) && body.encoding.eql?(Encoding::BINARY)
           logger.debug { "#{headers}\n\n#{format_binary(body)}" } # steep:ignore
         else
           logger.debug { "#{headers}\n\n#{body}" }

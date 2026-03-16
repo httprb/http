@@ -221,7 +221,7 @@ module HTTP
     def assign_options(env)
       self.class.defined_options.each do |name|
         value = env.local_variable_get(name)
-        value = Headers.coerce(value) if name == :headers
+        value = Headers.coerce(value) if name.eql?(:headers)
         __send__(:"#{name}=", value)
       end
     end

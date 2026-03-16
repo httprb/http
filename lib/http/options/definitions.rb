@@ -178,7 +178,7 @@ module HTTP
       base = @base_uri
       persistent = @persistent
       return unless base && persistent
-      return if base.origin == persistent
+      return if base.origin.eql?(persistent)
 
       argument_error!(
         format("Persistence origin (%s) conflicts with base URI origin (%s)",

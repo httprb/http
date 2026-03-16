@@ -148,7 +148,7 @@ module HTTP
     # @api public
     # @return [TrueClass, FalseClass] are the URIs equivalent (after normalization)?
     def ==(other)
-      other.is_a?(URI) && String(normalize) == String(other.normalize)
+      other.is_a?(URI) && String(normalize).eql?(String(other.normalize))
     end
 
     # Are these URI objects equal without normalization
@@ -162,7 +162,7 @@ module HTTP
     # @api public
     # @return [TrueClass, FalseClass] are the URIs equivalent?
     def eql?(other)
-      other.is_a?(URI) && String(self) == String(other)
+      other.is_a?(URI) && String(self).eql?(String(other))
     end
 
     # Hash value based off the normalized form of a URI
@@ -221,7 +221,7 @@ module HTTP
     # @api public
     # @return [String] origin of the URI
     def origin
-      port_suffix = ":#{port}" unless port == default_port
+      port_suffix = ":#{port}" unless port.eql?(default_port)
       "#{String(@scheme).downcase}://#{String(@raw_host).downcase}#{port_suffix}"
     end
 
@@ -282,7 +282,7 @@ module HTTP
         user:     @user,
         password: @password,
         host:     @raw_host&.downcase,
-        port:     (@port unless port == default_port),
+        port:     (@port unless port.eql?(default_port)),
         path:     @path.empty? && @raw_host ? "/" : @path,
         query:    @query,
         fragment: @fragment
@@ -298,7 +298,7 @@ module HTTP
     # @return [True] if URI is HTTP
     # @return [False] otherwise
     def http?
-      HTTP_SCHEME == @scheme
+      HTTP_SCHEME.eql?(@scheme)
     end
 
     # Checks whether the URI scheme is HTTPS
@@ -310,7 +310,7 @@ module HTTP
     # @return [True] if URI is HTTPS
     # @return [False] otherwise
     def https?
-      HTTPS_SCHEME == @scheme
+      HTTPS_SCHEME.eql?(@scheme)
     end
 
     # Duplicates the URI object

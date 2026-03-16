@@ -149,7 +149,7 @@ module HTTP
         verb = :get
       end
 
-      verb = :get if !SEE_OTHER_ALLOWED_VERBS.include?(verb) && 303 == code
+      verb = :get if !SEE_OTHER_ALLOWED_VERBS.include?(verb) && code.eql?(303)
 
       @request.redirect(uri, verb)
     end

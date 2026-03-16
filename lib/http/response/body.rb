@@ -110,7 +110,7 @@ module HTTP
       # @return [true]
       # @api public
       def stream!
-        raise StateError, "body has already been consumed" if @streaming == false
+        raise StateError, "body has already been consumed" if @streaming.eql?(false)
 
         @streaming = true
       end

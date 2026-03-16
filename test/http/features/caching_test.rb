@@ -353,7 +353,7 @@ describe HTTP::Features::Caching do
         assert_same new_response, result
       end
 
-      it "compares status code as integer, not status object" do
+      it "uses status predicate to detect 304 Not Modified" do
         entry = HTTP::Features::Caching::Entry.new(
           status:        200,
           version:       "1.1",

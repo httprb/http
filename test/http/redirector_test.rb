@@ -530,6 +530,21 @@ describe HTTP::Redirector do
       end
     end
 
+    it "detects endless loop when repeated URL is not the first one visited" do
+      req = HTTP::Request.new verb: :get, uri: "http://a.example.com"
+      hops = [
+        redirect_response(301, "http://b.example.com"),
+        redirect_response(301, "http://c.example.com"),
+        redirect_response(301, "http://b.example.com"),
+        redirect_response(301, "http://d.example.com"),
+        simple_response(200, "unreachable")
+      ]
+
+      assert_raises(HTTP::Redirector::EndlessRedirectError) do
+        redirector.perform(req, hops.shift) { hops.shift }
+      end
+    end
+
     context "with sensitive headers" do
       it "preserves Authorization and Cookie when redirecting to same origin" do
         req = HTTP::Request.new verb: :get, uri: "http://example.com"

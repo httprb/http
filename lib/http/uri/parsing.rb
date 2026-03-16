@@ -156,7 +156,7 @@ module HTTP
       # stdlib always returns a port (defaulting to scheme's default);
       # only store it when explicitly specified
       port = parsed.port
-      port = nil if port == parsed.default_port
+      port = nil if port.eql?(parsed.default_port)
       { scheme: parsed.scheme, user: parsed.user, password: parsed.password,
         host: parsed.host, port: port, path: parsed.path,
         query: parsed.query, fragment: parsed.fragment }
