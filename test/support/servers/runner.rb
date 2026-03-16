@@ -55,8 +55,8 @@ module ServerLifecycle
   end
 end
 
-Minitest::Spec.extend(ServerRunner)
-Minitest::Spec.include(ServerLifecycle)
+Minitest::Test.extend(ServerRunner)
+Minitest::Test.include(ServerLifecycle)
 
 Minitest.after_run do
   ServerRunner.all_servers.each do |server|

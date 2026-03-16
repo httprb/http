@@ -1,135 +1,134 @@
 # frozen_string_literal: true
 
 module TimeoutTests
-  def self.included(base)
-    base.class_eval do
-      context "without timeouts" do
-        let(:options) { { timeout_class: HTTP::Timeout::Null, timeout_options: {} } }
+  # Including class must provide:
+  #   - server: a DummyServer instance
+  #   - build_client(**options): builds an HTTP::Client with given options
 
-        it "works" do
-          assert_equal "<!doctype html>", client.get(server.endpoint).body.to_s
-        end
-      end
+  def test_timeout_without_timeouts_works
+    client = build_client(timeout_class: HTTP::Timeout::Null, timeout_options: {})
 
-      context "with a per operation timeout" do
-        let(:response) { client.get(server.endpoint).body.to_s }
+    assert_equal "<!doctype html>", client.get(server.endpoint).body.to_s
+  end
 
-        let(:options) do
-          {
-            timeout_class:   HTTP::Timeout::PerOperation,
-            timeout_options: {
-              connect_timeout: conn_timeout,
-              read_timeout:    read_timeout,
-              write_timeout:   write_timeout
-            }
-          }
-        end
-        let(:conn_timeout) { 0.5 }
-        let(:read_timeout) { 0.1 }
-        let(:write_timeout) { 0.5 }
+  def test_timeout_per_operation_works
+    client = build_client(
+      timeout_class:   HTTP::Timeout::PerOperation,
+      timeout_options: {
+        connect_timeout: 0.5,
+        read_timeout:    0.1,
+        write_timeout:   0.5
+      }
+    )
 
-        it "works" do
-          assert_equal "<!doctype html>", response
-        end
+    assert_equal "<!doctype html>", client.get(server.endpoint).body.to_s
+  end
 
-        context "connection of 0.5" do
-          let(:conn_timeout) { 0.5 }
+  def test_timeout_per_operation_connection_of_half_second_does_not_time_out
+    client = build_client(
+      timeout_class:   HTTP::Timeout::PerOperation,
+      timeout_options: {
+        connect_timeout: 0.5,
+        read_timeout:    0.1,
+        write_timeout:   0.5
+      }
+    )
 
-          it "does not time out" do
-            response
-          end
-        end
+    client.get(server.endpoint).body.to_s
+  end
 
-        context "read of 0" do
-          let(:read_timeout) { 0 }
+  def test_timeout_per_operation_read_of_zero_times_out
+    client = build_client(
+      timeout_class:   HTTP::Timeout::PerOperation,
+      timeout_options: {
+        connect_timeout: 0.5,
+        read_timeout:    0,
+        write_timeout:   0.5
+      }
+    )
 
-          it "times out" do
-            err = assert_raises(HTTP::TimeoutError) do
-              client.get("#{server.endpoint}/sleep").body.to_s
-            end
-            assert_match(/Read/i, err.message)
-          end
-        end
-
-        context "read of 0.1" do
-          let(:read_timeout) { 0.1 }
-
-          it "does not time out" do
-            client.get("#{server.endpoint}/sleep").body.to_s
-          end
-        end
-      end
-
-      context "with a global timeout" do
-        let(:options) do
-          {
-            timeout_class:   HTTP::Timeout::Global,
-            timeout_options: {
-              global_timeout: global_timeout
-            }
-          }
-        end
-        let(:global_timeout) { 0.01 }
-
-        let(:response) { client.get(server.endpoint).body.to_s }
-
-        it "errors if connecting takes too long" do
-          TCPSocket.stub(:open, ->(*) { sleep 0.025 }) do
-            err = assert_raises(HTTP::ConnectTimeoutError) { response }
-            assert_match(/execution/, err.message)
-          end
-        end
-
-        it "errors if reading takes too long" do
-          err = assert_raises(HTTP::TimeoutError) do
-            client.get("#{server.endpoint}/sleep").body.to_s
-          end
-          assert_match(/Timed out|execution expired/, err.message)
-        end
-
-        context "it resets state when reusing connections" do
-          let(:extra_options) { { persistent: server.endpoint } }
-
-          let(:global_timeout) { 0.5 }
-
-          it "does not timeout" do
-            client.get("#{server.endpoint}/sleep").body.to_s
-            client.get("#{server.endpoint}/sleep").body.to_s
-          end
-        end
-      end
-
-      context "with combined global and per-operation timeouts" do
-        let(:options) do
-          {
-            timeout_class:   HTTP::Timeout::Global,
-            timeout_options: {
-              global_timeout:  0.5,
-              connect_timeout: 0.25,
-              read_timeout:    read_timeout,
-              write_timeout:   0.25
-            }
-          }
-        end
-        let(:read_timeout) { 0.25 }
-
-        let(:response) { client.get(server.endpoint).body.to_s }
-
-        it "works for normal requests" do
-          assert_equal "<!doctype html>", response
-        end
-
-        context "read of 0" do
-          let(:read_timeout) { 0 }
-
-          it "errors if per-op read times out" do
-            err = assert_raises(HTTP::TimeoutError) do
-              client.get("#{server.endpoint}/sleep").body.to_s
-            end
-            assert_match(/Read timed out/, err.message)
-          end
-        end
-      end
+    err = assert_raises(HTTP::TimeoutError) do
+      client.get("#{server.endpoint}/sleep").body.to_s
     end
+    assert_match(/Read/i, err.message)
+  end
+
+  def test_timeout_per_operation_read_of_tenth_does_not_time_out
+    client = build_client(
+      timeout_class:   HTTP::Timeout::PerOperation,
+      timeout_options: {
+        connect_timeout: 0.5,
+        read_timeout:    0.1,
+        write_timeout:   0.5
+      }
+    )
+
+    client.get("#{server.endpoint}/sleep").body.to_s
+  end
+
+  def test_timeout_global_errors_if_connecting_takes_too_long
+    client = build_client(
+      timeout_class:   HTTP::Timeout::Global,
+      timeout_options: { global_timeout: 0.01 }
+    )
+
+    TCPSocket.stub(:open, ->(*) { sleep 0.025 }) do
+      err = assert_raises(HTTP::ConnectTimeoutError) { client.get(server.endpoint).body.to_s }
+      assert_match(/execution/, err.message)
+    end
+  end
+
+  def test_timeout_global_errors_if_reading_takes_too_long
+    client = build_client(
+      timeout_class:   HTTP::Timeout::Global,
+      timeout_options: { global_timeout: 0.01 }
+    )
+
+    err = assert_raises(HTTP::TimeoutError) do
+      client.get("#{server.endpoint}/sleep").body.to_s
+    end
+    assert_match(/Timed out|execution expired/, err.message)
+  end
+
+  def test_timeout_global_resets_state_when_reusing_connections
+    client = build_client(
+      timeout_class:   HTTP::Timeout::Global,
+      timeout_options: { global_timeout: 0.5 },
+      persistent:      server.endpoint
+    )
+
+    client.get("#{server.endpoint}/sleep").body.to_s
+    client.get("#{server.endpoint}/sleep").body.to_s
+  end
+
+  def test_timeout_combined_global_and_per_operation_works
+    client = build_client(
+      timeout_class:   HTTP::Timeout::Global,
+      timeout_options: {
+        global_timeout:  0.5,
+        connect_timeout: 0.25,
+        read_timeout:    0.25,
+        write_timeout:   0.25
+      }
+    )
+
+    assert_equal "<!doctype html>", client.get(server.endpoint).body.to_s
+  end
+
+  def test_timeout_combined_per_op_read_of_zero_times_out
+    client = build_client(
+      timeout_class:   HTTP::Timeout::Global,
+      timeout_options: {
+        global_timeout:  0.5,
+        connect_timeout: 0.25,
+        read_timeout:    0,
+        write_timeout:   0.25
+      }
+    )
+
+    err = assert_raises(HTTP::TimeoutError) do
+      client.get("#{server.endpoint}/sleep").body.to_s
+    end
+    assert_match(/Read timed out/, err.message)
   end
 end

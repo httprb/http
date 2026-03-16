@@ -2,81 +2,76 @@
 
 require "test_helper"
 
-describe HTTP::Features::RaiseError do
+class HTTPFeaturesRaiseErrorTest < Minitest::Test
   cover "HTTP::Features::RaiseError*"
-  let(:feature)    { HTTP::Features::RaiseError.new(ignore: ignore) }
-  let(:connection) { fake }
-  let(:status)     { 200 }
-  let(:ignore)     { [] }
 
-  describe "#wrap_response" do
-    let(:response) do
-      HTTP::Response.new(
-        version:    "1.1",
-        status:     status,
-        headers:    {},
-        connection: connection,
-        request:    HTTP::Request.new(verb: :get, uri: "https://example.com")
-      )
-    end
-
-    let(:result) { feature.wrap_response(response) }
-
-    context "when status is 200" do
-      it "returns original request" do
-        assert_same response, result
-      end
-    end
-
-    context "when status is 399" do
-      let(:status) { 399 }
-
-      it "returns original request" do
-        assert_same response, result
-      end
-    end
-
-    context "when status is 400" do
-      let(:status) { 400 }
-
-      it "raises" do
-        err = assert_raises(HTTP::StatusError) { result }
-        assert_equal "Unexpected status code 400", err.message
-      end
-    end
-
-    context "when status is 599" do
-      let(:status) { 599 }
-
-      it "raises" do
-        err = assert_raises(HTTP::StatusError) { result }
-        assert_equal "Unexpected status code 599", err.message
-      end
-    end
-
-    context "when error status is ignored" do
-      let(:status) { 500 }
-      let(:ignore) { [500] }
-
-      it "returns original request" do
-        assert_same response, result
-      end
-    end
+  def connection
+    @connection ||= fake
   end
 
-  describe "#initialize" do
-    it "defaults ignore to empty array" do
-      feature = HTTP::Features::RaiseError.new
-      response = HTTP::Response.new(
-        version: "1.1", status: 500, headers: {},
-        connection: connection,
-        request: HTTP::Request.new(verb: :get, uri: "https://example.com")
-      )
-      assert_raises(HTTP::StatusError) { feature.wrap_response(response) }
-    end
+  def build_response(status:)
+    HTTP::Response.new(
+      version:    "1.1",
+      status:     status,
+      headers:    {},
+      connection: connection,
+      request:    HTTP::Request.new(verb: :get, uri: "https://example.com")
+    )
+  end
 
-    it "is a Feature" do
-      assert_kind_of HTTP::Feature, HTTP::Features::RaiseError.new
-    end
+  # -- #wrap_response --
+
+  def test_wrap_response_when_status_is_200_returns_original_response
+    feature = HTTP::Features::RaiseError.new(ignore: [])
+    response = build_response(status: 200)
+    result = feature.wrap_response(response)
+
+    assert_same response, result
+  end
+
+  def test_wrap_response_when_status_is_399_returns_original_response
+    feature = HTTP::Features::RaiseError.new(ignore: [])
+    response = build_response(status: 399)
+    result = feature.wrap_response(response)
+
+    assert_same response, result
+  end
+
+  def test_wrap_response_when_status_is_400_raises
+    feature = HTTP::Features::RaiseError.new(ignore: [])
+    response = build_response(status: 400)
+    err = assert_raises(HTTP::StatusError) { feature.wrap_response(response) }
+    assert_equal "Unexpected status code 400", err.message
+  end
+
+  def test_wrap_response_when_status_is_599_raises
+    feature = HTTP::Features::RaiseError.new(ignore: [])
+    response = build_response(status: 599)
+    err = assert_raises(HTTP::StatusError) { feature.wrap_response(response) }
+    assert_equal "Unexpected status code 599", err.message
+  end
+
+  def test_wrap_response_when_error_status_is_ignored_returns_original_response
+    feature = HTTP::Features::RaiseError.new(ignore: [500])
+    response = build_response(status: 500)
+    result = feature.wrap_response(response)
+
+    assert_same response, result
+  end
+
+  # -- #initialize --
+
+  def test_initialize_defaults_ignore_to_empty_array
+    feature = HTTP::Features::RaiseError.new
+    response = HTTP::Response.new(
+      version: "1.1", status: 500, headers: {},
+      connection: connection,
+      request: HTTP::Request.new(verb: :get, uri: "https://example.com")
+    )
+    assert_raises(HTTP::StatusError) { feature.wrap_response(response) }
+  end
+
+  def test_initialize_is_a_feature
+    assert_kind_of HTTP::Feature, HTTP::Features::RaiseError.new
   end
 end

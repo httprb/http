@@ -563,7 +563,7 @@ module HTTP
       def authorize: (Request request, Response response) -> Request
       def parse_challenge: (String header) -> Hash[String, String]
       def build_auth: (Request request, Hash[String, String] challenge) -> String
-      def compute_auth_header: (String algorithm, String? qop, String nonce, String cnonce, String nonce_count, String uri, String ha1, String ha2, Hash[String, String] challenge) -> String
+      def compute_auth_header: (algorithm: String, qop: String?, nonce: String, cnonce: String, nonce_count: String, uri: String, ha1: String, ha2: String, challenge: Hash[String, String]) -> String
       def select_qop: (String? qop_str) -> String?
       def compute_ha1: (String algorithm, String realm, String nonce, String cnonce) -> String
       def compute_ha2: (String algorithm, String method, String uri) -> String
@@ -1014,6 +1014,7 @@ module HTTP
       def redirect?: () -> bool
       def client_error?: () -> bool
       def server_error?: () -> bool
+      def not_modified?: () -> bool
       def to_sym: () -> Symbol?
       def inspect: () -> String
       def deconstruct_keys: (Array[Symbol]? keys) -> Hash[Symbol, Integer | String?]

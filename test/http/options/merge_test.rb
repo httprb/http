@@ -2,24 +2,25 @@
 
 require "test_helper"
 
-describe HTTP::Options, "merge" do
+class HTTPOptionsMergeTest < Minitest::Test
   cover "HTTP::Options*"
-  let(:opts) { HTTP::Options.new }
 
-  it "supports a Hash" do
+  def test_supports_a_hash
+    opts = HTTP::Options.new
     old_response = opts.response
 
     assert_equal :body, opts.merge(response: :body).response
     assert_equal old_response, opts.response
   end
 
-  it "supports another Options" do
+  def test_supports_another_options
+    opts = HTTP::Options.new
     merged = opts.merge(HTTP::Options.new(response: :body))
 
     assert_equal :body, merged.response
   end
 
-  it "merges as excepted in complex cases" do
+  def test_merges_as_expected_in_complex_cases
     # FIXME: yuck :(
 
     foo = HTTP::Options.new(

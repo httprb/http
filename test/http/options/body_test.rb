@@ -2,15 +2,17 @@
 
 require "test_helper"
 
-describe HTTP::Options, "body" do
+class HTTPOptionsBodyTest < Minitest::Test
   cover "HTTP::Options*"
-  let(:opts) { HTTP::Options.new }
 
-  it "defaults to nil" do
+  def test_defaults_to_nil
+    opts = HTTP::Options.new
+
     assert_nil opts.body
   end
 
-  it "may be specified with with_body" do
+  def test_may_be_specified_with_with_body
+    opts = HTTP::Options.new
     opts2 = opts.with_body("foo")
 
     assert_nil opts.body

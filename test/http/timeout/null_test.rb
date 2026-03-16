@@ -2,240 +2,217 @@
 
 require "test_helper"
 
-describe HTTP::Timeout::Null do
+class HTTPTimeoutNullTest < Minitest::Test
   cover "HTTP::Timeout::Null*"
-  let(:timeout) { HTTP::Timeout::Null.new }
 
-  let(:io) { fake(wait_readable: true, wait_writable: true) }
-  let(:socket) { fake(to_io: io, closed?: false) }
-
-  before do
-    timeout.instance_variable_set(:@socket, socket)
+  def setup
+    super
+    @io = fake(wait_readable: true, wait_writable: true)
+    @socket = fake(to_io: @io, closed?: false)
+    @timeout = HTTP::Timeout::Null.new
+    @timeout.instance_variable_set(:@socket, @socket)
   end
 
-  describe "#initialize" do
-    it "stores provided options compacted" do
-      t = HTTP::Timeout::Null.new(read_timeout: 5, write_timeout: 10)
+  # -- #initialize --
 
-      assert_equal({ read_timeout: 5, write_timeout: 10 }, t.options)
-    end
+  def test_initialize_stores_provided_options_compacted
+    t = HTTP::Timeout::Null.new(read_timeout: 5, write_timeout: 10)
+
+    assert_equal({ read_timeout: 5, write_timeout: 10 }, t.options)
   end
 
-  describe "#start_tls" do
-    context "when ssl socket does not respond to hostname= or sync_close=" do
-      it "skips hostname= and sync_close=" do
-        ssl_socket = fake(connect: nil)
-        ssl_socket_class = fake(new: ssl_socket)
-        ssl_context = OpenSSL::SSL::SSLContext.new
-        ssl_context.verify_mode = OpenSSL::SSL::VERIFY_NONE
+  # -- #start_tls --
 
-        timeout.start_tls("example.com", ssl_socket_class, ssl_context)
-      end
-    end
-
-    context "when verify_mode is not VERIFY_PEER" do
-      it "skips post_connection_check" do
-        post_connection_check_called = false
-        ssl_socket = fake(
-          connect:               nil,
-          "hostname=":           ->(*) {},
-          "sync_close=":         ->(*) {},
-          post_connection_check: ->(*) { post_connection_check_called = true }
-        )
-        ssl_socket_class = fake(new: ssl_socket)
-        ssl_context = OpenSSL::SSL::SSLContext.new
-        ssl_context.verify_mode = OpenSSL::SSL::VERIFY_NONE
-
-        timeout.start_tls("example.com", ssl_socket_class, ssl_context)
-
-        refute post_connection_check_called
-      end
-    end
-
-    context "when verify_mode is VERIFY_PEER and verify_hostname is true" do
-      it "calls post_connection_check" do
-        post_connection_check_called = false
-        post_connection_check_arg = nil
-        ssl_socket = fake(
-          connect:               nil,
-          "hostname=":           ->(*) {},
-          "sync_close=":         ->(*) {},
-          post_connection_check: lambda { |host|
-            post_connection_check_called = true
-            post_connection_check_arg = host
-          }
-        )
-        ssl_socket_class = fake(new: ssl_socket)
-        ssl_context = OpenSSL::SSL::SSLContext.new
-        ssl_context.verify_mode = OpenSSL::SSL::VERIFY_PEER
-        ssl_context.verify_hostname = true
-
-        timeout.start_tls("example.com", ssl_socket_class, ssl_context)
-
-        assert post_connection_check_called
-        assert_equal "example.com", post_connection_check_arg
-      end
-    end
-
-    context "when verify_hostname is false" do
-      it "skips post_connection_check" do
-        post_connection_check_called = false
-        ssl_socket = fake(
-          connect:               nil,
-          "hostname=":           ->(*) {},
-          "sync_close=":         ->(*) {},
-          post_connection_check: ->(*) { post_connection_check_called = true }
-        )
-        ssl_socket_class = fake(new: ssl_socket)
-
-        # We need a real SSLContext but need to control verify_hostname
-        ssl_context = OpenSSL::SSL::SSLContext.new
-        ssl_context.verify_mode = OpenSSL::SSL::VERIFY_PEER
-        ssl_context.verify_hostname = false
-
-        timeout.start_tls("example.com", ssl_socket_class, ssl_context)
-
-        refute post_connection_check_called
-      end
-    end
+  def test_start_tls_skips_hostname_and_sync_close_when_not_responding
+    ssl_socket = fake(connect: nil)
+    ssl_socket_class = fake(new: ssl_socket)
+    ssl_context = OpenSSL::SSL::SSLContext.new
+    ssl_context.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    @timeout.start_tls("example.com", ssl_socket_class, ssl_context)
   end
 
-  describe "#rescue_readable (private)" do
-    it "yields the block" do
-      assert_equal :ok, timeout.send(:rescue_readable, 1) { :ok }
-    end
+  def test_start_tls_skips_post_connection_check_when_verify_mode_not_verify_peer
+    post_connection_check_called = false
+    ssl_socket = fake(
+      connect:               nil,
+      "hostname=":           ->(*) {},
+      "sync_close=":         ->(*) {},
+      post_connection_check: ->(*) { post_connection_check_called = true }
+    )
+    ssl_socket_class = fake(new: ssl_socket)
+    ssl_context = OpenSSL::SSL::SSLContext.new
+    ssl_context.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    @timeout.start_tls("example.com", ssl_socket_class, ssl_context)
 
-    context "when IO::WaitReadable is raised and wait succeeds" do
-      it "retries" do
-        call_count = 0
-        result = timeout.send(:rescue_readable, 1) do
-          raise IO::EAGAINWaitReadable if (call_count += 1) == 1
-
-          :done
-        end
-
-        assert_equal :done, result
-      end
-    end
-
-    context "when IO::WaitReadable is raised and wait times out" do
-      it "raises TimeoutError" do
-        io_with_nil_wait = fake(wait_readable: nil, wait_writable: true)
-        socket_with_nil_wait = fake(to_io: io_with_nil_wait, closed?: false)
-        timeout.instance_variable_set(:@socket, socket_with_nil_wait)
-
-        err = assert_raises(HTTP::TimeoutError) do
-          timeout.send(:rescue_readable, 1) { raise IO::EAGAINWaitReadable }
-        end
-        assert_match(/Read timed out/, err.message)
-      end
-    end
+    refute post_connection_check_called
   end
 
-  describe "#rescue_writable (private)" do
-    it "yields the block" do
-      assert_equal :ok, timeout.send(:rescue_writable, 1) { :ok }
-    end
+  def test_start_tls_calls_post_connection_check_when_verify_peer_and_verify_hostname
+    post_connection_check_called = false
+    post_connection_check_arg = nil
+    ssl_socket = fake(
+      connect:               nil,
+      "hostname=":           ->(*) {},
+      "sync_close=":         ->(*) {},
+      post_connection_check: lambda { |host|
+        post_connection_check_called = true
+        post_connection_check_arg = host
+      }
+    )
+    ssl_socket_class = fake(new: ssl_socket)
+    ssl_context = OpenSSL::SSL::SSLContext.new
+    ssl_context.verify_mode = OpenSSL::SSL::VERIFY_PEER
+    ssl_context.verify_hostname = true
+    @timeout.start_tls("example.com", ssl_socket_class, ssl_context)
 
-    context "when IO::WaitWritable is raised and wait succeeds" do
-      it "retries" do
-        call_count = 0
-        result = timeout.send(:rescue_writable, 1) do
-          raise IO::EAGAINWaitWritable if (call_count += 1) == 1
-
-          :done
-        end
-
-        assert_equal :done, result
-      end
-    end
-
-    context "when IO::WaitWritable is raised and wait times out" do
-      it "raises TimeoutError" do
-        io_with_nil_wait = fake(wait_readable: true, wait_writable: nil)
-        socket_with_nil_wait = fake(to_io: io_with_nil_wait, closed?: false)
-        timeout.instance_variable_set(:@socket, socket_with_nil_wait)
-
-        err = assert_raises(HTTP::TimeoutError) do
-          timeout.send(:rescue_writable, 1) { raise IO::EAGAINWaitWritable }
-        end
-        assert_match(/Write timed out/, err.message)
-      end
-    end
+    assert post_connection_check_called
+    assert_equal "example.com", post_connection_check_arg
   end
 
-  describe "NATIVE_CONNECT_TIMEOUT" do
-    it "is true on Ruby 3.4+" do
-      assert_equal RUBY_VERSION >= "3.4", HTTP::Timeout::Null::NATIVE_CONNECT_TIMEOUT
-    end
+  def test_start_tls_skips_post_connection_check_when_verify_hostname_false
+    post_connection_check_called = false
+    ssl_socket = fake(
+      connect:               nil,
+      "hostname=":           ->(*) {},
+      "sync_close=":         ->(*) {},
+      post_connection_check: ->(*) { post_connection_check_called = true }
+    )
+    ssl_socket_class = fake(new: ssl_socket)
+    ssl_context = OpenSSL::SSL::SSLContext.new
+    ssl_context.verify_mode = OpenSSL::SSL::VERIFY_PEER
+    ssl_context.verify_hostname = false
+    @timeout.start_tls("example.com", ssl_socket_class, ssl_context)
+
+    refute post_connection_check_called
   end
 
-  describe "#open_socket (private)" do
-    it "opens a socket without timeout" do
-      tcp_socket = fake(closed?: false)
-      socket_class = fake(open: tcp_socket)
+  # -- #rescue_readable (private) --
 
-      result = timeout.send(:open_socket, socket_class, "example.com", 80)
+  def test_rescue_readable_yields_the_block
+    assert_equal :ok, @timeout.send(:rescue_readable, 1) { :ok }
+  end
 
-      assert_same tcp_socket, result
+  def test_rescue_readable_when_wait_readable_raised_and_wait_succeeds_retries
+    call_count = 0
+    result = @timeout.send(:rescue_readable, 1) do
+      raise IO::EAGAINWaitReadable if (call_count += 1) == 1
+
+      :done
     end
 
-    it "passes connect_timeout natively when native timeout is supported" do
-      received_args = nil
-      stub_open = lambda do |*args, **kwargs|
-        received_args = [args, kwargs]
-        fake(closed?: false)
-      end
+    assert_equal :done, result
+  end
 
-      timeout.stub(:native_timeout?, true) do
-        TCPSocket.stub(:open, stub_open) do
-          timeout.send(:open_socket, TCPSocket, "127.0.0.1", 1, connect_timeout: 5)
-        end
-      end
+  def test_rescue_readable_when_wait_readable_raised_and_wait_times_out_raises_timeout_error
+    io_with_nil_wait = fake(wait_readable: nil, wait_writable: true)
+    socket_with_nil_wait = fake(to_io: io_with_nil_wait, closed?: false)
+    @timeout.instance_variable_set(:@socket, socket_with_nil_wait)
 
-      assert_equal [["127.0.0.1", 1], { connect_timeout: 5 }], received_args
+    err = assert_raises(HTTP::TimeoutError) do
+      @timeout.send(:rescue_readable, 1) { raise IO::EAGAINWaitReadable }
+    end
+    assert_match(/Read timed out/, err.message)
+  end
+
+  # -- #rescue_writable (private) --
+
+  def test_rescue_writable_yields_the_block
+    assert_equal :ok, @timeout.send(:rescue_writable, 1) { :ok }
+  end
+
+  def test_rescue_writable_when_wait_writable_raised_and_wait_succeeds_retries
+    call_count = 0
+    result = @timeout.send(:rescue_writable, 1) do
+      raise IO::EAGAINWaitWritable if (call_count += 1) == 1
+
+      :done
     end
 
-    it "does not pass connect_timeout to non-TCPSocket classes" do
-      received_args = nil
-      tcp_socket = fake(closed?: false)
-      socket_class = fake(open: proc { |*args|
-        received_args = args
-        tcp_socket
-      })
+    assert_equal :done, result
+  end
 
-      timeout.send(:open_socket, socket_class, "example.com", 80, connect_timeout: 5)
+  def test_rescue_writable_when_wait_writable_raised_and_wait_times_out_raises_timeout_error
+    io_with_nil_wait = fake(wait_readable: true, wait_writable: nil)
+    socket_with_nil_wait = fake(to_io: io_with_nil_wait, closed?: false)
+    @timeout.instance_variable_set(:@socket, socket_with_nil_wait)
 
-      assert_equal ["example.com", 80], received_args
+    err = assert_raises(HTTP::TimeoutError) do
+      @timeout.send(:rescue_writable, 1) { raise IO::EAGAINWaitWritable }
+    end
+    assert_match(/Write timed out/, err.message)
+  end
+
+  # -- NATIVE_CONNECT_TIMEOUT --
+
+  def test_native_connect_timeout_is_true_on_ruby_3_4_plus
+    assert_equal RUBY_VERSION >= "3.4", HTTP::Timeout::Null::NATIVE_CONNECT_TIMEOUT
+  end
+
+  # -- #open_socket (private) --
+
+  def test_open_socket_opens_a_socket_without_timeout
+    tcp_socket = fake(closed?: false)
+    socket_class = fake(open: tcp_socket)
+    result = @timeout.send(:open_socket, socket_class, "example.com", 80)
+
+    assert_same tcp_socket, result
+  end
+
+  def test_open_socket_passes_connect_timeout_natively_when_supported
+    received_args = nil
+    stub_open = lambda do |*args, **kwargs|
+      received_args = [args, kwargs]
+      fake(closed?: false)
     end
 
-    it "converts IO::TimeoutError to ConnectTimeoutError" do
-      socket_class = fake(open: proc { |*| raise IO::TimeoutError, "Connect timed out!" })
-
-      err = assert_raises(HTTP::ConnectTimeoutError) do
-        timeout.send(:open_socket, socket_class, "example.com", 80, connect_timeout: 5)
+    @timeout.stub(:native_timeout?, true) do
+      TCPSocket.stub(:open, stub_open) do
+        @timeout.send(:open_socket, TCPSocket, "127.0.0.1", 1, connect_timeout: 5)
       end
-      assert_match(/Connect timed out/, err.message)
+    end
+
+    assert_equal [["127.0.0.1", 1], { connect_timeout: 5 }], received_args
+  end
+
+  def test_open_socket_does_not_pass_connect_timeout_to_non_tcp_socket_classes
+    received_args = nil
+    tcp_socket = fake(closed?: false)
+    socket_class = fake(open: proc { |*args|
+      received_args = args
+      tcp_socket
+    })
+
+    @timeout.send(:open_socket, socket_class, "example.com", 80, connect_timeout: 5)
+
+    assert_equal ["example.com", 80], received_args
+  end
+
+  def test_open_socket_converts_io_timeout_error_to_connect_timeout_error
+    socket_class = fake(open: proc { |*| raise IO::TimeoutError, "Connect timed out!" })
+
+    err = assert_raises(HTTP::ConnectTimeoutError) do
+      @timeout.send(:open_socket, socket_class, "example.com", 80, connect_timeout: 5)
+    end
+    assert_match(/Connect timed out/, err.message)
+  end
+
+  # -- #native_timeout? (private) --
+
+  if RUBY_VERSION >= "3.4"
+    def test_native_timeout_returns_true_for_tcp_socket_on_ruby_3_4_plus
+      assert @timeout.send(:native_timeout?, TCPSocket)
+    end
+  else
+    def test_native_timeout_returns_false_for_tcp_socket_on_ruby_below_3_4
+      refute @timeout.send(:native_timeout?, TCPSocket)
     end
   end
 
-  describe "#native_timeout? (private)" do
-    if RUBY_VERSION >= "3.4"
-      it "returns true for TCPSocket on Ruby 3.4+" do
-        assert timeout.send(:native_timeout?, TCPSocket)
-      end
-    else
-      it "returns false for TCPSocket on Ruby < 3.4" do
-        refute timeout.send(:native_timeout?, TCPSocket)
-      end
-    end
+  def test_native_timeout_returns_false_for_non_tcp_socket_classes
+    refute @timeout.send(:native_timeout?, OpenSSL::SSL::SSLSocket)
+  end
 
-    it "returns false for non-TCPSocket classes" do
-      refute timeout.send(:native_timeout?, OpenSSL::SSL::SSLSocket)
-    end
-
-    it "returns false for non-class objects" do
-      refute timeout.send(:native_timeout?, fake(open: nil))
-    end
+  def test_native_timeout_returns_false_for_non_class_objects
+    refute @timeout.send(:native_timeout?, fake(open: nil))
   end
 end

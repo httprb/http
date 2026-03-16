@@ -2,15 +2,17 @@
 
 require "test_helper"
 
-describe HTTP::Options, "json" do
+class HTTPOptionsJSONTest < Minitest::Test
   cover "HTTP::Options*"
-  let(:opts) { HTTP::Options.new }
 
-  it "defaults to nil" do
+  def test_defaults_to_nil
+    opts = HTTP::Options.new
+
     assert_nil opts.json
   end
 
-  it "may be specified with with_json data" do
+  def test_may_be_specified_with_with_json_data
+    opts = HTTP::Options.new
     opts2 = opts.with_json(foo: 42)
 
     assert_nil opts.json

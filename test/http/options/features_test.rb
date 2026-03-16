@@ -2,15 +2,17 @@
 
 require "test_helper"
 
-describe HTTP::Options, "features" do
+class HTTPOptionsFeaturesTest < Minitest::Test
   cover "HTTP::Options*"
-  let(:opts) { HTTP::Options.new }
 
-  it "defaults to be empty" do
+  def test_defaults_to_be_empty
+    opts = HTTP::Options.new
+
     assert_empty opts.features
   end
 
-  it "accepts plain symbols in array" do
+  def test_accepts_plain_symbols_in_array
+    opts = HTTP::Options.new
     opts2 = opts.with_features([:auto_inflate])
 
     assert_empty opts.features
@@ -18,7 +20,8 @@ describe HTTP::Options, "features" do
     assert_instance_of HTTP::Features::AutoInflate, opts2.features[:auto_inflate]
   end
 
-  it "accepts feature name with its options in array" do
+  def test_accepts_feature_name_with_its_options_in_array
+    opts = HTTP::Options.new
     opts2 = opts.with_features([{ auto_deflate: { method: :deflate } }])
 
     assert_empty opts.features
@@ -27,7 +30,8 @@ describe HTTP::Options, "features" do
     assert_equal "deflate", opts2.features[:auto_deflate].method
   end
 
-  it "raises error for not supported features" do
+  def test_raises_error_for_not_supported_features
+    opts = HTTP::Options.new
     error = assert_raises(HTTP::Error) { opts.with_features([:wrong_feature]) }
     assert_equal "Unsupported feature: wrong_feature", error.message
   end

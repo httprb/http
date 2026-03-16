@@ -2,22 +2,25 @@
 
 require "test_helper"
 
-describe HTTP::Options, "headers" do
+class HTTPOptionsHeadersTest < Minitest::Test
   cover "HTTP::Options*"
-  let(:opts) { HTTP::Options.new }
 
-  it "defaults to be empty" do
+  def test_defaults_to_be_empty
+    opts = HTTP::Options.new
+
     assert_empty opts.headers
   end
 
-  it "may be specified with with_headers" do
+  def test_may_be_specified_with_with_headers
+    opts = HTTP::Options.new
     opts2 = opts.with_headers(accept: "json")
 
     assert_empty opts.headers
     assert_equal [%w[Accept json]], opts2.headers.to_a
   end
 
-  it "accepts any object that respond to :to_hash" do
+  def test_accepts_any_object_that_respond_to_to_hash
+    opts = HTTP::Options.new
     x = if RUBY_VERSION >= "3.2.0"
           Data.define(:to_hash).new(to_hash: { "accept" => "json" })
         else

@@ -15,15 +15,6 @@ Minitest::Test.extend(Module.new { def cover(*); end }) unless Minitest::Test.re
 require "support/capture_warning"
 require "support/fakeio"
 
-# Add context as alias for describe in Minitest::Spec
-module Minitest
-  class Spec
-    class << self
-      alias context describe
-    end
-  end
-end
-
 # Helper for creating fake objects with predefined method responses
 module FakeHelper
   def fake(**methods)
@@ -40,7 +31,7 @@ module FakeHelper
 end
 
 module Minitest
-  class Spec
+  class Test
     include FakeHelper
     include Minitest::Memory if RUBY_ENGINE == "ruby"
   end

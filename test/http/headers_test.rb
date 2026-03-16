@@ -2,796 +2,887 @@
 
 require "test_helper"
 
-describe HTTP::Headers do
+class HTTPHeadersTest < Minitest::Test
   cover "HTTP::Headers*"
-  let(:headers) { HTTP::Headers.new }
 
-  it "is Enumerable" do
+  def headers
+    @headers ||= HTTP::Headers.new
+  end
+
+  def test_is_enumerable
     assert_kind_of Enumerable, headers
   end
 
-  describe "#set" do
-    it "sets header value" do
-      headers.set "Accept", "application/json"
+  # -- #set -------------------------------------------------------------------
 
-      assert_equal "application/json", headers["Accept"]
-    end
+  def test_set_sets_header_value
+    headers.set "Accept", "application/json"
 
-    it "allows retrieval via normalized header name" do
-      headers.set :content_type, "application/json"
+    assert_equal "application/json", headers["Accept"]
+  end
 
-      assert_equal "application/json", headers["Content-Type"]
-    end
+  def test_set_allows_retrieval_via_normalized_header_name
+    headers.set :content_type, "application/json"
 
-    it "overwrites previous value" do
-      headers.set :set_cookie, "hoo=ray"
-      headers.set :set_cookie, "woo=hoo"
+    assert_equal "application/json", headers["Content-Type"]
+  end
 
-      assert_equal "woo=hoo", headers["Set-Cookie"]
-    end
+  def test_set_overwrites_previous_value
+    headers.set :set_cookie, "hoo=ray"
+    headers.set :set_cookie, "woo=hoo"
 
-    it "allows set multiple values" do
-      headers.set :set_cookie, "hoo=ray"
-      headers.set :set_cookie, %w[hoo=ray woo=hoo]
+    assert_equal "woo=hoo", headers["Set-Cookie"]
+  end
 
-      assert_equal %w[hoo=ray woo=hoo], headers["Set-Cookie"]
-    end
+  def test_set_allows_set_multiple_values
+    headers.set :set_cookie, "hoo=ray"
+    headers.set :set_cookie, %w[hoo=ray woo=hoo]
 
-    it "fails with empty header name" do
-      assert_raises(HTTP::HeaderError) { headers.set "", "foo bar" }
-    end
+    assert_equal %w[hoo=ray woo=hoo], headers["Set-Cookie"]
+  end
 
-    ["foo bar", "foo bar: ok\nfoo", "evil-header: evil-value\nfoo"].each do |name|
-      it "fails with invalid header name (#{name.inspect})" do
-        assert_raises(HTTP::HeaderError) { headers.set name, "baz" }
-      end
-    end
+  def test_set_fails_with_empty_header_name
+    assert_raises(HTTP::HeaderError) { headers.set "", "foo bar" }
+  end
 
-    it "fails with invalid header value" do
-      assert_raises(HTTP::HeaderError) { headers.set "foo", "bar\nEvil-Header: evil-value" }
+  ["foo bar", "foo bar: ok\nfoo", "evil-header: evil-value\nfoo"].each do |name|
+    define_method :"test_set_fails_with_invalid_header_name_#{name.inspect}" do
+      assert_raises(HTTP::HeaderError) { headers.set name, "baz" }
     end
   end
 
-  describe "#[]=" do
-    it "sets header value" do
-      headers["Accept"] = "application/json"
+  def test_set_fails_with_invalid_header_value
+    assert_raises(HTTP::HeaderError) { headers.set "foo", "bar\nEvil-Header: evil-value" }
+  end
 
-      assert_equal "application/json", headers["Accept"]
-    end
+  # -- #[]= ------------------------------------------------------------------
 
-    it "allows retrieval via normalized header name" do
-      headers[:content_type] = "application/json"
+  def test_bracket_assign_sets_header_value
+    headers["Accept"] = "application/json"
 
-      assert_equal "application/json", headers["Content-Type"]
-    end
+    assert_equal "application/json", headers["Accept"]
+  end
 
-    it "overwrites previous value" do
-      headers[:set_cookie] = "hoo=ray"
-      headers[:set_cookie] = "woo=hoo"
+  def test_bracket_assign_allows_retrieval_via_normalized_header_name
+    headers[:content_type] = "application/json"
 
-      assert_equal "woo=hoo", headers["Set-Cookie"]
-    end
+    assert_equal "application/json", headers["Content-Type"]
+  end
 
-    it "allows set multiple values" do
-      headers[:set_cookie] = "hoo=ray"
-      headers[:set_cookie] = %w[hoo=ray woo=hoo]
+  def test_bracket_assign_overwrites_previous_value
+    headers[:set_cookie] = "hoo=ray"
+    headers[:set_cookie] = "woo=hoo"
 
-      assert_equal %w[hoo=ray woo=hoo], headers["Set-Cookie"]
+    assert_equal "woo=hoo", headers["Set-Cookie"]
+  end
+
+  def test_bracket_assign_allows_set_multiple_values
+    headers[:set_cookie] = "hoo=ray"
+    headers[:set_cookie] = %w[hoo=ray woo=hoo]
+
+    assert_equal %w[hoo=ray woo=hoo], headers["Set-Cookie"]
+  end
+
+  # -- #delete ----------------------------------------------------------------
+
+  def test_delete_removes_given_header
+    headers.set "Content-Type", "application/json"
+    headers.delete "Content-Type"
+
+    assert_nil headers["Content-Type"]
+  end
+
+  def test_delete_removes_header_that_matches_normalized_version_of_specified_name
+    headers.set "Content-Type", "application/json"
+    headers.delete :content_type
+
+    assert_nil headers["Content-Type"]
+  end
+
+  def test_delete_calls_to_s_on_non_string_name_argument
+    headers.set "Content-Type", "application/json"
+    name = fake(to_s: "Content-Type")
+    headers.delete name
+
+    assert_nil headers["Content-Type"]
+  end
+
+  def test_delete_fails_with_empty_header_name
+    headers.set "Content-Type", "application/json"
+
+    assert_raises(HTTP::HeaderError) { headers.delete "" }
+  end
+
+  ["foo bar", "foo bar: ok\nfoo"].each do |name|
+    define_method :"test_delete_fails_with_invalid_header_name_#{name.inspect}" do
+      headers.set "Content-Type", "application/json"
+
+      assert_raises(HTTP::HeaderError) { headers.delete name }
     end
   end
 
-  describe "#delete" do
-    before { headers.set "Content-Type", "application/json" }
+  # -- #add -------------------------------------------------------------------
 
-    it "removes given header" do
-      headers.delete "Content-Type"
+  def test_add_sets_header_value
+    headers.add "Accept", "application/json"
 
-      assert_nil headers["Content-Type"]
-    end
+    assert_equal "application/json", headers["Accept"]
+  end
 
-    it "removes header that matches normalized version of specified name" do
-      headers.delete :content_type
+  def test_add_allows_retrieval_via_normalized_header_name
+    headers.add :content_type, "application/json"
 
-      assert_nil headers["Content-Type"]
-    end
+    assert_equal "application/json", headers["Content-Type"]
+  end
 
-    it "calls .to_s on non-string name argument" do
-      name = fake(to_s: "Content-Type")
-      headers.delete name
+  def test_add_appends_new_value_if_header_exists
+    headers.add "Set-Cookie", "hoo=ray"
+    headers.add :set_cookie, "woo=hoo"
 
-      assert_nil headers["Content-Type"]
-    end
+    assert_equal %w[hoo=ray woo=hoo], headers["Set-Cookie"]
+  end
 
-    it "fails with empty header name" do
-      assert_raises(HTTP::HeaderError) { headers.delete "" }
-    end
+  def test_add_allows_append_multiple_values
+    headers.add :set_cookie, "hoo=ray"
+    headers.add :set_cookie, %w[woo=hoo yup=pie]
 
-    ["foo bar", "foo bar: ok\nfoo"].each do |name|
-      it "fails with invalid header name (#{name.inspect})" do
-        assert_raises(HTTP::HeaderError) { headers.delete name }
-      end
+    assert_equal %w[hoo=ray woo=hoo yup=pie], headers["Set-Cookie"]
+  end
+
+  def test_add_fails_with_empty_header_name
+    assert_raises(HTTP::HeaderError) { headers.add("", "foobar") }
+  end
+
+  ["foo bar", "foo bar: ok\nfoo"].each do |name|
+    define_method :"test_add_fails_with_invalid_header_name_#{name.inspect}" do
+      assert_raises(HTTP::HeaderError) { headers.add name, "baz" }
     end
   end
 
-  describe "#add" do
-    it "sets header value" do
-      headers.add "Accept", "application/json"
+  def test_add_fails_with_invalid_header_value
+    assert_raises(HTTP::HeaderError) { headers.add "foo", "bar\nEvil-Header: evil-value" }
+  end
 
-      assert_equal "application/json", headers["Accept"]
-    end
+  def test_add_fails_when_header_name_is_not_a_string_or_symbol
+    err = assert_raises(HTTP::HeaderError) { headers.add 2, "foo" }
+    assert_includes err.message, "2"
+  end
 
-    it "allows retrieval via normalized header name" do
-      headers.add :content_type, "application/json"
+  def test_add_includes_inspect_formatted_name_in_error_for_non_string_symbol
+    obj = Object.new
+    def obj.to_s = "plain"
+    def obj.inspect = "INSPECTED"
 
-      assert_equal "application/json", headers["Content-Type"]
-    end
+    err = assert_raises(HTTP::HeaderError) { headers.add obj, "foo" }
+    assert_includes err.message, "INSPECTED"
+  end
 
-    it "appends new value if header exists" do
-      headers.add "Set-Cookie", "hoo=ray"
-      headers.add :set_cookie, "woo=hoo"
+  def test_add_uses_normalized_name_as_wire_name_for_symbol_keys_in_to_a
+    headers.add :content_type, "application/json"
 
-      assert_equal %w[hoo=ray woo=hoo], headers["Set-Cookie"]
-    end
+    assert_equal [["Content-Type", "application/json"]], headers.to_a
+  end
 
-    it "allows append multiple values" do
-      headers.add :set_cookie, "hoo=ray"
-      headers.add :set_cookie, %w[woo=hoo yup=pie]
+  def test_add_preserves_original_string_as_wire_name_for_string_keys_in_to_a
+    headers.add "auth_key", "secret"
 
-      assert_equal %w[hoo=ray woo=hoo yup=pie], headers["Set-Cookie"]
-    end
+    assert_equal [%w[auth_key secret]], headers.to_a
+  end
 
-    it "fails with empty header name" do
-      assert_raises(HTTP::HeaderError) { headers.add("", "foobar") }
-    end
+  def test_add_calls_to_s_on_symbol_name_for_normalization
+    headers.add :accept, "text/html"
 
-    ["foo bar", "foo bar: ok\nfoo"].each do |name|
-      it "fails with invalid header name (#{name.inspect})" do
-        assert_raises(HTTP::HeaderError) { headers.add name, "baz" }
-      end
-    end
+    assert_equal [["Accept", "text/html"]], headers.to_a
+  end
 
-    it "fails with invalid header value" do
-      assert_raises(HTTP::HeaderError) { headers.add "foo", "bar\nEvil-Header: evil-value" }
-    end
+  # -- #get -------------------------------------------------------------------
 
-    it "fails when header name is not a String or Symbol" do
-      err = assert_raises(HTTP::HeaderError) { headers.add 2, "foo" }
-      assert_includes err.message, "2"
-    end
+  def test_get_returns_array_of_associated_values
+    headers.set("Content-Type", "application/json")
 
-    it "includes inspect-formatted name in error for non-String/Symbol" do
-      obj = Object.new
-      def obj.to_s = "plain"
-      def obj.inspect = "INSPECTED"
+    assert_equal %w[application/json], headers.get("Content-Type")
+  end
 
-      err = assert_raises(HTTP::HeaderError) { headers.add obj, "foo" }
-      assert_includes err.message, "INSPECTED"
-    end
+  def test_get_normalizes_header_name
+    headers.set("Content-Type", "application/json")
 
-    it "uses normalized name as wire_name for Symbol keys in to_a" do
-      headers.add :content_type, "application/json"
+    assert_equal %w[application/json], headers.get(:content_type)
+  end
 
-      assert_equal [["Content-Type", "application/json"]], headers.to_a
-    end
+  def test_get_when_header_does_not_exist_returns_empty_array
+    headers.set("Content-Type", "application/json")
 
-    it "preserves original string as wire_name for String keys in to_a" do
-      headers.add "auth_key", "secret"
+    assert_equal [], headers.get(:accept)
+  end
 
-      assert_equal [%w[auth_key secret]], headers.to_a
-    end
+  def test_get_calls_to_s_on_non_string_name_argument
+    headers.set("Content-Type", "application/json")
+    name = fake(to_s: "Content-Type")
 
-    it "calls .to_s on Symbol name for normalization" do
-      headers.add :accept, "text/html"
+    assert_equal %w[application/json], headers.get(name)
+  end
 
-      assert_equal [["Accept", "text/html"]], headers.to_a
+  def test_get_fails_with_empty_header_name
+    headers.set("Content-Type", "application/json")
+
+    assert_raises(HTTP::HeaderError) { headers.get("") }
+  end
+
+  ["foo bar", "foo bar: ok\nfoo"].each do |name|
+    define_method :"test_get_fails_with_invalid_header_name_#{name.inspect}" do
+      headers.set("Content-Type", "application/json")
+
+      assert_raises(HTTP::HeaderError) { headers.get name }
     end
   end
 
-  describe "#get" do
-    before { headers.set("Content-Type", "application/json") }
+  # -- #[] -------------------------------------------------------------------
 
-    it "returns array of associated values" do
-      assert_equal %w[application/json], headers.get("Content-Type")
-    end
+  def test_bracket_when_header_does_not_exist_returns_nil
+    assert_nil headers[:accept]
+  end
 
-    it "normalizes header name" do
-      assert_equal %w[application/json], headers.get(:content_type)
-    end
+  def test_bracket_single_value_normalizes_header_name
+    headers.set "Content-Type", "application/json"
 
-    context "when header does not exists" do
-      it "returns empty array" do
-        assert_equal [], headers.get(:accept)
-      end
-    end
+    refute_nil headers[:content_type]
+  end
 
-    it "calls .to_s on non-string name argument" do
-      name = fake(to_s: "Content-Type")
+  def test_bracket_single_value_returns_single_value
+    headers.set "Content-Type", "application/json"
 
-      assert_equal %w[application/json], headers.get(name)
-    end
+    assert_equal "application/json", headers[:content_type]
+  end
 
-    it "fails with empty header name" do
-      assert_raises(HTTP::HeaderError) { headers.get("") }
-    end
+  def test_bracket_multiple_values_normalizes_header_name
+    headers.add :set_cookie, "hoo=ray"
+    headers.add :set_cookie, "woo=hoo"
 
-    ["foo bar", "foo bar: ok\nfoo"].each do |name|
-      it "fails with invalid header name (#{name.inspect})" do
-        assert_raises(HTTP::HeaderError) { headers.get name }
-      end
+    refute_nil headers[:set_cookie]
+  end
+
+  def test_bracket_multiple_values_returns_array_of_associated_values
+    headers.add :set_cookie, "hoo=ray"
+    headers.add :set_cookie, "woo=hoo"
+
+    assert_equal %w[hoo=ray woo=hoo], headers[:set_cookie]
+  end
+
+  def test_bracket_returns_nil_for_missing_header
+    headers.set "Content-Type", "text/plain"
+    result = headers[:nonexistent]
+
+    assert_nil result
+  end
+
+  def test_bracket_returns_string_for_single_value
+    headers.set "Content-Type", "text/plain"
+
+    result = headers["Content-Type"]
+
+    assert_instance_of String, result
+    assert_equal "text/plain", result
+  end
+
+  def test_bracket_returns_array_for_multiple_values
+    headers.add :cookie, "a=1"
+    headers.add :cookie, "b=2"
+
+    result = headers[:cookie]
+
+    assert_instance_of Array, result
+    assert_equal %w[a=1 b=2], result
+  end
+
+  # -- #include? --------------------------------------------------------------
+
+  def test_include_tells_whenever_given_headers_is_set_or_not
+    headers.add :content_type, "application/json"
+    headers.add :set_cookie,   "hoo=ray"
+    headers.add :set_cookie,   "woo=hoo"
+
+    assert_includes headers, "Content-Type"
+    assert_includes headers, "Set-Cookie"
+    refute_includes headers, "Accept"
+  end
+
+  def test_include_normalizes_given_header_name
+    headers.add :content_type, "application/json"
+    headers.add :set_cookie,   "hoo=ray"
+    headers.add :set_cookie,   "woo=hoo"
+
+    assert_includes headers, :content_type
+    assert_includes headers, :set_cookie
+    refute_includes headers, :accept
+  end
+
+  def test_include_calls_to_s_on_non_string_name_argument
+    headers.add :content_type, "application/json"
+    headers.add :set_cookie,   "hoo=ray"
+    headers.add :set_cookie,   "woo=hoo"
+    name = fake(to_s: "Content-Type")
+
+    assert_includes headers, name
+  end
+
+  def test_include_finds_headers_added_with_non_canonical_string_keys
+    h = HTTP::Headers.new
+    h.add("x-custom", "value")
+
+    assert_includes h, "x-custom"
+  end
+
+  # -- #to_h ------------------------------------------------------------------
+
+  def test_to_h_returns_a_hash
+    headers.add :content_type, "application/json"
+    headers.add :set_cookie,   "hoo=ray"
+    headers.add :set_cookie,   "woo=hoo"
+
+    assert_kind_of Hash, headers.to_h
+  end
+
+  def test_to_h_returns_hash_with_normalized_keys
+    headers.add :content_type, "application/json"
+    headers.add :set_cookie,   "hoo=ray"
+    headers.add :set_cookie,   "woo=hoo"
+
+    assert_equal %w[Content-Type Set-Cookie].sort, headers.to_h.keys.sort
+  end
+
+  def test_to_h_single_value_provides_value_as_is
+    headers.add :content_type, "application/json"
+    headers.add :set_cookie,   "hoo=ray"
+    headers.add :set_cookie,   "woo=hoo"
+
+    assert_equal "application/json", headers.to_h["Content-Type"]
+  end
+
+  def test_to_h_multiple_values_provides_array_of_values
+    headers.add :content_type, "application/json"
+    headers.add :set_cookie,   "hoo=ray"
+    headers.add :set_cookie,   "woo=hoo"
+
+    assert_equal %w[hoo=ray woo=hoo], headers.to_h["Set-Cookie"]
+  end
+
+  # -- #to_a ------------------------------------------------------------------
+
+  def test_to_a_returns_an_array
+    headers.add :content_type, "application/json"
+    headers.add :set_cookie,   "hoo=ray"
+    headers.add :set_cookie,   "woo=hoo"
+
+    assert_kind_of Array, headers.to_a
+  end
+
+  def test_to_a_returns_array_of_key_value_pairs_with_normalized_keys
+    headers.add :content_type, "application/json"
+    headers.add :set_cookie,   "hoo=ray"
+    headers.add :set_cookie,   "woo=hoo"
+
+    assert_equal [
+      %w[Content-Type application/json],
+      %w[Set-Cookie hoo=ray],
+      %w[Set-Cookie woo=hoo]
+    ], headers.to_a
+  end
+
+  def test_to_a_returns_two_element_arrays
+    headers.add :content_type, "application/json"
+    headers.add :set_cookie,   "hoo=ray"
+    headers.add :set_cookie,   "woo=hoo"
+
+    headers.to_a.each do |pair|
+      assert_equal 2, pair.size, "Expected each element to be a [name, value] pair"
     end
   end
 
-  describe "#[]" do
-    context "when header does not exists" do
-      it "returns nil" do
-        assert_nil headers[:accept]
-      end
-    end
+  def test_to_a_returns_wire_name_as_first_element
+    h = HTTP::Headers.new
+    h.add "X_Custom", "val"
 
-    context "when header has a single value" do
-      before { headers.set "Content-Type", "application/json" }
+    assert_equal [%w[X_Custom val]], h.to_a
+  end
 
-      it "normalizes header name" do
-        refute_nil headers[:content_type]
-      end
+  # -- #deconstruct_keys ------------------------------------------------------
 
-      it "returns it returns a single value" do
-        assert_equal "application/json", headers[:content_type]
-      end
-    end
+  def test_deconstruct_keys_returns_all_keys_as_snake_case_symbols_when_given_nil
+    headers.add :content_type, "application/json"
+    headers.add :set_cookie,   "hoo=ray"
+    headers.add :set_cookie,   "woo=hoo"
 
-    context "when header has a multiple values" do
-      before do
-        headers.add :set_cookie, "hoo=ray"
-        headers.add :set_cookie, "woo=hoo"
-      end
+    result = headers.deconstruct_keys(nil)
 
-      it "normalizes header name" do
-        refute_nil headers[:set_cookie]
-      end
+    assert_equal "application/json", result[:content_type]
+    assert_equal %w[hoo=ray woo=hoo], result[:set_cookie]
+  end
 
-      it "returns array of associated values" do
-        assert_equal %w[hoo=ray woo=hoo], headers[:set_cookie]
-      end
-    end
+  def test_deconstruct_keys_converts_header_names_to_snake_case_symbols
+    headers.add :content_type, "application/json"
+    headers.add :set_cookie,   "hoo=ray"
+    headers.add :set_cookie,   "woo=hoo"
 
-    it "returns nil for missing header (not empty array or other)" do
-      headers.set "Content-Type", "text/plain"
-      result = headers[:nonexistent]
+    assert_includes headers.deconstruct_keys(nil).keys, :content_type
+    assert_includes headers.deconstruct_keys(nil).keys, :set_cookie
+  end
 
-      assert_nil result
-    end
+  def test_deconstruct_keys_returns_only_requested_keys
+    headers.add :content_type, "application/json"
+    headers.add :set_cookie,   "hoo=ray"
+    headers.add :set_cookie,   "woo=hoo"
 
-    it "returns a String (not Array) for single value" do
-      headers.set "Content-Type", "text/plain"
+    result = headers.deconstruct_keys([:content_type])
 
-      result = headers["Content-Type"]
+    assert_equal({ content_type: "application/json" }, result)
+  end
 
-      assert_instance_of String, result
-      assert_equal "text/plain", result
-    end
+  def test_deconstruct_keys_excludes_unrequested_keys
+    headers.add :content_type, "application/json"
+    headers.add :set_cookie,   "hoo=ray"
+    headers.add :set_cookie,   "woo=hoo"
 
-    it "returns an Array for multiple values" do
-      headers.add :cookie, "a=1"
-      headers.add :cookie, "b=2"
+    refute_includes headers.deconstruct_keys([:content_type]).keys, :set_cookie
+  end
 
-      result = headers[:cookie]
+  def test_deconstruct_keys_returns_empty_hash_for_empty_keys
+    headers.add :content_type, "application/json"
+    headers.add :set_cookie,   "hoo=ray"
+    headers.add :set_cookie,   "woo=hoo"
 
-      assert_instance_of Array, result
-      assert_equal %w[a=1 b=2], result
+    assert_equal({}, headers.deconstruct_keys([]))
+  end
+
+  def test_deconstruct_keys_supports_pattern_matching_with_case_in
+    headers.add :content_type, "application/json"
+    headers.add :set_cookie,   "hoo=ray"
+    headers.add :set_cookie,   "woo=hoo"
+
+    matched = case headers
+              in { content_type: /json/ }
+                true
+              else
+                false
+              end
+
+    assert matched
+  end
+
+  # -- #inspect ---------------------------------------------------------------
+
+  def test_inspect_returns_a_human_readable_representation
+    headers.set :set_cookie, %w[hoo=ray woo=hoo]
+
+    assert_equal "#<HTTP::Headers>", headers.inspect
+  end
+
+  # -- #keys ------------------------------------------------------------------
+
+  def test_keys_returns_uniq_keys_only
+    headers.add :content_type, "application/json"
+    headers.add :set_cookie,   "hoo=ray"
+    headers.add :set_cookie,   "woo=hoo"
+
+    assert_equal 2, headers.keys.size
+  end
+
+  def test_keys_normalizes_keys
+    headers.add :content_type, "application/json"
+    headers.add :set_cookie,   "hoo=ray"
+    headers.add :set_cookie,   "woo=hoo"
+
+    assert_includes headers.keys, "Content-Type"
+    assert_includes headers.keys, "Set-Cookie"
+  end
+
+  # -- #each ------------------------------------------------------------------
+
+  def test_each_yields_each_key_value_pair_separately
+    headers.add :set_cookie,   "hoo=ray"
+    headers.add :content_type, "application/json"
+    headers.add :set_cookie,   "woo=hoo"
+
+    yielded = headers.map { |pair| pair }
+
+    assert_equal 3, yielded.size
+  end
+
+  def test_each_yields_headers_in_the_same_order_they_were_added
+    headers.add :set_cookie,   "hoo=ray"
+    headers.add :content_type, "application/json"
+    headers.add :set_cookie,   "woo=hoo"
+
+    yielded = headers.map { |pair| pair }
+
+    assert_equal [
+      %w[Set-Cookie hoo=ray],
+      %w[Content-Type application/json],
+      %w[Set-Cookie woo=hoo]
+    ], yielded
+  end
+
+  def test_each_yields_header_keys_specified_as_symbols_in_normalized_form
+    headers.add :set_cookie,   "hoo=ray"
+    headers.add :content_type, "application/json"
+    headers.add :set_cookie,   "woo=hoo"
+
+    keys = headers.each.map(&:first)
+
+    assert_equal %w[Set-Cookie Content-Type Set-Cookie], keys
+  end
+
+  def test_each_yields_headers_specified_as_strings_without_conversion
+    headers.add :set_cookie,   "hoo=ray"
+    headers.add :content_type, "application/json"
+    headers.add :set_cookie,   "woo=hoo"
+    headers.add "X_kEy", "value"
+
+    keys = headers.each.map(&:first)
+
+    assert_equal %w[Set-Cookie Content-Type Set-Cookie X_kEy], keys
+  end
+
+  def test_each_returns_self_instance_if_block_given
+    assert_same(headers, headers.each { |*| nil })
+  end
+
+  def test_each_returns_enumerator_if_no_block_given
+    assert_kind_of Enumerator, headers.each
+  end
+
+  def test_each_yields_two_element_arrays
+    headers.add :set_cookie,   "hoo=ray"
+    headers.add :content_type, "application/json"
+    headers.add :set_cookie,   "woo=hoo"
+
+    headers.each do |pair|
+      assert_equal 2, pair.size
     end
   end
 
-  describe "#include?" do
-    before do
-      headers.add :content_type, "application/json"
-      headers.add :set_cookie,   "hoo=ray"
-      headers.add :set_cookie,   "woo=hoo"
-    end
+  # -- .empty? ----------------------------------------------------------------
 
-    it "tells whenever given headers is set or not" do
-      assert_includes headers, "Content-Type"
-      assert_includes headers, "Set-Cookie"
-      refute_includes headers, "Accept"
-    end
+  def test_empty_initially_is_true
+    assert_empty headers
+  end
 
-    it "normalizes given header name" do
-      assert_includes headers, :content_type
-      assert_includes headers, :set_cookie
-      refute_includes headers, :accept
-    end
+  def test_empty_when_header_exists_is_false
+    headers.add :accept, "text/plain"
 
-    it "calls .to_s on non-string name argument" do
-      name = fake(to_s: "Content-Type")
+    refute_empty headers
+  end
 
-      assert_includes headers, name
-    end
+  def test_empty_when_last_header_was_removed_is_true
+    headers.add :accept, "text/plain"
+    headers.delete :accept
 
-    it "finds headers added with non-canonical string keys" do
-      h = HTTP::Headers.new
-      h.add("x-custom", "value")
+    assert_empty headers
+  end
 
-      assert_includes h, "x-custom"
+  # -- #hash ------------------------------------------------------------------
+
+  def test_hash_equals_if_two_headers_equals
+    left  = HTTP::Headers.new
+    right = HTTP::Headers.new
+
+    left.add :accept, "text/plain"
+    right.add :accept, "text/plain"
+
+    assert_equal left.hash, right.hash
+  end
+
+  # -- #== -------------------------------------------------------------------
+
+  def test_eq_compares_header_keys_and_values
+    left  = HTTP::Headers.new
+    right = HTTP::Headers.new
+
+    left.add :accept, "text/plain"
+    right.add :accept, "text/plain"
+
+    assert_equal left, right
+  end
+
+  def test_eq_allows_comparison_with_array_of_key_value_pairs
+    left = HTTP::Headers.new
+    left.add :accept, "text/plain"
+
+    assert_equal [%w[Accept text/plain]], left.to_a
+  end
+
+  def test_eq_sensitive_to_headers_order
+    left  = HTTP::Headers.new
+    right = HTTP::Headers.new
+
+    left.add :accept, "text/plain"
+    left.add :cookie, "woo=hoo"
+    right.add :cookie, "woo=hoo"
+    right.add :accept, "text/plain"
+
+    refute_equal left, right
+  end
+
+  def test_eq_sensitive_to_header_values_order
+    left  = HTTP::Headers.new
+    right = HTTP::Headers.new
+
+    left.add :cookie, "hoo=ray"
+    left.add :cookie, "woo=hoo"
+    right.add :cookie, "woo=hoo"
+    right.add :cookie, "hoo=ray"
+
+    refute_equal left, right
+  end
+
+  def test_eq_returns_false_when_compared_to_object_without_to_a
+    left = HTTP::Headers.new
+    left.add :accept, "text/plain"
+
+    refute_equal left, 42
+  end
+
+  # -- #dup -------------------------------------------------------------------
+
+  def test_dup_returns_an_http_headers_instance
+    headers.set :content_type, "application/json"
+    dupped = headers.dup
+
+    assert_kind_of HTTP::Headers, dupped
+  end
+
+  def test_dup_is_not_the_same_object
+    headers.set :content_type, "application/json"
+    dupped = headers.dup
+
+    refute_same headers, dupped
+  end
+
+  def test_dup_has_headers_copied
+    headers.set :content_type, "application/json"
+    dupped = headers.dup
+
+    assert_equal "application/json", dupped[:content_type]
+  end
+
+  def test_dup_modifying_copy_modifies_dupped_copy
+    headers.set :content_type, "application/json"
+    dupped = headers.dup
+    dupped.set :content_type, "text/plain"
+
+    assert_equal "text/plain", dupped[:content_type]
+  end
+
+  def test_dup_modifying_copy_does_not_affect_original_headers
+    headers.set :content_type, "application/json"
+    dupped = headers.dup
+    dupped.set :content_type, "text/plain"
+
+    assert_equal "application/json", headers[:content_type]
+  end
+
+  def test_dup_deep_copies_internal_pile_entries
+    headers.set :content_type, "application/json"
+    dupped = headers.dup
+
+    original_pile = headers.instance_variable_get(:@pile)
+    dupped_pile   = dupped.instance_variable_get(:@pile)
+
+    # The outer arrays should be different objects
+    refute_same original_pile, dupped_pile
+
+    # Each inner array should also be a different object
+    original_pile.each_with_index do |entry, i|
+      refute_same entry, dupped_pile[i]
     end
   end
 
-  describe "#to_h" do
-    before do
-      headers.add :content_type, "application/json"
-      headers.add :set_cookie,   "hoo=ray"
-      headers.add :set_cookie,   "woo=hoo"
-    end
+  # -- validate_value (via #add) ----------------------------------------------
 
-    it "returns a Hash" do
-      assert_kind_of Hash, headers.to_h
-    end
-
-    it "returns Hash with normalized keys" do
-      assert_equal %w[Content-Type Set-Cookie].sort, headers.to_h.keys.sort
-    end
-
-    context "for a header with single value" do
-      it "provides a value as is" do
-        assert_equal "application/json", headers.to_h["Content-Type"]
-      end
-    end
-
-    context "for a header with multiple values" do
-      it "provides an array of values" do
-        assert_equal %w[hoo=ray woo=hoo], headers.to_h["Set-Cookie"]
-      end
-    end
+  def test_validate_value_raises_header_error_when_value_contains_newline
+    err = assert_raises(HTTP::HeaderError) { headers.add "X-Test", "foo\nbar" }
+    assert_includes err.message, "foo"
   end
 
-  describe "#to_a" do
-    before do
-      headers.add :content_type, "application/json"
-      headers.add :set_cookie,   "hoo=ray"
-      headers.add :set_cookie,   "woo=hoo"
-    end
+  def test_validate_value_accepts_values_without_newlines
+    headers.add "X-Test", "foobar"
 
-    it "returns an Array" do
-      assert_kind_of Array, headers.to_a
-    end
-
-    it "returns Array of key/value pairs with normalized keys" do
-      assert_equal [
-        %w[Content-Type application/json],
-        %w[Set-Cookie hoo=ray],
-        %w[Set-Cookie woo=hoo]
-      ], headers.to_a
-    end
-
-    it "returns two-element arrays (not three-element or one-element)" do
-      headers.to_a.each do |pair|
-        assert_equal 2, pair.size, "Expected each element to be a [name, value] pair"
-      end
-    end
-
-    it "returns wire_name (not lookup_name) as first element" do
-      h = HTTP::Headers.new
-      h.add "X_Custom", "val"
-
-      assert_equal [%w[X_Custom val]], h.to_a
-    end
+    assert_equal "foobar", headers["X-Test"]
   end
 
-  describe "#deconstruct_keys" do
-    before do
-      headers.add :content_type, "application/json"
-      headers.add :set_cookie,   "hoo=ray"
-      headers.add :set_cookie,   "woo=hoo"
-    end
+  def test_validate_value_calls_to_s_on_non_string_values
+    numeric_value = 42
+    headers.add "X-Number", numeric_value
 
-    it "returns all keys as snake_case symbols when given nil" do
-      result = headers.deconstruct_keys(nil)
-
-      assert_equal "application/json", result[:content_type]
-      assert_equal %w[hoo=ray woo=hoo], result[:set_cookie]
-    end
-
-    it "converts header names to snake_case symbols" do
-      assert_includes headers.deconstruct_keys(nil).keys, :content_type
-      assert_includes headers.deconstruct_keys(nil).keys, :set_cookie
-    end
-
-    it "returns only requested keys" do
-      result = headers.deconstruct_keys([:content_type])
-
-      assert_equal({ content_type: "application/json" }, result)
-    end
-
-    it "excludes unrequested keys" do
-      refute_includes headers.deconstruct_keys([:content_type]).keys, :set_cookie
-    end
-
-    it "returns empty hash for empty keys" do
-      assert_equal({}, headers.deconstruct_keys([]))
-    end
-
-    it "supports pattern matching with case/in" do
-      matched = case headers
-                in { content_type: /json/ }
-                  true
-                else
-                  false
-                end
-
-      assert matched
-    end
+    assert_equal "42", headers["X-Number"]
   end
 
-  describe "#inspect" do
-    it "returns a human-readable representation" do
-      headers.set :set_cookie, %w[hoo=ray woo=hoo]
+  def test_validate_value_raises_header_error_when_to_s_result_contains_newline
+    evil = fake(to_s: "good\nevil")
 
-      assert_equal "#<HTTP::Headers>", headers.inspect
-    end
+    assert_raises(HTTP::HeaderError) { headers.add "X-Evil", evil }
   end
 
-  describe "#keys" do
-    before do
-      headers.add :content_type, "application/json"
-      headers.add :set_cookie,   "hoo=ray"
-      headers.add :set_cookie,   "woo=hoo"
-    end
+  def test_validate_value_includes_inspected_value_in_error_message
+    err = assert_raises(HTTP::HeaderError) { headers.add "Test", "bad\nvalue" }
 
-    it "returns uniq keys only" do
-      assert_equal 2, headers.keys.size
-    end
-
-    it "normalizes keys" do
-      assert_includes headers.keys, "Content-Type"
-      assert_includes headers.keys, "Set-Cookie"
-    end
+    assert_includes err.message, '"bad\nvalue"'
   end
 
-  describe "#each" do
-    before do
-      headers.add :set_cookie,   "hoo=ray"
-      headers.add :content_type, "application/json"
-      headers.add :set_cookie,   "woo=hoo"
-    end
-
-    it "yields each key/value pair separatedly" do
-      yielded = headers.map { |pair| pair }
-
-      assert_equal 3, yielded.size
-    end
-
-    it "yields headers in the same order they were added" do
-      yielded = headers.map { |pair| pair }
-
-      assert_equal [
-        %w[Set-Cookie hoo=ray],
-        %w[Content-Type application/json],
-        %w[Set-Cookie woo=hoo]
-      ], yielded
-    end
-
-    it "yields header keys specified as symbols in normalized form" do
-      keys = headers.each.map(&:first)
-
-      assert_equal %w[Set-Cookie Content-Type Set-Cookie], keys
-    end
-
-    it "yields headers specified as strings without conversion" do
-      headers.add "X_kEy", "value"
-      keys = headers.each.map(&:first)
-
-      assert_equal %w[Set-Cookie Content-Type Set-Cookie X_kEy], keys
-    end
-
-    it "returns self instance if block given" do
-      assert_same(headers, headers.each { |*| nil })
-    end
-
-    it "returns Enumerator if no block given" do
-      assert_kind_of Enumerator, headers.each
-    end
-
-    it "yields two-element arrays [name, value]" do
-      headers.each do |pair|
-        assert_equal 2, pair.size
-      end
-    end
+  def test_validate_value_raises_header_error_when_value_contains_carriage_return
+    assert_raises(HTTP::HeaderError) { headers.add "X-Test", "foo\rbar" }
   end
 
-  describe ".empty?" do
-    context "initially" do
-      it "is true" do
-        assert_empty headers
-      end
-    end
-
-    context "when header exists" do
-      before { headers.add :accept, "text/plain" }
-
-      it "is false" do
-        refute_empty headers
-      end
-    end
-
-    context "when last header was removed" do
-      before do
-        headers.add :accept, "text/plain"
-        headers.delete :accept
-      end
-
-      it "is true" do
-        assert_empty headers
-      end
-    end
+  def test_validate_value_raises_header_error_when_value_contains_crlf
+    assert_raises(HTTP::HeaderError) { headers.add "X-Test", "foo\r\nbar" }
   end
 
-  describe "#hash" do
-    let(:left)  { HTTP::Headers.new }
-    let(:right) { HTTP::Headers.new }
+  # -- #merge! ----------------------------------------------------------------
 
-    it "equals if two headers equals" do
-      left.add :accept, "text/plain"
-      right.add :accept, "text/plain"
+  def test_merge_bang_leaves_headers_not_presented_in_other_as_is
+    headers.set :host, "example.com"
+    headers.set :accept, "application/json"
+    headers.merge! accept: "plain/text", cookie: %w[hoo=ray woo=hoo]
 
-      assert_equal left.hash, right.hash
-    end
+    assert_equal "example.com", headers[:host]
   end
 
-  describe "#==" do
-    let(:left)  { HTTP::Headers.new }
-    let(:right) { HTTP::Headers.new }
+  def test_merge_bang_overwrites_existing_values
+    headers.set :host, "example.com"
+    headers.set :accept, "application/json"
+    headers.merge! accept: "plain/text", cookie: %w[hoo=ray woo=hoo]
 
-    it "compares header keys and values" do
-      left.add :accept, "text/plain"
-      right.add :accept, "text/plain"
-
-      assert_equal left, right
-    end
-
-    it "allows comparison with Array of key/value pairs" do
-      left.add :accept, "text/plain"
-
-      assert_equal [%w[Accept text/plain]], left.to_a
-    end
-
-    it "sensitive to headers order" do
-      left.add :accept, "text/plain"
-      left.add :cookie, "woo=hoo"
-      right.add :cookie, "woo=hoo"
-      right.add :accept, "text/plain"
-
-      refute_equal left, right
-    end
-
-    it "sensitive to header values order" do
-      left.add :cookie, "hoo=ray"
-      left.add :cookie, "woo=hoo"
-      right.add :cookie, "woo=hoo"
-      right.add :cookie, "hoo=ray"
-
-      refute_equal left, right
-    end
-
-    it "returns false when compared to object without #to_a" do
-      left.add :accept, "text/plain"
-
-      refute_equal left, 42
-    end
+    assert_equal "plain/text", headers[:accept]
   end
 
-  describe "#dup" do
-    let(:dupped) { headers.dup }
+  def test_merge_bang_appends_other_headers_not_presented_in_base
+    headers.set :host, "example.com"
+    headers.set :accept, "application/json"
+    headers.merge! accept: "plain/text", cookie: %w[hoo=ray woo=hoo]
 
-    before { headers.set :content_type, "application/json" }
-
-    it "returns an HTTP::Headers instance" do
-      assert_kind_of HTTP::Headers, dupped
-    end
-
-    it "is not the same object" do
-      refute_same headers, dupped
-    end
-
-    it "has headers copied" do
-      assert_equal "application/json", dupped[:content_type]
-    end
-
-    context "modifying a copy" do
-      before { dupped.set :content_type, "text/plain" }
-
-      it "modifies dupped copy" do
-        assert_equal "text/plain", dupped[:content_type]
-      end
-
-      it "does not affects original headers" do
-        assert_equal "application/json", headers[:content_type]
-      end
-    end
-
-    it "deep copies internal pile entries so mutations to inner arrays don't leak" do
-      original_pile = headers.instance_variable_get(:@pile)
-      dupped_pile   = dupped.instance_variable_get(:@pile)
-
-      # The outer arrays should be different objects
-      refute_same original_pile, dupped_pile
-
-      # Each inner array should also be a different object
-      original_pile.each_with_index do |entry, i|
-        refute_same entry, dupped_pile[i]
-      end
-    end
+    assert_equal %w[hoo=ray woo=hoo], headers[:cookie]
   end
 
-  describe "validate_value (via #add)" do
-    it "raises HeaderError when value contains a newline in the middle" do
-      err = assert_raises(HTTP::HeaderError) { headers.add "X-Test", "foo\nbar" }
-      assert_includes err.message, "foo"
-    end
+  def test_merge_bang_accepts_an_http_headers_instance
+    other = HTTP::Headers.new
+    other.set :accept, "text/xml"
 
-    it "accepts values without newlines" do
-      headers.add "X-Test", "foobar"
+    h = HTTP::Headers.new
+    h.set :accept, "application/json"
+    h.merge!(other)
 
-      assert_equal "foobar", headers["X-Test"]
-    end
-
-    it "calls .to_s on non-string values" do
-      numeric_value = 42
-      headers.add "X-Number", numeric_value
-
-      assert_equal "42", headers["X-Number"]
-    end
-
-    it "raises HeaderError when .to_s result contains a newline" do
-      evil = fake(to_s: "good\nevil")
-
-      assert_raises(HTTP::HeaderError) { headers.add "X-Evil", evil }
-    end
-
-    it "includes inspected value in error message" do
-      err = assert_raises(HTTP::HeaderError) { headers.add "Test", "bad\nvalue" }
-
-      assert_includes err.message, '"bad\nvalue"'
-    end
-
-    it "raises HeaderError when value contains a carriage return" do
-      assert_raises(HTTP::HeaderError) { headers.add "X-Test", "foo\rbar" }
-    end
-
-    it "raises HeaderError when value contains CRLF" do
-      assert_raises(HTTP::HeaderError) { headers.add "X-Test", "foo\r\nbar" }
-    end
+    assert_equal "text/xml", h[:accept]
   end
 
-  describe "#merge!" do
-    before do
-      headers.set :host, "example.com"
-      headers.set :accept, "application/json"
-      headers.merge! accept: "plain/text", cookie: %w[hoo=ray woo=hoo]
-    end
+  def test_merge_bang_uses_set_so_existing_values_are_replaced
+    h = HTTP::Headers.new
+    h.add :accept, "text/html"
+    h.add :accept, "text/plain"
+    h[:accept] = "application/json"
 
-    it "leaves headers not presented in other as is" do
-      assert_equal "example.com", headers[:host]
-    end
-
-    it "overwrites existing values" do
-      assert_equal "plain/text", headers[:accept]
-    end
-
-    it "appends other headers, not presented in base" do
-      assert_equal %w[hoo=ray woo=hoo], headers[:cookie]
-    end
-
-    it "accepts an HTTP::Headers instance" do
-      other = HTTP::Headers.new
-      other.set :accept, "text/xml"
-
-      h = HTTP::Headers.new
-      h.set :accept, "application/json"
-      h.merge!(other)
-
-      assert_equal "text/xml", h[:accept]
-    end
-
-    it "uses set (not add) so existing values are replaced" do
-      h = HTTP::Headers.new
-      h.add :accept, "text/html"
-      h.add :accept, "text/plain"
-      h[:accept] = "application/json"
-
-      assert_equal "application/json", h[:accept]
-    end
+    assert_equal "application/json", h[:accept]
   end
 
-  describe "#merge" do
-    let(:merged) do
-      headers.merge accept: "plain/text", cookie: %w[hoo=ray woo=hoo]
-    end
+  # -- #merge -----------------------------------------------------------------
 
-    before do
-      headers.set :host, "example.com"
-      headers.set :accept, "application/json"
-    end
+  def test_merge_returns_an_http_headers_instance
+    headers.set :host, "example.com"
+    headers.set :accept, "application/json"
+    merged = headers.merge accept: "plain/text", cookie: %w[hoo=ray woo=hoo]
 
-    it "returns an HTTP::Headers instance" do
-      assert_kind_of HTTP::Headers, merged
-    end
-
-    it "is not the same object" do
-      refute_same headers, merged
-    end
-
-    it "does not affects original headers" do
-      refute_equal merged.to_h, headers.to_h
-    end
-
-    it "leaves headers not presented in other as is" do
-      assert_equal "example.com", merged[:host]
-    end
-
-    it "overwrites existing values" do
-      assert_equal "plain/text", merged[:accept]
-    end
-
-    it "appends other headers, not presented in base" do
-      assert_equal %w[hoo=ray woo=hoo], merged[:cookie]
-    end
+    assert_kind_of HTTP::Headers, merged
   end
 
-  describe ".coerce" do
-    let(:dummy_class) { Class.new { def respond_to?(*); end } }
+  def test_merge_is_not_the_same_object
+    headers.set :host, "example.com"
+    headers.set :accept, "application/json"
+    merged = headers.merge accept: "plain/text", cookie: %w[hoo=ray woo=hoo]
 
-    it "accepts any object that respond to #to_hash" do
-      hashie = fake(to_hash: { "accept" => "json" })
-
-      assert_equal "json", HTTP::Headers.coerce(hashie)["accept"]
-    end
-
-    it "accepts any object that respond to #to_h" do
-      hashie = fake(to_h: { "accept" => "json" })
-
-      assert_equal "json", HTTP::Headers.coerce(hashie)["accept"]
-    end
-
-    it "accepts any object that respond to #to_a" do
-      hashie = fake(to_a: [%w[accept json]])
-
-      assert_equal "json", HTTP::Headers.coerce(hashie)["accept"]
-    end
-
-    it "fails if given object cannot be coerced" do
-      obj = Object.new
-      def obj.respond_to?(*); end
-      def obj.inspect = "INSPECTED"
-      def obj.to_s = "plain"
-
-      err = assert_raises(HTTP::Error) { HTTP::Headers.coerce obj }
-      assert_includes err.message, "INSPECTED"
-    end
-
-    context "with duplicate header keys (mixed case)" do
-      let(:hdrs) { { "Set-Cookie" => "hoo=ray", "set_cookie" => "woo=hoo", :set_cookie => "ta=da" } }
-
-      it "adds all headers" do
-        expected = [%w[Set-Cookie hoo=ray], %w[set_cookie woo=hoo], %w[Set-Cookie ta=da]]
-
-        assert_equal expected.sort, HTTP::Headers.coerce(hdrs).to_a.sort
-      end
-    end
-
-    it "is aliased as .[]" do
-      result = HTTP::Headers["Content-Type" => "text/plain"]
-
-      assert_instance_of HTTP::Headers, result
-      assert_equal "text/plain", result["Content-Type"]
-    end
+    refute_same headers, merged
   end
 
-  describe ".normalizer" do
-    it "returns a Normalizer instance" do
-      assert_instance_of HTTP::Headers::Normalizer, HTTP::Headers.normalizer
-    end
+  def test_merge_does_not_affect_original_headers
+    headers.set :host, "example.com"
+    headers.set :accept, "application/json"
+    merged = headers.merge accept: "plain/text", cookie: %w[hoo=ray woo=hoo]
 
-    it "returns the same instance on subsequent calls" do
-      assert_same HTTP::Headers.normalizer, HTTP::Headers.normalizer
-    end
+    refute_equal merged.to_h, headers.to_h
+  end
+
+  def test_merge_leaves_headers_not_presented_in_other_as_is
+    headers.set :host, "example.com"
+    headers.set :accept, "application/json"
+    merged = headers.merge accept: "plain/text", cookie: %w[hoo=ray woo=hoo]
+
+    assert_equal "example.com", merged[:host]
+  end
+
+  def test_merge_overwrites_existing_values
+    headers.set :host, "example.com"
+    headers.set :accept, "application/json"
+    merged = headers.merge accept: "plain/text", cookie: %w[hoo=ray woo=hoo]
+
+    assert_equal "plain/text", merged[:accept]
+  end
+
+  def test_merge_appends_other_headers_not_presented_in_base
+    headers.set :host, "example.com"
+    headers.set :accept, "application/json"
+    merged = headers.merge accept: "plain/text", cookie: %w[hoo=ray woo=hoo]
+
+    assert_equal %w[hoo=ray woo=hoo], merged[:cookie]
+  end
+
+  # -- .coerce ----------------------------------------------------------------
+
+  def test_coerce_accepts_any_object_that_respond_to_to_hash
+    hashie = fake(to_hash: { "accept" => "json" })
+
+    assert_equal "json", HTTP::Headers.coerce(hashie)["accept"]
+  end
+
+  def test_coerce_accepts_any_object_that_respond_to_to_h
+    hashie = fake(to_h: { "accept" => "json" })
+
+    assert_equal "json", HTTP::Headers.coerce(hashie)["accept"]
+  end
+
+  def test_coerce_accepts_any_object_that_respond_to_to_a
+    hashie = fake(to_a: [%w[accept json]])
+
+    assert_equal "json", HTTP::Headers.coerce(hashie)["accept"]
+  end
+
+  def test_coerce_fails_if_given_object_cannot_be_coerced
+    obj = Object.new
+    def obj.respond_to?(*); end
+    def obj.inspect = "INSPECTED"
+    def obj.to_s = "plain"
+
+    err = assert_raises(HTTP::Error) { HTTP::Headers.coerce obj }
+    assert_includes err.message, "INSPECTED"
+  end
+
+  def test_coerce_with_duplicate_header_keys_adds_all_headers
+    hdrs = { "Set-Cookie" => "hoo=ray", "set_cookie" => "woo=hoo", :set_cookie => "ta=da" }
+    expected = [%w[Set-Cookie hoo=ray], %w[set_cookie woo=hoo], %w[Set-Cookie ta=da]]
+
+    assert_equal expected.sort, HTTP::Headers.coerce(hdrs).to_a.sort
+  end
+
+  def test_coerce_is_aliased_as_bracket
+    result = HTTP::Headers["Content-Type" => "text/plain"]
+
+    assert_instance_of HTTP::Headers, result
+    assert_equal "text/plain", result["Content-Type"]
+  end
+
+  # -- .normalizer ------------------------------------------------------------
+
+  def test_normalizer_returns_a_normalizer_instance
+    assert_instance_of HTTP::Headers::Normalizer, HTTP::Headers.normalizer
+  end
+
+  def test_normalizer_returns_the_same_instance_on_subsequent_calls
+    assert_same HTTP::Headers.normalizer, HTTP::Headers.normalizer
   end
 end

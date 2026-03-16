@@ -2,39 +2,38 @@
 
 require "test_helper"
 
-describe HTTP::MimeType::JSON do
+class HTTPMimeTypeJSONTest < Minitest::Test
   cover "HTTP::MimeType*"
-  let(:adapter) { HTTP::MimeType::JSON.send(:new) }
 
-  describe "#encode" do
-    it "uses to_json when available" do
-      assert_equal '{"foo":"bar"}', adapter.encode(foo: "bar")
-    end
-
-    it "prefers to_json over JSON.dump" do
-      obj = Object.new
-      def obj.to_json(*args)
-        args.empty? ? '"direct"' : '"via_dump"'
-      end
-
-      assert_equal '"direct"', adapter.encode(obj)
-    end
-
-    it "falls back to JSON.dump for objects without to_json" do
-      obj = Object.new
-      obj.define_singleton_method(:respond_to?) do |method, *args|
-        return false if method == :to_json
-
-        super(method, *args)
-      end
-
-      assert_kind_of String, adapter.encode(obj)
-    end
+  def adapter
+    @adapter ||= HTTP::MimeType::JSON.send(:new)
   end
 
-  describe "#decode" do
-    it "parses JSON strings" do
-      assert_equal({ "foo" => "bar" }, adapter.decode('{"foo":"bar"}'))
+  def test_encode_uses_to_json_when_available
+    assert_equal '{"foo":"bar"}', adapter.encode(foo: "bar")
+  end
+
+  def test_encode_prefers_to_json_over_json_dump
+    obj = Object.new
+    def obj.to_json(*args)
+      args.empty? ? '"direct"' : '"via_dump"'
     end
+
+    assert_equal '"direct"', adapter.encode(obj)
+  end
+
+  def test_encode_falls_back_to_json_dump_for_objects_without_to_json
+    obj = Object.new
+    obj.define_singleton_method(:respond_to?) do |method, *args|
+      return false if method == :to_json
+
+      super(method, *args)
+    end
+
+    assert_kind_of String, adapter.encode(obj)
+  end
+
+  def test_decode_parses_json_strings
+    assert_equal({ "foo" => "bar" }, adapter.decode('{"foo":"bar"}'))
   end
 end

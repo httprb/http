@@ -2,422 +2,317 @@
 
 require "test_helper"
 
-describe HTTP::Request::Body do
+class HTTPRequestBodyTest < Minitest::Test
   cover "HTTP::Request::Body*"
-  let(:subject_under_test) { HTTP::Request::Body.new(body) }
 
-  let(:body) { "" }
+  def build_body(source = "")
+    HTTP::Request::Body.new(source)
+  end
 
-  describe "#initialize" do
-    context "when body is nil" do
-      let(:body) { nil }
+  # #initialize
 
-      it "does not raise an error" do
-        HTTP::Request::Body.new(body)
-      end
+  def test_initialize_when_body_is_nil_does_not_raise
+    HTTP::Request::Body.new(nil)
+  end
+
+  def test_initialize_when_body_is_a_string_does_not_raise
+    HTTP::Request::Body.new("string body")
+  end
+
+  def test_initialize_when_body_is_an_io_does_not_raise
+    HTTP::Request::Body.new(FakeIO.new("IO body"))
+  end
+
+  def test_initialize_when_body_is_an_enumerable_does_not_raise
+    HTTP::Request::Body.new(%w[bees cows])
+  end
+
+  def test_initialize_when_body_is_of_unrecognized_type_raises_error
+    assert_raises(HTTP::RequestError) { HTTP::Request::Body.new(123) }
+  end
+
+  # #source
+
+  def test_source_returns_the_original_object
+    assert_equal "", build_body("").source
+  end
+
+  # #size
+
+  def test_size_when_body_is_nil_returns_zero
+    assert_equal 0, build_body(nil).size
+  end
+
+  def test_size_when_body_is_a_string_returns_string_bytesize
+    assert_equal 21, build_body("\u041F\u0440\u0438\u0432\u0435\u0442, \u043C\u0438\u0440!").size
+  end
+
+  def test_size_when_body_is_an_io_with_size_returns_io_size
+    assert_equal 7, build_body(FakeIO.new("content")).size
+  end
+
+  def test_size_when_body_is_an_io_without_size_raises_request_error
+    assert_raises(HTTP::RequestError) { build_body(IO.pipe[0]).size }
+  end
+
+  def test_size_when_body_is_an_enumerable_raises_request_error
+    assert_raises(HTTP::RequestError) { build_body(%w[bees cows]).size }
+  end
+
+  # #empty?
+
+  def test_empty_when_body_is_nil_returns_true
+    assert_predicate build_body(nil), :empty?
+  end
+
+  def test_empty_when_body_is_a_string_returns_false
+    refute_predicate build_body("content"), :empty?
+  end
+
+  def test_empty_when_body_is_an_empty_string_returns_false
+    refute_predicate build_body(""), :empty?
+  end
+
+  # #loggable?
+
+  def test_loggable_when_body_is_a_text_string_returns_true
+    assert_predicate build_body("text content"), :loggable?
+  end
+
+  def test_loggable_when_body_is_a_binary_encoded_string_returns_true
+    assert_predicate build_body(String.new("\x89PNG\r\n", encoding: Encoding::BINARY)), :loggable?
+  end
+
+  def test_loggable_when_body_is_nil_returns_false
+    refute_predicate build_body(nil), :loggable?
+  end
+
+  def test_loggable_when_body_is_an_io_returns_false
+    refute_predicate build_body(FakeIO.new("IO body")), :loggable?
+  end
+
+  def test_loggable_when_body_is_an_enumerable_returns_false
+    refute_predicate build_body(%w[bees cows]), :loggable?
+  end
+
+  # #each
+
+  def test_each_when_body_is_nil_yields_nothing
+    chunks = build_body(nil).enum_for(:each).map(&:dup)
+
+    assert_equal [], chunks
+  end
+
+  def test_each_when_body_is_a_string_yields_the_string
+    chunks = build_body("content").enum_for(:each).map(&:dup)
+
+    assert_equal %w[content], chunks
+  end
+
+  def test_each_when_body_is_a_non_enumerable_io_yields_chunks_of_content
+    body = FakeIO.new(("a" * 16 * 1024) + ("b" * 10 * 1024))
+    chunks = build_body(body).enum_for(:each).map(&:dup)
+
+    assert_equal ("a" * 16 * 1024) + ("b" * 10 * 1024), chunks.sum("")
+  end
+
+  def test_each_when_body_is_a_pipe_yields_chunks_of_content
+    ios = IO.pipe
+    subject = build_body(ios[0])
+
+    writer = Thread.new(ios[1]) do |io|
+      io << "abcdef"
+      io.close
     end
 
-    context "when body is a string" do
-      let(:body) { "string body" }
+    begin
+      chunks = subject.enum_for(:each).map(&:dup)
 
-      it "does not raise an error" do
-        HTTP::Request::Body.new(body)
-      end
-    end
-
-    context "when body is an IO" do
-      let(:body) { FakeIO.new("IO body") }
-
-      it "does not raise an error" do
-        HTTP::Request::Body.new(body)
-      end
-    end
-
-    context "when body is an Enumerable" do
-      let(:body) { %w[bees cows] }
-
-      it "does not raise an error" do
-        HTTP::Request::Body.new(body)
-      end
-    end
-
-    context "when body is of unrecognized type" do
-      let(:body) { 123 }
-
-      it "raises an error" do
-        assert_raises(HTTP::RequestError) { HTTP::Request::Body.new(body) }
-      end
+      assert_equal "abcdef", chunks.sum("")
+    ensure
+      writer.join
     end
   end
 
-  describe "#source" do
-    it "returns the original object" do
-      assert_equal "", subject_under_test.source
-    end
+  def test_each_when_body_is_an_enumerable_io_yields_chunks_of_content
+    data = ("a" * 16 * 1024) + ("b" * 10 * 1024)
+    chunks = build_body(StringIO.new(data)).enum_for(:each).map(&:dup)
+
+    assert_equal data, chunks.sum("")
   end
 
-  describe "#size" do
-    context "when body is nil" do
-      let(:body) { nil }
+  def test_each_when_body_is_an_enumerable_io_allows_multiple_enumerations
+    data = ("a" * 16 * 1024) + ("b" * 10 * 1024)
+    subject = build_body(StringIO.new(data))
+    results = []
 
-      it "returns zero" do
-        assert_equal 0, subject_under_test.size
-      end
+    2.times do
+      result = ""
+      subject.each { |chunk| result += chunk }
+      results << result
     end
 
-    context "when body is a string" do
-      let(:body) { "\u041F\u0440\u0438\u0432\u0435\u0442, \u043C\u0438\u0440!" }
-
-      it "returns string bytesize" do
-        assert_equal 21, subject_under_test.size
-      end
-    end
-
-    context "when body is an IO with size" do
-      let(:body) { FakeIO.new("content") }
-
-      it "returns IO size" do
-        assert_equal 7, subject_under_test.size
-      end
-    end
-
-    context "when body is an IO without size" do
-      let(:body) { IO.pipe[0] }
-
-      it "raises a RequestError" do
-        assert_raises(HTTP::RequestError) { subject_under_test.size }
-      end
-    end
-
-    context "when body is an Enumerable" do
-      let(:body) { %w[bees cows] }
-
-      it "raises a RequestError" do
-        assert_raises(HTTP::RequestError) { subject_under_test.size }
-      end
-    end
+    assert_equal 2, results.count
+    assert(results.all?(data))
   end
 
-  describe "#empty?" do
-    context "when body is nil" do
-      let(:body) { nil }
+  def test_each_when_body_is_an_enumerable_yields_elements
+    chunks = build_body(%w[bees cows]).enum_for(:each).map(&:dup)
 
-      it "returns true" do
-        assert_predicate subject_under_test, :empty?
-      end
-    end
-
-    context "when body is a string" do
-      let(:body) { "content" }
-
-      it "returns false" do
-        refute_predicate subject_under_test, :empty?
-      end
-    end
-
-    context "when body is an empty string" do
-      let(:body) { "" }
-
-      it "returns false" do
-        refute_predicate subject_under_test, :empty?
-      end
-    end
+    assert_equal %w[bees cows], chunks
   end
 
-  describe "#loggable?" do
-    context "when body is a text string" do
-      let(:body) { "text content" }
+  # #==
 
-      it "returns true" do
-        assert_predicate subject_under_test, :loggable?
-      end
-    end
+  def test_eq_when_sources_are_equivalent_returns_true
+    body1 = HTTP::Request::Body.new("content")
+    body2 = HTTP::Request::Body.new("content")
 
-    context "when body is a binary-encoded string" do
-      let(:body) { String.new("\x89PNG\r\n", encoding: Encoding::BINARY) }
-
-      it "returns true" do
-        assert_predicate subject_under_test, :loggable?
-      end
-    end
-
-    context "when body is nil" do
-      let(:body) { nil }
-
-      it "returns false" do
-        refute_predicate subject_under_test, :loggable?
-      end
-    end
-
-    context "when body is an IO" do
-      let(:body) { FakeIO.new("IO body") }
-
-      it "returns false" do
-        refute_predicate subject_under_test, :loggable?
-      end
-    end
-
-    context "when body is an Enumerable" do
-      let(:body) { %w[bees cows] }
-
-      it "returns false" do
-        refute_predicate subject_under_test, :loggable?
-      end
-    end
+    assert_equal body1, body2
   end
 
-  describe "#each" do
-    let(:chunks) do
-      subject_under_test.enum_for(:each).map(&:dup)
-    end
+  def test_eq_compares_by_value_not_identity
+    a = HTTP::Request::Body.new(+"same")
+    b = HTTP::Request::Body.new(+"same")
 
-    context "when body is nil" do
-      let(:body) { nil }
-
-      it "yields nothing" do
-        assert_equal [], chunks
-      end
-    end
-
-    context "when body is a string" do
-      let(:body) { "content" }
-
-      it "yields the string" do
-        assert_equal %w[content], chunks
-      end
-    end
-
-    context "when body is a non-Enumerable IO" do
-      let(:body) { FakeIO.new(("a" * 16 * 1024) + ("b" * 10 * 1024)) }
-
-      it "yields chunks of content" do
-        assert_equal ("a" * 16 * 1024) + ("b" * 10 * 1024), chunks.sum("")
-      end
-    end
-
-    context "when body is a pipe" do
-      let(:ios)  { IO.pipe }
-      let(:body) { ios[0] }
-
-      it "yields chunks of content" do
-        writer = Thread.new(ios[1]) do |io|
-          io << "abcdef"
-          io.close
-        end
-
-        begin
-          assert_equal "abcdef", chunks.sum("")
-        ensure
-          writer.join
-        end
-      end
-    end
-
-    context "when body is an Enumerable IO" do
-      let(:data) { ("a" * 16 * 1024) + ("b" * 10 * 1024) }
-      let(:body) { StringIO.new data }
-
-      it "yields chunks of content" do
-        assert_equal data, chunks.sum("")
-      end
-
-      it "allows to enumerate multiple times" do
-        results = []
-
-        2.times do
-          result = ""
-          subject_under_test.each { |chunk| result += chunk }
-          results << result
-        end
-
-        assert_equal 2, results.count
-        assert(results.all?(data))
-      end
-    end
-
-    context "when body is an Enumerable" do
-      let(:body) { %w[bees cows] }
-
-      it "yields elements" do
-        assert_equal %w[bees cows], chunks
-      end
-    end
+    assert_equal a, b
   end
 
-  describe "#==" do
-    context "when sources are equivalent" do
-      let(:body1) { HTTP::Request::Body.new("content") }
-      let(:body2) { HTTP::Request::Body.new("content") }
+  def test_eq_uses_coercion_on_sources
+    a = HTTP::Request::Body.new([1])
+    b = HTTP::Request::Body.new([1.0])
 
-      it "returns true" do
-        assert_equal body1, body2
-      end
-
-      it "compares by value not identity" do
-        a = HTTP::Request::Body.new(String.new("same"))
-        b = HTTP::Request::Body.new(String.new("same"))
-
-        assert_equal a, b
-      end
-
-      it "uses == coercion on sources" do
-        a = HTTP::Request::Body.new([1])
-        b = HTTP::Request::Body.new([1.0])
-
-        assert_equal a, b
-      end
-    end
-
-    context "when sources are not equivalent" do
-      let(:body1) { HTTP::Request::Body.new("content") }
-      let(:body2) { HTTP::Request::Body.new(nil) }
-
-      it "returns false" do
-        refute_equal body1, body2
-      end
-    end
-
-    context "when objects are not of the same class" do
-      let(:body1) { HTTP::Request::Body.new("content") }
-      let(:body2) { "content" }
-
-      it "returns false" do
-        refute_equal body1, body2
-      end
-    end
-
-    context "when sources are both truthy but different" do
-      let(:body1) { HTTP::Request::Body.new("alpha") }
-      let(:body2) { HTTP::Request::Body.new("beta") }
-
-      it "returns false" do
-        refute_equal body1, body2
-      end
-    end
+    assert_equal a, b
   end
 
-  describe "#each return value" do
-    context "when body is a string" do
-      let(:body) { "content" }
+  def test_eq_when_sources_are_not_equivalent_returns_false
+    body1 = HTTP::Request::Body.new("content")
+    body2 = HTTP::Request::Body.new(nil)
 
-      it "returns self" do
-        assert_same(subject_under_test, subject_under_test.each { |_| nil })
-      end
-    end
-
-    context "when body is nil" do
-      let(:body) { nil }
-
-      it "returns self" do
-        assert_same(subject_under_test, subject_under_test.each { |_| nil })
-      end
-    end
-
-    context "when body is an IO" do
-      let(:body) { StringIO.new("io content") }
-
-      it "returns self" do
-        assert_same(subject_under_test, subject_under_test.each { |_| nil })
-      end
-    end
-
-    context "when body is an Enumerable" do
-      let(:body) { %w[bees cows] }
-
-      it "returns self" do
-        assert_same(subject_under_test, subject_under_test.each { |_| nil })
-      end
-    end
+    refute_equal body1, body2
   end
 
-  describe "#size error messages" do
-    context "when body is an IO without #size" do
-      let(:body) { IO.pipe[0] }
+  def test_eq_when_objects_are_not_of_the_same_class_returns_false
+    body1 = HTTP::Request::Body.new("content")
+    body2 = "content"
 
-      it "raises RequestError with message about IO needing #size" do
-        err = assert_raises(HTTP::RequestError) { subject_under_test.size }
-        assert_match(/IO object must respond to #size/, err.message)
-      end
-    end
-
-    context "when body is an Enumerable" do
-      let(:body) { %w[bees cows] }
-
-      it "raises RequestError with message about undetermined size including inspect" do
-        err = assert_raises(HTTP::RequestError) { subject_under_test.size }
-        assert_match(/cannot determine size of body/, err.message)
-        assert_includes err.message, body.inspect
-        assert_match(/Content-Length/, err.message)
-        assert_match(/chunked Transfer-Encoding/, err.message)
-      end
-    end
+    refute_equal body1, body2
   end
 
-  describe "#initialize error messages" do
-    context "when body is of unrecognized type" do
-      it "raises RequestError mentioning wrong type and class name" do
-        err = assert_raises(HTTP::RequestError) { HTTP::Request::Body.new(123) }
-        assert_match(/body of wrong type/, err.message)
-        assert_match(/Integer/, err.message)
-      end
-    end
+  def test_eq_when_sources_are_both_truthy_but_different_returns_false
+    body1 = HTTP::Request::Body.new("alpha")
+    body2 = HTTP::Request::Body.new("beta")
+
+    refute_equal body1, body2
   end
 
-  context "when body is a String subclass" do
-    let(:string_subclass) { Class.new(String) }
-    let(:body) { string_subclass.new("subclass body") }
+  # #each return value
 
-    it "does not raise on initialization" do
-      HTTP::Request::Body.new(body)
-    end
+  def test_each_return_value_when_body_is_a_string_returns_self
+    subject = build_body("content")
 
-    it "returns correct size" do
-      assert_equal 13, subject_under_test.size
-    end
-
-    it "yields the string in #each" do
-      chunks = subject_under_test.enum_for(:each).map(&:dup)
-
-      assert_equal ["subclass body"], chunks
-    end
-
-    it "is loggable" do
-      assert_predicate subject_under_test, :loggable?
-    end
+    assert_same(subject, subject.each { |_| nil })
   end
 
-  context "when comparing with a Body subclass" do
-    it "returns true for equivalent subclass instance" do
-      subclass = Class.new(HTTP::Request::Body)
-      body1 = HTTP::Request::Body.new("content")
-      body2 = subclass.new("content")
+  def test_each_return_value_when_body_is_nil_returns_self
+    subject = build_body(nil)
 
-      assert_equal body1, body2
-    end
+    assert_same(subject, subject.each { |_| nil })
   end
 
-  describe HTTP::Request::Body::ProcIO do
-    describe "#write" do
-      it "calls the block with data and returns bytesize" do
-        received = nil
-        block = proc { |data| received = data }
-        proc_io = HTTP::Request::Body::ProcIO.new(block)
+  def test_each_return_value_when_body_is_an_io_returns_self
+    subject = build_body(StringIO.new("io content"))
 
-        result = proc_io.write("hello")
+    assert_same(subject, subject.each { |_| nil })
+  end
 
-        assert_equal "hello", received
-        assert_equal 5, result
-      end
+  def test_each_return_value_when_body_is_an_enumerable_returns_self
+    subject = build_body(%w[bees cows])
 
-      it "returns correct bytesize for multibyte strings" do
-        block = proc { |_| }
-        proc_io = HTTP::Request::Body::ProcIO.new(block)
+    assert_same(subject, subject.each { |_| nil })
+  end
 
-        # "Привет" is 12 bytes in UTF-8
-        result = proc_io.write("\u041F\u0440\u0438\u0432\u0435\u0442")
+  # #size error messages
 
-        assert_equal 12, result
-      end
-    end
+  def test_size_error_when_body_is_an_io_without_size_mentions_io_needing_size
+    err = assert_raises(HTTP::RequestError) { build_body(IO.pipe[0]).size }
+    assert_match(/IO object must respond to #size/, err.message)
+  end
+
+  def test_size_error_when_body_is_an_enumerable_mentions_undetermined_size
+    body = %w[bees cows]
+    err = assert_raises(HTTP::RequestError) { build_body(body).size }
+    assert_match(/cannot determine size of body/, err.message)
+    assert_includes err.message, body.inspect
+    assert_match(/Content-Length/, err.message)
+    assert_match(/chunked Transfer-Encoding/, err.message)
+  end
+
+  # #initialize error messages
+
+  def test_initialize_error_when_body_is_of_unrecognized_type_mentions_wrong_type
+    err = assert_raises(HTTP::RequestError) { HTTP::Request::Body.new(123) }
+    assert_match(/body of wrong type/, err.message)
+    assert_match(/Integer/, err.message)
+  end
+
+  # String subclass
+
+  def test_string_subclass_does_not_raise_on_initialization
+    string_subclass = Class.new(String)
+    HTTP::Request::Body.new(string_subclass.new("subclass body"))
+  end
+
+  def test_string_subclass_returns_correct_size
+    string_subclass = Class.new(String)
+
+    assert_equal 13, build_body(string_subclass.new("subclass body")).size
+  end
+
+  def test_string_subclass_yields_the_string_in_each
+    string_subclass = Class.new(String)
+    subject = build_body(string_subclass.new("subclass body"))
+    chunks = subject.enum_for(:each).map(&:dup)
+
+    assert_equal ["subclass body"], chunks
+  end
+
+  def test_string_subclass_is_loggable
+    string_subclass = Class.new(String)
+
+    assert_predicate build_body(string_subclass.new("subclass body")), :loggable?
+  end
+
+  # Body subclass comparison
+
+  def test_comparing_with_a_body_subclass_returns_true_for_equivalent
+    subclass = Class.new(HTTP::Request::Body)
+    body1 = HTTP::Request::Body.new("content")
+    body2 = subclass.new("content")
+
+    assert_equal body1, body2
+  end
+
+  # ProcIO
+
+  def test_proc_io_write_calls_the_block_with_data_and_returns_bytesize
+    received = nil
+    block = proc { |data| received = data }
+    proc_io = HTTP::Request::Body::ProcIO.new(block)
+
+    result = proc_io.write("hello")
+
+    assert_equal "hello", received
+    assert_equal 5, result
+  end
+
+  def test_proc_io_write_returns_correct_bytesize_for_multibyte_strings
+    block = proc { |_| }
+    proc_io = HTTP::Request::Body::ProcIO.new(block)
+
+    # "Привет" is 12 bytes in UTF-8
+    result = proc_io.write("\u041F\u0440\u0438\u0432\u0435\u0442")
+
+    assert_equal 12, result
   end
 end

@@ -2,491 +2,501 @@
 
 require "test_helper"
 
-describe HTTP::Response do
+class HTTPResponseTest < Minitest::Test
   cover "HTTP::Response*"
-  let(:response) do
-    HTTP::Response.new(
-      status:  200,
-      version: "1.1",
-      headers: headers,
-      body:    body,
-      request: request
-    )
+
+  def build_response(status: 200, version: "1.1", headers: {}, body: "Hello world!", uri: "http://example.com/", **opts)
+    request = opts.delete(:request) || HTTP::Request.new(verb: :get, uri: uri)
+    HTTP::Response.new(status: status, version: version, headers: headers, body: body, request: request, **opts)
   end
 
-  let(:body)          { "Hello world!" }
-  let(:uri)           { "http://example.com/" }
-  let(:headers)       { {} }
-  let(:request)       { HTTP::Request.new(verb: :get, uri: uri) }
+  # ---------------------------------------------------------------------------
+  # #headers
+  # ---------------------------------------------------------------------------
+  def test_provides_a_headers_accessor
+    response = build_response
 
-  it "provides a #headers accessor" do
     assert_kind_of HTTP::Headers, response.headers
   end
 
-  describe "to_a" do
-    let(:body)         { "Hello world" }
-    let(:content_type) { "text/plain" }
-    let(:headers)      { { "Content-Type" => content_type } }
+  # ---------------------------------------------------------------------------
+  # #to_a
+  # ---------------------------------------------------------------------------
+  def test_to_a_returns_a_rack_like_array
+    headers = { "Content-Type" => "text/plain" }
+    response = build_response(headers: headers, body: "Hello world")
 
-    it "returns a Rack-like array" do
-      assert_equal [200, headers, body], response.to_a
-    end
-
-    it "returns an Integer status code" do
-      assert_instance_of Integer, response.to_a.fetch(0)
-    end
-
-    it "returns a plain Hash for headers" do
-      result = response.to_a.fetch(1)
-
-      assert_instance_of Hash, result
-      refute_instance_of HTTP::Headers, result
-    end
-
-    it "returns a String for body" do
-      conn = fake(sequence_id: 0, readpartial: proc { raise EOFError }, body_completed?: true)
-      resp = HTTP::Response.new(status: 200, version: "1.1", headers: headers,
-                                connection: conn, request: request)
-      result = resp.to_a.fetch(2)
-
-      assert_instance_of String, result
-      refute_instance_of HTTP::Response::Body, result
-    end
+    assert_equal [200, headers, "Hello world"], response.to_a
   end
 
-  describe "#deconstruct_keys" do
-    it "returns all keys when given nil" do
-      result = response.deconstruct_keys(nil)
+  def test_to_a_returns_an_integer_status_code
+    headers = { "Content-Type" => "text/plain" }
+    response = build_response(headers: headers, body: "Hello world")
 
-      assert_instance_of HTTP::Response::Status, result[:status]
-      assert_equal "1.1", result[:version]
-      assert_instance_of HTTP::Headers, result[:headers]
-      assert_equal body, result[:body]
-      assert_equal request, result[:request]
-      assert_instance_of HTTP::Headers, result[:proxy_headers]
-    end
-
-    it "returns only requested keys" do
-      result = response.deconstruct_keys(%i[status version])
-
-      assert_equal 2, result.size
-      assert_instance_of HTTP::Response::Status, result[:status]
-      assert_equal "1.1", result[:version]
-    end
-
-    it "excludes unrequested keys" do
-      result = response.deconstruct_keys([:status])
-
-      refute_includes result.keys, :version
-      refute_includes result.keys, :body
-    end
-
-    it "returns empty hash for empty keys" do
-      assert_equal({}, response.deconstruct_keys([]))
-    end
-
-    it "supports hash pattern matching" do
-      matched = case response
-                in { status: HTTP::Response::Status, version: "1.1" }
-                  true
-                else
-                  false
-                end
-
-      assert matched
-    end
+    assert_instance_of Integer, response.to_a.fetch(0)
   end
 
-  describe "#deconstruct" do
-    let(:body)         { "Hello world" }
-    let(:content_type) { "text/plain" }
-    let(:headers)      { { "Content-Type" => content_type } }
+  def test_to_a_returns_a_plain_hash_for_headers
+    headers = { "Content-Type" => "text/plain" }
+    response = build_response(headers: headers, body: "Hello world")
+    result = response.to_a.fetch(1)
 
-    it "returns a Rack-like array" do
-      assert_equal [200, headers, body], response.deconstruct
-    end
-
-    it "supports array pattern matching" do
-      matched = case response
-                in [200, *, String]
-                  true
-                else
-                  false
-                end
-
-      assert matched
-    end
+    assert_instance_of Hash, result
+    refute_instance_of HTTP::Headers, result
   end
 
-  describe "#content_length" do
-    context "without Content-Length header" do
-      it "returns nil" do
-        assert_nil response.content_length
-      end
-    end
+  def test_to_a_returns_a_string_for_body
+    request = HTTP::Request.new(verb: :get, uri: "http://example.com/")
+    headers = { "Content-Type" => "text/plain" }
+    conn = fake(sequence_id: 0, readpartial: proc { raise EOFError }, body_completed?: true)
+    resp = HTTP::Response.new(status: 200, version: "1.1", headers: headers,
+                              connection: conn, request: request)
+    result = resp.to_a.fetch(2)
 
-    context "with Content-Length: 5" do
-      let(:headers) { { "Content-Length" => "5" } }
-
-      it "returns 5" do
-        assert_equal 5, response.content_length
-      end
-    end
-
-    context "with invalid Content-Length" do
-      let(:headers) { { "Content-Length" => "foo" } }
-
-      it "returns nil" do
-        assert_nil response.content_length
-      end
-    end
-
-    context "with duplicate identical Content-Length" do
-      let(:headers) do
-        h = HTTP::Headers.new
-        h.add("Content-Length", "5")
-        h.add("Content-Length", "5")
-        h
-      end
-
-      it "returns the deduplicated value" do
-        assert_equal 5, response.content_length
-      end
-    end
-
-    context "with conflicting Content-Length values" do
-      let(:headers) do
-        h = HTTP::Headers.new
-        h.add("Content-Length", "5")
-        h.add("Content-Length", "10")
-        h
-      end
-
-      it "returns nil" do
-        assert_nil response.content_length
-      end
-    end
-
-    context "with Transfer-Encoding header" do
-      let(:headers) { { "Transfer-Encoding" => "chunked", "Content-Length" => "5" } }
-
-      it "returns nil" do
-        assert_nil response.content_length
-      end
-    end
+    assert_instance_of String, result
+    refute_instance_of HTTP::Response::Body, result
   end
 
-  describe "mime_type" do
-    context "without Content-Type header" do
-      let(:headers) { {} }
+  # ---------------------------------------------------------------------------
+  # #deconstruct_keys
+  # ---------------------------------------------------------------------------
+  def test_deconstruct_keys_returns_all_keys_when_given_nil
+    response = build_response
+    result = response.deconstruct_keys(nil)
 
-      it "returns nil" do
-        assert_nil response.mime_type
-      end
-    end
-
-    context "with Content-Type: text/html" do
-      let(:headers) { { "Content-Type" => "text/html" } }
-
-      it "returns text/html" do
-        assert_equal "text/html", response.mime_type
-      end
-    end
-
-    context "with Content-Type: text/html; charset=utf-8" do
-      let(:headers) { { "Content-Type" => "text/html; charset=utf-8" } }
-
-      it "returns text/html" do
-        assert_equal "text/html", response.mime_type
-      end
-    end
+    assert_instance_of HTTP::Response::Status, result[:status]
+    assert_equal "1.1", result[:version]
+    assert_instance_of HTTP::Headers, result[:headers]
+    assert_equal "Hello world!", result[:body]
+    assert_equal response.request, result[:request]
+    assert_instance_of HTTP::Headers, result[:proxy_headers]
   end
 
-  describe "charset" do
-    context "without Content-Type header" do
-      let(:headers) { {} }
+  def test_deconstruct_keys_returns_only_requested_keys
+    response = build_response
+    result = response.deconstruct_keys(%i[status version])
 
-      it "returns nil" do
-        assert_nil response.charset
-      end
-    end
-
-    context "with Content-Type: text/html" do
-      let(:headers) { { "Content-Type" => "text/html" } }
-
-      it "returns nil" do
-        assert_nil response.charset
-      end
-    end
-
-    context "with Content-Type: text/html; charset=utf-8" do
-      let(:headers) { { "Content-Type" => "text/html; charset=utf-8" } }
-
-      it "returns utf-8" do
-        assert_equal "utf-8", response.charset
-      end
-    end
+    assert_equal 2, result.size
+    assert_instance_of HTTP::Response::Status, result[:status]
+    assert_equal "1.1", result[:version]
   end
 
-  describe "#parse" do
-    let(:headers)   { { "Content-Type" => content_type } }
-    let(:body)      { '{"foo":"100%s"}' }
+  def test_deconstruct_keys_excludes_unrequested_keys
+    response = build_response
+    result = response.deconstruct_keys([:status])
 
-    context "with known content type" do
-      let(:content_type) { "application/json" }
-
-      it "returns parsed body" do
-        assert_equal({ "foo" => "100%s" }, response.parse)
-      end
-    end
-
-    context "with unknown content type" do
-      let(:content_type) { "application/deadbeef" }
-
-      it "raises HTTP::ParseError" do
-        assert_raises(HTTP::ParseError) { response.parse }
-      end
-    end
-
-    context "with explicitly given mime type" do
-      let(:content_type) { "application/deadbeef" }
-
-      it "ignores mime_type of response" do
-        assert_equal({ "foo" => "100%s" }, response.parse("application/json"))
-      end
-
-      it "supports mime type aliases" do
-        assert_equal({ "foo" => "100%s" }, response.parse(:json))
-      end
-    end
-
-    context "when underlying parser fails" do
-      let(:content_type) { "application/deadbeef" }
-      let(:body)         { "" }
-
-      it "raises HTTP::ParseError" do
-        assert_raises(HTTP::ParseError) { response.parse }
-      end
-
-      it "preserves the original error message" do
-        err = assert_raises(HTTP::ParseError) { response.parse }
-
-        assert_includes err.message, "application/deadbeef"
-      end
-    end
+    refute_includes result.keys, :version
+    refute_includes result.keys, :body
   end
 
-  describe "#flush" do
-    it "returns response self-reference" do
-      mock_body = fake(to_s: "")
-      resp = HTTP::Response.new(status: 200, version: "1.1", body: mock_body, request: request)
+  def test_deconstruct_keys_returns_empty_hash_for_empty_keys
+    response = build_response
 
-      assert_same resp, resp.flush
-    end
-
-    it "flushes body" do
-      to_s_called = false
-      mock_body = Object.new
-      mock_body.define_singleton_method(:to_s) do
-        to_s_called = true
-        ""
-      end
-      resp = HTTP::Response.new(status: 200, version: "1.1", body: mock_body, request: request)
-      resp.flush
-
-      assert to_s_called, "expected body.to_s to be called"
-    end
+    assert_equal({}, response.deconstruct_keys([]))
   end
 
-  describe "#inspect" do
-    let(:headers) { { content_type: "text/plain" } }
-    let(:body)    { fake(to_s: "foobar") }
+  def test_deconstruct_keys_supports_hash_pattern_matching
+    response = build_response
+    matched = case response
+              in { status: HTTP::Response::Status, version: "1.1" }
+                true
+              else
+                false
+              end
 
-    it "returns a useful string representation" do
-      assert_equal "#<HTTP::Response/1.1 200 OK text/plain>", response.inspect
-    end
+    assert matched
   end
 
-  describe "#cookies" do
-    let(:cookie_list) { response.cookies }
+  # ---------------------------------------------------------------------------
+  # #deconstruct
+  # ---------------------------------------------------------------------------
+  def test_deconstruct_returns_a_rack_like_array
+    headers = { "Content-Type" => "text/plain" }
+    response = build_response(headers: headers, body: "Hello world")
 
-    let(:cookies) { ["a=1", "b=2; domain=example.com", "c=3; domain=bad.org"] }
-    let(:headers) { { "Set-Cookie" => cookies } }
-
-    it "returns an Array of HTTP::Cookie" do
-      assert_kind_of Array, cookie_list
-      cookie_list.each { |c| assert_kind_of HTTP::Cookie, c }
-    end
-
-    it "contains cookies without domain restriction" do
-      assert_equal(1, cookie_list.count { |c| "a" == c.name })
-    end
-
-    it "contains cookies limited to domain of request uri" do
-      assert_equal(1, cookie_list.count { |c| "b" == c.name })
-    end
-
-    it "does not contain cookies limited to non-requested uri" do
-      assert_equal(0, cookie_list.count { |c| "c" == c.name })
-    end
+    assert_equal [200, headers, "Hello world"], response.deconstruct
   end
 
-  describe "#connection" do
-    let(:response) do
+  def test_deconstruct_supports_array_pattern_matching
+    headers = { "Content-Type" => "text/plain" }
+    response = build_response(headers: headers, body: "Hello world")
+    matched = case response
+              in [200, *, String]
+                true
+              else
+                false
+              end
+
+    assert matched
+  end
+
+  # ---------------------------------------------------------------------------
+  # #content_length
+  # ---------------------------------------------------------------------------
+  def test_content_length_without_header_returns_nil
+    response = build_response
+
+    assert_nil response.content_length
+  end
+
+  def test_content_length_with_content_length_5_returns_5
+    response = build_response(headers: { "Content-Length" => "5" })
+
+    assert_equal 5, response.content_length
+  end
+
+  def test_content_length_with_invalid_content_length_returns_nil
+    response = build_response(headers: { "Content-Length" => "foo" })
+
+    assert_nil response.content_length
+  end
+
+  def test_content_length_with_duplicate_identical_returns_deduplicated_value
+    h = HTTP::Headers.new
+    h.add("Content-Length", "5")
+    h.add("Content-Length", "5")
+    response = build_response(headers: h)
+
+    assert_equal 5, response.content_length
+  end
+
+  def test_content_length_with_conflicting_values_returns_nil
+    h = HTTP::Headers.new
+    h.add("Content-Length", "5")
+    h.add("Content-Length", "10")
+    response = build_response(headers: h)
+
+    assert_nil response.content_length
+  end
+
+  def test_content_length_with_transfer_encoding_header_returns_nil
+    response = build_response(headers: { "Transfer-Encoding" => "chunked", "Content-Length" => "5" })
+
+    assert_nil response.content_length
+  end
+
+  # ---------------------------------------------------------------------------
+  # #mime_type
+  # ---------------------------------------------------------------------------
+  def test_mime_type_without_content_type_returns_nil
+    response = build_response(headers: {})
+
+    assert_nil response.mime_type
+  end
+
+  def test_mime_type_with_text_html_returns_text_html
+    response = build_response(headers: { "Content-Type" => "text/html" })
+
+    assert_equal "text/html", response.mime_type
+  end
+
+  def test_mime_type_with_charset_returns_mime_type_only
+    response = build_response(headers: { "Content-Type" => "text/html; charset=utf-8" })
+
+    assert_equal "text/html", response.mime_type
+  end
+
+  # ---------------------------------------------------------------------------
+  # #charset
+  # ---------------------------------------------------------------------------
+  def test_charset_without_content_type_returns_nil
+    response = build_response(headers: {})
+
+    assert_nil response.charset
+  end
+
+  def test_charset_with_text_html_no_charset_returns_nil
+    response = build_response(headers: { "Content-Type" => "text/html" })
+
+    assert_nil response.charset
+  end
+
+  def test_charset_with_charset_utf8_returns_utf8
+    response = build_response(headers: { "Content-Type" => "text/html; charset=utf-8" })
+
+    assert_equal "utf-8", response.charset
+  end
+
+  # ---------------------------------------------------------------------------
+  # #parse
+  # ---------------------------------------------------------------------------
+  def test_parse_with_known_content_type_returns_parsed_body
+    response = build_response(headers: { "Content-Type" => "application/json" }, body: '{"foo":"100%s"}')
+
+    assert_equal({ "foo" => "100%s" }, response.parse)
+  end
+
+  def test_parse_with_unknown_content_type_raises_parse_error
+    response = build_response(headers: { "Content-Type" => "application/deadbeef" }, body: '{"foo":"100%s"}')
+
+    assert_raises(HTTP::ParseError) { response.parse }
+  end
+
+  def test_parse_with_explicit_mime_type_ignores_response_mime_type
+    response = build_response(headers: { "Content-Type" => "application/deadbeef" }, body: '{"foo":"100%s"}')
+
+    assert_equal({ "foo" => "100%s" }, response.parse("application/json"))
+  end
+
+  def test_parse_supports_mime_type_aliases
+    response = build_response(headers: { "Content-Type" => "application/deadbeef" }, body: '{"foo":"100%s"}')
+
+    assert_equal({ "foo" => "100%s" }, response.parse(:json))
+  end
+
+  def test_parse_when_underlying_parser_fails_raises_parse_error
+    response = build_response(headers: { "Content-Type" => "application/deadbeef" }, body: "")
+
+    assert_raises(HTTP::ParseError) { response.parse }
+  end
+
+  def test_parse_when_underlying_parser_fails_preserves_original_error_message
+    response = build_response(headers: { "Content-Type" => "application/deadbeef" }, body: "")
+    err = assert_raises(HTTP::ParseError) { response.parse }
+
+    assert_includes err.message, "application/deadbeef"
+  end
+
+  # ---------------------------------------------------------------------------
+  # #flush
+  # ---------------------------------------------------------------------------
+  def test_flush_returns_response_self_reference
+    request = HTTP::Request.new(verb: :get, uri: "http://example.com/")
+    mock_body = fake(to_s: "")
+    resp = HTTP::Response.new(status: 200, version: "1.1", body: mock_body, request: request)
+
+    assert_same resp, resp.flush
+  end
+
+  def test_flush_flushes_body
+    request = HTTP::Request.new(verb: :get, uri: "http://example.com/")
+    to_s_called = false
+    mock_body = Object.new
+    mock_body.define_singleton_method(:to_s) do
+      to_s_called = true
+      ""
+    end
+    resp = HTTP::Response.new(status: 200, version: "1.1", body: mock_body, request: request)
+    resp.flush
+
+    assert to_s_called, "expected body.to_s to be called"
+  end
+
+  # ---------------------------------------------------------------------------
+  # #inspect
+  # ---------------------------------------------------------------------------
+  def test_inspect_returns_useful_string_representation
+    response = build_response(headers: { content_type: "text/plain" }, body: fake(to_s: "foobar"))
+
+    assert_equal "#<HTTP::Response/1.1 200 OK text/plain>", response.inspect
+  end
+
+  # ---------------------------------------------------------------------------
+  # #cookies
+  # ---------------------------------------------------------------------------
+  def test_cookies_returns_an_array_of_http_cookie
+    cookies = ["a=1", "b=2; domain=example.com", "c=3; domain=bad.org"]
+    response = build_response(headers: { "Set-Cookie" => cookies })
+    cookie_list = response.cookies
+
+    assert_kind_of Array, cookie_list
+    cookie_list.each { |c| assert_kind_of HTTP::Cookie, c }
+  end
+
+  def test_cookies_contains_cookies_without_domain_restriction
+    cookies = ["a=1", "b=2; domain=example.com", "c=3; domain=bad.org"]
+    response = build_response(headers: { "Set-Cookie" => cookies })
+    cookie_list = response.cookies
+
+    assert_equal(1, cookie_list.count { |c| "a" == c.name })
+  end
+
+  def test_cookies_contains_cookies_limited_to_domain_of_request_uri
+    cookies = ["a=1", "b=2; domain=example.com", "c=3; domain=bad.org"]
+    response = build_response(headers: { "Set-Cookie" => cookies })
+    cookie_list = response.cookies
+
+    assert_equal(1, cookie_list.count { |c| "b" == c.name })
+  end
+
+  def test_cookies_does_not_contain_cookies_limited_to_non_requested_uri
+    cookies = ["a=1", "b=2; domain=example.com", "c=3; domain=bad.org"]
+    response = build_response(headers: { "Set-Cookie" => cookies })
+    cookie_list = response.cookies
+
+    assert_equal(0, cookie_list.count { |c| "c" == c.name })
+  end
+
+  # ---------------------------------------------------------------------------
+  # #connection
+  # ---------------------------------------------------------------------------
+  def test_connection_returns_connection_object
+    request = HTTP::Request.new(verb: :get, uri: "http://example.com/")
+    connection = fake
+    response = HTTP::Response.new(
+      version:    "1.1",
+      status:     200,
+      connection: connection,
+      request:    request
+    )
+
+    assert_equal connection, response.connection
+  end
+
+  # ---------------------------------------------------------------------------
+  # #chunked?
+  # ---------------------------------------------------------------------------
+  def test_chunked_returns_true_when_encoding_is_chunked
+    response = build_response(headers: { "Transfer-Encoding" => "chunked" })
+
+    assert_predicate response, :chunked?
+  end
+
+  def test_chunked_returns_false_by_default
+    response = build_response
+
+    refute_predicate response, :chunked?
+  end
+
+  # ---------------------------------------------------------------------------
+  # backwards compatibility with :uri
+  # ---------------------------------------------------------------------------
+  def test_backwards_compat_with_uri_defaults_uri
+    response = HTTP::Response.new(
+      status:  200,
+      version: "1.1",
+      headers: {},
+      body:    "Hello world!",
+      uri:     "http://example.com/"
+    )
+
+    assert_equal "http://example.com/", response.request.uri.to_s
+  end
+
+  def test_backwards_compat_with_uri_defaults_verb_to_get
+    response = HTTP::Response.new(
+      status:  200,
+      version: "1.1",
+      headers: {},
+      body:    "Hello world!",
+      uri:     "http://example.com/"
+    )
+
+    assert_equal :get, response.request.verb
+  end
+
+  def test_backwards_compat_with_both_request_and_uri_raises_argument_error
+    request = HTTP::Request.new(verb: :get, uri: "http://example.com/")
+    err = assert_raises(ArgumentError) do
       HTTP::Response.new(
-        version:    "1.1",
-        status:     200,
-        connection: connection,
-        request:    request
+        status:  200,
+        version: "1.1",
+        headers: {},
+        body:    "Hello world!",
+        uri:     "http://example.com/",
+        request: request
       )
     end
 
-    let(:connection) { fake }
-
-    it "returns the connection object used to instantiate the response" do
-      assert_equal connection, response.connection
-    end
+    assert_includes err.message, ":uri"
   end
 
-  describe "#chunked?" do
-    context "when encoding is set to chunked" do
-      let(:headers) { { "Transfer-Encoding" => "chunked" } }
+  # ---------------------------------------------------------------------------
+  # #body encoding
+  # ---------------------------------------------------------------------------
+  def test_body_with_no_content_type_returns_binary_encoding
+    request = HTTP::Request.new(verb: :get, uri: "http://example.com/")
+    chunks = ["Hello, ", "World!"]
+    connection = fake(sequence_id: 0, readpartial: proc { chunks.shift || raise(EOFError) }, body_completed?: proc {
+      chunks.empty?
+    })
+    response = HTTP::Response.new(
+      status: 200, version: "1.1", headers: {},
+      request: request, connection: connection
+    )
 
-      it "returns true" do
-        assert_predicate response, :chunked?
-      end
-    end
-
-    it "returns false by default" do
-      refute_predicate response, :chunked?
-    end
+    assert_equal Encoding::BINARY, response.body.to_s.encoding
   end
 
-  describe "backwards compatibility with :uri" do
-    context "with no :verb" do
-      let(:response) do
-        HTTP::Response.new(
-          status:  200,
-          version: "1.1",
-          headers: headers,
-          body:    body,
-          uri:     uri
-        )
-      end
+  def test_body_with_application_json_returns_utf8_encoding
+    request = HTTP::Request.new(verb: :get, uri: "http://example.com/")
+    chunks = ["Hello, ", "World!"]
+    connection = fake(sequence_id: 0, readpartial: proc { chunks.shift || raise(EOFError) }, body_completed?: proc {
+      chunks.empty?
+    })
+    response = HTTP::Response.new(
+      status: 200, version: "1.1", headers: { "Content-Type" => "application/json" },
+      request: request, connection: connection
+    )
 
-      it "defaults the uri to :uri" do
-        assert_equal uri, response.request.uri.to_s
-      end
-
-      it "defaults to the verb to :get" do
-        assert_equal :get, response.request.verb
-      end
-    end
-
-    context "with both a :request and :uri" do
-      it "raises ArgumentError with a descriptive message" do
-        err = assert_raises(ArgumentError) do
-          HTTP::Response.new(
-            status:  200,
-            version: "1.1",
-            headers: headers,
-            body:    body,
-            uri:     uri,
-            request: request
-          )
-        end
-
-        assert_includes err.message, ":uri"
-      end
-    end
+    assert_equal Encoding::UTF_8, response.body.to_s.encoding
   end
 
-  describe "#body" do
-    let(:response) do
-      HTTP::Response.new(
-        status:     200,
-        version:    "1.1",
-        headers:    headers,
-        request:    request,
-        connection: connection
-      )
-    end
+  def test_body_with_text_html_returns_binary_encoding
+    request = HTTP::Request.new(verb: :get, uri: "http://example.com/")
+    chunks = ["Hello, ", "World!"]
+    connection = fake(sequence_id: 0, readpartial: proc { chunks.shift || raise(EOFError) }, body_completed?: proc {
+      chunks.empty?
+    })
+    response = HTTP::Response.new(
+      status: 200, version: "1.1", headers: { "Content-Type" => "text/html" },
+      request: request, connection: connection
+    )
 
-    let(:connection) do
-      fake(sequence_id: 0, readpartial: proc { chunks.shift || raise(EOFError) }, body_completed?: proc {
-        chunks.empty?
-      })
-    end
-    let(:chunks)     { ["Hello, ", "World!"] }
-
-    context "with no Content-Type" do
-      let(:headers) { {} }
-
-      it "returns a body with default binary encoding" do
-        assert_equal Encoding::BINARY, response.body.to_s.encoding
-      end
-    end
-
-    context "with Content-Type: application/json" do
-      let(:headers) { { "Content-Type" => "application/json" } }
-
-      it "returns a body with a default UTF_8 encoding" do
-        assert_equal Encoding::UTF_8, response.body.to_s.encoding
-      end
-    end
-
-    context "with Content-Type: text/html (non-JSON)" do
-      let(:headers) { { "Content-Type" => "text/html" } }
-
-      it "returns a body with default binary encoding" do
-        assert_equal Encoding::BINARY, response.body.to_s.encoding
-      end
-    end
-
-    context "with Content-Type: text/html; charset=utf-8" do
-      let(:headers) { { "Content-Type" => "text/html; charset=utf-8" } }
-
-      it "uses charset for body encoding" do
-        assert_equal Encoding::UTF_8, response.body.to_s.encoding
-      end
-    end
-
-    context "with explicit encoding" do
-      let(:headers) { {} }
-
-      it "passes encoding to the body" do
-        conn = fake(sequence_id: 0, readpartial: proc { chunks.shift || raise(EOFError) },
-                    body_completed?: proc { chunks.empty? })
-        resp = HTTP::Response.new(
-          status: 200, version: "1.1", headers: headers,
-          request: request, connection: conn, encoding: "UTF-8"
-        )
-
-        assert_equal Encoding::UTF_8, resp.body.to_s.encoding
-      end
-    end
+    assert_equal Encoding::BINARY, response.body.to_s.encoding
   end
 
-  describe "#initialize defaults" do
-    it "defaults headers to empty" do
-      resp = HTTP::Response.new(status: 200, version: "1.1", body: "ok", request: request)
+  def test_body_with_charset_utf8_uses_charset_for_encoding
+    request = HTTP::Request.new(verb: :get, uri: "http://example.com/")
+    chunks = ["Hello, ", "World!"]
+    connection = fake(sequence_id: 0, readpartial: proc { chunks.shift || raise(EOFError) }, body_completed?: proc {
+      chunks.empty?
+    })
+    response = HTTP::Response.new(
+      status: 200, version: "1.1", headers: { "Content-Type" => "text/html; charset=utf-8" },
+      request: request, connection: connection
+    )
 
-      assert_empty resp.headers
-    end
+    assert_equal Encoding::UTF_8, response.body.to_s.encoding
+  end
 
-    it "defaults proxy_headers to empty" do
-      resp = HTTP::Response.new(status: 200, version: "1.1", body: "ok", request: request)
+  def test_body_with_explicit_encoding_passes_encoding_to_body
+    request = HTTP::Request.new(verb: :get, uri: "http://example.com/")
+    chunks = ["Hello, ", "World!"]
+    conn = fake(sequence_id: 0, readpartial: proc { chunks.shift || raise(EOFError) },
+                body_completed?: proc { chunks.empty? })
+    resp = HTTP::Response.new(
+      status: 200, version: "1.1", headers: {},
+      request: request, connection: conn, encoding: "UTF-8"
+    )
 
-      assert_empty resp.proxy_headers
-    end
+    assert_equal Encoding::UTF_8, resp.body.to_s.encoding
+  end
 
-    it "passes proxy_headers through to accessor" do
-      resp = HTTP::Response.new(
-        status: 200, version: "1.1", body: "ok", request: request,
-        proxy_headers: { "Via" => "1.1 proxy" }
-      )
+  # ---------------------------------------------------------------------------
+  # #initialize defaults
+  # ---------------------------------------------------------------------------
+  def test_initialize_defaults_headers_to_empty
+    request = HTTP::Request.new(verb: :get, uri: "http://example.com/")
+    resp = HTTP::Response.new(status: 200, version: "1.1", body: "ok", request: request)
 
-      assert_equal "1.1 proxy", resp.proxy_headers["Via"]
-    end
+    assert_empty resp.headers
+  end
+
+  def test_initialize_defaults_proxy_headers_to_empty
+    request = HTTP::Request.new(verb: :get, uri: "http://example.com/")
+    resp = HTTP::Response.new(status: 200, version: "1.1", body: "ok", request: request)
+
+    assert_empty resp.proxy_headers
+  end
+
+  def test_initialize_passes_proxy_headers_through_to_accessor
+    request = HTTP::Request.new(verb: :get, uri: "http://example.com/")
+    resp = HTTP::Response.new(
+      status: 200, version: "1.1", body: "ok", request: request,
+      proxy_headers: { "Via" => "1.1 proxy" }
+    )
+
+    assert_equal "1.1 proxy", resp.proxy_headers["Via"]
   end
 end

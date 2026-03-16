@@ -2,423 +2,390 @@
 
 require "test_helper"
 
-describe HTTP::Request::Writer do
+class HTTPRequestWriterTest < Minitest::Test
   cover "HTTP::Request::Writer*"
-  let(:writer)      { HTTP::Request::Writer.new(io, body, headers, headerstart) }
 
-  let(:io)          { StringIO.new }
-  let(:body)        { HTTP::Request::Body.new("") }
-  let(:headers)     { HTTP::Headers.new }
-  let(:headerstart) { "GET /test HTTP/1.1" }
-
-  describe "#stream" do
-    context "when multiple headers are set" do
-      let(:headers) { HTTP::Headers.coerce "Host" => "example.org" }
-
-      it "separates headers with carriage return and line feed" do
-        writer.stream
-
-        assert_equal [
-          "#{headerstart}\r\n",
-          "Host: example.org\r\nContent-Length: 0\r\n\r\n"
-        ].join, io.string
-      end
-    end
-
-    context "when headers are specified as strings with mixed case" do
-      let(:headers) { HTTP::Headers.coerce "content-Type" => "text", "X_MAX" => "200" }
-
-      it "writes the headers with the same casing" do
-        writer.stream
-
-        assert_equal [
-          "#{headerstart}\r\n",
-          "content-Type: text\r\nX_MAX: 200\r\nContent-Length: 0\r\n\r\n"
-        ].join, io.string
-      end
-    end
-
-    context "when body is nonempty" do
-      let(:body) { HTTP::Request::Body.new("content") }
-
-      it "writes it to the socket and sets Content-Length" do
-        writer.stream
-
-        assert_equal [
-          "#{headerstart}\r\n",
-          "Content-Length: 7\r\n\r\n",
-          "content"
-        ].join, io.string
-      end
-    end
-
-    context "when body is not set" do
-      let(:body) { HTTP::Request::Body.new(nil) }
-
-      it "doesn't write anything to the socket and doesn't set Content-Length" do
-        writer.stream
-
-        assert_equal "#{headerstart}\r\n\r\n", io.string
-      end
-    end
-
-    context "when body is empty" do
-      let(:body) { HTTP::Request::Body.new("") }
-
-      it "doesn't write anything to the socket and sets Content-Length" do
-        writer.stream
-
-        assert_equal [
-          "#{headerstart}\r\n",
-          "Content-Length: 0\r\n\r\n"
-        ].join, io.string
-      end
-    end
-
-    context "when Content-Length header is set" do
-      let(:headers) { HTTP::Headers.coerce "Content-Length" => "12" }
-      let(:body)    { HTTP::Request::Body.new("content") }
-
-      it "keeps the given value" do
-        writer.stream
-
-        assert_equal [
-          "#{headerstart}\r\n",
-          "Content-Length: 12\r\n\r\n",
-          "content"
-        ].join, io.string
-      end
-    end
-
-    context "when Transfer-Encoding is chunked" do
-      let(:headers) { HTTP::Headers.coerce "Transfer-Encoding" => "chunked" }
-      let(:body)    { HTTP::Request::Body.new(%w[request body]) }
-
-      it "writes encoded content and omits Content-Length" do
-        writer.stream
-
-        assert_equal [
-          "#{headerstart}\r\n",
-          "Transfer-Encoding: chunked\r\n\r\n",
-          "7\r\nrequest\r\n4\r\nbody\r\n0\r\n\r\n"
-        ].join, io.string
-      end
-    end
-
-    context "when Transfer-Encoding is chunked with body size >= 10" do
-      let(:headers) { HTTP::Headers.coerce "Transfer-Encoding" => "chunked" }
-      let(:body)    { HTTP::Request::Body.new(["a" * 255]) }
-
-      it "encodes chunk size in hexadecimal" do
-        writer.stream
-
-        assert_includes io.string, "ff\r\n#{'a' * 255}\r\n"
-      end
-    end
-
-    context "when Transfer-Encoding is not chunked" do
-      let(:headers) { HTTP::Headers.coerce "Transfer-Encoding" => "gzip" }
-      let(:body)    { HTTP::Request::Body.new("content") }
-
-      it "does not treat as chunked encoding" do
-        writer.stream
-
-        refute_includes io.string, "0\r\n\r\n"
-        assert_includes io.string, "content"
-      end
-
-      it "returns false from chunked?" do
-        refute_predicate writer, :chunked?
-      end
-    end
-
-    context "when server won't accept any more data" do
-      it "aborts silently" do
-        mock_io = Object.new
-        mock_io.define_singleton_method(:write) { |*| raise Errno::EPIPE }
-        w = HTTP::Request::Writer.new(mock_io, body, headers, headerstart)
-        w.stream
-      end
-    end
-
-    context "when body is nil on a POST request" do
-      let(:headerstart) { "POST /test HTTP/1.1" }
-      let(:body)        { HTTP::Request::Body.new(nil) }
-
-      it "sets Content-Length to 0" do
-        writer.stream
-
-        assert_equal "POST /test HTTP/1.1\r\nContent-Length: 0\r\n\r\n", io.string
-      end
-    end
-
-    context "when body is nil on a HEAD request" do
-      let(:headerstart) { "HEAD /test HTTP/1.1" }
-      let(:headers)     { HTTP::Headers.coerce "Host" => "example.org" }
-      let(:body)        { HTTP::Request::Body.new(nil) }
-
-      it "omits Content-Length" do
-        writer.stream
-
-        refute_includes io.string, "Content-Length"
-      end
-    end
-
-    context "when body is nil on a DELETE request" do
-      let(:headerstart) { "DELETE /test HTTP/1.1" }
-      let(:headers)     { HTTP::Headers.coerce "Host" => "example.org" }
-      let(:body)        { HTTP::Request::Body.new(nil) }
-
-      it "omits Content-Length" do
-        writer.stream
-
-        refute_includes io.string, "Content-Length"
-      end
-    end
-
-    context "when body is nil on a CONNECT request" do
-      let(:headerstart) { "CONNECT example.com:443 HTTP/1.1" }
-      let(:headers)     { HTTP::Headers.coerce "Host" => "example.com:443" }
-      let(:body)        { HTTP::Request::Body.new(nil) }
-
-      it "omits Content-Length" do
-        writer.stream
-
-        refute_includes io.string, "Content-Length"
-      end
-    end
-
-    context "when writing to socket raises an exception" do
-      it "raises a ConnectionError" do
-        mock_io = Object.new
-        mock_io.define_singleton_method(:write) { |*| raise Errno::ECONNRESET }
-        w = HTTP::Request::Writer.new(mock_io, body, headers, headerstart)
-        assert_raises(HTTP::ConnectionError) { w.stream }
-      end
-
-      it "includes original error message" do
-        mock_io = Object.new
-        mock_io.define_singleton_method(:write) { |*| raise Errno::ECONNRESET }
-        w = HTTP::Request::Writer.new(mock_io, body, headers, headerstart)
-        err = assert_raises(HTTP::ConnectionError) { w.stream }
-
-        assert_includes err.message, "error writing to socket:"
-        assert_includes err.message, "Connection reset by peer"
-      end
-
-      it "preserves original error backtrace" do
-        mock_io = Object.new
-        mock_io.define_singleton_method(:write) { |*| raise Errno::ECONNRESET }
-        w = HTTP::Request::Writer.new(mock_io, body, headers, headerstart)
-        err = assert_raises(HTTP::ConnectionError) { w.stream }
-
-        assert_includes err.backtrace.first, "writer_test.rb"
-      end
-    end
-
-    context "when socket performs partial writes" do
-      it "writes remaining data in subsequent calls" do
-        written = []
-        call_count = 0
-        mock_io = Object.new
-        mock_io.define_singleton_method(:write) do |data|
-          call_count += 1
-          bytes = call_count == 1 ? [5, data.bytesize].min : data.bytesize
-          written << data.byteslice(0, bytes)
-          bytes
-        end
-
-        body = HTTP::Request::Body.new("HelloWorld")
-        w = HTTP::Request::Writer.new(mock_io, body, HTTP::Headers.new, headerstart)
-        w.stream
-
-        full_output = written.join
-
-        assert_includes full_output, "HelloWorld"
-      end
-    end
+  def build_writer(io: StringIO.new, body: HTTP::Request::Body.new(""), headers: HTTP::Headers.new,
+                   headerstart: "GET /test HTTP/1.1")
+    HTTP::Request::Writer.new(io, body, headers, headerstart)
   end
 
-  describe "#connect_through_proxy" do
-    it "writes headers without body" do
-      writer.connect_through_proxy
+  # #stream
 
-      assert_equal "GET /test HTTP/1.1\r\n\r\n", io.string
-    end
+  def test_stream_with_multiple_headers_separates_with_crlf
+    io = StringIO.new
+    headers = HTTP::Headers.coerce "Host" => "example.org"
+    headerstart = "GET /test HTTP/1.1"
+    writer = build_writer(io: io, headers: headers, headerstart: headerstart)
+    writer.stream
 
-    context "with headers" do
-      let(:headers) { HTTP::Headers.coerce "Host" => "example.org" }
-
-      it "includes headers in the output" do
-        writer.connect_through_proxy
-
-        assert_equal "GET /test HTTP/1.1\r\nHost: example.org\r\n\r\n", io.string
-      end
-    end
-
-    context "when socket raises EPIPE" do
-      it "propagates the error" do
-        mock_io = Object.new
-        mock_io.define_singleton_method(:write) { |*| raise Errno::EPIPE }
-        w = HTTP::Request::Writer.new(mock_io, body, headers, headerstart)
-
-        assert_raises(Errno::EPIPE) { w.connect_through_proxy }
-      end
-    end
+    assert_equal [
+      "#{headerstart}\r\n",
+      "Host: example.org\r\nContent-Length: 0\r\n\r\n"
+    ].join, io.string
   end
 
-  describe "#each_chunk" do
-    context "when body has content" do
-      let(:body) { HTTP::Request::Body.new("content") }
+  def test_stream_with_mixed_case_headers_writes_with_same_casing
+    io = StringIO.new
+    headers = HTTP::Headers.coerce "content-Type" => "text", "X_MAX" => "200"
+    headerstart = "GET /test HTTP/1.1"
+    writer = build_writer(io: io, headers: headers, headerstart: headerstart)
+    writer.stream
 
-      it "yields headers combined with first chunk" do
-        writer.add_headers
-        writer.add_body_type_headers
-        chunks = []
-        writer.each_chunk { |chunk| chunks << chunk.dup }
-
-        assert_equal 1, chunks.length
-        assert_includes chunks.first, "content"
-      end
-    end
-
-    context "when body is empty" do
-      let(:body) { HTTP::Request::Body.new("") }
-
-      it "yields headers only once" do
-        writer.add_headers
-        writer.add_body_type_headers
-        chunks = []
-        writer.each_chunk { |chunk| chunks << chunk.dup }
-
-        assert_equal 1, chunks.length
-        assert_includes chunks.first, headerstart
-      end
-    end
+    assert_equal [
+      "#{headerstart}\r\n",
+      "content-Type: text\r\nX_MAX: 200\r\nContent-Length: 0\r\n\r\n"
+    ].join, io.string
   end
 
-  describe "#add_body_type_headers" do
-    # Kills mutations:
-    # - @request_header[0] -> @request_header.at(0)
-    # - @request_header[0] -> @request_header.fetch(0)
-    # Both are equivalent for arrays, so these are namespace-equivalent mutations.
-    context "when body is nil on a PUT request" do
-      let(:headerstart) { "PUT /test HTTP/1.1" }
-      let(:body)        { HTTP::Request::Body.new(nil) }
+  def test_stream_with_nonempty_body_writes_body_and_sets_content_length
+    io = StringIO.new
+    body = HTTP::Request::Body.new("content")
+    headerstart = "GET /test HTTP/1.1"
+    writer = build_writer(io: io, body: body, headerstart: headerstart)
+    writer.stream
 
-      it "sets Content-Length to 0" do
-        writer.stream
-
-        assert_includes io.string, "Content-Length: 0"
-      end
-    end
-
-    context "when body is nil on a PATCH request" do
-      let(:headerstart) { "PATCH /test HTTP/1.1" }
-      let(:body)        { HTTP::Request::Body.new(nil) }
-
-      it "sets Content-Length to 0" do
-        writer.stream
-
-        assert_includes io.string, "Content-Length: 0"
-      end
-    end
-
-    context "when body is nil on an OPTIONS request" do
-      let(:headerstart) { "OPTIONS /test HTTP/1.1" }
-      let(:body)        { HTTP::Request::Body.new(nil) }
-
-      it "sets Content-Length to 0" do
-        writer.stream
-
-        assert_includes io.string, "Content-Length: 0"
-      end
-    end
+    assert_equal [
+      "#{headerstart}\r\n",
+      "Content-Length: 7\r\n\r\n",
+      "content"
+    ].join, io.string
   end
 
-  describe "#write (private) partial write handling" do
-    # Kills mutations on the write method's loop:
-    # - until data.empty? -> until nil / until false
-    # - unless data.bytesize > length -> unless length / unless true / unless data.bytesize
-    # - removing the break / unless block
-    # - data = data.byteslice(length..-1) -> data = data / data.byteslice(nil..-1) / data.byteslice(length..nil)
-    # - break -> nil
-    context "when socket performs partial writes" do
-      it "writes exactly the correct bytes with no duplication or loss" do
-        # Track every byte written to the socket
-        written_data = +""
-        write_calls = 0
-        mock_io = Object.new
-        mock_io.define_singleton_method(:write) do |data|
-          write_calls += 1
-          # Only write 2 bytes per call to force multiple iterations
-          bytes = [2, data.bytesize].min
-          written_data << data.byteslice(0, bytes)
-          bytes
-        end
+  def test_stream_when_body_is_not_set_does_not_write_body_or_content_length
+    io = StringIO.new
+    body = HTTP::Request::Body.new(nil)
+    headerstart = "GET /test HTTP/1.1"
+    writer = build_writer(io: io, body: body, headerstart: headerstart)
+    writer.stream
 
-        # Use a known body so we can verify exact output
-        body = HTTP::Request::Body.new("ABCDEF")
-        w = HTTP::Request::Writer.new(mock_io, body, HTTP::Headers.new, headerstart)
-        w.stream
+    assert_equal "#{headerstart}\r\n\r\n", io.string
+  end
 
-        # The full output should contain the headers + body exactly once
-        assert_includes written_data, "ABCDEF"
-        # Body should appear exactly once (no duplication from loop bugs)
-        body_start = written_data.index("ABCDEF")
+  def test_stream_when_body_is_empty_sets_content_length_zero
+    io = StringIO.new
+    body = HTTP::Request::Body.new("")
+    headerstart = "GET /test HTTP/1.1"
+    writer = build_writer(io: io, body: body, headerstart: headerstart)
+    writer.stream
 
-        refute_nil body_start
-        assert_nil written_data.index("ABCDEF", body_start + 1)
-        # Multiple write calls are needed due to partial writes
-        assert_operator write_calls, :>, 1
+    assert_equal [
+      "#{headerstart}\r\n",
+      "Content-Length: 0\r\n\r\n"
+    ].join, io.string
+  end
+
+  def test_stream_when_content_length_header_is_set_keeps_given_value
+    io = StringIO.new
+    headers = HTTP::Headers.coerce "Content-Length" => "12"
+    body = HTTP::Request::Body.new("content")
+    headerstart = "GET /test HTTP/1.1"
+    writer = build_writer(io: io, body: body, headers: headers, headerstart: headerstart)
+    writer.stream
+
+    assert_equal [
+      "#{headerstart}\r\n",
+      "Content-Length: 12\r\n\r\n",
+      "content"
+    ].join, io.string
+  end
+
+  def test_stream_when_transfer_encoding_is_chunked_writes_encoded_content
+    io = StringIO.new
+    headers = HTTP::Headers.coerce "Transfer-Encoding" => "chunked"
+    body = HTTP::Request::Body.new(%w[request body])
+    headerstart = "GET /test HTTP/1.1"
+    writer = build_writer(io: io, body: body, headers: headers, headerstart: headerstart)
+    writer.stream
+
+    assert_equal [
+      "#{headerstart}\r\n",
+      "Transfer-Encoding: chunked\r\n\r\n",
+      "7\r\nrequest\r\n4\r\nbody\r\n0\r\n\r\n"
+    ].join, io.string
+  end
+
+  def test_stream_when_transfer_encoding_chunked_with_large_body_encodes_hex
+    io = StringIO.new
+    headers = HTTP::Headers.coerce "Transfer-Encoding" => "chunked"
+    body = HTTP::Request::Body.new(["a" * 255])
+    headerstart = "GET /test HTTP/1.1"
+    writer = build_writer(io: io, body: body, headers: headers, headerstart: headerstart)
+    writer.stream
+
+    assert_includes io.string, "ff\r\n#{'a' * 255}\r\n"
+  end
+
+  def test_stream_when_transfer_encoding_is_not_chunked_does_not_treat_as_chunked
+    io = StringIO.new
+    headers = HTTP::Headers.coerce "Transfer-Encoding" => "gzip"
+    body = HTTP::Request::Body.new("content")
+    headerstart = "GET /test HTTP/1.1"
+    writer = build_writer(io: io, body: body, headers: headers, headerstart: headerstart)
+    writer.stream
+
+    refute_includes io.string, "0\r\n\r\n"
+    assert_includes io.string, "content"
+  end
+
+  def test_stream_when_transfer_encoding_is_not_chunked_returns_false_from_chunked
+    headers = HTTP::Headers.coerce "Transfer-Encoding" => "gzip"
+    body = HTTP::Request::Body.new("content")
+    writer = build_writer(body: body, headers: headers)
+
+    refute_predicate writer, :chunked?
+  end
+
+  def test_stream_when_server_wont_accept_data_aborts_silently
+    mock_io = Object.new
+    mock_io.define_singleton_method(:write) { |*| raise Errno::EPIPE }
+    body = HTTP::Request::Body.new("")
+    headers = HTTP::Headers.new
+    w = HTTP::Request::Writer.new(mock_io, body, headers, "GET /test HTTP/1.1")
+    w.stream
+  end
+
+  def test_stream_when_body_is_nil_on_post_request_sets_content_length_to_zero
+    io = StringIO.new
+    body = HTTP::Request::Body.new(nil)
+    writer = build_writer(io: io, body: body, headerstart: "POST /test HTTP/1.1")
+    writer.stream
+
+    assert_equal "POST /test HTTP/1.1\r\nContent-Length: 0\r\n\r\n", io.string
+  end
+
+  def test_stream_when_body_is_nil_on_head_request_omits_content_length
+    io = StringIO.new
+    headers = HTTP::Headers.coerce "Host" => "example.org"
+    body = HTTP::Request::Body.new(nil)
+    writer = build_writer(io: io, body: body, headers: headers, headerstart: "HEAD /test HTTP/1.1")
+    writer.stream
+
+    refute_includes io.string, "Content-Length"
+  end
+
+  def test_stream_when_body_is_nil_on_delete_request_omits_content_length
+    io = StringIO.new
+    headers = HTTP::Headers.coerce "Host" => "example.org"
+    body = HTTP::Request::Body.new(nil)
+    writer = build_writer(io: io, body: body, headers: headers, headerstart: "DELETE /test HTTP/1.1")
+    writer.stream
+
+    refute_includes io.string, "Content-Length"
+  end
+
+  def test_stream_when_body_is_nil_on_connect_request_omits_content_length
+    io = StringIO.new
+    headers = HTTP::Headers.coerce "Host" => "example.com:443"
+    body = HTTP::Request::Body.new(nil)
+    writer = build_writer(io: io, body: body, headers: headers, headerstart: "CONNECT example.com:443 HTTP/1.1")
+    writer.stream
+
+    refute_includes io.string, "Content-Length"
+  end
+
+  def test_stream_when_socket_raises_exception_raises_connection_error
+    mock_io = Object.new
+    mock_io.define_singleton_method(:write) { |*| raise Errno::ECONNRESET }
+    body = HTTP::Request::Body.new("")
+    headers = HTTP::Headers.new
+    w = HTTP::Request::Writer.new(mock_io, body, headers, "GET /test HTTP/1.1")
+
+    assert_raises(HTTP::ConnectionError) { w.stream }
+  end
+
+  def test_stream_when_socket_raises_exception_includes_original_error_message
+    mock_io = Object.new
+    mock_io.define_singleton_method(:write) { |*| raise Errno::ECONNRESET }
+    body = HTTP::Request::Body.new("")
+    headers = HTTP::Headers.new
+    w = HTTP::Request::Writer.new(mock_io, body, headers, "GET /test HTTP/1.1")
+    err = assert_raises(HTTP::ConnectionError) { w.stream }
+
+    assert_includes err.message, "error writing to socket:"
+    assert_includes err.message, "Connection reset by peer"
+  end
+
+  def test_stream_when_socket_raises_exception_preserves_original_backtrace
+    mock_io = Object.new
+    mock_io.define_singleton_method(:write) { |*| raise Errno::ECONNRESET }
+    body = HTTP::Request::Body.new("")
+    headers = HTTP::Headers.new
+    w = HTTP::Request::Writer.new(mock_io, body, headers, "GET /test HTTP/1.1")
+    err = assert_raises(HTTP::ConnectionError) { w.stream }
+
+    assert_includes err.backtrace.first, "writer_test.rb"
+  end
+
+  def test_stream_when_socket_performs_partial_writes_writes_remaining_data
+    written = []
+    call_count = 0
+    mock_io = Object.new
+    mock_io.define_singleton_method(:write) do |data|
+      call_count += 1
+      bytes = call_count == 1 ? [5, data.bytesize].min : data.bytesize
+      written << data.byteslice(0, bytes)
+      bytes
+    end
+
+    body = HTTP::Request::Body.new("HelloWorld")
+    w = HTTP::Request::Writer.new(mock_io, body, HTTP::Headers.new, "GET /test HTTP/1.1")
+    w.stream
+
+    full_output = written.join
+
+    assert_includes full_output, "HelloWorld"
+  end
+
+  # #connect_through_proxy
+
+  def test_connect_through_proxy_writes_headers_without_body
+    io = StringIO.new
+    writer = build_writer(io: io)
+    writer.connect_through_proxy
+
+    assert_equal "GET /test HTTP/1.1\r\n\r\n", io.string
+  end
+
+  def test_connect_through_proxy_with_headers_includes_headers
+    io = StringIO.new
+    headers = HTTP::Headers.coerce "Host" => "example.org"
+    writer = build_writer(io: io, headers: headers)
+    writer.connect_through_proxy
+
+    assert_equal "GET /test HTTP/1.1\r\nHost: example.org\r\n\r\n", io.string
+  end
+
+  def test_connect_through_proxy_when_socket_raises_epipe_propagates_error
+    mock_io = Object.new
+    mock_io.define_singleton_method(:write) { |*| raise Errno::EPIPE }
+    body = HTTP::Request::Body.new("")
+    headers = HTTP::Headers.new
+    w = HTTP::Request::Writer.new(mock_io, body, headers, "GET /test HTTP/1.1")
+
+    assert_raises(Errno::EPIPE) { w.connect_through_proxy }
+  end
+
+  # #each_chunk
+
+  def test_each_chunk_when_body_has_content_yields_headers_combined_with_first_chunk
+    body = HTTP::Request::Body.new("content")
+    writer = build_writer(body: body)
+    writer.add_headers
+    writer.add_body_type_headers
+    chunks = []
+    writer.each_chunk { |chunk| chunks << chunk.dup }
+
+    assert_equal 1, chunks.length
+    assert_includes chunks.first, "content"
+  end
+
+  def test_each_chunk_when_body_is_empty_yields_headers_only_once
+    body = HTTP::Request::Body.new("")
+    headerstart = "GET /test HTTP/1.1"
+    writer = build_writer(body: body, headerstart: headerstart)
+    writer.add_headers
+    writer.add_body_type_headers
+    chunks = []
+    writer.each_chunk { |chunk| chunks << chunk.dup }
+
+    assert_equal 1, chunks.length
+    assert_includes chunks.first, headerstart
+  end
+
+  # #add_body_type_headers
+
+  def test_add_body_type_headers_when_body_is_nil_on_put_sets_content_length_zero
+    io = StringIO.new
+    body = HTTP::Request::Body.new(nil)
+    writer = build_writer(io: io, body: body, headerstart: "PUT /test HTTP/1.1")
+    writer.stream
+
+    assert_includes io.string, "Content-Length: 0"
+  end
+
+  def test_add_body_type_headers_when_body_is_nil_on_patch_sets_content_length_zero
+    io = StringIO.new
+    body = HTTP::Request::Body.new(nil)
+    writer = build_writer(io: io, body: body, headerstart: "PATCH /test HTTP/1.1")
+    writer.stream
+
+    assert_includes io.string, "Content-Length: 0"
+  end
+
+  def test_add_body_type_headers_when_body_is_nil_on_options_sets_content_length_zero
+    io = StringIO.new
+    body = HTTP::Request::Body.new(nil)
+    writer = build_writer(io: io, body: body, headerstart: "OPTIONS /test HTTP/1.1")
+    writer.stream
+
+    assert_includes io.string, "Content-Length: 0"
+  end
+
+  # #write (private) partial write handling
+
+  def test_write_partial_writes_exact_correct_bytes_no_duplication
+    written_data = +""
+    write_calls = 0
+    mock_io = Object.new
+    mock_io.define_singleton_method(:write) do |data|
+      write_calls += 1
+      bytes = [2, data.bytesize].min
+      written_data << data.byteslice(0, bytes)
+      bytes
+    end
+
+    body = HTTP::Request::Body.new("ABCDEF")
+    headerstart = "GET /test HTTP/1.1"
+    w = HTTP::Request::Writer.new(mock_io, body, HTTP::Headers.new, headerstart)
+    w.stream
+
+    assert_includes written_data, "ABCDEF"
+    body_start = written_data.index("ABCDEF")
+
+    refute_nil body_start
+    assert_nil written_data.index("ABCDEF", body_start + 1)
+    assert_operator write_calls, :>, 1
+  end
+
+  def test_write_when_socket_writes_all_bytes_at_once_calls_write_once
+    write_calls = 0
+    mock_io = Object.new
+    mock_io.define_singleton_method(:write) do |data|
+      write_calls += 1
+      data.bytesize
+    end
+
+    body = HTTP::Request::Body.new("Hello")
+    w = HTTP::Request::Writer.new(mock_io, body, HTTP::Headers.new, "GET /test HTTP/1.1")
+    w.stream
+
+    assert_equal 1, write_calls
+  end
+
+  def test_write_when_data_is_split_across_two_writes_correctly_slices_remaining
+    written_chunks = []
+    call_count = 0
+    mock_io = Object.new
+    mock_io.define_singleton_method(:write) do |data|
+      call_count += 1
+      written_chunks << data.dup
+      if call_count == 1
+        [5, data.bytesize].min
+      else
+        data.bytesize
       end
     end
 
-    context "when socket writes all bytes at once" do
-      it "calls write only once per data chunk" do
-        write_calls = 0
-        mock_io = Object.new
-        mock_io.define_singleton_method(:write) do |data|
-          write_calls += 1
-          data.bytesize
-        end
+    body = HTTP::Request::Body.new("TESTDATA123")
+    headerstart = "GET /test HTTP/1.1"
+    w = HTTP::Request::Writer.new(mock_io, body, HTTP::Headers.new, headerstart)
+    w.stream
 
-        body = HTTP::Request::Body.new("Hello")
-        w = HTTP::Request::Writer.new(mock_io, body, HTTP::Headers.new, headerstart)
-        w.stream
+    full_output = written_chunks.map { |c| c.byteslice(0, [5, c.bytesize].min) }.first +
+                  written_chunks[1..].join
 
-        # Should write only once since all bytes were accepted
-        assert_equal 1, write_calls
-      end
-    end
-
-    context "when data is split across exactly two writes" do
-      it "correctly slices remaining data after first partial write" do
-        written_chunks = []
-        call_count = 0
-        mock_io = Object.new
-        mock_io.define_singleton_method(:write) do |data|
-          call_count += 1
-          written_chunks << data.dup
-          if call_count == 1
-            # Write only 5 bytes of the first chunk (headers + body combined)
-            [5, data.bytesize].min
-          else
-            data.bytesize
-          end
-        end
-
-        body = HTTP::Request::Body.new("TESTDATA123")
-        w = HTTP::Request::Writer.new(mock_io, body, HTTP::Headers.new, headerstart)
-        w.stream
-
-        full_output = written_chunks.map { |c| c.byteslice(0, [5, c.bytesize].min) }.first +
-                      written_chunks[1..].join
-
-        assert_includes full_output, "TESTDATA123"
-        # Second call should have the REMAINDER, not the full data
-        assert_operator written_chunks[1].bytesize, :<, written_chunks[0].bytesize
-      end
-    end
+    assert_includes full_output, "TESTDATA123"
+    assert_operator written_chunks[1].bytesize, :<, written_chunks[0].bytesize
   end
 end

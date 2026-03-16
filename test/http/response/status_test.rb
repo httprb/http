@@ -2,50 +2,55 @@
 
 require "test_helper"
 
-describe HTTP::Response::Status do
+class HTTPResponseStatusTest < Minitest::Test
   cover "HTTP::Response::Status*"
-  describe ".new" do
-    it "fails if given value does not respond to #to_i" do
-      assert_raises(TypeError) { HTTP::Response::Status.new(Object.new) }
+
+  # ---------------------------------------------------------------------------
+  # .new
+  # ---------------------------------------------------------------------------
+  def test_new_fails_if_given_value_does_not_respond_to_to_i
+    assert_raises(TypeError) { HTTP::Response::Status.new(Object.new) }
+  end
+
+  def test_new_accepts_any_object_that_responds_to_to_i
+    HTTP::Response::Status.new(fake(to_i: 200))
+  end
+
+  # ---------------------------------------------------------------------------
+  # #code
+  # ---------------------------------------------------------------------------
+  def test_code_returns_the_integer_code
+    status = HTTP::Response::Status.new("200.0")
+
+    assert_equal 200, status.code
+  end
+
+  def test_code_is_an_integer
+    status = HTTP::Response::Status.new("200.0")
+
+    assert_kind_of Integer, status.code
+  end
+
+  # ---------------------------------------------------------------------------
+  # #reason
+  # ---------------------------------------------------------------------------
+  def test_reason_with_unknown_code_returns_nil
+    assert_nil HTTP::Response::Status.new(1024).reason
+  end
+
+  HTTP::Response::Status::REASONS.each do |code, reason|
+    define_method(:"test_reason_#{code}_returns_#{reason.downcase.gsub(/[^a-z0-9]/, '_')}") do
+      assert_equal reason, HTTP::Response::Status.new(code).reason
     end
 
-    it "accepts any object that responds to #to_i" do
-      HTTP::Response::Status.new(fake(to_i: 200))
+    define_method(:"test_reason_#{code}_is_frozen") do
+      assert_predicate HTTP::Response::Status.new(code).reason, :frozen?
     end
   end
 
-  describe "#code" do
-    let(:status) { HTTP::Response::Status.new("200.0") }
-
-    it "returns the integer code" do
-      assert_equal 200, status.code
-    end
-
-    it "is an Integer" do
-      assert_kind_of Integer, status.code
-    end
-  end
-
-  describe "#reason" do
-    context "with unknown code" do
-      it "returns nil" do
-        assert_nil HTTP::Response::Status.new(1024).reason
-      end
-    end
-
-    HTTP::Response::Status::REASONS.each do |code, reason|
-      context "with well-known code: #{code}" do
-        it "returns #{reason.inspect}" do
-          assert_equal reason, HTTP::Response::Status.new(code).reason
-        end
-
-        it "is frozen" do
-          assert_predicate HTTP::Response::Status.new(code).reason, :frozen?
-        end
-      end
-    end
-  end
-
+  # ---------------------------------------------------------------------------
+  # category methods
+  # ---------------------------------------------------------------------------
   all_category_methods = %i[informational? success? redirect? client_error? server_error?]
 
   {
@@ -55,256 +60,263 @@ describe HTTP::Response::Status do
     400...500 => :client_error?,
     500...600 => :server_error?
   }.each do |range, positive_method|
-    context "with #{range.first / 100}xx codes" do
-      let(:statuses) { range.map { |code| HTTP::Response::Status.new(code) } }
+    prefix = range.first / 100
 
-      it "is ##{positive_method}" do
-        assert(statuses.all?(&positive_method))
-      end
+    define_method(:"test_#{prefix}xx_codes_are_#{positive_method.to_s.chomp('?')}") do
+      statuses = range.map { |code| HTTP::Response::Status.new(code) }
 
-      (all_category_methods - [positive_method]).each do |method|
-        it "is not ##{method}" do
-          assert(statuses.none?(&method))
-        end
-      end
-    end
-  end
-
-  describe "#to_sym" do
-    context "with unknown code" do
-      it "returns nil" do
-        assert_nil HTTP::Response::Status.new(1024).to_sym
-      end
+      assert(statuses.all?(&positive_method))
     end
 
-    HTTP::Response::Status::SYMBOLS.each do |code, symbol|
-      context "with well-known code: #{code}" do
-        it "returns #{symbol.inspect}" do
-          assert_equal symbol, HTTP::Response::Status.new(code).to_sym
-        end
+    (all_category_methods - [positive_method]).each do |method|
+      define_method(:"test_#{prefix}xx_codes_are_not_#{method.to_s.chomp('?')}") do
+        statuses = range.map { |code| HTTP::Response::Status.new(code) }
+
+        assert(statuses.none?(&method))
       end
     end
   end
 
-  describe "#inspect" do
-    it "returns quoted code and reason phrase" do
-      status = HTTP::Response::Status.new(200)
-
-      assert_equal "#<HTTP::Response::Status 200 OK>", status.inspect
-    end
-  end
-
-  describe "::SYMBOLS" do
-    it "maps 200 to :ok" do
-      assert_equal :ok, HTTP::Response::Status::SYMBOLS[200]
-    end
-
-    it "maps 400 to :bad_request" do
-      assert_equal :bad_request, HTTP::Response::Status::SYMBOLS[400]
-    end
+  # ---------------------------------------------------------------------------
+  # #to_sym
+  # ---------------------------------------------------------------------------
+  def test_to_sym_with_unknown_code_returns_nil
+    assert_nil HTTP::Response::Status.new(1024).to_sym
   end
 
   HTTP::Response::Status::SYMBOLS.each do |code, symbol|
-    describe "##{symbol}?" do
-      context "when code is #{code}" do
-        it "returns true" do
-          assert HTTP::Response::Status.new(code).send(:"#{symbol}?")
-        end
-      end
-
-      context "when code is higher than #{code}" do
-        it "returns false" do
-          refute HTTP::Response::Status.new(code + 1).send(:"#{symbol}?")
-        end
-      end
-
-      context "when code is lower than #{code}" do
-        it "returns false" do
-          refute HTTP::Response::Status.new(code - 1).send(:"#{symbol}?")
-        end
-      end
+    define_method(:"test_to_sym_#{code}_returns_#{symbol}") do
+      assert_equal symbol, HTTP::Response::Status.new(code).to_sym
     end
   end
 
-  describe "#to_s" do
-    it "strips trailing whitespace for unknown codes" do
-      assert_equal "1024", HTTP::Response::Status.new(1024).to_s
+  # ---------------------------------------------------------------------------
+  # #inspect
+  # ---------------------------------------------------------------------------
+  def test_inspect_returns_quoted_code_and_reason_phrase
+    status = HTTP::Response::Status.new(200)
+
+    assert_equal "#<HTTP::Response::Status 200 OK>", status.inspect
+  end
+
+  # ---------------------------------------------------------------------------
+  # ::SYMBOLS
+  # ---------------------------------------------------------------------------
+  def test_symbols_maps_200_to_ok
+    assert_equal :ok, HTTP::Response::Status::SYMBOLS[200]
+  end
+
+  def test_symbols_maps_400_to_bad_request
+    assert_equal :bad_request, HTTP::Response::Status::SYMBOLS[400]
+  end
+
+  # ---------------------------------------------------------------------------
+  # symbol? predicate methods
+  # ---------------------------------------------------------------------------
+  HTTP::Response::Status::SYMBOLS.each do |code, symbol|
+    define_method(:"test_#{symbol}_predicate_returns_true_when_code_is_#{code}") do
+      assert HTTP::Response::Status.new(code).send(:"#{symbol}?")
+    end
+
+    define_method(:"test_#{symbol}_predicate_returns_false_when_code_is_higher_than_#{code}") do
+      refute HTTP::Response::Status.new(code + 1).send(:"#{symbol}?")
+    end
+
+    define_method(:"test_#{symbol}_predicate_returns_false_when_code_is_lower_than_#{code}") do
+      refute HTTP::Response::Status.new(code - 1).send(:"#{symbol}?")
     end
   end
 
-  describe "#initialize" do
-    it "includes the inspected object in the error message" do
-      obj = Object.new
-      def obj.to_s = "custom"
-
-      err = assert_raises(TypeError) { HTTP::Response::Status.new(obj) }
-      assert_match(/#<Object:0x\h+>/, err.message)
-      refute_includes err.message, "custom"
-    end
+  # ---------------------------------------------------------------------------
+  # #to_s
+  # ---------------------------------------------------------------------------
+  def test_to_s_strips_trailing_whitespace_for_unknown_codes
+    assert_equal "1024", HTTP::Response::Status.new(1024).to_s
   end
 
-  describe "#to_i" do
-    it "returns the integer code" do
-      assert_equal 200, HTTP::Response::Status.new(200).to_i
-    end
+  # ---------------------------------------------------------------------------
+  # #initialize error message
+  # ---------------------------------------------------------------------------
+  def test_initialize_includes_inspected_object_in_error_message
+    obj = Object.new
+    def obj.to_s = "custom"
+
+    err = assert_raises(TypeError) { HTTP::Response::Status.new(obj) }
+    assert_match(/#<Object:0x\h+>/, err.message)
+    refute_includes err.message, "custom"
   end
 
-  describe "#to_int" do
-    it "returns the integer code" do
-      assert_equal 200, HTTP::Response::Status.new(200).to_int
-    end
+  # ---------------------------------------------------------------------------
+  # #to_i
+  # ---------------------------------------------------------------------------
+  def test_to_i_returns_the_integer_code
+    assert_equal 200, HTTP::Response::Status.new(200).to_i
   end
 
-  describe "#<=>" do
-    it "compares by code" do
-      assert_equal(-1, HTTP::Response::Status.new(200) <=> HTTP::Response::Status.new(404))
-    end
-
-    it "compares with integers" do
-      assert_equal 0, HTTP::Response::Status.new(200) <=> 200
-    end
-
-    it "returns nil for non-numeric" do
-      assert_nil HTTP::Response::Status.new(200) <=> Object.new
-    end
-
-    it "compares with objects that respond to #to_i but not #to_int" do
-      assert_equal 1, HTTP::Response::Status.new(200) <=> "abc"
-    end
+  # ---------------------------------------------------------------------------
+  # #to_int
+  # ---------------------------------------------------------------------------
+  def test_to_int_returns_the_integer_code
+    assert_equal 200, HTTP::Response::Status.new(200).to_int
   end
 
-  describe "#==" do
-    it "is equal to another Status with the same code" do
-      assert_equal HTTP::Response::Status.new(200), HTTP::Response::Status.new(200)
-    end
-
-    it "is not equal to a Status with a different code" do
-      refute_equal HTTP::Response::Status.new(200), HTTP::Response::Status.new(404)
-    end
+  # ---------------------------------------------------------------------------
+  # #<=>
+  # ---------------------------------------------------------------------------
+  def test_spaceship_compares_by_code
+    assert_equal(-1, HTTP::Response::Status.new(200) <=> HTTP::Response::Status.new(404))
   end
 
-  describe "#hash" do
-    it "is the same for equal statuses" do
-      assert_equal HTTP::Response::Status.new(200).hash, HTTP::Response::Status.new(200).hash
-    end
-
-    it "is consistent with the code's hash" do
-      assert_equal 200.hash, HTTP::Response::Status.new(200).hash
-    end
+  def test_spaceship_compares_with_integers
+    assert_equal 0, HTTP::Response::Status.new(200) <=> 200
   end
 
-  describe "#deconstruct_keys" do
-    let(:status) { HTTP::Response::Status.new(200) }
-
-    it "returns all keys when given nil" do
-      assert_equal({ code: 200, reason: "OK" }, status.deconstruct_keys(nil))
-    end
-
-    it "returns only requested keys" do
-      result = status.deconstruct_keys([:code])
-
-      assert_equal({ code: 200 }, result)
-    end
-
-    it "excludes unrequested keys" do
-      refute_includes status.deconstruct_keys([:code]).keys, :reason
-    end
-
-    it "returns empty hash for empty keys" do
-      assert_equal({}, status.deconstruct_keys([]))
-    end
-
-    it "returns nil reason for unknown code" do
-      unknown = HTTP::Response::Status.new(1024)
-
-      assert_equal({ code: 1024, reason: nil }, unknown.deconstruct_keys(nil))
-    end
-
-    it "supports pattern matching with case/in" do
-      matched = case status
-                in { code: 200..299 }
-                  true
-                else
-                  false
-                end
-
-      assert matched
-    end
-
-    it "supports pattern matching with specific code" do
-      matched = case status
-                in { code: 200, reason: "OK" }
-                  true
-                else
-                  false
-                end
-
-      assert matched
-    end
+  def test_spaceship_returns_nil_for_non_numeric
+    assert_nil HTTP::Response::Status.new(200) <=> Object.new
   end
 
-  describe "boundary conditions" do
-    it "code 99 is not informational" do
-      refute_predicate HTTP::Response::Status.new(99), :informational?
-    end
-
-    it "code 600 is not server_error" do
-      refute_predicate HTTP::Response::Status.new(600), :server_error?
-    end
+  def test_spaceship_compares_with_objects_that_respond_to_to_i_but_not_to_int
+    assert_equal 1, HTTP::Response::Status.new(200) <=> "abc"
   end
 
-  describe ".coerce" do
-    context "with String" do
-      it "coerces reasons" do
-        assert_equal HTTP::Response::Status.new(400), HTTP::Response::Status.coerce("Bad request")
-      end
+  # ---------------------------------------------------------------------------
+  # #==
+  # ---------------------------------------------------------------------------
+  def test_equal_to_another_status_with_same_code
+    assert_equal HTTP::Response::Status.new(200), HTTP::Response::Status.new(200)
+  end
 
-      it "coerces hyphenated reasons" do
-        assert_equal HTTP::Response::Status.new(207), HTTP::Response::Status.coerce("Multi-Status")
-      end
+  def test_not_equal_to_status_with_different_code
+    refute_equal HTTP::Response::Status.new(200), HTTP::Response::Status.new(404)
+  end
 
-      it "coerces reasons with multiple words" do
-        assert_equal HTTP::Response::Status.new(203), HTTP::Response::Status.coerce("Non-Authoritative Information")
-      end
+  # ---------------------------------------------------------------------------
+  # #hash
+  # ---------------------------------------------------------------------------
+  def test_hash_is_same_for_equal_statuses
+    assert_equal HTTP::Response::Status.new(200).hash, HTTP::Response::Status.new(200).hash
+  end
 
-      it "fails when reason is unknown" do
-        assert_raises(HTTP::Error) { HTTP::Response::Status.coerce("foobar") }
-      end
-    end
+  def test_hash_is_consistent_with_codes_hash
+    assert_equal 200.hash, HTTP::Response::Status.new(200).hash
+  end
 
-    context "with Symbol" do
-      it "coerces symbolized reasons" do
-        assert_equal HTTP::Response::Status.new(400), HTTP::Response::Status.coerce(:bad_request)
-      end
+  # ---------------------------------------------------------------------------
+  # #deconstruct_keys
+  # ---------------------------------------------------------------------------
+  def test_deconstruct_keys_returns_all_keys_when_given_nil
+    status = HTTP::Response::Status.new(200)
 
-      it "fails when symbolized reason is unknown" do
-        assert_raises(HTTP::Error) { HTTP::Response::Status.coerce(:foobar) }
-      end
-    end
+    assert_equal({ code: 200, reason: "OK" }, status.deconstruct_keys(nil))
+  end
 
-    context "with Numeric" do
-      it "coerces as Fixnum code" do
-        assert_equal HTTP::Response::Status.new(200), HTTP::Response::Status.coerce(200.1)
-      end
-    end
+  def test_deconstruct_keys_returns_only_requested_keys
+    status = HTTP::Response::Status.new(200)
+    result = status.deconstruct_keys([:code])
 
-    it "returns a Status instance" do
-      result = HTTP::Response::Status.coerce(:ok)
+    assert_equal({ code: 200 }, result)
+  end
 
-      assert_instance_of HTTP::Response::Status, result
-    end
+  def test_deconstruct_keys_excludes_unrequested_keys
+    status = HTTP::Response::Status.new(200)
 
-    it "fails if coercion failed" do
-      err = assert_raises(HTTP::Error) { HTTP::Response::Status.coerce(true) }
-      assert_includes err.message, "TrueClass"
-      assert_includes err.message, "true"
-      assert_includes err.message, "HTTP::Response::Status"
-    end
+    refute_includes status.deconstruct_keys([:code]).keys, :reason
+  end
 
-    it "is aliased as `.[]`" do
-      status = HTTP::Response::Status[:ok]
+  def test_deconstruct_keys_returns_empty_hash_for_empty_keys
+    status = HTTP::Response::Status.new(200)
 
-      assert_equal 200, status.code
-    end
+    assert_equal({}, status.deconstruct_keys([]))
+  end
+
+  def test_deconstruct_keys_returns_nil_reason_for_unknown_code
+    unknown = HTTP::Response::Status.new(1024)
+
+    assert_equal({ code: 1024, reason: nil }, unknown.deconstruct_keys(nil))
+  end
+
+  def test_deconstruct_keys_supports_pattern_matching_with_case_in
+    status = HTTP::Response::Status.new(200)
+    matched = case status
+              in { code: 200..299 }
+                true
+              else
+                false
+              end
+
+    assert matched
+  end
+
+  def test_deconstruct_keys_supports_pattern_matching_with_specific_code
+    status = HTTP::Response::Status.new(200)
+    matched = case status
+              in { code: 200, reason: "OK" }
+                true
+              else
+                false
+              end
+
+    assert matched
+  end
+
+  # ---------------------------------------------------------------------------
+  # boundary conditions
+  # ---------------------------------------------------------------------------
+  def test_code_99_is_not_informational
+    refute_predicate HTTP::Response::Status.new(99), :informational?
+  end
+
+  def test_code_600_is_not_server_error
+    refute_predicate HTTP::Response::Status.new(600), :server_error?
+  end
+
+  # ---------------------------------------------------------------------------
+  # .coerce
+  # ---------------------------------------------------------------------------
+  def test_coerce_with_string_coerces_reasons
+    assert_equal HTTP::Response::Status.new(400), HTTP::Response::Status.coerce("Bad request")
+  end
+
+  def test_coerce_with_string_coerces_hyphenated_reasons
+    assert_equal HTTP::Response::Status.new(207), HTTP::Response::Status.coerce("Multi-Status")
+  end
+
+  def test_coerce_with_string_coerces_reasons_with_multiple_words
+    assert_equal HTTP::Response::Status.new(203), HTTP::Response::Status.coerce("Non-Authoritative Information")
+  end
+
+  def test_coerce_with_string_fails_when_reason_is_unknown
+    assert_raises(HTTP::Error) { HTTP::Response::Status.coerce("foobar") }
+  end
+
+  def test_coerce_with_symbol_coerces_symbolized_reasons
+    assert_equal HTTP::Response::Status.new(400), HTTP::Response::Status.coerce(:bad_request)
+  end
+
+  def test_coerce_with_symbol_fails_when_symbolized_reason_is_unknown
+    assert_raises(HTTP::Error) { HTTP::Response::Status.coerce(:foobar) }
+  end
+
+  def test_coerce_with_numeric_coerces_as_fixnum_code
+    assert_equal HTTP::Response::Status.new(200), HTTP::Response::Status.coerce(200.1)
+  end
+
+  def test_coerce_returns_a_status_instance
+    result = HTTP::Response::Status.coerce(:ok)
+
+    assert_instance_of HTTP::Response::Status, result
+  end
+
+  def test_coerce_fails_if_coercion_failed
+    err = assert_raises(HTTP::Error) { HTTP::Response::Status.coerce(true) }
+    assert_includes err.message, "TrueClass"
+    assert_includes err.message, "true"
+    assert_includes err.message, "HTTP::Response::Status"
+  end
+
+  def test_coerce_is_aliased_as_brackets
+    status = HTTP::Response::Status[:ok]
+
+    assert_equal 200, status.code
   end
 end

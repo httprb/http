@@ -2,40 +2,40 @@
 
 require "test_helper"
 
-describe HTTP::Features::NormalizeUri do
+class HTTPFeaturesNormalizeURITest < Minitest::Test
   cover "HTTP::Features::NormalizeUri*"
 
-  describe "#initialize" do
-    it "defaults normalizer to HTTP::URI::NORMALIZER" do
-      feature = HTTP::Features::NormalizeUri.new
+  # -- #initialize --
 
-      assert_same HTTP::URI::NORMALIZER, feature.normalizer
-    end
+  def test_initialize_defaults_normalizer_to_http_uri_normalizer
+    feature = HTTP::Features::NormalizeUri.new
 
-    it "accepts a custom normalizer" do
-      custom = ->(uri) { uri }
-      feature = HTTP::Features::NormalizeUri.new(normalizer: custom)
-
-      assert_same custom, feature.normalizer
-    end
-
-    it "is a Feature" do
-      assert_kind_of HTTP::Feature, HTTP::Features::NormalizeUri.new
-    end
+    assert_same HTTP::URI::NORMALIZER, feature.normalizer
   end
 
-  describe "#normalizer" do
-    it "returns the normalizer" do
-      custom = ->(uri) { uri }
-      feature = HTTP::Features::NormalizeUri.new(normalizer: custom)
+  def test_initialize_accepts_a_custom_normalizer
+    custom = ->(uri) { uri }
+    feature = HTTP::Features::NormalizeUri.new(normalizer: custom)
 
-      assert_same custom, feature.normalizer
-    end
+    assert_same custom, feature.normalizer
   end
 
-  describe ".register_feature" do
-    it "registers as :normalize_uri" do
-      assert_equal HTTP::Features::NormalizeUri, HTTP::Options.available_features[:normalize_uri]
-    end
+  def test_initialize_is_a_feature
+    assert_kind_of HTTP::Feature, HTTP::Features::NormalizeUri.new
+  end
+
+  # -- #normalizer --
+
+  def test_normalizer_returns_the_normalizer
+    custom = ->(uri) { uri }
+    feature = HTTP::Features::NormalizeUri.new(normalizer: custom)
+
+    assert_same custom, feature.normalizer
+  end
+
+  # -- .register_feature --
+
+  def test_register_feature_registers_as_normalize_uri
+    assert_equal HTTP::Features::NormalizeUri, HTTP::Options.available_features[:normalize_uri]
   end
 end

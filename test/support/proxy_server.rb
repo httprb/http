@@ -45,8 +45,8 @@ class ProxyServer
 
   def shutdown
     @shutdown_write.close
-    @tcp_server.close rescue nil # rubocop:disable Style/RescueModifier
-    @shutdown_read.close rescue nil # rubocop:disable Style/RescueModifier
+    @tcp_server.close rescue nil
+    @shutdown_read.close rescue nil
   rescue
     nil
   end
@@ -70,7 +70,7 @@ class ProxyServer
   rescue IOError, Errno::ECONNRESET, Errno::EPIPE, Errno::EBADF, URI::InvalidURIError
     # Connection closed
   ensure
-    client.close rescue nil # rubocop:disable Style/RescueModifier
+    client.close rescue nil
   end
 
   def read_proxy_request(client)
@@ -119,7 +119,7 @@ class ProxyServer
     target_socket = send_to_target(method, target, body, version)
     relay_response(client, target_socket)
   ensure
-    target_socket&.close rescue nil # rubocop:disable Style/RescueModifier
+    target_socket&.close rescue nil
   end
 
   def send_to_target(method, target, body, version)
@@ -153,7 +153,7 @@ class ProxyServer
     client.write("HTTP/1.1 200 Connection established\r\n\r\n")
     relay_tunnel(client, target_socket)
   ensure
-    target_socket&.close rescue nil # rubocop:disable Style/RescueModifier
+    target_socket&.close rescue nil
   end
 
   def relay_tunnel(client, target)

@@ -2,14 +2,14 @@
 
 require "test_helper"
 
-describe HTTP::VERSION do
+class HTTPVersionTest < Minitest::Test
   cover "HTTP::VERSION*"
 
-  it "is a string" do
+  def test_is_a_string
     assert_kind_of String, HTTP::VERSION
   end
 
-  it "follows semantic versioning" do
+  def test_follows_semantic_versioning
     assert_match(/\A\d+\.\d+\.\d+/, HTTP::VERSION)
   end
 end

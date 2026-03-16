@@ -123,14 +123,16 @@ module HTTP
         ha1 = compute_ha1(algorithm, challenge.fetch("realm"), nonce, cnonce)
         ha2 = compute_ha2(algorithm, String(request.verb).upcase, uri)
 
-        compute_auth_header(algorithm, qop, nonce, cnonce, nonce_count, uri, ha1, ha2, challenge)
+        compute_auth_header(algorithm: algorithm, qop: qop, nonce: nonce, cnonce: cnonce,
+                            nonce_count: nonce_count, uri: uri, ha1: ha1, ha2: ha2,
+                            challenge: challenge)
       end
 
       # Compute digest and build the Authorization header string
       #
       # @return [String] formatted authorization header
       # @api private
-      def compute_auth_header(algorithm, qop, nonce, cnonce, nonce_count, uri, ha1, ha2, challenge) # rubocop:disable Metrics/ParameterLists
+      def compute_auth_header(algorithm:, qop:, nonce:, cnonce:, nonce_count:, uri:, ha1:, ha2:, challenge:)
         response = compute_response(algorithm, ha1, ha2, nonce: nonce,
                                     nonce_count: nonce_count, cnonce: cnonce, qop: qop)
 

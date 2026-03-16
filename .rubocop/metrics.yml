@@ -1,6 +1,6 @@
 Metrics/AbcSize:
   Exclude:
-    - 'test/support/**/*.rb'
+    - 'test/**/*.rb'
 
 Metrics/ParameterLists:
   CountKeywordArgs: false
@@ -20,7 +20,7 @@ Metrics/ClassLength:
     - heredoc
     - method_call
   Exclude:
-    - 'test/support/**/*.rb'
+    - 'test/**/*.rb'
 
 Metrics/MethodLength:
   CountAsOne:
@@ -28,7 +28,7 @@ Metrics/MethodLength:
     - heredoc
     - method_call
   Exclude:
-    - 'test/support/**/*.rb'
+    - 'test/**/*.rb'
 
 Metrics/ModuleLength:
   CountAsOne:
@@ -36,4 +36,4 @@ Metrics/ModuleLength:
     - heredoc
     - method_call
   Exclude:
-    - 'test/support/**/*.rb'
+    - 'test/**/*.rb'

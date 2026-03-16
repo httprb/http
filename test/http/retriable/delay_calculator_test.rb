@@ -2,10 +2,11 @@
 
 require "test_helper"
 
-describe HTTP::Retriable::DelayCalculator do
+class HTTPRetriableDelayCalculatorTest < Minitest::Test
   cover "HTTP::Retriable::DelayCalculator*"
-  let(:response) do
-    HTTP::Response.new(
+
+  def response
+    @response ||= HTTP::Response.new(
       status:  200,
       version: "1.1",
       headers: {},
@@ -14,20 +15,20 @@ describe HTTP::Retriable::DelayCalculator do
     )
   end
 
-  def call_delay(iterations, response: self.response, **options)
-    HTTP::Retriable::DelayCalculator.new(**options).call(iterations, response)
+  def call_delay(iterations, response: self.response, **)
+    HTTP::Retriable::DelayCalculator.new(**).call(iterations, response)
   end
 
-  def call_retry_header(value, **options)
+  def call_retry_header(value, **)
     response.headers["Retry-After"] = value
-    HTTP::Retriable::DelayCalculator.new(**options).call(rand(1...100), response)
+    HTTP::Retriable::DelayCalculator.new(**).call(rand(1...100), response)
   end
 
-  it "prevents negative sleep time" do
+  def test_prevents_negative_sleep_time
     assert_equal 0, call_delay(20, delay: -20)
   end
 
-  it "backs off exponentially" do
+  def test_backs_off_exponentially
     val1 = call_delay(1)
 
     assert_operator val1, :>=, 0
@@ -54,80 +55,79 @@ describe HTTP::Retriable::DelayCalculator do
     assert_operator val5, :<=, 16
   end
 
-  it "includes jitter in exponential backoff" do
-    # The base delay for iteration 3 is (2^2) - 1 = 3
-    # With jitter (rand 0..1), result must be strictly greater than the base
+  def test_includes_jitter_in_exponential_backoff
     results = Array.new(10) { call_delay(3) }
 
     assert results.any? { |v| v > 3 }, "expected at least one value with jitter above base delay of 3"
   end
 
-  it "always returns a Float" do
+  def test_always_returns_a_float
     assert_instance_of Float, call_delay(1, delay: 2)
     assert_instance_of Float, call_delay(1)
   end
 
-  it "can have a maximum wait time" do
+  def test_can_have_a_maximum_wait_time
     val1 = call_delay(1, max_delay: 5)
 
     assert_operator val1, :>=, 0
     assert_operator val1, :<=, 1
-
     assert_equal 5, call_delay(5, max_delay: 5)
   end
 
-  it "caps delay at max_delay" do
+  def test_caps_delay_at_max_delay
     assert_in_delta(5.0, call_delay(10, max_delay: 5, delay: 100))
   end
 
-  it "converts max_delay to Float" do
+  def test_converts_max_delay_to_float
     calc = HTTP::Retriable::DelayCalculator.new(max_delay: 10)
 
     assert_instance_of Float, calc.instance_variable_get(:@max_delay)
   end
 
-  context "with a delay proc" do
-    it "calls the proc with the iteration number" do
-      received_iteration = nil
-      delay_proc = proc do |iteration|
-        received_iteration = iteration
-        iteration * 2
-      end
+  # -- with a delay proc --
 
-      result = call_delay(3, delay: delay_proc)
-
-      assert_equal 3, received_iteration
-      assert_in_delta(6.0, result)
+  def test_with_delay_proc_calls_the_proc_with_iteration_number
+    received_iteration = nil
+    delay_proc = proc do |iteration|
+      received_iteration = iteration
+      iteration * 2
     end
 
-    it "uses the proc return value as the delay" do
-      delay_proc = ->(i) { i * 10 }
+    result = call_delay(3, delay: delay_proc)
 
-      assert_in_delta(10.0, call_delay(1, delay: delay_proc))
-      assert_in_delta(50.0, call_delay(5, delay: delay_proc))
-    end
-
-    it "clamps the proc return value to max_delay" do
-      delay_proc = ->(_i) { 100 }
-
-      assert_in_delta(5.0, call_delay(1, delay: delay_proc, max_delay: 5))
-    end
+    assert_equal 3, received_iteration
+    assert_in_delta(6.0, result)
   end
 
-  context "with a nil response" do
-    it "falls back to iteration-based delay" do
-      result = call_delay(1, response: nil)
+  def test_with_delay_proc_uses_proc_return_value_as_delay
+    delay_proc = ->(i) { i * 10 }
 
-      assert_operator result, :>=, 0
-      assert_operator result, :<=, 1
-    end
-
-    it "uses fixed delay when provided" do
-      assert_in_delta(2.0, call_delay(1, delay: 2, response: nil))
-    end
+    assert_in_delta(10.0, call_delay(1, delay: delay_proc))
+    assert_in_delta(50.0, call_delay(5, delay: delay_proc))
   end
 
-  it "respects Retry-After headers as integer" do
+  def test_with_delay_proc_clamps_return_value_to_max_delay
+    delay_proc = ->(_i) { 100 }
+
+    assert_in_delta(5.0, call_delay(1, delay: delay_proc, max_delay: 5))
+  end
+
+  # -- with a nil response --
+
+  def test_with_nil_response_falls_back_to_iteration_based_delay
+    result = call_delay(1, response: nil)
+
+    assert_operator result, :>=, 0
+    assert_operator result, :<=, 1
+  end
+
+  def test_with_nil_response_uses_fixed_delay_when_provided
+    assert_in_delta(2.0, call_delay(1, delay: 2, response: nil))
+  end
+
+  # -- Retry-After headers --
+
+  def test_respects_retry_after_headers_as_integer
     delay_time = rand(6...2500)
     header_value = delay_time.to_s
 
@@ -135,12 +135,12 @@ describe HTTP::Retriable::DelayCalculator do
     assert_equal 5, call_retry_header(header_value, max_delay: 5)
   end
 
-  it "respects Retry-After headers as integer with whitespace" do
+  def test_respects_retry_after_headers_as_integer_with_whitespace
     assert_equal 42, call_retry_header("  42  ")
     assert_equal 10, call_retry_header("10\t")
   end
 
-  it "respects Retry-After headers as rfc2822 timestamp" do
+  def test_respects_retry_after_headers_as_rfc2822_timestamp
     delay_time = rand(6...2500)
     header_value = (Time.now.gmtime + delay_time).to_datetime.rfc2822.sub("+0000", "GMT")
 
@@ -148,14 +148,14 @@ describe HTTP::Retriable::DelayCalculator do
     assert_equal 5, call_retry_header(header_value, max_delay: 5)
   end
 
-  it "respects Retry-After headers as rfc2822 timestamp in the past" do
+  def test_respects_retry_after_headers_as_rfc2822_timestamp_in_the_past
     delay_time = rand(6...2500)
     header_value = (Time.now.gmtime - delay_time).to_datetime.rfc2822.sub("+0000", "GMT")
 
     assert_equal 0, call_retry_header(header_value)
   end
 
-  it "handles non-string Retry-After header values" do
+  def test_handles_non_string_retry_after_header_values
     response.headers["Retry-After"] = 42
     calc = HTTP::Retriable::DelayCalculator.new
     result = calc.call(1, response)
@@ -163,7 +163,7 @@ describe HTTP::Retriable::DelayCalculator do
     assert_in_delta(42.0, result)
   end
 
-  it "does not error on invalid Retry-After header" do
+  def test_does_not_error_on_invalid_retry_after_header
     [
       "This is a string with a number 5 in it",
       "8 Eight is the first digit in this string",
@@ -173,20 +173,20 @@ describe HTTP::Retriable::DelayCalculator do
     end
   end
 
-  it "returns zero for invalid Retry-After header" do
+  def test_returns_zero_for_invalid_retry_after_header
     calc = HTTP::Retriable::DelayCalculator.new
     result = calc.delay_from_retry_header("invalid-value")
 
     assert_equal 0, result
   end
 
-  it "coerces non-string Retry-After values via to_s" do
+  def test_coerces_non_string_retry_after_values_via_to_s
     calc = HTTP::Retriable::DelayCalculator.new
 
     assert_in_delta(42.0, calc.delay_from_retry_header(42))
   end
 
-  it "parses integer Retry-After with embedded newline via to_i" do
+  def test_parses_integer_retry_after_with_embedded_newline_via_to_i
     calc = HTTP::Retriable::DelayCalculator.new
 
     assert_in_delta(5.0, calc.delay_from_retry_header("5\nfoo"))

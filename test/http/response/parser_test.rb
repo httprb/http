@@ -2,96 +2,104 @@
 
 require "test_helper"
 
-describe HTTP::Response::Parser do
+class HTTPResponseParserTest < Minitest::Test
   cover "HTTP::Response::Parser*"
-  let(:parser) { HTTP::Response::Parser.new }
 
-  let(:raw_response) do
-    "HTTP/1.1 200 OK\r\nContent-Length: 2\r\nContent-Type: application/json\r\nMyHeader: val\r\nEmptyHeader: \r\n\r\n{}"
-  end
-  let(:expected_headers) do
-    {
-      "Content-Length" => "2",
-      "Content-Type"   => "application/json",
-      "MyHeader"       => "val",
-      "EmptyHeader"    => ""
-    }
-  end
-  let(:expected_body) { "{}" }
+  RAW_RESPONSE = "HTTP/1.1 200 OK\r\nContent-Length: 2\r\nContent-Type: application/json\r\n" \
+                 "MyHeader: val\r\nEmptyHeader: \r\n\r\n{}"
+  EXPECTED_HEADERS = {
+    "Content-Length" => "2",
+    "Content-Type"   => "application/json",
+    "MyHeader"       => "val",
+    "EmptyHeader"    => ""
+  }.freeze
+  EXPECTED_BODY = "{}"
 
-  context "whole response in one part" do
-    before { parser.add(raw_response) }
+  # ---------------------------------------------------------------------------
+  # whole response in one part
+  # ---------------------------------------------------------------------------
+  def test_whole_response_parses_headers
+    parser = HTTP::Response::Parser.new
+    parser.add(RAW_RESPONSE)
 
-    it "parses headers" do
-      assert_equal expected_headers, parser.headers.to_h
-    end
-
-    it "parses body" do
-      assert_equal expected_body, parser.read(expected_body.size)
-    end
+    assert_equal EXPECTED_HEADERS, parser.headers.to_h
   end
 
-  context "response in many parts" do
-    before { raw_response.chars.each { |part| parser.add(part) } }
+  def test_whole_response_parses_body
+    parser = HTTP::Response::Parser.new
+    parser.add(RAW_RESPONSE)
 
-    it "parses headers" do
-      assert_equal expected_headers, parser.headers.to_h
-    end
-
-    it "parses body" do
-      assert_equal expected_body, parser.read(expected_body.size)
-    end
+    assert_equal EXPECTED_BODY, parser.read(EXPECTED_BODY.size)
   end
 
-  describe "#add with invalid data" do
-    it "raises IOError on invalid HTTP data" do
-      assert_raises(IOError) { parser.add("NOT HTTP AT ALL\r\n\r\n") }
-    end
+  # ---------------------------------------------------------------------------
+  # response in many parts
+  # ---------------------------------------------------------------------------
+  def test_many_parts_parses_headers
+    parser = HTTP::Response::Parser.new
+    RAW_RESPONSE.chars.each { |part| parser.add(part) }
+
+    assert_equal EXPECTED_HEADERS, parser.headers.to_h
   end
 
-  describe "#read with chunk larger than requested size" do
-    let(:raw_response) do
-      "HTTP/1.1 200 OK\r\nContent-Length: 10\r\n\r\n0123456789"
-    end
+  def test_many_parts_parses_body
+    parser = HTTP::Response::Parser.new
+    RAW_RESPONSE.chars.each { |part| parser.add(part) }
 
-    before { parser.add(raw_response) }
-
-    it "returns only the requested bytes and retains the rest" do
-      chunk = parser.read(4)
-
-      assert_equal "0123", chunk
-      chunk = parser.read(6)
-
-      assert_equal "456789", chunk
-    end
+    assert_equal EXPECTED_BODY, parser.read(EXPECTED_BODY.size)
   end
 
-  context "when got 100 Continue response" do
-    let(:raw_response) do
-      "HTTP/1.1 100 Continue\r\n\r\n" \
-        "HTTP/1.1 200 OK\r\n" \
-        "Content-Length: 12\r\n\r\n" \
-        "Hello World!"
-    end
+  # ---------------------------------------------------------------------------
+  # #add with invalid data
+  # ---------------------------------------------------------------------------
+  def test_add_raises_io_error_on_invalid_http_data
+    parser = HTTP::Response::Parser.new
 
-    context "when response is fed in one part" do
-      before { parser.add(raw_response) }
+    assert_raises(IOError) { parser.add("NOT HTTP AT ALL\r\n\r\n") }
+  end
 
-      it "skips to next non-info response" do
-        assert_equal 200, parser.status_code
-        assert_equal({ "Content-Length" => "12" }, parser.headers)
-        assert_equal "Hello World!", parser.read(12)
-      end
-    end
+  # ---------------------------------------------------------------------------
+  # #read with chunk larger than requested size
+  # ---------------------------------------------------------------------------
+  def test_read_returns_only_requested_bytes_and_retains_rest
+    raw = "HTTP/1.1 200 OK\r\nContent-Length: 10\r\n\r\n0123456789"
+    parser = HTTP::Response::Parser.new
+    parser.add(raw)
 
-    context "when response is fed in many parts" do
-      before { raw_response.chars.each { |part| parser.add(part) } }
+    chunk = parser.read(4)
 
-      it "skips to next non-info response" do
-        assert_equal 200, parser.status_code
-        assert_equal({ "Content-Length" => "12" }, parser.headers)
-        assert_equal "Hello World!", parser.read(12)
-      end
-    end
+    assert_equal "0123", chunk
+    chunk = parser.read(6)
+
+    assert_equal "456789", chunk
+  end
+
+  # ---------------------------------------------------------------------------
+  # 100 Continue response
+  # ---------------------------------------------------------------------------
+  def test_100_continue_in_one_part_skips_to_next_non_info_response
+    raw = "HTTP/1.1 100 Continue\r\n\r\n" \
+          "HTTP/1.1 200 OK\r\n" \
+          "Content-Length: 12\r\n\r\n" \
+          "Hello World!"
+    parser = HTTP::Response::Parser.new
+    parser.add(raw)
+
+    assert_equal 200, parser.status_code
+    assert_equal({ "Content-Length" => "12" }, parser.headers)
+    assert_equal "Hello World!", parser.read(12)
+  end
+
+  def test_100_continue_in_many_parts_skips_to_next_non_info_response
+    raw = "HTTP/1.1 100 Continue\r\n\r\n" \
+          "HTTP/1.1 200 OK\r\n" \
+          "Content-Length: 12\r\n\r\n" \
+          "Hello World!"
+    parser = HTTP::Response::Parser.new
+    raw.chars.each { |part| parser.add(part) }
+
+    assert_equal 200, parser.status_code
+    assert_equal({ "Content-Length" => "12" }, parser.headers)
+    assert_equal "Hello World!", parser.read(12)
   end
 end

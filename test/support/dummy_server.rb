@@ -153,7 +153,7 @@ class DummyServer
   rescue IOError, Errno::EBADF, Errno::ECONNRESET, Errno::EPIPE, Errno::EPROTOTYPE, OpenSSL::SSL::SSLError
     # Connection closed or SSL error
   ensure
-    client.close rescue nil # rubocop:disable Style/RescueModifier
+    client.close rescue nil
   end
 
   def read_request(client)

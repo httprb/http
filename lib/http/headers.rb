@@ -143,7 +143,7 @@ module HTTP
     # @api public
     def get(name)
       name = normalize_header name
-      @pile.select { |k, _| k.eql?(name) }.map { |_, _, v| v }
+      @pile.filter_map { |k, _, v| v if k.eql?(name) }
     end
 
     # Smart version of {#get}

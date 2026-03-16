@@ -19,3 +19,15 @@ Lint/MissingSuper:
   AllowedParentClasses:
     - BasicObject
     - Feature
+
+Minitest/MultipleAssertions:
+  Exclude:
+    - 'test/**/*.rb'
+
+Minitest/TestFileName:
+  Exclude:
+    - 'test/regression_tests.rb'
+
+Naming/VariableNumber:
+  Exclude:
+    - 'test/**/*.rb'
