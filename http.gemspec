@@ -29,7 +29,7 @@ Gem::Specification.new do |spec|
     extras = %w[CHANGELOG.md CONTRIBUTING.md LICENSE.txt README.md SECURITY.md UPGRADING.md] << File.basename(__FILE__)
 
     ls.readlines("\x0", chomp: true).select do |f|
-      f.start_with?("lib/", "test/") || extras.include?(f)
+      f.start_with?("lib/", "test/") || extras.include?(f) || f.eql?("sig/http.rbs")
     end
   end
 
