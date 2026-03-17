@@ -1,0 +1,67 @@
+---
+name: Push Gem
+
+"on":
+  push:
+    tags:
+      - v*
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      id-token: write
+
+    strategy:
+      matrix:
+        include:
+          - ruby: ruby
+            platform: ""
+          - ruby: jruby
+            platform: java
+
+    env:
+      BUNDLE_WITHOUT: sig
+
+    steps:
+      - uses: rubygems/configure-rubygems-credentials@main
+        with:
+          role-to-assume: rg_oidc_akr_j4j75yxftmnzz97q1cvd
+
+      - uses: actions/checkout@v6
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+          ruby-version: ${{ matrix.ruby }}
+
+      - name: Build gem
+        run: gem build http.gemspec
+        env:
+          HTTP_PLATFORM: ${{ matrix.platform }}
+
+      - name: Push gem
+        run: gem push http-*.gem
+
+      - name: Wait for release to propagate
+        run: |
+          gem install rubygems-await
+          gem_tuple="$(ruby -rbundler/setup -rbundler -e '
+              spec = Bundler.definition.specs.find {|s| s.name == ARGV[0] }
+              raise "No spec for #{ARGV[0]}" unless spec
+              print [spec.name, spec.version, spec.platform].join(":")
+            ' "http")"
+          gem await "${gem_tuple}"
+        env:
+          HTTP_PLATFORM: ${{ matrix.platform }}
+
+      - name: Create GitHub release
+        if: matrix.ruby == 'ruby'
+        run: |
+          tag_name="$(git describe --tags --abbrev=0)"
+          gh release create "${tag_name}" --verify-tag --generate-notes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
