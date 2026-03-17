@@ -26,10 +26,10 @@ Gem::Specification.new do |spec|
   spec.metadata["rubygems_mfa_required"] = "true"
 
   spec.files = IO.popen(%w[git ls-files -z], chdir: __dir__, err: IO::NULL) do |ls|
-    extras = %w[CHANGELOG.md CONTRIBUTING.md LICENSE.txt README.md SECURITY.md UPGRADING.md] << File.basename(__FILE__)
+    extras = %w[LICENSE.txt README.md sig/http.rbs] << File.basename(__FILE__)
 
     ls.readlines("\x0", chomp: true).select do |f|
-      f.start_with?("lib/", "test/", "sig/") || extras.include?(f)
+      f.start_with?("lib/") || extras.include?(f)
     end
   end
 
