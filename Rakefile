@@ -81,7 +81,7 @@ end
 
 desc "Run mutation testing with Mutant"
 task :mutant do
-  system("bundle exec mutant run") || abort("Mutant failed!")
+  system("bundle", "exec", "mutant", "run", "--since", "main") or abort("Mutant failed!")
 end
 
-task default: %i[test rubocop verify_measurements steep]
+task default: %i[test mutant rubocop verify_measurements steep]
