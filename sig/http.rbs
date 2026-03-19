@@ -1272,7 +1272,7 @@ module HTTP
       def size: () -> Integer
 
       # Rewinds the IO to the beginning
-      def rewind: () -> (Integer | void)
+      def rewind: () -> void
     end
 
     class Part
