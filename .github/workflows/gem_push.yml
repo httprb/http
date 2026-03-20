@@ -1,15 +1,20 @@
----
-name: Push Gem
+name: Push gem to RubyGems
 
-"on":
+on:
   push:
     tags:
-      - v*
+      - "v*"
+
+permissions:
+  contents: read
 
 jobs:
   push:
+    if: github.repository == 'httprb/http'
     runs-on: ubuntu-latest
-
+    environment:
+      name: rubygems.org
+      url: https://rubygems.org/gems/http
     permissions:
       contents: write
       id-token: write
@@ -26,38 +31,32 @@ jobs:
       BUNDLE_WITHOUT: sig
 
     steps:
-      - uses: rubygems/configure-rubygems-credentials@main
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
         with:
-          role-to-assume: rg_oidc_akr_j4j75yxftmnzz97q1cvd
-
-      - uses: actions/checkout@v6
-
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          bundler-cache: true
           ruby-version: ${{ matrix.ruby }}
-
+          bundler-cache: true
+      - uses: rubygems/configure-rubygems-credentials@v1.0.0
+      - name: Update RubyGems
+        run: gem update --system
       - name: Build gem
         run: gem build http.gemspec
         env:
           HTTP_PLATFORM: ${{ matrix.platform }}
-
-      - name: Push gem
-        run: gem push http-*.gem
-
-      - name: Wait for release to propagate
+      - name: Sign gem with Sigstore
         run: |
-          gem install rubygems-await
-          gem_tuple="$(ruby -rbundler/setup -rbundler -e '
-              spec = Bundler.definition.specs.find {|s| s.name == ARGV[0] }
-              raise "No spec for #{ARGV[0]}" unless spec
-              print [spec.name, spec.version, spec.platform].join(":")
-            ' "http")"
-          gem await "${gem_tuple}"
+          for gem in http-*.gem; do
+            gem exec sigstore-cli sign "$gem" --bundle "${gem%.gem}.gem.sigstore.json"
+          done
+      - name: Push gem
+        run: |
+          for gem in http-*.gem; do
+            gem push "$gem" --attestation "${gem%.gem}.gem.sigstore.json"
+          done
+      - name: Wait for release
+        run: gem exec rubygems-await http-*.gem
         env:
           HTTP_PLATFORM: ${{ matrix.platform }}
-
       - name: Create GitHub release
         if: matrix.ruby == 'ruby'
         run: |
