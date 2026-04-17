@@ -171,11 +171,11 @@ module HTTP
     # @return [Hash] URI components
     private_class_method def self.parse_with_addressable(uri_string)
       require_addressable
-      parsed = Addressable::URI.parse(uri_string) # steep:ignore
+      parsed = Addressable::URI.parse(uri_string)
       { scheme: parsed.scheme, user: parsed.user, password: parsed.password,
         host: parsed.host, port: parsed.port, path: parsed.path,
         query: parsed.query, fragment: parsed.fragment }
-    rescue Addressable::URI::InvalidURIError # steep:ignore
+    rescue Addressable::URI::InvalidURIError
       raise InvalidError, "invalid URI: #{uri_string.inspect}"
     end
   end

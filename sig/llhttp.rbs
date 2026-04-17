@@ -1,0 +1,20 @@
+# Stubs for llhttp / llhttp-ffi, which do not ship their own RBS signatures.
+# Referenced by `HTTP::Response::Parser`, which is part of the public API.
+
+module LLHttp
+  class Error < StandardError
+  end
+
+  class Parser
+    def initialize: (untyped, ?type: Symbol) -> void
+    def reset: () -> void
+    def <<: (String) -> void
+    def status_code: () -> Integer
+    def http_major: () -> Integer
+    def http_minor: () -> Integer
+  end
+
+  class Delegate
+    def initialize: () -> void
+  end
+end

@@ -78,24 +78,6 @@ module Zlib
   end
 end
 
-module LLHttp
-  class Error < StandardError
-  end
-
-  class Parser
-    def initialize: (untyped, ?type: Symbol) -> void
-    def reset: () -> void
-    def <<: (String) -> void
-    def status_code: () -> Integer
-    def http_major: () -> Integer
-    def http_minor: () -> Integer
-  end
-
-  class Delegate
-    def initialize: () -> void
-  end
-end
-
 # Supplement: Numeric#to_i and #to_f are not in the stdlib RBS
 class Numeric
   def to_i: () -> Integer

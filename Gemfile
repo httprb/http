@@ -33,7 +33,8 @@ group :test do
 end
 
 group :sig do
-  gem "steep"
+  gem "rbs",   ">= 4"
+  gem "steep", ">= 2"
 end
 
 group :doc do

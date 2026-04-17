@@ -158,7 +158,7 @@ module HTTP
       # @return [HTTP::Response::Body]
       # @api private
       def logged_body(body)
-        formatter = (method(:format_binary) unless body.loggable?) # steep:ignore
+        formatter = (method(:format_binary) unless body.loggable?)
         stream = BodyLogger.new(body.instance_variable_get(:@stream), logger, formatter: formatter) # steep:ignore
         Response::Body.new(stream, encoding: body.encoding)
       end

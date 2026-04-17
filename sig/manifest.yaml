@@ -1,0 +1,13 @@
+dependencies:
+  - name: base64
+  - name: digest
+  - name: forwardable
+  - name: openssl
+  - name: pathname
+  - name: securerandom
+  - name: singleton
+  - name: tempfile
+  - name: time
+  - name: timeout
+  - name: uri
+  - name: zlib

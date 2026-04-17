@@ -26,7 +26,7 @@ Gem::Specification.new do |spec|
   spec.metadata["rubygems_mfa_required"] = "true"
 
   spec.files = IO.popen(%w[git ls-files -z], chdir: __dir__, err: IO::NULL) do |ls|
-    extras = %w[LICENSE.txt README.md sig/http.rbs] << File.basename(__FILE__)
+    extras = %w[LICENSE.txt README.md sig/http.rbs sig/llhttp.rbs sig/manifest.yaml] << File.basename(__FILE__)
 
     ls.readlines("\x0", chomp: true).select do |f|
       f.start_with?("lib/") || extras.include?(f)
