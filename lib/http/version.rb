@@ -2,5 +2,5 @@
 
 module HTTP
   # Current library version
-  VERSION = "6.0.2"
+  VERSION = "6.0.3"
 end

@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.0.3] - 2026-04-20
+
+### Fixed
+
+- Ship RBS signatures for downstream consumers. Previously only `sig/http.rbs`
+  was packaged, but it referenced `LLHttp::Parser` and `LLHttp::Delegate`
+  (defined only in the unshipped `sig/deps.rbs`), causing `Cannot find type
+  LLHttp::Delegate` errors in Steep when loading `library "http"`. Public
+  LLHttp stubs are now shipped in `sig/llhttp.rbs`, and `sig/manifest.yaml`
+  declares stdlib dependencies so consumers don't need to re-list them.
+
 ## [6.0.2] - 2026-03-20
 
 ### Fixed
