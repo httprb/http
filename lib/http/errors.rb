@@ -49,6 +49,52 @@ module HTTP
     end
   end
 
+  # Client errors 4xx
+  class ClientError < StatusError; end
+  class BadRequestError < ClientError; end
+  class UnauthorizedError < ClientError; end
+  class PaymentRequiredError < ClientError; end
+  class ForbiddenError < ClientError; end
+  class NotFoundError < ClientError; end
+  class MethodNotAllowedError < ClientError; end
+  class NotAcceptableError < ClientError; end
+  class ProxyAuthenticationRequiredError < ClientError; end
+  class RequestTimeoutError < ClientError; end
+  class ConflictError < ClientError; end
+  class GoneError < ClientError; end
+  class LengthRequiredError < ClientError; end
+  class PreconditionFailedError < ClientError; end
+  class ContentTooLargeError < ClientError; end
+  class UriTooLongError < ClientError; end
+  class UnsupportedMediaTypeError < ClientError; end
+  class RangeNotSatisfiableError < ClientError; end
+  class ExpectationFailedError < ClientError; end
+  class ImATeapotError < ClientError; end
+  class MisdirectedRequestError < ClientError; end
+  class UnprocessableContentError < ClientError; end
+  class LockedError < ClientError; end
+  class FailedDependencyError < ClientError; end
+  class TooEarlyError < ClientError; end
+  class UpgradeRequiredError < ClientError; end
+  class PreconditionRequiredError < ClientError; end
+  class TooManyRequestsError < ClientError; end
+  class RequestHeaderFieldsTooLargeError < ClientError; end
+  class UnavailableForLegalReasonsError < ClientError; end
+
+  # Server errors 5xx
+  class ServerError < StatusError; end
+  class InternalServerError < ServerError; end
+  class NotImplementedError < ServerError; end
+  class BadGatewayError < ServerError; end
+  class ServiceUnavailableError < ServerError; end
+  class GatewayTimeoutError < ServerError; end
+  class HttpVersionNotSupportedError < ServerError; end
+  class VariantAlsoNegotiatesError < ServerError; end
+  class InsufficientStorageError < ServerError; end
+  class LoopDetectedError < ServerError; end
+  class NotExtendedError < ServerError; end
+  class NetworkAuthenticationRequiredError < ServerError; end
+
   # Raised when `Response#parse` fails due to any underlying reason (unexpected
   # MIME type, or decoder fails). See `Exception#cause` for the original exception.
   class ParseError < ResponseError; end
