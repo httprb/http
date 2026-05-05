@@ -37,26 +37,32 @@ class HTTPFeaturesRaiseErrorTest < Minitest::Test
     assert_same response, result
   end
 
-  def test_wrap_response_when_status_is_400_raises
+  def test_wrap_response_when_status_is_400_raises_bad_request_error
     feature = HTTP::Features::RaiseError.new(ignore: [])
     response = build_response(status: 400)
-    err = assert_raises(HTTP::StatusError) { feature.wrap_response(response) }
+    err = assert_raises(HTTP::BadRequestError) { feature.wrap_response(response) }
     assert_equal "Unexpected status code 400", err.message
   end
 
-  def test_wrap_response_when_status_is_599_raises
+  def test_wrap_response_when_status_is_500_raises_internal_server_error
     feature = HTTP::Features::RaiseError.new(ignore: [])
-    response = build_response(status: 599)
-    err = assert_raises(HTTP::StatusError) { feature.wrap_response(response) }
-    assert_equal "Unexpected status code 599", err.message
+    response = build_response(status: 500)
+    err = assert_raises(HTTP::InternalServerError) { feature.wrap_response(response) }
+    assert_equal "Unexpected status code 500", err.message
   end
 
-  def test_wrap_response_when_error_status_is_ignored_returns_original_response
-    feature = HTTP::Features::RaiseError.new(ignore: [500])
-    response = build_response(status: 500)
-    result = feature.wrap_response(response)
+  def test_wrap_response_when_unmapped_4xx_status_raises_client_error
+    feature = HTTP::Features::RaiseError.new(ignore: [])
+    response = build_response(status: 499)
+    err = assert_raises(HTTP::ClientError) { feature.wrap_response(response) }
+    assert_equal "Unexpected status code 499", err.message
+  end
 
-    assert_same response, result
+  def test_wrap_response_when_unmapped_5xx_status_raises_server_error
+    feature = HTTP::Features::RaiseError.new(ignore: [])
+    response = build_response(status: 599)
+    err = assert_raises(HTTP::ServerError) { feature.wrap_response(response) }
+    assert_equal "Unexpected status code 599", err.message
   end
 
   # -- #initialize --
