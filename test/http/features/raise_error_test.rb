@@ -89,4 +89,20 @@ class HTTPFeaturesRaiseErrorTest < Minitest::Test
   def test_initialize_is_a_feature
     assert_kind_of HTTP::Feature, HTTP::Features::RaiseError.new
   end
+
+  def test_wrap_response_when_status_is_400_and_ignored_returns_original_response
+    feature = HTTP::Features::RaiseError.new(ignore: [400])
+    response = build_response(status: 400)
+    result = feature.wrap_response(response)
+
+    assert_same response, result
+  end
+
+  def test_wrap_response_when_status_is_500_and_ignored_returns_original_response
+    feature = HTTP::Features::RaiseError.new(ignore: [500])
+    response = build_response(status: 500)
+    result = feature.wrap_response(response)
+
+    assert_same response, result
+  end
 end
