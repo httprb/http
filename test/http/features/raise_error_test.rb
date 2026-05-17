@@ -65,6 +65,15 @@ class HTTPFeaturesRaiseErrorTest < Minitest::Test
     assert_equal "Unexpected status code 599", err.message
   end
 
+  def test_each_error_code
+    HTTP::Features::RaiseError::CODE_TO_ERROR_CLASS.each do |status, expected_error_class|
+      feature = HTTP::Features::RaiseError.new(ignore: [])
+      response = build_response(status: status)
+      err = assert_raises(expected_error_class) { feature.wrap_response(response) }
+      refute_nil err.message
+    end
+  end
+
   # -- #initialize --
 
   def test_initialize_defaults_ignore_to_empty_array
