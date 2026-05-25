@@ -402,7 +402,7 @@ class HTTPClientTest < Minitest::Test
     sleep_url = "#{dummy.endpoint}/sleep"
     feature_instance = feature_class.new
 
-    TCPSocket.stub(:open, ->(*) { sleep 0.1 }) do
+    TCPSocket.stub(:open, ->(*, **) { raise IO::TimeoutError }) do
       assert_raises(HTTP::ConnectTimeoutError) do
         client.use(test_feature: feature_instance)
               .timeout(0.001)

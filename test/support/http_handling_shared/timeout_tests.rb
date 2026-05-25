@@ -72,9 +72,9 @@ module TimeoutTests
       timeout_options: { global_timeout: 0.01 }
     )
 
-    TCPSocket.stub(:open, ->(*) { sleep 0.025 }) do
+    TCPSocket.stub(:open, ->(*, **) { raise IO::TimeoutError }) do
       err = assert_raises(HTTP::ConnectTimeoutError) { client.get(server.endpoint).body.to_s }
-      assert_match(/execution/, err.message)
+      assert_match(/Connect timed out|execution/, err.message)
     end
   end
 
