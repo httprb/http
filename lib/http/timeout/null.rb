@@ -185,12 +185,14 @@ module HTTP
       # @return [Object] the connected socket
       # @api private
       def open_socket(socket_class, host, port, connect_timeout: nil)
-        if connect_timeout
+        return socket_class.open(host, port) unless connect_timeout
+
+        if native_timeout?(socket_class)
+          open_with_timeout(socket_class, host, port, connect_timeout)
+        else
           ::Timeout.timeout(connect_timeout, ConnectTimeoutError) do
             open_with_timeout(socket_class, host, port, connect_timeout)
           end
-        else
-          socket_class.open(host, port)
         end
       rescue IO::TimeoutError
         raise ConnectTimeoutError, "Connect timed out after #{connect_timeout} seconds"
