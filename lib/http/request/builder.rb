@@ -84,8 +84,18 @@ module HTTP
         uri = uri.to_s
 
         if @options.base_uri? && uri !~ HTTP_OR_HTTPS_RE
+          # A leading "//" makes the input a protocol-relative (network-path)
+          # reference per RFC 3986 §4.2 / §5.2. Passing it to base.join /
+          # URI#merge would replace the base authority with the input's host,
+          # turning a base_uri-scoped request into one to an arbitrary host.
+          # Prepend "./" so it resolves as a normal relative path under base.
+          uri = "./#{uri}" if uri.start_with?("//")
           uri = resolve_against_base(uri)
         elsif @options.persistent? && uri !~ HTTP_OR_HTTPS_RE
+          # Same hazard against the persistent-host concatenation: a leading
+          # "//" produces "scheme://persistent//evil/path" which HTTP::URI.parse
+          # normalises into scheme://evil/path. Force a relative-path prefix.
+          uri = "./#{uri}" if uri.start_with?("//")
           uri = "#{@options.persistent}#{uri}"
         end
 

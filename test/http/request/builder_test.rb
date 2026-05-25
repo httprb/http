@@ -620,4 +620,63 @@ class HTTPRequestBuilderTest < Minitest::Test
 
     assert_includes chunks.join, "key=value"
   end
+
+  # Regression coverage for protocol-relative (network-path-reference) inputs.
+  # Without the guard in make_request_uri, an input like "//evil.com/path"
+  # bypasses HTTP_OR_HTTPS_RE and reaches base.join, which per RFC 3986 §5.2
+  # replaces the base authority with the input host — turning a base_uri-scoped
+  # request into one to an arbitrary host while keeping connection-scoped
+  # headers (Authorization, etc.).
+  def test_build_with_base_uri_and_protocol_relative_does_not_override_host
+    builder = build_builder(base_uri: "http://example.com/api/")
+    req = builder.build(:get, "//evil.com/leak")
+
+    assert_equal "example.com", req.uri.host
+    refute_equal "evil.com", req.uri.host
+  end
+
+  def test_build_with_base_uri_and_protocol_relative_with_port_does_not_override_host
+    builder = build_builder(base_uri: "http://example.com/api/")
+    req = builder.build(:get, "//evil.com:8080/leak")
+
+    assert_equal "example.com", req.uri.host
+  end
+
+  def test_build_with_base_uri_and_protocol_relative_with_userinfo_does_not_override_host
+    builder = build_builder(base_uri: "http://example.com/api/")
+    req = builder.build(:get, "//user:pass@evil.com/leak")
+
+    assert_equal "example.com", req.uri.host
+  end
+
+  def test_build_with_base_uri_and_triple_slash_does_not_override_host
+    builder = build_builder(base_uri: "http://example.com/api/")
+    req = builder.build(:get, "///evil.com")
+
+    assert_equal "example.com", req.uri.host
+  end
+
+  def test_build_with_persistent_and_protocol_relative_does_not_override_host
+    builder = build_builder(persistent: "http://example.com")
+    req = builder.build(:get, "//evil.com/leak")
+
+    assert_equal "example.com", req.uri.host
+    refute_equal "evil.com", req.uri.host
+  end
+
+  def test_build_with_base_uri_still_allows_absolute_paths_after_fix
+    builder = build_builder(base_uri: "http://example.com/api/")
+    req = builder.build(:get, "/safe/path")
+
+    assert_equal "example.com", req.uri.host
+    assert_equal "/safe/path", req.uri.path
+  end
+
+  def test_build_with_base_uri_still_allows_plain_relative_after_fix
+    builder = build_builder(base_uri: "http://example.com/api/")
+    req = builder.build(:get, "users/me")
+
+    assert_equal "example.com", req.uri.host
+    assert_equal "/api/users/me", req.uri.path
+  end
 end

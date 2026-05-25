@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Security
+
+- `HTTP::Request::Builder#make_request_uri` now rejects protocol-relative inputs
+  (`//host/path`) when resolving against a configured `base_uri` or `persistent`
+  origin. Previously such inputs flowed into `URI#merge` and replaced the base
+  authority, allowing an attacker who controlled the path argument to redirect
+  the request to an arbitrary host and leak any connection-scoped headers
+  (`HTTP.auth(...)`, etc.). See `GHSA-r98x-p6m8-xcrv` for details.
+
 ## [6.0.3] - 2026-04-20
 
 ### Fixed
