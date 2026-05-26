@@ -81,21 +81,11 @@ module HTTP
       # @return [HTTP::URI] the constructed URI
       # @api private
       def make_request_uri(uri)
-        uri = uri.to_s
+        uri = neutralize_protocol_relative(uri.to_s)
 
         if @options.base_uri? && uri !~ HTTP_OR_HTTPS_RE
-          # A leading "//" makes the input a protocol-relative (network-path)
-          # reference per RFC 3986 §4.2 / §5.2. Passing it to base.join /
-          # URI#merge would replace the base authority with the input's host,
-          # turning a base_uri-scoped request into one to an arbitrary host.
-          # Prepend "./" so it resolves as a normal relative path under base.
-          uri = "./#{uri}" if uri.start_with?("//")
           uri = resolve_against_base(uri)
         elsif @options.persistent? && uri !~ HTTP_OR_HTTPS_RE
-          # Same hazard against the persistent-host concatenation: a leading
-          # "//" produces "scheme://persistent//evil/path" which HTTP::URI.parse
-          # normalises into scheme://evil/path. Force a relative-path prefix.
-          uri = "./#{uri}" if uri.start_with?("//")
           uri = "#{@options.persistent}#{uri}"
         end
 
@@ -109,6 +99,26 @@ module HTTP
         uri.path = "/" if uri.path.empty?
 
         uri
+      end
+
+      # Neutralize a leading "//" so it resolves as a relative path under base
+      #
+      # A "//"-prefixed input is a protocol-relative (network-path) reference
+      # per RFC 3986 §4.2 / §5.2. On the base_uri branch it would replace the
+      # base authority via URI#join; on the persistent branch naive
+      # concatenation produces "scheme://persistent//evil/path" which
+      # HTTP::URI.parse normalises into scheme://evil/path. Prepending "./"
+      # forces the input to resolve as an ordinary relative path under the
+      # configured base.
+      #
+      # @param uri [String] the input URI
+      # @return [String] uri unchanged, or "./" + uri when neutralization applies
+      # @api private
+      def neutralize_protocol_relative(uri)
+        return uri unless @options.base_uri? || @options.persistent?
+        return uri unless uri.start_with?("//")
+
+        "./#{uri}"
       end
 
       # Resolve a relative URI against the configured base URI

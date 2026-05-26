@@ -338,6 +338,18 @@ class HTTPRetriablePerformerTest < Minitest::Test
     assert_kind_of CustomException, received_err
   end
 
+  def test_should_retry_passes_the_response_to_proc
+    received_res = nil
+    retry_proc = proc do |_req, _err, res, _attempt|
+      received_res = res
+      false
+    end
+
+    perform(should_retry: retry_proc) { response }
+
+    assert_equal response, received_res
+  end
+
   def test_should_retry_raises_original_error_if_not_retryable
     retry_proc = ->(*) { false }
 

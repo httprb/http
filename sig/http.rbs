@@ -818,6 +818,7 @@ module HTTP
       private
 
       def make_request_uri: (String | URI uri) -> URI
+      def neutralize_protocol_relative: (String uri) -> String
       def resolve_against_base: (String uri) -> String
       def merge_query_params!: (URI uri) -> void
       def make_request_headers: () -> Headers

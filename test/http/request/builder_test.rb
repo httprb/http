@@ -660,7 +660,12 @@ class HTTPRequestBuilderTest < Minitest::Test
     builder = build_builder(persistent: "http://example.com")
     req = builder.build(:get, "//evil.com/leak")
 
-    assert_equal "example.com", req.uri.host
+    # Pin the full URI: concatenation produces "http://example.com.//..."
+    # whose host is `example.com.`; HTTP::URI#normalize_host strips the
+    # trailing dot. Asserting on origin/to_s guards against a future
+    # change to normalize_host that would let the dot leak through.
+    assert_equal "http://example.com", req.uri.origin
+    assert_equal "http://example.com///evil.com/leak", req.uri.to_s
     refute_equal "evil.com", req.uri.host
   end
 
@@ -678,5 +683,15 @@ class HTTPRequestBuilderTest < Minitest::Test
 
     assert_equal "example.com", req.uri.host
     assert_equal "/api/users/me", req.uri.path
+  end
+
+  # Without base_uri or persistent set, the helper must leave a "//"-prefixed
+  # input alone — neutralizing would push the request off the intended host
+  # via dot-segment normalization. Tested directly because the public build()
+  # path normalizes ".///x" back to "//x", obscuring the difference.
+  def test_neutralize_protocol_relative_without_options_returns_uri_unchanged
+    builder = build_builder
+
+    assert_equal "//evil.com/leak", builder.send(:neutralize_protocol_relative, "//evil.com/leak")
   end
 end
