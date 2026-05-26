@@ -196,6 +196,21 @@ class HTTPTimeoutNullTest < Minitest::Test
     assert_match(/Connect timed out/, err.message)
   end
 
+  def test_open_socket_wraps_in_timeout_when_native_unsupported
+    socket_class = fake(open: fake(closed?: false))
+    called_with = nil
+    stub_timeout = lambda do |secs, klass, &blk|
+      called_with = [secs, klass]
+      blk.call
+    end
+
+    ::Timeout.stub(:timeout, stub_timeout) do
+      @timeout.send(:open_socket, socket_class, "example.com", 80, connect_timeout: 5)
+    end
+
+    assert_equal [5, HTTP::ConnectTimeoutError], called_with
+  end
+
   # -- #native_timeout? (private) --
 
   if RUBY_VERSION >= "3.4"

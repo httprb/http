@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- On Ruby 3.4+ with `TCPSocket`, the redundant `Timeout.timeout` wrap around
+  socket-level `connect_timeout` is removed. The native timeout is used alone,
+  which avoids a slow `Thread` leak from `Timeout::Request` retention under
+  abnormal exit paths (see [#542]). On Ruby 3.2/3.3 and with custom socket
+  classes the previous `Timeout.timeout` wrap is preserved.
+
 ### Security
 
 - `HTTP::Request::Builder#make_request_uri` now rejects protocol-relative inputs
@@ -285,6 +293,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#535]: https://github.com/httprb/http/issues/535
 [#536]: https://github.com/httprb/http/issues/536
 [#537]: https://github.com/httprb/http/issues/537
+[#542]: https://github.com/httprb/http/issues/542
 [#544]: https://github.com/httprb/http/issues/544
 [#557]: https://github.com/httprb/http/issues/557
 [#560]: https://github.com/httprb/http/pull/560

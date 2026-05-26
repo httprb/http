@@ -74,7 +74,7 @@ module TimeoutTests
 
     TCPSocket.stub(:open, ->(*, **) { raise IO::TimeoutError }) do
       err = assert_raises(HTTP::ConnectTimeoutError) { client.get(server.endpoint).body.to_s }
-      assert_match(/Connect timed out|execution/, err.message)
+      assert_match(/Connect timed out/, err.message)
     end
   end
 
