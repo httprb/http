@@ -326,11 +326,9 @@ module HTTP
     # @return [String]
     # @api private
     def default_host_header_value
-      value = PORTS[@scheme] == port ? host : "#{host}:#{port}"
+      raise RequestError, "Invalid host: #{host.inspect}" if host.nil? || host.match?(/\s/)
 
-      raise RequestError, "Invalid host: #{value.inspect}" if value.match?(/\s/)
-
-      value
+      PORTS[@scheme] == port ? host : "#{host}:#{port}"
     end
 
     # Parse and normalize the URI, setting scheme

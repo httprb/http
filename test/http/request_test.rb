@@ -266,6 +266,18 @@ class HTTPRequestTest < Minitest::Test
     assert_includes err.message, "exam ple.com".inspect
   end
 
+  def test_host_header_when_host_is_nil_raises_request_error
+    normalizer = lambda { |uri|
+      u = HTTP::URI.parse(uri)
+      u.host = nil
+      u
+    }
+
+    assert_raises(HTTP::RequestError) do
+      HTTP::Request.new(verb: :get, uri: "http://example.com/", uri_normalizer: normalizer)
+    end
+  end
+
   # User-Agent header
 
   def test_user_agent_header_defaults_to_http_request_user_agent
