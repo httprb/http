@@ -337,9 +337,9 @@ module HTTP
     # @return [HTTP::Request]
     # @api private
     def init_request(request, uri)
-      raise ArgumentError, ":uri is for backwards compatibilty and conflicts with :request" if request && uri
+      raise ArgumentError, ":uri is for backwards compatibility and conflicts with :request" if request && uri
 
-      # For backwards compatibilty
+      # For backwards compatibility
       if uri
         HTTP::Request.new(uri: uri, verb: :get)
       else

@@ -14,8 +14,8 @@ module HTTP
     #
     # Emits two events on every request:
     #
-    #  * `start_request.http` before the request is made, so you can log the reqest being started
-    #  * `request.http` after the response is recieved, and contains `start`
+    #  * `start_request.http` before the request is made, so you can log the request being started
+    #  * `request.http` after the response is received, and contains `start`
     #    and `finish` so the duration of the request can be calculated.
     #
     class Instrumentation < Feature
