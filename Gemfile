@@ -20,7 +20,7 @@ group :test do
   gem "rubocop-performance", "~> 1.26"
   gem "rubocop-rake",        "~> 0.7.1"
 
-  gem "simplecov",      require: false
+  gem "simplecov",      ">= 1", require: false
   gem "simplecov-lcov", require: false
 
   gem "minitest-memory", platform: :mri

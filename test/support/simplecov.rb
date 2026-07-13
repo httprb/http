@@ -16,8 +16,8 @@ if ENV["CI"]
 end
 
 SimpleCov.start do
-  add_filter "/test/"
-  add_filter "/minitest-memory/"
+  skip "/test/"
+  skip "/minitest-memory/"
 
   if RUBY_ENGINE == "ruby"
     enable_coverage :branch
