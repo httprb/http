@@ -1062,6 +1062,12 @@ module HTTP
     end
 
     class Parser
+      module RetainCallbackProcs : LLHttp::Callbacks
+        @retained_callback_procs: Array[Proc]?
+
+        def []=: (Symbol key, Proc value) -> Proc
+      end
+
       @handler: Handler
       @header_finished: bool
       @message_finished: bool

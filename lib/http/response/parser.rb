@@ -2,28 +2,36 @@
 
 require "llhttp"
 
-# :nocov:
-if RUBY_ENGINE == "jruby"
-  # JRuby's FFI does not retain Ruby references to procs assigned into
-  # FFI::Struct callback fields, so the JVM may garbage-collect the native
-  # callback trampolines while the parser is still in use, after which
-  # llhttp_execute succeeds without invoking any callbacks. Retain each
-  # assigned proc on the struct so the trampolines live as long as the
-  # parser that owns them.
-  LLHttp::Callbacks.prepend(Module.new do
-    def []=(key, value)
-      (@retained_callback_procs ||= []) << value
-      super
-    end
-  end)
-end
-# :nocov:
-
 module HTTP
   class Response
     # HTTP response parser backed by LLHttp
     # @api private
     class Parser
+      # JRuby's FFI does not retain Ruby references to procs assigned into
+      # FFI::Struct callback fields, so the JVM may garbage-collect the
+      # native callback trampolines while the parser is still in use, after
+      # which llhttp_execute succeeds without invoking any callbacks.
+      # Prepended to LLHttp::Callbacks to retain each assigned proc on the
+      # struct so the trampolines live as long as the parser that owns them.
+      # @api private
+      module RetainCallbackProcs
+        # :nocov:
+
+        # Retain the callback proc, then assign it as usual
+        # @return [Proc]
+        # @api private
+        def []=(key, value)
+          retained = @retained_callback_procs ||= [] #: Array[Proc]
+          retained << value
+          super
+        end
+        # :nocov:
+      end
+
+      # :nocov:
+      LLHttp::Callbacks.prepend(RetainCallbackProcs) if RUBY_ENGINE == "jruby"
+      # :nocov:
+
       # The underlying LLHttp parser
       # @return [LLHttp::Parser] the underlying parser
       # @api private

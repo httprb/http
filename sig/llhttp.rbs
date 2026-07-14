@@ -17,4 +17,8 @@ module LLHttp
   class Delegate
     def initialize: () -> void
   end
+
+  class Callbacks
+    def []=: (Symbol key, Proc value) -> Proc
+  end
 end
