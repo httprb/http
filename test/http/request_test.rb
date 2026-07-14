@@ -273,9 +273,27 @@ class HTTPRequestTest < Minitest::Test
       u
     }
 
-    assert_raises(HTTP::RequestError) do
+    err = assert_raises(HTTP::RequestError) do
       HTTP::Request.new(verb: :get, uri: "http://example.com/", uri_normalizer: normalizer)
     end
+
+    assert_includes err.message, "nil"
+  end
+
+  def test_host_header_when_host_is_empty_raises_request_error
+    err = assert_raises(HTTP::RequestError) do
+      HTTP::Request.new(verb: :get, uri: "https:///foobar")
+    end
+
+    assert_includes err.message, "".inspect
+  end
+
+  def test_host_header_when_host_is_empty_with_non_default_port_raises_request_error
+    err = assert_raises(HTTP::RequestError) do
+      HTTP::Request.new(verb: :get, uri: "https://:123/foobar")
+    end
+
+    assert_includes err.message, "".inspect
   end
 
   # User-Agent header

@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Building a default `Host` header now raises `HTTP::RequestError` when the
+  request URI has a nil host (previously `NoMethodError`) or an empty host
+  (e.g. `https:///path` or `https://:123/path`, which previously produced
+  invalid `Host: ` / `Host: :123` headers). A non-empty host is required per
+  RFC 9110 Section 7.2. ([#841])
 - On JRuby, HTTP responses could intermittently hang forever (or time out)
   waiting for data that had already been received. JRuby's FFI does not retain
   Ruby references to procs assigned into `FFI::Struct` callback fields, so the
@@ -324,6 +329,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#784]: https://github.com/httprb/http/issues/784
 [#785]: https://github.com/httprb/http/issues/785
 [#826]: https://github.com/httprb/http/issues/826
+[#841]: https://github.com/httprb/http/pull/841
 [unreleased]: https://github.com/httprb/http/compare/v6.0.4...HEAD
 [6.0.4]: https://github.com/httprb/http/compare/v6.0.3...v6.0.4
 [6.0.3]: https://github.com/httprb/http/compare/v6.0.2...v6.0.3
