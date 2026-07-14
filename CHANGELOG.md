@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- On JRuby, HTTP responses could intermittently hang forever (or time out)
+  waiting for data that had already been received. JRuby's FFI does not retain
+  Ruby references to procs assigned into `FFI::Struct` callback fields, so the
+  JVM could garbage-collect llhttp's native callback trampolines while a parser
+  was still in use, after which `llhttp_execute` succeeded without invoking any
+  callbacks. Callback procs are now retained for the lifetime of the parser.
+
 ## [6.0.4] - 2026-07-14
 
 ### Fixed
