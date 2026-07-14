@@ -29,7 +29,7 @@ jobs:
             platform: java
 
     env:
-      BUNDLE_WITHOUT: sig
+      BUNDLE_WITHOUT: development:test:doc:sig
 
     steps:
       - uses: actions/checkout@v6
