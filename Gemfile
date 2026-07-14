@@ -27,7 +27,7 @@ group :test do
   gem "minitest-mock"
   gem "minitest-strict"
 
-  gem "mutant-minitest"
+  gem "mutant-minitest", platform: :mri
 
   gem "yardstick"
 end
