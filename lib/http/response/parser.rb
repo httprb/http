@@ -15,7 +15,7 @@ module HTTP
       # struct so the trampolines live as long as the parser that owns them.
       # @api private
       module RetainCallbackProcs
-        # :nocov:
+        # simplecov:disable — only executed on JRuby
 
         # Retain the callback proc, then assign it as usual
         # @return [Proc]
@@ -25,12 +25,10 @@ module HTTP
           retained << value
           super
         end
-        # :nocov:
+        # simplecov:enable
       end
 
-      # :nocov:
-      LLHttp::Callbacks.prepend(RetainCallbackProcs) if RUBY_ENGINE == "jruby"
-      # :nocov:
+      LLHttp::Callbacks.prepend(RetainCallbackProcs) if RUBY_ENGINE == "jruby" # simplecov:disable — JRuby-only
 
       # The underlying LLHttp parser
       # @return [LLHttp::Parser] the underlying parser
