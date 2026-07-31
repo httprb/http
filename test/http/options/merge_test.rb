@@ -64,6 +64,7 @@ class HTTPOptionsMergeTest < Minitest::Test
         proxy:              { proxy_address: "127.0.0.1", proxy_port: 8080 },
         follow:             nil,
         retriable:          nil,
+        blocklist:          nil,
         base_uri:           nil,
         socket_class:       HTTP::Options.default_socket_class,
         nodelay:            false,

@@ -166,6 +166,23 @@ module HTTP
     end
     alias through via
 
+    # Deny requests to blocked hostnames and IP addresses
+    #
+    # @example
+    #   HTTP.blocklist(IPAddr.new("127.0.0.0/8"), "localhost").get("http://example.com")
+    #
+    # @example Deciding per address
+    #   HTTP.blocklist(deny: ->(address) { address.loopback? || address.private? })
+    #
+    # @param [Array<IPAddr, String>] entries address and hostname rules
+    # @param [#call, nil] deny called with each resolved address, truthy blocks it
+    # @return [HTTP::Session]
+    # @see HTTP::Blocklist
+    # @api public
+    def blocklist(*entries, deny: nil)
+      branch default_options.with_blocklist(entries: entries.flatten, deny: deny)
+    end
+
     # Make client follow redirects
     #
     # @example

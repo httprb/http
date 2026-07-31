@@ -146,6 +146,50 @@ HTTP.base_uri("https://api.example.com/v1").persistent do |http|
 end
 ```
 
+### Blocklist
+
+When fetching user-supplied URLs, block hosts you don't want reachable:
+
+```ruby
+http = HTTP.blocklist(
+  IPAddr.new("169.254.0.0/16"), # link-local, incl. cloud metadata
+  "internal.example.com",       # by hostname
+  deny: ->(address) { address.loopback? || address.private? }
+)
+
+http.get("http://127.0.0.1/")   # raises HTTP::BlockedHostError
+http.get("https://example.com") # allowed
+```
+
+Entries are classified by type, and the block decides anything they can't:
+
+- **`IPAddr`** entries are checked against *every* address the request host
+  resolves to, so a hostname pointing at `127.0.0.1` is blocked too. The socket
+  then connects to the address that was validated, so DNS cannot return a
+  different answer between the check and the connect.
+- **`String`** entries are hostnames, matched against the request host and its
+  subdomains, case-insensitively: `internal.example.com` also blocks
+  `db.internal.example.com`. A String is *always* a hostname — write
+  `IPAddr.new("127.0.0.0/8")`, not `"127.0.0.0/8"`.
+- **`deny:`** receives each resolved address as an `IPAddr` and blocks it by
+  returning true, like `retriable`'s `should_retry:`. It composes with the
+  entries: an address is blocked if either matches. In the `blocklist:` option
+  form, pass a Hash — `blocklist: { entries: [...], deny: ->(a) { ... } }`.
+
+Every redirect hop is checked, so a redirect into a blocked host raises rather
+than being followed. `HTTP::BlockedHostError` is an `HTTP::RequestError`, not a
+`ConnectionError`, so `retriable` will not retry it.
+
+**A blocklist cannot be enforced through a proxy**, and warns once when the two
+are combined. The proxy resolves the target and makes the connection, so the
+addresses checked here are not necessarily the ones reached, and a target that
+only resolves from the proxy's network will fail to resolve locally. The rules
+are still applied on a best-effort basis; treat the result as advisory.
+
+Note that with a blocklist configured http.rb connects to a single validated
+address rather than letting the OS try each one, so dual-stack fallback
+(Happy Eyeballs) does not apply to those requests.
+
 ### Thread Safety
 
 Configured sessions are safe to share across threads:

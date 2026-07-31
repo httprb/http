@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `HTTP.blocklist` denies requests to hostnames and IP addresses you don't want
+  reachable, raising `HTTP::BlockedHostError`. `IPAddr` entries are matched
+  against every address the request host resolves to, and the socket connects to
+  the address that was validated, so DNS cannot answer differently between the
+  check and the connect. `String` entries are hostnames, matching the request
+  host and its subdomains. An optional `deny:` callable receives each resolved
+  address as an `IPAddr` and blocks it by returning true, e.g.
+  `HTTP.blocklist(deny: ->(address) { address.loopback? || address.private? })`.
+  Every redirect hop is checked. Also available as a per-request and constructor
+  option, either as a list of rules or as a Hash:
+  `HTTP.get(url, blocklist: [IPAddr.new("127.0.0.0/8")])`,
+  `HTTP.get(url, blocklist: { entries: [...], deny: ->(a) { a.loopback? } })`.
+  Note that requests using a blocklist connect to a single validated address, so
+  dual-stack fallback (Happy Eyeballs) does not apply to them. A blocklist
+  cannot be enforced through a proxy — the proxy resolves the target and makes
+  the connection — so combining the two warns once and the checks are advisory.
+
 ### Fixed
 
 - Building a default `Host` header now raises `HTTP::RequestError` when the

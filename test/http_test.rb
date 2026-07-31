@@ -316,6 +316,53 @@ class HTTPTest < Minitest::Test
     assert_raises(ArgumentError) { HTTP.persistent }
   end
 
+  # .blocklist
+
+  def test_blocklist_collects_entries_from_a_splat_or_a_single_array
+    splatted = HTTP.blocklist("localhost", IPAddr.new("127.0.0.0/8")).default_options.blocklist
+    arrayed  = HTTP.blocklist([IPAddr.new("127.0.0.1"), "localhost"]).default_options.blocklist
+
+    [splatted, arrayed].each do |blocklist|
+      assert blocklist.blocked_host?("localhost")
+      assert blocklist.blocked_address?(IPAddr.new("127.0.0.1"))
+    end
+  end
+
+  def test_blocklist_blocks_matching_requests_and_allows_the_rest
+    assert_raises(HTTP::BlockedHostError) do
+      HTTP.blocklist(IPAddr.new("127.0.0.0/8")).get(dummy.endpoint)
+    end
+
+    assert_equal 200, HTTP.blocklist(IPAddr.new("10.0.0.0/8")).get(dummy.endpoint).code
+  end
+
+  def test_blocklist_deny_decides_per_address
+    assert_raises(HTTP::BlockedHostError) do
+      HTTP.blocklist(deny: lambda(&:loopback?)).get(dummy.endpoint)
+    end
+
+    assert_equal 200, HTTP.blocklist(deny: lambda(&:private?)).get(dummy.endpoint).code
+  end
+
+  def test_blocklist_can_be_given_per_request
+    assert_raises(HTTP::BlockedHostError) do
+      HTTP.get(dummy.endpoint, blocklist: [IPAddr.new("127.0.0.0/8")])
+    end
+
+    assert_raises(HTTP::BlockedHostError) do
+      HTTP.blocklist(IPAddr.new("10.0.0.0/8")).get(dummy.endpoint, blocklist: { deny: lambda(&:loopback?) })
+    end
+  end
+
+  def test_blocklist_raises_when_a_redirect_targets_a_blocked_host
+    target = "http://localhost:#{dummy.port}/"
+
+    assert_raises(HTTP::BlockedHostError) do
+      HTTP.blocklist("localhost").follow
+          .get("#{dummy.endpoint}/cross-origin-redirect?target=#{target}")
+    end
+  end
+
   # .persistent
 
   def test_persistent_with_host_returns_http_session

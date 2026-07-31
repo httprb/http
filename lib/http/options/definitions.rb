@@ -90,6 +90,25 @@ module HTTP
         end
     end
 
+    def_option :blocklist, reader_only: true
+
+    # Sets the blocklist of denied hostnames and addresses
+    #
+    # Accepts a {Blocklist}, a list of rules, or a Hash of `entries` and `deny`.
+    #
+    # @param [HTTP::Blocklist, Array<IPAddr, String>, String, Hash, nil] value
+    # @api private
+    # @return [HTTP::Blocklist, nil]
+    def blocklist=(value)
+      @blocklist =
+        if value.respond_to?(:to_hash)
+          hash = value #: Hash[Symbol, untyped]
+          Blocklist.new(hash[:entries], **hash.except(:entries))
+        elsif value
+          Blocklist.new(value)
+        end
+    end
+
     def_option :base_uri, reader_only: true
 
     # Sets the base URI for resolving relative request paths

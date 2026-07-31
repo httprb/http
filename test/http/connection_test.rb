@@ -1530,4 +1530,52 @@ class HTTPConnectionTest < Minitest::Test
 
     assert_instance_of HTTP::Response::Parser, parser
   end
+
+  # ---------------------------------------------------------------------------
+  # blocklist enforcement
+  # ---------------------------------------------------------------------------
+
+  LOOPBACK_RULES = [IPAddr.new("127.0.0.0/8"), IPAddr.new("::1/128")].freeze
+
+  LOOPBACK_ADDRESSES = ["127.0.0.1", "::1"].freeze
+
+  PROXY = { proxy_address: "proxy.example", proxy_port: 8080 }.freeze
+
+  # Returns the host the socket was actually opened against.
+  def connect_to(uri: "http://localhost/", proxy: nil, **)
+    connected = []
+    socket = fake(connect: ->(_klass, host, _port, **) { connected << host }, close: nil)
+    timeout_class = fake(new: socket)
+    req = build_req(uri: uri, proxy: proxy)
+
+    HTTP::Connection.new(req, HTTP::Options.new(timeout_class: timeout_class, **))
+
+    connected.first
+  end
+
+  def test_connect_uses_the_validated_address_only_when_a_blocklist_is_configured
+    assert_equal "localhost", connect_to
+    assert_includes LOOPBACK_ADDRESSES, connect_to(blocklist: [IPAddr.new("10.0.0.0/8")])
+  end
+
+  def test_connect_raises_when_the_request_host_is_blocked
+    assert_raises(HTTP::BlockedHostError) { connect_to(blocklist: LOOPBACK_RULES) }
+  end
+
+  def test_connect_still_dials_the_proxy_but_checks_the_target
+    allowed = HTTP::Blocklist.new([IPAddr.new("10.0.0.0/8")])
+
+    capture_warning do
+      assert_equal "proxy.example", connect_to(proxy: PROXY, blocklist: allowed)
+
+      assert_raises(HTTP::BlockedHostError) { connect_to(proxy: PROXY, blocklist: LOOPBACK_RULES) }
+    end
+  end
+
+  def test_connect_warns_only_when_a_blocklist_is_combined_with_a_proxy
+    blocklist = HTTP::Blocklist.new([IPAddr.new("10.0.0.0/8")])
+
+    assert_empty(capture_warning { connect_to(blocklist: blocklist) })
+    assert_includes capture_warning { connect_to(proxy: PROXY, blocklist: blocklist) }, "proxy"
+  end
 end

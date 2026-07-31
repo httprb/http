@@ -17,6 +17,9 @@ module HTTP
   # Generic Request error
   class RequestError < Error; end
 
+  # Error raised when host matches a blocked host/ip
+  class BlockedHostError < RequestError; end
+
   # Generic Response error
   class ResponseError < Error; end
 

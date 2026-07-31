@@ -16,6 +16,10 @@ requires:
 mutation:
   operators: full
   timeout: 10.0
+  ignore_patterns:
+    # getaddrinfo resolves the same addresses regardless of the socktype and
+    # protocol arguments, so mutating them cannot change behavior.
+    - send{selector=getaddrinfo}
 
 matcher:
   subjects:
@@ -44,6 +48,10 @@ matcher:
     - "HTTP::Response#init_body"
     - "HTTP::Response#init_request"
     # Equivalent mutations — semantically identical code that mutant cannot distinguish
+    # `is_a?` -> `instance_of?`; Blocklist is never subclassed
+    - "HTTP::Blocklist.new"
+    # `downcase` -> `upcase`; case folding is applied to both rules and queries
+    - "HTTP::Blocklist#normalize_host"
     - "HTTP::Response::Body#loggable?"
     - "HTTP::Response::Body#read_contents"
     - "HTTP::Response::Body#to_s"

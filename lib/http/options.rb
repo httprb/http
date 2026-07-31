@@ -152,7 +152,8 @@ module HTTP
       retriable: nil,
       base_uri: nil,
       persistent: nil,
-      ssl_context: nil
+      ssl_context: nil,
+      blocklist: nil
     )
       assign_options(binding)
     end

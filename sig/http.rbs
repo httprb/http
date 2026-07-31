@@ -5,6 +5,30 @@ module HTTP
 
   extend Chainable
 
+  type blocklist_rule = IPAddr | String
+
+  type blocklist_deny = ^(IPAddr) -> boolish
+
+  type blocklist_entries = Blocklist | Array[blocklist_rule] | String | Hash[Symbol, untyped]
+
+  class Blocklist
+    @addresses: Array[IPAddr]
+    @hosts: Array[String]
+    @deny: blocklist_deny?
+    @warned: bool?
+
+    def self.new: (?blocklist_entries entries, ?deny: blocklist_deny?) -> Blocklist
+    def initialize: (Array[blocklist_rule] | String | nil entries, deny: blocklist_deny?) -> void
+    def blocked_host?: (String host) -> bool
+    def blocked_address?: (IPAddr address) -> bool
+    def validate!: (String host) -> String
+    def warn_proxy_incompatible: () -> void
+
+    private
+
+    def normalize_host: (String host) -> String
+  end
+
   def self.[]: (Hash[String | Symbol, String] headers) -> Session
 
   module Base64
@@ -68,6 +92,7 @@ module HTTP
       ?retriable: bool | Hash[Symbol, untyped],
       ?base_uri: String | URI?,
       ?persistent: String?,
+      ?blocklist: blocklist_entries?,
       ?ssl_context: OpenSSL::SSL::SSLContext?
     ) -> Response
                 | [T] (
@@ -93,6 +118,7 @@ module HTTP
       ?retriable: bool | Hash[Symbol, untyped],
       ?base_uri: String | URI?,
       ?persistent: String?,
+      ?blocklist: blocklist_entries?,
       ?ssl_context: OpenSSL::SSL::SSLContext?
     ) { (Response) -> T } -> T
     def timeout: (Numeric | Hash[Symbol, Numeric] | :null options) -> Session
@@ -102,6 +128,7 @@ module HTTP
     def via: (*(String | Integer | Hash[String, String]) proxy) -> Session
     alias through via
     def follow: (?strict: bool, ?max_hops: Integer, ?on_redirect: (^(Response, Request) -> void)?) -> Session
+    def blocklist: (*blocklist_rule entries, ?deny: blocklist_deny?) -> Session
     def headers: (Hash[String | Symbol, untyped] headers) -> Session
     def cookies: (Hash[String | Symbol, String] | Array[Cookie] cookies) -> Session
     def encoding: (String | Encoding encoding) -> Session
@@ -156,6 +183,7 @@ module HTTP
       ?retriable: bool | Hash[Symbol, untyped],
       ?base_uri: String | URI?,
       ?persistent: String?,
+      ?blocklist: blocklist_entries?,
       ?ssl_context: OpenSSL::SSL::SSLContext?
     ) -> Response
     def persistent?: () -> bool
@@ -207,6 +235,7 @@ module HTTP
       ?retriable: bool | Hash[Symbol, untyped],
       ?base_uri: String | URI?,
       ?persistent: String?,
+      ?blocklist: blocklist_entries?,
       ?ssl_context: OpenSSL::SSL::SSLContext?
     ) -> Response
                 | [T] (
@@ -232,6 +261,7 @@ module HTTP
       ?retriable: bool | Hash[Symbol, untyped],
       ?base_uri: String | URI?,
       ?persistent: String?,
+      ?blocklist: blocklist_entries?,
       ?ssl_context: OpenSSL::SSL::SSLContext?
     ) { (Response) -> T } -> T
     def persistent?: () -> bool
@@ -646,6 +676,7 @@ module HTTP
       ?retriable: bool | Hash[Symbol, untyped],
       ?base_uri: String | URI?,
       ?persistent: String?,
+      ?blocklist: blocklist_entries?,
       ?ssl_context: OpenSSL::SSL::SSLContext?
     ) -> void
     def features=: (Hash[Symbol, untyped] features) -> Hash[Symbol, Feature]
@@ -658,6 +689,7 @@ module HTTP
     def base_uri?: () -> bool
     def persistent=: (String? value) -> String?
     def persistent?: () -> bool
+    def blocklist=: (blocklist_entries? value) -> Blocklist?
     def merge: (Hash[Symbol, untyped] | Options other) -> Options
     def to_hash: () -> Hash[Symbol, untyped]
     def dup: () ?{ (Options) -> void } -> Options
@@ -684,6 +716,7 @@ module HTTP
     attr_reader retriable: Hash[Symbol, untyped]?
     attr_reader base_uri: URI?
     attr_reader persistent: String?
+    attr_reader blocklist: Blocklist?
 
     def with_headers: (Hash[String | Symbol, untyped] | Headers value) -> Options
     def with_encoding: (String | Encoding value) -> Options
@@ -692,6 +725,7 @@ module HTTP
     def with_retriable: (Hash[Symbol, untyped] | bool value) -> Options
     def with_base_uri: (String | URI value) -> Options
     def with_persistent: (String value) -> Options
+    def with_blocklist: (blocklist_entries value) -> Options
     def with_proxy: (Hash[Symbol, untyped] value) -> Options
     def with_params: (Hash[String | Symbol, untyped] value) -> Options
     def with_form: (untyped value) -> Options
@@ -1174,6 +1208,7 @@ module HTTP
 
       def flush_pending_response: () -> void
       def flush_or_close_response: (Response response) -> void
+      def connect_address: (Request req, Options options) -> String
       def start_tls: (Request req, Options options) -> void
       def send_proxy_connect_request: (Request req) -> void
       def handle_proxy_connect_response: () -> void
@@ -1461,6 +1496,9 @@ module HTTP
   end
 
   class RequestError < Error
+  end
+
+  class BlockedHostError < RequestError
   end
 
   class ResponseError < Error

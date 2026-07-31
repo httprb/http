@@ -34,6 +34,24 @@ module HTTP
         end
       end
 
+      # Resolve the address to connect to, enforcing the blocklist
+      #
+      # @param [HTTP::Request] req
+      # @param [HTTP::Options] options
+      # @return [String] host or validated address to connect to
+      # @raise [HTTP::BlockedHostError] when the request target is blocked
+      # @api private
+      def connect_address(req, options)
+        blocklist = options.blocklist
+        return req.socket_host unless blocklist
+
+        proxied = req.using_proxy?
+        blocklist.warn_proxy_incompatible if proxied
+        address = blocklist.validate!(req.host)
+
+        proxied ? req.socket_host : address
+      end
+
       # Sets up SSL context and starts TLS if needed
       # @param (see Connection#initialize)
       # @return [void]

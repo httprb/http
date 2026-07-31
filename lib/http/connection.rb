@@ -255,7 +255,7 @@ module HTTP
     # @api private
     def connect_socket(req, options)
       @socket = options.timeout_class.new(**options.timeout_options)
-      @socket.connect(options.socket_class, req.socket_host, req.socket_port, nodelay: options.nodelay)
+      @socket.connect(options.socket_class, connect_address(req, options), req.socket_port, nodelay: options.nodelay)
 
       send_proxy_connect_request(req)
       start_tls(req, options)

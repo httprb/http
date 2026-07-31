@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "http/errors"
+require "http/blocklist"
 require "http/timeout/null"
 require "http/timeout/per_operation"
 require "http/timeout/global"
