@@ -403,6 +403,46 @@ class HTTPConnectionTest < Minitest::Test
     assert_equal "", chunk2
   end
 
+  # Delivers `response`, then closes the way OpenSSL reports a peer
+  # disconnecting without a close_notify alert. Going through a real timeout
+  # handler is the point: it is what turns that SSLError into the :eof
+  # #check_premature_eof judges, so TLS reaches the same verdict a plain socket
+  # would for the same response framing.
+  def build_tls_eof_connection(response)
+    reads = [response]
+    raw_socket = fake(
+      close:       nil,
+      closed?:     false,
+      readpartial: proc { |*|
+        raise OpenSSL::SSL::SSLError, "SSL_read: unexpected eof while reading" if reads.empty?
+
+        reads.shift
+      }
+    )
+    socket = HTTP::Timeout::Null.new
+    socket.instance_variable_set(:@socket, raw_socket)
+    socket.define_singleton_method(:connect) { |*, **| nil }
+
+    conn = HTTP::Connection.new(build_req, HTTP::Options.new(timeout_class: fake(new: socket)))
+    conn.instance_variable_set(:@pending_response, true)
+    conn.tap(&:read_headers!)
+  end
+
+  def test_readpartial_treats_tls_unexpected_eof_as_the_end_of_an_unframed_body
+    conn = build_tls_eof_connection("HTTP/1.1 200 OK\r\n\r\nhello")
+
+    assert_equal "hello", conn.readpartial
+    assert_equal "", conn.readpartial
+  end
+
+  def test_readpartial_detects_premature_eof_when_tls_closes_mid_framed_body
+    conn = build_tls_eof_connection("HTTP/1.1 200 OK\r\nContent-Length: 100\r\n\r\nhello")
+
+    assert_equal "hello", conn.readpartial
+    err = assert_raises(HTTP::ConnectionError) { conn.readpartial }
+    assert_includes err.message, "response body ended prematurely"
+  end
+
   def test_readpartial_finishes_response_when_parser_says_finished
     req = build_req
     call_count = 0

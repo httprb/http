@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- A TLS peer that closes the connection without sending a `close_notify` alert
+  no longer raises a bare `OpenSSL::SSL::SSLError` ("SSL_read: unexpected eof
+  while reading") out of a read. OpenSSL 3 reports that close as an error
+  rather than as the end of the stream, so TLS connections bypassed the
+  premature-EOF check that plain connections get. This sort of close is now reported
+  as EOF as it does for a plain socket: a body delimited by connection close finishes 
+  normally, while a `Content-Length` or chunked body that ends early raises
+  `HTTP::ConnectionError`.
 - Building a default `Host` header now raises `HTTP::RequestError` when the
   request URI has a nil host (previously `NoMethodError`) or an empty host
   (e.g. `https:///path` or `https://:123/path`, which previously produced
