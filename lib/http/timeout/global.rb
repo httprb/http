@@ -111,14 +111,6 @@ module HTTP
 
       private
 
-      # Reads from socket in non-blocking mode
-      #
-      # @api private
-      # @return [String, Symbol]
-      def read_nonblock(size, buffer = nil)
-        @socket.read_nonblock(size, buffer, exception: false)
-      end
-
       # Writes to socket in non-blocking mode
       #
       # @api private

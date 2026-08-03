@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "io/wait"
+require "openssl"
 require "timeout"
 
 module HTTP
@@ -13,6 +14,11 @@ module HTTP
       #
       # @api private
       NATIVE_CONNECT_TIMEOUT = RUBY_VERSION >= "3.4"
+
+      # OpenSSL's message for a peer that closed without a close_notify alert
+      #
+      # @api private
+      UNEXPECTED_EOF = "unexpected eof while reading"
 
       # Timeout configuration options
       #
@@ -133,6 +139,10 @@ module HTTP
         @socket.readpartial(size, buffer)
       rescue EOFError
         :eof
+      rescue OpenSSL::SSL::SSLError => e
+        raise unless unexpected_eof?(e)
+
+        :eof
       end
 
       # Write to the socket
@@ -149,6 +159,29 @@ module HTTP
       alias << write
 
       private
+
+      # Reads from socket in non-blocking mode
+      #
+      # @param [Integer] size
+      # @param [String, nil] buffer
+      # @api private
+      # @return [String, Symbol, nil]
+      def read_nonblock(size, buffer = nil)
+        @socket.read_nonblock(size, buffer, exception: false)
+      rescue OpenSSL::SSL::SSLError => e
+        raise unless unexpected_eof?(e)
+
+        nil
+      end
+
+      # Whether an SSL error is a peer closing without a close_notify alert
+      #
+      # @param [OpenSSL::SSL::SSLError] error
+      # @api private
+      # @return [Boolean]
+      def unexpected_eof?(error)
+        error.message.include?(UNEXPECTED_EOF)
+      end
 
       # Retries reading on wait readable
       #
