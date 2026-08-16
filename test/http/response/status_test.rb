@@ -180,6 +180,25 @@ class HTTPResponseStatusTest < Minitest::Test
   end
 
   # ---------------------------------------------------------------------------
+  # #coerce
+  # ---------------------------------------------------------------------------
+  def test_coerce_returns_pair_comparable_with_integers
+    assert_equal [500, 503], HTTP::Response::Status.new(503).coerce(500)
+  end
+
+  def test_integer_spaceship_compares_with_status
+    assert_equal(-1, 500 <=> HTTP::Response::Status.new(503))
+  end
+
+  def test_range_case_equality_matches_status_within_range
+    assert_operator 500..599, :===, HTTP::Response::Status.new(503)
+  end
+
+  def test_range_case_equality_does_not_match_status_outside_range
+    refute_operator 500..599, :===, HTTP::Response::Status.new(404)
+  end
+
+  # ---------------------------------------------------------------------------
   # #==
   # ---------------------------------------------------------------------------
   def test_equal_to_another_status_with_same_code
