@@ -14,6 +14,12 @@ unless defined?(CustomSubException)
   end
 end
 
+# Subclass for testing is_a? vs instance_of? in StatusError handling
+unless defined?(CustomStatusError)
+  class CustomStatusError < HTTP::StatusError
+  end
+end
+
 class HTTPRetriablePerformerTest < Minitest::Test
   cover "HTTP::Retriable::Performer*"
 
@@ -194,6 +200,146 @@ class HTTPRetriablePerformerTest < Minitest::Test
 
     assert_equal response, result
     assert_equal 1, counter_spy
+  end
+
+  # -- StatusError raised inside the attempt (raise_error feature interop) --
+
+  def error_response
+    @error_response ||= make_response(status: 503)
+  end
+
+  def test_perform_retries_status_error_matching_retry_statuses
+    assert_raises HTTP::OutOfRetriesError do
+      perform(retry_statuses: [503], tries: 3) do
+        raise HTTP::StatusError, error_response
+      end
+    end
+    assert_equal 3, counter_spy
+  end
+
+  def test_perform_retries_status_error_subclasses_and_attaches_response
+    err = nil
+    begin
+      perform(retry_statuses: [503], tries: 2) do
+        raise CustomStatusError, error_response
+      end
+    rescue HTTP::OutOfRetriesError => e
+      err = e
+    end
+
+    assert_equal error_response, err.response
+    assert_equal 2, counter_spy
+  end
+
+  def test_perform_does_not_retry_status_error_not_matching_retry_statuses
+    assert_raises HTTP::StatusError do
+      perform(retry_statuses: [503], tries: 3) do
+        raise HTTP::StatusError, make_response(status: 404)
+      end
+    end
+    assert_equal 1, counter_spy
+  end
+
+  def test_perform_does_not_retry_plain_exception_when_retry_statuses_configured
+    assert_raises CustomException do
+      perform(retry_statuses: [503], tries: 3) do
+        raise CustomException
+      end
+    end
+    assert_equal 1, counter_spy
+  end
+
+  def test_perform_does_not_retry_status_error_without_retry_statuses
+    assert_raises HTTP::StatusError do
+      perform(tries: 3) do
+        raise HTTP::StatusError, error_response
+      end
+    end
+    assert_equal 1, counter_spy
+  end
+
+  def test_out_of_retries_error_from_status_error_has_response_and_cause
+    err = nil
+    begin
+      perform(retry_statuses: [503], tries: 2) do
+        raise HTTP::StatusError, error_response
+      end
+    rescue HTTP::OutOfRetriesError => e
+      err = e
+    end
+
+    assert_equal error_response, err.response
+    assert_kind_of HTTP::StatusError, err.cause
+  end
+
+  def test_out_of_retries_error_from_status_error_in_exceptions_list_has_response
+    err = nil
+    begin
+      perform(exceptions: [HTTP::StatusError], tries: 2) do
+        raise HTTP::StatusError, error_response
+      end
+    rescue HTTP::OutOfRetriesError => e
+      err = e
+    end
+
+    assert_equal error_response, err.response
+  end
+
+  def test_on_retry_callback_with_status_error_receives_error_and_response
+    callback_call_spy = 0
+
+    callback_spy = proc do |callback_request, error, callback_response|
+      assert_equal request, callback_request
+      assert_kind_of HTTP::StatusError, error
+      assert_equal error_response, callback_response
+      callback_call_spy += 1
+    end
+
+    assert_raises HTTP::OutOfRetriesError do
+      perform(retry_statuses: [503], tries: 3, on_retry: callback_spy) do
+        raise HTTP::StatusError, error_response
+      end
+    end
+
+    assert_equal 2, callback_call_spy
+  end
+
+  def test_calculate_delay_receives_status_error_response
+    responses_seen = []
+
+    performer = HTTP::Retriable::Performer.new(delay: 0, retry_statuses: [503], tries: 2)
+    calculator = performer.instance_variable_get(:@delay_calculator)
+    original_call = calculator.method(:call)
+    calculator.define_singleton_method(:call) do |iteration, resp|
+      responses_seen << resp
+      original_call.call(iteration, resp)
+    end
+
+    begin
+      performer.perform(client, request) { raise HTTP::StatusError, error_response }
+    rescue HTTP::OutOfRetriesError
+      nil
+    end
+
+    assert_equal error_response, responses_seen.first
+  end
+
+  def test_response_flushing_flushes_status_error_response_when_retries_exhausted
+    flushed = false
+    error_response.define_singleton_method(:flush) do
+      flushed = true
+      self
+    end
+
+    begin
+      perform(retry_statuses: [503], tries: 2) do
+        raise HTTP::StatusError, error_response
+      end
+    rescue HTTP::OutOfRetriesError
+      nil
+    end
+
+    assert flushed, "expected StatusError response to be flushed on final attempt"
   end
 
   # -- on_retry callback --
