@@ -9,7 +9,7 @@ module HTTP
     # Timeout handler with separate timeouts for connect, read, and write
     class PerOperation < Null
       # Mapping of shorthand option keys to their full forms
-      KEYS = %i[read write connect].to_h { |k| [k, :"#{k}_timeout"] }.freeze
+      KEYS = { read: :read_timeout, write: :write_timeout, connect: :connect_timeout }.freeze
 
       # Normalize and validate timeout options
       #

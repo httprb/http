@@ -61,7 +61,7 @@ module HTTP
       def new(options = nil, **kwargs)
         return options if options.is_a?(self)
 
-        super(**(options || kwargs)) # steep:ignore
+        super(**(options || kwargs))
       end
 
       # Returns list of defined option names
@@ -181,7 +181,7 @@ module HTTP
     # @api public
     # @return [Hash]
     def to_hash
-      self.class.defined_options.to_h { |opt_name| [opt_name, public_send(opt_name)] }
+      self.class.defined_options.to_h { |opt_name| [opt_name, public_send(opt_name)] } # steep:ignore
     end
 
     # Duplicates the options object

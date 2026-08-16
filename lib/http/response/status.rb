@@ -66,7 +66,7 @@ module HTTP
       #   SYMBOL_CODES[:im_a_teapot]           # => 418
       #
       # @return [Hash<Symbol => Fixnum>]
-      SYMBOL_CODES = SYMBOLS.to_h { |k, v| [v, k] }.freeze
+      SYMBOL_CODES = SYMBOLS.invert.freeze
 
       # The numeric status code
       #
