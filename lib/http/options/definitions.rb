@@ -45,7 +45,7 @@ module HTTP
                     unless (feature = self.class.available_features[name])
                       argument_error! "Unsupported feature: #{name}"
                     end
-                    feature.new(**opts_or_feature) # steep:ignore
+                    feature.new(**opts_or_feature)
                   end
       end
     end

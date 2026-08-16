@@ -184,7 +184,7 @@ module HTTP
     # @return [Hash]
     # @api public
     def to_h
-      keys.to_h { |k| [k, self[k]] }
+      keys.to_h { |k| [k, self[k]] } # steep:ignore
     end
     # @!method to_hash
     #   @see #to_h
@@ -200,7 +200,7 @@ module HTTP
     # @return [Hash{Symbol => Object}]
     # @api public
     def deconstruct_keys(keys)
-      hash = @pile.map { |_, k, _| k }.to_h { |k| [k.tr("A-Z-", "a-z_").to_sym, self[k]] }
+      hash = @pile.map { |_, k, _| k }.to_h { |k| [k.tr("A-Z-", "a-z_").to_sym, self[k]] } # steep:ignore
       keys ? hash.slice(*keys) : hash
     end
 
