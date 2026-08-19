@@ -20,6 +20,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   JVM could garbage-collect llhttp's native callback trampolines while a parser
   was still in use, after which `llhttp_execute` succeeded without invoking any
   callbacks. Callback procs are now retained for the lifetime of the parser.
+- `Response::Status` now implements the numeric coercion protocol (instance
+  `#coerce`), so range patterns (`case response in status: 500..599`) and
+  Integer-first comparisons (`500 <=> status`) work. Previously `Integer#<=>`
+  returned nil for `Status` operands, so range patterns silently never
+  matched. ([#847])
 
 ## [6.0.4] - 2026-07-14
 
@@ -330,6 +335,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#785]: https://github.com/httprb/http/issues/785
 [#826]: https://github.com/httprb/http/issues/826
 [#841]: https://github.com/httprb/http/pull/841
+[#847]: https://github.com/httprb/http/pull/847
 [unreleased]: https://github.com/httprb/http/compare/v6.0.4...HEAD
 [6.0.4]: https://github.com/httprb/http/compare/v6.0.3...v6.0.4
 [6.0.3]: https://github.com/httprb/http/compare/v6.0.2...v6.0.3
