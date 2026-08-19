@@ -1601,6 +1601,7 @@ module HTTP
       def try_request: () { () -> Response? } -> [Exception?, Response?]
       def retry_request?: (Request req, Exception? err, Response? res, Integer attempt) -> bool
       def retry_exception?: (Exception err) -> bool
+      def retriable_status_error?: (Exception err) -> bool
       def retry_response?: (untyped res) -> bool
       def wait_for_retry_or_raise: (Request req, Exception? err, Response? res, Integer attempt) -> void
       def out_of_retries_error: (Request request, Response? response, Exception? exception) -> OutOfRetriesError
