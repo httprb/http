@@ -136,7 +136,7 @@ module HTTP
       def readpartial(size, buffer = nil)
         timeout = false
         loop do
-          result = @socket.read_nonblock(size, buffer, exception: false)
+          result = read_nonblock(size, buffer)
 
           return :eof   if result.nil?
           return result unless WAIT_RESULTS.include?(result)

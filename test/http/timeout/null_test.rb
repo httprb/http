@@ -86,6 +86,47 @@ class HTTPTimeoutNullTest < Minitest::Test
     refute post_connection_check_called
   end
 
+  # -- unexpected eof --
+  #
+  # OpenSSL 3 raises instead of signalling EOF when a peer closes the connection
+  # without a close_notify alert. Both read paths report it the way the socket
+  # itself reports an ordinary close, leaving the connection layer to decide
+  # whether that EOF was premature. Subclasses inherit #read_nonblock, so this
+  # covers their reads too.
+
+  def stub_socket(method, message)
+    socket = fake(
+      to_io:   @io,
+      closed?: false,
+      method => proc { |*| raise OpenSSL::SSL::SSLError, message }
+    )
+    @timeout.instance_variable_set(:@socket, socket)
+  end
+
+  def test_readpartial_returns_eof_when_tls_peer_closes_without_close_notify
+    stub_socket(:readpartial, "SSL_read: unexpected eof while reading")
+
+    assert_equal :eof, @timeout.readpartial(10)
+  end
+
+  def test_readpartial_reraises_ssl_errors_that_are_not_an_unexpected_eof
+    stub_socket(:readpartial, "SSL_read: decryption failed or bad record mac")
+    err = assert_raises(OpenSSL::SSL::SSLError) { @timeout.readpartial(10) }
+    assert_match(/decryption failed/, err.message)
+  end
+
+  def test_read_nonblock_returns_nil_when_tls_peer_closes_without_close_notify
+    stub_socket(:read_nonblock, "SSL_read: unexpected eof while reading")
+
+    assert_nil @timeout.send(:read_nonblock, 10)
+  end
+
+  def test_read_nonblock_reraises_ssl_errors_that_are_not_an_unexpected_eof
+    stub_socket(:read_nonblock, "SSL_read: decryption failed or bad record mac")
+    err = assert_raises(OpenSSL::SSL::SSLError) { @timeout.send(:read_nonblock, 10) }
+    assert_match(/decryption failed/, err.message)
+  end
+
   # -- #rescue_readable (private) --
 
   def test_rescue_readable_yields_the_block

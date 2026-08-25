@@ -1498,6 +1498,7 @@ module HTTP
   module Timeout
     class Null
       NATIVE_CONNECT_TIMEOUT: bool
+      UNEXPECTED_EOF: String
 
       attr_reader options: Hash[Symbol, Numeric]
       attr_reader socket: untyped
@@ -1516,6 +1517,8 @@ module HTTP
 
       def read_timeout: () -> Numeric?
       def write_timeout: () -> Numeric?
+      def read_nonblock: (Integer size, ?String? buffer) -> untyped
+      def unexpected_eof?: (OpenSSL::SSL::SSLError error) -> bool
       def rescue_readable: (?Numeric? timeout) { () -> untyped } -> untyped
       def rescue_writable: (?Numeric? timeout) { () -> untyped } -> untyped
       def open_socket: (untyped socket_class, String host, Integer port, ?connect_timeout: Numeric?) -> untyped
@@ -1566,7 +1569,6 @@ module HTTP
 
       private
 
-      def read_nonblock: (Integer size, ?String? buffer) -> untyped
       def write_nonblock: (String data) -> untyped
       def perform_io: (?Numeric? per_op_timeout) { () -> untyped } -> untyped
       def handle_io_result: (untyped result) -> untyped
