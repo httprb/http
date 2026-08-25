@@ -105,7 +105,7 @@ module HTTP
       #
       # @api private
       # @return [Array]
-      # rubocop:disable Lint/RescueException
+      # rubocop:disable-next Lint/RescueException
       def try_request
         err, res = nil
 
@@ -117,7 +117,6 @@ module HTTP
 
         [err, res]
       end
-      # rubocop:enable Lint/RescueException
 
       # Checks whether the request should be retried
       #

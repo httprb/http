@@ -24,8 +24,8 @@ module HTTP
       # @api public
       def coerce(object)
         object = if    object.respond_to?(:to_hash) then object.to_hash
-                 elsif object.respond_to?(:to_h)    then object.to_h
-                 elsif object.respond_to?(:to_a)    then object.to_a
+                 elsif object.respond_to?(:to_h) then object.to_h
+                 elsif object.respond_to?(:to_a) then object.to_a
                  else raise Error, "Can't coerce #{object.inspect} to Headers"
                  end
 
