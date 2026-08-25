@@ -1,5 +1,4 @@
 dependencies:
-  - name: base64
   - name: digest
   - name: forwardable
   - name: openssl
