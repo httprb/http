@@ -95,6 +95,34 @@ class HTTPResponseBodyTest < Minitest::Test
     assert_equal "Hello, World!", collected.join
   end
 
+  def test_each_passes_buffer_size_to_underlying_readpartial
+    received_sizes = []
+    conn = Object.new
+    conn.define_singleton_method(:readpartial) do |size = nil|
+      received_sizes << size
+      raise EOFError if received_sizes.size > 1
+
+      "data"
+    end
+    body = HTTP::Response::Body.new(conn, encoding: Encoding::UTF_8)
+    body.each(buffer_size: 1_048_576) { |chunk| chunk }
+
+    assert_equal [1_048_576, 1_048_576], received_sizes
+  end
+
+  def test_each_defaults_buffer_size_to_connection_buffer_size
+    received_sizes = []
+    conn = Object.new
+    conn.define_singleton_method(:readpartial) do |size = nil|
+      received_sizes << size
+      raise EOFError
+    end
+    body = HTTP::Response::Body.new(conn, encoding: Encoding::UTF_8)
+    body.each { |chunk| chunk }
+
+    assert_equal [HTTP::Connection::BUFFER_SIZE], received_sizes
+  end
+
   # ---------------------------------------------------------------------------
   # #to_s when streaming
   # ---------------------------------------------------------------------------

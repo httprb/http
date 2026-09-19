@@ -1034,8 +1034,8 @@ module HTTP
 
       def initialize: (untyped stream, ?encoding: String | Encoding) -> void
       def readpartial: (?Integer size, ?String? outbuf) -> String
-      def each: () { (String) -> void } -> void
-             | () -> Enumerator[String, void]
+      def each: (?buffer_size: Integer) { (String) -> void } -> void
+             | (?buffer_size: Integer) -> Enumerator[String, void]
       def to_s: () -> untyped
       alias to_str to_s
       def stream!: () -> untyped

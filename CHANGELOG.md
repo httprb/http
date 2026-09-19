@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `HTTP::Response::Body#each` now accepts a `buffer_size:` keyword argument
+  to control the chunk size used when streaming the body, instead of always
+  using `HTTP::Connection::BUFFER_SIZE` (16KB). ([#782])
+
 ### Fixed
 
 - Building a default `Host` header now raises `HTTP::RequestError` when the
@@ -293,6 +299,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `Request` and `Response`. Use `request.headers["..."]` and
   `response.headers["..."]` instead ([#537])
 
+[#782]: https://github.com/httprb/http/issues/782
 [#270]: https://github.com/httprb/http/issues/270
 [#223]: https://github.com/httprb/http/issues/223
 [#358]: https://github.com/httprb/http/issues/358
