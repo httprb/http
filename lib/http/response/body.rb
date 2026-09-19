@@ -67,13 +67,17 @@ module HTTP
       # @example
       #   body.each { |chunk| puts chunk }
       #
+      # @example
+      #   body.each(buffer_size: 1.megabyte) { |chunk| puts chunk }
+      #
+      # @param buffer_size [Integer] the maximum size of each yielded chunk
       # @yield [chunk] Passes each chunk to the block
       # @yieldparam chunk [String]
       # @return [void]
       # @api public
-      def each
+      def each(buffer_size: Connection::BUFFER_SIZE)
         loop do
-          yield readpartial
+          yield readpartial(buffer_size)
         end
       rescue EOFError # rubocop:disable Lint/SuppressedException
       end
