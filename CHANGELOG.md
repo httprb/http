@@ -20,6 +20,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   JVM could garbage-collect llhttp's native callback trampolines while a parser
   was still in use, after which `llhttp_execute` succeeded without invoking any
   callbacks. Callback procs are now retained for the lifetime of the parser.
+- An IO request body is now rewound when writing it fails partway, not only
+  after it is sent in full. Previously a retried request (e.g. via
+  `.retriable` after a connection reset mid-upload) sent the body from where
+  the failed write stopped: fewer bytes than its `Content-Length`, so the
+  server waited for the rest until the read timed out.
 
 ## [6.0.4] - 2026-07-14
 

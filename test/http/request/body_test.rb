@@ -156,6 +156,24 @@ class HTTPRequestBodyTest < Minitest::Test
     assert(results.all?(data))
   end
 
+  def test_each_when_body_is_an_io_rewinds_it_when_a_chunk_fails_to_write
+    data = ("a" * 16 * 1024) + ("b" * 10 * 1024)
+    subject = build_body(StringIO.new(data))
+    written = 0
+
+    assert_raises(Errno::EPIPE) do
+      subject.each do |chunk|
+        raise Errno::EPIPE if written.positive?
+
+        written += chunk.bytesize
+      end
+    end
+
+    chunks = subject.enum_for(:each).map(&:dup)
+
+    assert_equal data, chunks.sum("")
+  end
+
   def test_each_when_body_is_an_enumerable_yields_elements
     chunks = build_body(%w[bees cows]).enum_for(:each).map(&:dup)
 

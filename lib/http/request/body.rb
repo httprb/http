@@ -90,8 +90,7 @@ module HTTP
         if @source.is_a?(String)
           yield @source
         elsif @source.respond_to?(:read)
-          IO.copy_stream(@source, ProcIO.new(block))
-          rewind(@source)
+          copy_io(block)
         elsif @source
           @source.each(&block)
         end
@@ -111,6 +110,20 @@ module HTTP
       end
 
       private
+
+      # Stream an IO source to the block, then rewind it
+      #
+      # The rewind also runs when the block raises, so a retried request
+      # sends the whole body again instead of the unsent remainder.
+      #
+      # @param [Proc] block
+      # @return [void]
+      # @api private
+      def copy_io(block)
+        IO.copy_stream(@source, ProcIO.new(block))
+      ensure
+        rewind(@source)
+      end
 
       # Rewind an IO source if possible
       # @return [void]

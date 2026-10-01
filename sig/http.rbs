@@ -906,6 +906,7 @@ module HTTP
 
       private
 
+      def copy_io: ((^(String) -> void)? block) -> void
       def rewind: (untyped io) -> void
       def validate_source_type!: () -> void
 
