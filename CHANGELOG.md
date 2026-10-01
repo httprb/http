@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- A connection whose proxy refused the `CONNECT` tunnel is no longer kept
+  alive. The next request on a persistent client returned the old refusal
+  without contacting the proxy, or a response with status 0 once the
+  refusal's body had been read. It now opens a new connection and asks the
+  proxy again.
 - Building a default `Host` header now raises `HTTP::RequestError` when the
   request URI has a nil host (previously `NoMethodError`) or an empty host
   (e.g. `https:///path` or `https://:123/path`, which previously produced

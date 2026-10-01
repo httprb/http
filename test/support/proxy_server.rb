@@ -205,3 +205,35 @@ class AuthProxyServer < ProxyServer
       "\r\n"
   end
 end
+
+class RefusingProxyServer < ProxyServer
+  def initialize
+    super
+    @connections = Queue.new
+  end
+
+  def connections
+    @connections.size
+  end
+
+  def reset
+    @connections.clear
+  end
+
+  private
+
+  def handle_request(client)
+    @connections << true
+    while read_proxy_request(client)
+      client.write "HTTP/1.1 407 Proxy Authentication Required\r\n" \
+                   "Proxy-Authenticate: Basic realm=\"proxy\"\r\n" \
+                   "Content-Length: 4\r\n" \
+                   "\r\n" \
+                   "deny"
+    end
+  rescue IOError, SystemCallError
+    nil
+  ensure
+    client.close rescue nil
+  end
+end

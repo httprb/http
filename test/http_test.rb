@@ -816,3 +816,35 @@ class HTTPViaAuthProxyTest < Minitest::Test
     assert_equal 407, response.status.to_i
   end
 end
+
+class HTTPViaRefusingProxyTest < Minitest::Test
+  run_server(:dummy_ssl) { DummyServer.new(ssl: true) }
+  run_server(:proxy) { RefusingProxyServer.new }
+
+  def setup
+    super
+    @session = HTTP.timeout(5).via(proxy.addr, proxy.port).persistent(dummy_ssl.endpoint)
+  end
+
+  def teardown
+    @session.close
+    super
+  end
+
+  def get
+    @session.get(dummy_ssl.endpoint, ssl_context: SSLHelper.client_context)
+  end
+
+  def test_persistent_client_retries_refused_tunnel_on_new_connection
+    statuses = Array.new(2) { get.status.to_i }
+
+    assert_equal [407, 407], statuses
+    assert_equal 2, proxy.connections
+  end
+
+  def test_persistent_client_retries_refused_tunnel_after_reading_refusal
+    assert_equal "deny", get.to_s
+    assert_equal 407, get.status.to_i
+    assert_equal 2, proxy.connections
+  end
+end

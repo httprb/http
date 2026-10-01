@@ -1101,6 +1101,25 @@ class HTTPConnectionTest < Minitest::Test
     assert conn.instance_variable_get(:@pending_response)
   end
 
+  def test_proxy_connect_non_200_is_not_kept_alive
+    proxy_req = build_req(
+      uri:   "https://example.com/",
+      proxy: { proxy_address: "proxy.example.com", proxy_port: 8080 }
+    )
+    proxy_socket = fake(
+      connect:     nil,
+      close:       nil,
+      closed?:     false,
+      write:       lambda(&:bytesize),
+      readpartial: "HTTP/1.1 407 Proxy Authentication Required\r\nContent-Length: 0\r\n\r\n",
+      start_tls:   ->(*) {}
+    )
+    proxy_opts = HTTP::Options.new(timeout_class: fake(new: proxy_socket), persistent: "https://example.com")
+    conn = HTTP::Connection.new(proxy_req, proxy_opts)
+
+    assert_same false, conn.keep_alive?
+  end
+
   def test_proxy_connect_200_completes_successfully_and_resets_parser
     proxy_req = build_req(
       uri:   "https://example.com/",

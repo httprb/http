@@ -76,6 +76,7 @@ module HTTP
 
         if @parser.status_code != 200
           @failed_proxy_connect = true
+          @keep_alive = false
           return
         end
 
