@@ -144,6 +144,7 @@ module HTTP
     def send_request(req, options)
       notify_features(req, options)
 
+      discard_stale_connection
       @connection ||= HTTP::Connection.new(req, options)
 
       unless @connection.failed_proxy_connect?
@@ -153,6 +154,23 @@ module HTTP
     rescue Error => e
       options.features.each_value { |feature| feature.on_error(req, e) }
       raise
+    end
+
+    # Drop the connection unless it can carry another request
+    #
+    # Reads off the previous response first. Runs after the client is marked
+    # dirty, so an interrupted read still makes the next request reconnect.
+    #
+    # @return [void]
+    # @api private
+    def discard_stale_connection
+      return unless @connection
+
+      @connection.flush_pending_response
+      return if @connection.keep_alive? && !@connection.stale?
+
+      @connection.close
+      @connection = nil
     end
 
     # Build response and apply feature wrapping

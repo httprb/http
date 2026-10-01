@@ -101,7 +101,7 @@ module HTTP
     # @return [nil]
     # @api public
     def send_request(req)
-      flush_pending_response if @pending_response
+      flush_pending_response
 
       if @pending_request
         raise StateError, "Tried to send a request while a response is pending. Make sure you read off the body."

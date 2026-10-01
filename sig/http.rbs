@@ -172,6 +172,7 @@ module HTTP
     def build_response: (Request req, Options options) -> Response
     def build_wrapped_response: (Request req, Options options) -> Response
     def send_request: (Request req, Options options) -> void
+    def discard_stale_connection: () -> void
     def verify_connection!: (URI uri) -> void
   end
 
@@ -1170,9 +1171,11 @@ module HTTP
         def close: () -> void
       end
 
+      def stale?: () -> bool
+      def flush_pending_response: () -> void
+
       private
 
-      def flush_pending_response: () -> void
       def flush_or_close_response: (Response response) -> void
       def start_tls: (Request req, Options options) -> void
       def send_proxy_connect_request: (Request req) -> void

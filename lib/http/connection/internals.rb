@@ -2,14 +2,45 @@
 
 module HTTP
   class Connection
-    # Internal private methods for Connection
+    # Lower-level socket and response handling for Connection
     module Internals
-      private
+      # Whether the server closed this idle connection or sent data on it
+      #
+      # Checks the socket without blocking. On an idle connection any readable
+      # data means it can't carry another request: an EOF, a reset, a TLS
+      # close_notify, or a response nobody asked for, such as the 408 some
+      # servers send before closing. Always false while a response is pending,
+      # because its unread body is expected data.
+      #
+      # @example
+      #   connection.stale?
+      #
+      # @return [Boolean]
+      # @api public
+      def stale?
+        return false if @pending_response
+
+        io = @socket.socket if @socket.respond_to?(:socket)
+        return false unless io.respond_to?(:to_io)
+
+        io.to_io.wait_readable(0) ? true : false
+      rescue IOError, SystemCallError
+        true
+      end
 
       # Flush the pending response body so the connection can be reused
+      #
+      # Closes the connection instead when the body can't be flushed or is
+      # larger than {MAX_FLUSH_SIZE}. Does nothing when no response is pending.
+      #
+      # @example
+      #   connection.flush_pending_response
+      #
       # @return [void]
-      # @api private
+      # @api public
       def flush_pending_response
+        return unless @pending_response
+
         response = @pending_response
         unless response.respond_to?(:flush)
           close
@@ -20,6 +51,8 @@ module HTTP
       rescue
         close
       end
+
+      private
 
       # Flush the response or close if the body exceeds the size limit
       # @param response [HTTP::Response] the response to flush

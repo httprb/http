@@ -682,12 +682,86 @@ class HTTPClientTest < Minitest::Test
       close:                  nil,
       "pending_response=":    ->(*) {}
     )
-    proxy_client.instance_variable_set(:@connection, conn)
-    proxy_client.instance_variable_set(:@state, :clean)
     req = HTTP::Request.new(verb: :get, uri: "http://example.com/", headers: {})
-    response = proxy_client.perform(req, HTTP::Options.new)
+    response = HTTP::Connection.stub(:new, conn) { proxy_client.perform(req, HTTP::Options.new) }
 
     assert_equal 407, response.status.to_i
+  end
+
+  # #perform on a persistent connection
+
+  def build_idle_connection(**overrides)
+    fake(
+      failed_proxy_connect?:  false,
+      send_request:           nil,
+      read_headers!:          nil,
+      proxy_response_headers: {},
+      status_code:            200,
+      http_version:           "1.1",
+      headers:                HTTP::Headers.new,
+      finish_response:        nil,
+      keep_alive?:            true,
+      expired?:               false,
+      flush_pending_response: nil,
+      stale?:                 false,
+      close:                  nil,
+      "pending_response=":    ->(*) {},
+      **overrides
+    )
+  end
+
+  def perform_over(connection)
+    client = HTTP::Client.new
+    client.instance_variable_set(:@connection, connection)
+    client.instance_variable_set(:@state, :clean)
+    replacement = build_idle_connection
+    req = HTTP::Request.new(verb: :get, uri: "http://example.com/", headers: {})
+    HTTP::Connection.stub(:new, replacement) { client.perform(req, HTTP::Options.new) }
+
+    [client.instance_variable_get(:@connection), replacement]
+  end
+
+  def test_perform_reuses_idle_connection
+    connection = build_idle_connection
+
+    assert_same connection, perform_over(connection).first
+  end
+
+  def test_perform_replaces_stale_connection
+    closed = false
+    connection = build_idle_connection(stale?: true, close: -> { closed = true })
+    current, replacement = perform_over(connection)
+
+    assert closed
+    assert_same replacement, current
+  end
+
+  def test_perform_replaces_connection_closed_while_flushing_previous_response
+    alive = true
+    closed = false
+    connection = build_idle_connection(
+      keep_alive?:            -> { alive },
+      flush_pending_response: -> { alive = false },
+      close:                  -> { closed = true }
+    )
+    current, replacement = perform_over(connection)
+
+    assert closed
+    assert_same replacement, current
+  end
+
+  def test_perform_keeps_client_dirty_when_interrupted_on_replacement_connection
+    client = HTTP::Client.new
+    client.instance_variable_set(:@connection, build_idle_connection(stale?: true))
+    client.instance_variable_set(:@state, :clean)
+    interrupted = build_idle_connection(send_request: ->(*) { raise Interrupt })
+    req = HTTP::Request.new(verb: :get, uri: "http://example.com/", headers: {})
+
+    HTTP::Connection.stub(:new, interrupted) do
+      assert_raises(Interrupt) { client.perform(req, HTTP::Options.new) }
+    end
+
+    assert_equal :dirty, client.instance_variable_get(:@state)
   end
 end
 

@@ -979,6 +979,105 @@ class HTTPConnectionTest < Minitest::Test
   end
 
   # ---------------------------------------------------------------------------
+  # #stale?
+  # ---------------------------------------------------------------------------
+  def build_connection_over(io)
+    build_connection(socket: fake(connect: nil, close: nil, closed?: false, socket: io))
+  end
+
+  def test_stale_returns_true_when_idle_socket_is_readable
+    raw = Object.new
+    connection = build_connection_over(fake(to_io: fake(wait_readable: raw)))
+
+    assert_same true, connection.stale?
+  end
+
+  def test_stale_returns_false_when_idle_socket_is_not_readable
+    connection = build_connection_over(fake(to_io: fake(wait_readable: nil)))
+
+    assert_same false, connection.stale?
+  end
+
+  def test_stale_checks_readability_without_waiting
+    timeouts = []
+    raw = fake(wait_readable: ->(timeout) { timeouts << timeout and nil })
+    build_connection_over(fake(to_io: raw)).stale?
+
+    assert_equal [0], timeouts
+  end
+
+  def test_stale_returns_false_while_response_is_pending
+    connection = build_connection_over(fake(to_io: fake(wait_readable: Object.new)))
+    connection.instance_variable_set(:@pending_response, true)
+
+    assert_same false, connection.stale?
+  end
+
+  def test_stale_returns_false_when_socket_is_not_exposed
+    connection = build_connection(socket: fake(connect: nil, close: nil, closed?: false))
+
+    assert_same false, connection.stale?
+  end
+
+  def test_stale_returns_false_when_socket_is_not_an_io
+    connection = build_connection_over(Object.new)
+
+    assert_same false, connection.stale?
+  end
+
+  def test_stale_returns_true_when_socket_is_closed
+    raw = fake(wait_readable: ->(_) { raise IOError, "closed stream" })
+    connection = build_connection_over(fake(to_io: raw))
+
+    assert_same true, connection.stale?
+  end
+
+  def test_stale_returns_true_when_socket_errors
+    raw = fake(wait_readable: ->(_) { raise Errno::EBADF })
+    connection = build_connection_over(fake(to_io: raw))
+
+    assert_same true, connection.stale?
+  end
+
+  # ---------------------------------------------------------------------------
+  # #flush_pending_response
+  # ---------------------------------------------------------------------------
+  def test_flush_pending_response_does_nothing_without_pending_response
+    closed = false
+    connection = build_connection(socket: fake(connect: nil, close: -> { closed = true }, closed?: false))
+    connection.flush_pending_response
+
+    refute closed
+  end
+
+  def test_flush_pending_response_flushes_pending_response
+    connection = build_connection
+    flushed = false
+    connection.instance_variable_set(:@pending_response, fake(content_length: 1, flush: -> { flushed = true }))
+    connection.flush_pending_response
+
+    assert flushed
+  end
+
+  def test_flush_pending_response_closes_when_response_cannot_be_flushed
+    closed = false
+    connection = build_connection(socket: fake(connect: nil, close: -> { closed = true }, closed?: false))
+    connection.instance_variable_set(:@pending_response, true)
+    connection.flush_pending_response
+
+    assert closed
+  end
+
+  def test_flush_pending_response_closes_when_flushing_fails
+    closed = false
+    connection = build_connection(socket: fake(connect: nil, close: -> { closed = true }, closed?: false))
+    connection.instance_variable_set(:@pending_response, fake(content_length: nil, flush: -> { raise IOError }))
+    connection.flush_pending_response
+
+    assert closed
+  end
+
+  # ---------------------------------------------------------------------------
   # keep_alive behavior (set_keep_alive)
   # ---------------------------------------------------------------------------
   def test_keep_alive_with_http10_and_keep_alive_header

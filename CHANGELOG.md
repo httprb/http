@@ -7,8 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `HTTP::Connection#stale?` checks, without blocking, whether the server
+  closed an idle connection or sent data on it.
+  `HTTP::Connection#flush_pending_response` is now public.
+
 ### Fixed
 
+- Persistent connections are no longer reused after the server or a proxy
+  closed them while idle. The next request used to fail with
+  `HTTP::ResponseHeaderError` ("couldn't read response headers") or
+  `OpenSSL::SSL::SSLError` ("unexpected eof while reading"), or read an
+  unsolicited response the server sent before closing, such as
+  `408 Request Timeout`, as its own. The client now checks the idle socket
+  before reuse and reconnects when anything is readable. ([#420], [#459])
+- Reusing a persistent connection after leaving a response body larger than
+  1 MiB unread no longer raises `HTTP::SocketWriteError` ("closed stream").
+  The connection is closed to skip the body, and the client now reconnects
+  instead of writing to it.
 - Building a default `Host` header now raises `HTTP::RequestError` when the
   request URI has a nil host (previously `NoMethodError`) or an empty host
   (e.g. `https:///path` or `https://:123/path`, which previously produced
@@ -298,9 +315,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#358]: https://github.com/httprb/http/issues/358
 [#371]: https://github.com/httprb/http/issues/371
 [#372]: https://github.com/httprb/http/issues/372
+[#420]: https://github.com/httprb/http/issues/420
 [#447]: https://github.com/httprb/http/issues/447
 [#448]: https://github.com/httprb/http/issues/448
 [#449]: https://github.com/httprb/http/issues/449
+[#459]: https://github.com/httprb/http/issues/459
 [#491]: https://github.com/httprb/http/issues/491
 [#493]: https://github.com/httprb/http/pull/493
 [#512]: https://github.com/httprb/http/issues/512

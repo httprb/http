@@ -111,6 +111,15 @@ class DummyServer
       res.body = bytes.pack("c*")
     end
 
+    get "/large" do |_req, res|
+      res.status = 200
+      res.body   = "x" * (HTTP::Connection::MAX_FLUSH_SIZE + 1)
+    end
+
+    get "/close" do |req, _res|
+      req.socket.close
+    end
+
     get "/iso-8859-1" do |_req, res|
       res["Content-Type"] = "text/plain; charset=ISO-8859-1"
       res.body = "testæ".encode(Encoding::ISO8859_1)
