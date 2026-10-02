@@ -1,11 +1,8 @@
 # frozen_string_literal: true
 
 require "openssl"
-require "pathname"
 
 module SSLHelper
-  CERTS_PATH = Pathname.new File.expand_path("../../tmp/certs", __dir__)
-
   class << self
     def server_context
       context = OpenSSL::SSL::SSLContext.new
@@ -13,32 +10,34 @@ module SSLHelper
       context.verify_mode = OpenSSL::SSL::VERIFY_NONE
       context.key         = server_cert_key
       context.cert        = server_cert_cert
-      context.ca_file     = ca_file
 
       context
     end
 
     def client_context
-      # Ensure server cert is generated (triggers CA generation too)
-      server_cert_cert
       context = OpenSSL::SSL::SSLContext.new
 
       context.options     = OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:options]
       context.verify_mode = OpenSSL::SSL::VERIFY_PEER
       context.verify_hostname = true if context.respond_to?(:verify_hostname=)
-      context.ca_file = ca_file
+      context.cert_store = cert_store
 
       context
     end
 
     def client_params
-      server_cert_cert
       {
-        ca_file: ca_file
+        cert_store: cert_store
       }
     end
 
     private
+
+    # Each test process generates its own CA, so it is trusted in memory
+    # rather than through a file that parallel processes would overwrite
+    def cert_store
+      OpenSSL::X509::Store.new.tap { |store| store.add_cert(ca_cert) }
+    end
 
     def ca_key
       @ca_key ||= OpenSSL::PKey::RSA.new(2048)
@@ -65,15 +64,6 @@ module SSLHelper
         cert.sign(ca_key, OpenSSL::Digest.new("SHA256"))
         cert
       end
-    end
-
-    def ca_file
-      return @ca_file if defined?(@ca_file)
-
-      CERTS_PATH.mkpath
-      cert_file = CERTS_PATH.join("ca.crt")
-      cert_file.open("w") { |io| io << ca_cert.to_pem }
-      @ca_file = cert_file.to_s
     end
 
     def server_cert_key
