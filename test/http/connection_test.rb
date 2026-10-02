@@ -651,6 +651,64 @@ class HTTPConnectionTest < Minitest::Test
   end
 
   # ---------------------------------------------------------------------------
+  # #response_started?
+  # ---------------------------------------------------------------------------
+  def test_response_started_is_false_initially
+    refute_predicate build_connection, :response_started?
+  end
+
+  def test_response_started_after_reading_headers
+    socket = fake(connect: nil, close: nil, readpartial: "HTTP/1.1 200 OK\r\nContent-Length: 0\r\n\r\n")
+    connection = build_connection(socket: socket)
+    connection.instance_variable_set(:@pending_response, true)
+    connection.read_headers!
+
+    assert_predicate connection, :response_started?
+  end
+
+  def test_response_not_started_when_connection_closes_before_any_byte
+    connection = build_connection(socket: fake(connect: nil, close: nil, readpartial: :eof))
+    connection.instance_variable_set(:@pending_response, true)
+
+    assert_raises(HTTP::ResponseHeaderError) { connection.read_headers! }
+    refute_predicate connection, :response_started?
+  end
+
+  def test_response_started_when_first_bytes_fail_to_parse
+    connection = build_connection(socket: fake(connect: nil, close: nil, readpartial: "garbage\r\n\r\n"))
+    connection.instance_variable_set(:@pending_response, true)
+
+    assert_raises(HTTP::ConnectionError) { connection.read_headers! }
+    assert_predicate connection, :response_started?
+  end
+
+  def test_response_started_after_informational_response
+    responses = ["HTTP/1.1 100 Continue\r\n\r\n", :eof]
+    connection = build_connection(socket: fake(connect: nil, close: nil, readpartial: proc { responses.shift }))
+    connection.instance_variable_set(:@pending_response, true)
+
+    assert_raises(HTTP::ResponseHeaderError) { connection.read_headers! }
+    assert_predicate connection, :response_started?
+  end
+
+  def test_send_request_resets_response_started
+    connection = build_connection(socket: fake(connect: nil, close: nil, closed?: false, write: lambda(&:bytesize)))
+    connection.instance_variable_set(:@response_started, true)
+    connection.send_request(build_req)
+
+    refute_predicate connection, :response_started?
+  end
+
+  def test_send_request_resets_response_started_after_flushing_previous_response
+    connection = build_connection(socket: fake(connect: nil, close: nil, closed?: false, write: lambda(&:bytesize)))
+    response = fake(content_length: 2, flush: -> { connection.instance_variable_set(:@response_started, true) })
+    connection.instance_variable_set(:@pending_response, response)
+    connection.send_request(build_req)
+
+    refute_predicate connection, :response_started?
+  end
+
+  # ---------------------------------------------------------------------------
   # #finish_response
   # ---------------------------------------------------------------------------
   def test_finish_response_closes_socket_when_not_keeping_alive

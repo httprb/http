@@ -107,7 +107,8 @@ module HTTP
         raise StateError, "Tried to send a request while a response is pending. Make sure you read off the body."
       end
 
-      @pending_request = true
+      @response_started = false
+      @pending_request  = true
 
       req.stream @socket
 
@@ -199,6 +200,17 @@ module HTTP
       !@pending_request && !@pending_response
     end
 
+    # Whether response bytes have arrived since the last request was sent
+    #
+    # @example
+    #   connection.response_started? # => false
+    #
+    # @return [Boolean]
+    # @api public
+    def response_started?
+      @response_started
+    end
+
     # Whether we're keeping the conn alive
     #
     # @example
@@ -231,23 +243,10 @@ module HTTP
       @keep_alive_timeout   = options.keep_alive_timeout.to_f
       @pending_request      = false
       @pending_response     = false
+      @response_started     = false
       @failed_proxy_connect = false
       @buffer               = "".b
       @parser               = Response::Parser.new
-    end
-
-    # Check for premature end-of-file and raise if detected
-    #
-    # @example
-    #   check_premature_eof(:eof)
-    #
-    # @return [void]
-    # @api private
-    def check_premature_eof(eof)
-      return unless eof && !@parser.finished? && body_framed?
-
-      close
-      raise ConnectionError, "response body ended prematurely"
     end
 
     # Connect socket and set up proxy/TLS

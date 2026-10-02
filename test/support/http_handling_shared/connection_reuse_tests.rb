@@ -58,17 +58,25 @@ module ConnectionReuseTests
     first_socket_id = client.get("#{server.endpoint}/socket").body.to_s
 
     refute_equal "", first_socket_id
-    # Kill off the sockets we used
-    DummyServer::Servlet.sockets.each do |socket|
-      socket.close
-    rescue IOError
-      nil
-    end
-    DummyServer::Servlet.sockets.clear
+    kill_server_sockets
 
-    # Should error because we tried to use a bad socket
+    # A GET is resent once on a new socket
+    second_socket_id = client.get("#{server.endpoint}/socket").body.to_s
+
+    refute_equal "", second_socket_id
+    refute_equal first_socket_id, second_socket_id
+  end
+
+  def test_connection_reuse_enabled_socket_issue_raises_for_non_idempotent_request
+    client = build_client(persistent: server.endpoint)
+    first_socket_id = client.get("#{server.endpoint}/socket").body.to_s
+
+    refute_equal "", first_socket_id
+    kill_server_sockets
+
+    # Should error because a POST is not resent
     assert_raises(HTTP::ConnectionError) do
-      client.get("#{server.endpoint}/socket").body.to_s
+      client.post("#{server.endpoint}/sleep").body.to_s
     end
 
     # Should succeed since we create a new socket
@@ -93,5 +101,16 @@ module ConnectionReuseTests
 
     refute_includes sockets_used, ""
     assert_equal 2, sockets_used.uniq.length
+  end
+
+  private
+
+  def kill_server_sockets
+    DummyServer::Servlet.sockets.each do |socket|
+      socket.close
+    rescue IOError
+      nil
+    end
+    DummyServer::Servlet.sockets.clear
   end
 end

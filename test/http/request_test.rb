@@ -353,6 +353,50 @@ class HTTPRequestTest < Minitest::Test
     assert_predicate build_request(proxy: proxy), :using_authenticated_proxy?
   end
 
+  # #replayable?
+
+  def test_replayable_with_idempotent_methods_returns_true
+    %i[get head options trace put delete].each do |verb|
+      assert_predicate build_request(verb: verb), :replayable?, verb
+    end
+  end
+
+  def test_replayable_with_non_idempotent_methods_returns_false
+    %i[post patch connect].each do |verb|
+      refute_predicate build_request(verb: verb), :replayable?, verb
+    end
+  end
+
+  def test_replayable_with_idempotency_key_returns_true
+    assert_predicate build_request(verb: :post, headers: { "Idempotency-Key" => "abc" }), :replayable?
+  end
+
+  def test_replayable_with_x_idempotency_key_returns_true
+    assert_predicate build_request(verb: :post, headers: { "X-Idempotency-Key" => "abc" }), :replayable?
+  end
+
+  def test_replayable_with_string_body_returns_true
+    assert_predicate build_request(verb: :put, body: "data"), :replayable?
+  end
+
+  def test_replayable_with_string_subclass_body_returns_true
+    assert_predicate build_request(verb: :put, body: Class.new(String).new("data")), :replayable?
+  end
+
+  def test_replayable_with_io_body_returns_false
+    refute_predicate build_request(verb: :put, body: StringIO.new("data")), :replayable?
+  end
+
+  def test_replayable_with_enumerable_body_returns_false
+    refute_predicate build_request(verb: :put, body: ["data"]), :replayable?
+  end
+
+  def test_replayable_with_idempotency_key_and_io_body_returns_false
+    request = build_request(verb: :post, headers: { "Idempotency-Key" => "abc" }, body: StringIO.new("data"))
+
+    refute_predicate request, :replayable?
+  end
+
   # #redirect
 
   def test_redirect_has_correct_uri

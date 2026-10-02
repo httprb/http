@@ -7,8 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `HTTP::Request#replayable?` reports whether a request can be sent again
+  after a connection failure: its method is idempotent (RFC 9110 Section 9.2.2)
+  or it carries an `Idempotency-Key` / `X-Idempotency-Key` header, and its body
+  is nil or a String.
+
 ### Fixed
 
+- Persistent clients now resend a replayable request once, on a new
+  connection, when a reused connection fails before any response byte arrives,
+  typically because the server or a proxy closed it while it sat idle.
+  Previously the request raised `HTTP::ResponseHeaderError` ("couldn't read
+  response headers"), `HTTP::SocketReadError`, `HTTP::SocketWriteError` or,
+  over TLS on OpenSSL 3, `OpenSSL::SSL::SSLError`. Non-replayable requests,
+  clients with a `retriable` policy, timeouts, and failures after part of the
+  response arrived still raise. ([#420], [#459])
 - Building a default `Host` header now raises `HTTP::RequestError` when the
   request URI has a nil host (previously `NoMethodError`) or an empty host
   (e.g. `https:///path` or `https://:123/path`, which previously produced
@@ -298,9 +313,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#358]: https://github.com/httprb/http/issues/358
 [#371]: https://github.com/httprb/http/issues/371
 [#372]: https://github.com/httprb/http/issues/372
+[#420]: https://github.com/httprb/http/issues/420
 [#447]: https://github.com/httprb/http/issues/447
 [#448]: https://github.com/httprb/http/issues/448
 [#449]: https://github.com/httprb/http/issues/449
+[#459]: https://github.com/httprb/http/issues/459
 [#491]: https://github.com/httprb/http/issues/491
 [#493]: https://github.com/httprb/http/pull/493
 [#512]: https://github.com/httprb/http/issues/512

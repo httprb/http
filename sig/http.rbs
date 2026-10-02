@@ -127,6 +127,7 @@ module HTTP
   class Client
     extend Forwardable
     include Chainable
+    include Client::ConnectionReuse
 
     @default_options: Options
     @connection: untyped
@@ -166,13 +167,23 @@ module HTTP
 
     def perform_once: (Request req, Options options) -> Response
     def perform_with_retry: (Request req, Options options) -> Response
-    def notify_features: (Request req, Options options) -> void
     def perform_exchange: (Request req, Options options) -> Response
     def around_request: (Request request, Options options) { (Request) -> Response } -> Response
     def build_response: (Request req, Options options) -> Response
     def build_wrapped_response: (Request req, Options options) -> Response
     def send_request: (Request req, Options options) -> void
+    def transmit: (Request req, Options options) -> void
+    def resend?: (Request req, Options options) -> bool
     def verify_connection!: (URI uri) -> void
+
+    module ConnectionReuse
+      @connection: untyped
+
+      private
+
+      def transmit: (Request req, Options options) -> void
+      def resend?: (Request req, Options options) -> bool
+    end
   end
 
   class Session
@@ -805,6 +816,7 @@ module HTTP
     extend Forwardable
     include Base64
     include Request::Proxy
+    include Request::Idempotency
 
     class Builder
       HTTP_OR_HTTPS_RE: Regexp
@@ -889,6 +901,19 @@ module HTTP
 
       def encode64: (String input) -> String
       def port: () -> untyped
+    end
+
+    module Idempotency : _IdempotencyHost
+      interface _IdempotencyHost
+        def body: () -> Request::Body
+        def verb: () -> verb
+        def headers: () -> Headers
+      end
+
+      IDEMPOTENT_METHODS: Array[verb]
+      IDEMPOTENCY_KEY_HEADERS: Array[String]
+
+      def replayable?: () -> bool
     end
 
     class Body
@@ -1127,6 +1152,7 @@ module HTTP
     @keep_alive_timeout: Float
     @pending_request: bool
     @pending_response: bool | Response
+    @response_started: bool
     @failed_proxy_connect: bool
     @buffer: String
     @parser: Response::Parser
@@ -1145,6 +1171,7 @@ module HTTP
     def finish_response: () -> void
     def close: () -> void
     def finished_request?: () -> bool
+    def response_started?: () -> bool
     def keep_alive?: () -> bool
     def expired?: () -> bool
     def status_code: () -> Integer?
@@ -1179,8 +1206,10 @@ module HTTP
       def handle_proxy_connect_response: () -> void
       def reset_timer: () -> void
       def set_keep_alive: () -> void
+      def check_premature_eof: (bool eof) -> void
       def body_framed?: () -> bool
       def read_more: (Integer size) -> untyped
+      def feed_parser: (String chunk) -> Response::Parser
     end
   end
 

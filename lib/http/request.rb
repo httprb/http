@@ -7,6 +7,7 @@ require "http/base64"
 require "http/errors"
 require "http/headers"
 require "http/request/body"
+require "http/request/idempotency"
 require "http/request/proxy"
 require "http/request/writer"
 require "http/version"
@@ -19,6 +20,7 @@ module HTTP
 
     include HTTP::Base64
     include Proxy
+    include Idempotency
 
     # The method given was not understood
     class UnsupportedMethodError < RequestError; end

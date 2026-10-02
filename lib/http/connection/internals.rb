@@ -107,6 +107,20 @@ module HTTP
           end
       end
 
+      # Check for premature end-of-file and raise if detected
+      #
+      # @example
+      #   check_premature_eof(:eof)
+      #
+      # @return [void]
+      # @api private
+      def check_premature_eof(eof)
+        return unless eof && !@parser.finished? && body_framed?
+
+        close
+        raise ConnectionError, "response body ended prematurely"
+      end
+
       # Check if the response body has a known framing mechanism
       #
       # @example
@@ -131,10 +145,24 @@ module HTTP
           @parser << ""
           :eof
         elsif value
-          @parser << value
+          feed_parser(value)
         end
       rescue IOError, SocketError, SystemCallError => e
         raise SocketReadError, "error reading from socket: #{e}", e.backtrace
+      end
+
+      # Marks the response as started, then feeds a chunk into parser
+      #
+      # The mark comes first so a chunk the parser rejects still counts.
+      #
+      # @example
+      #   feed_parser("HTTP/1.1 200 OK\r\n")
+      #
+      # @return [Response::Parser]
+      # @api private
+      def feed_parser(chunk)
+        @response_started = true
+        @parser << chunk
       end
     end
   end

@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
 require "forwardable"
+require "openssl"
 
 require "http/form_data"
 require "http/retriable/performer"
 require "http/options"
 require "http/feature"
 require "http/headers"
+require "http/client/connection_reuse"
 require "http/connection"
 require "http/redirector"
 require "http/request/builder"
@@ -17,6 +19,7 @@ module HTTP
   class Client
     extend Forwardable
     include Chainable
+    include ConnectionReuse
 
     # Initialize a new HTTP Client
     #
@@ -142,14 +145,8 @@ module HTTP
     # @return [void]
     # @api private
     def send_request(req, options)
-      notify_features(req, options)
-
-      @connection ||= HTTP::Connection.new(req, options)
-
-      unless @connection.failed_proxy_connect?
-        @connection.send_request(req)
-        @connection.read_headers!
-      end
+      options.features.each_value { |feature| feature.on_request(req) }
+      transmit(req, options)
     rescue Error => e
       options.features.each_value { |feature| feature.on_error(req, e) }
       raise
@@ -164,13 +161,6 @@ module HTTP
       options.features.values.reverse.inject(res) do |response, feature|
         feature.wrap_response(response)
       end
-    end
-
-    # Notify features of an upcoming request attempt
-    # @return [void]
-    # @api private
-    def notify_features(req, options)
-      options.features.each_value { |feature| feature.on_request(req) }
     end
 
     # Execute the HTTP exchange wrapped by feature around_request hooks
