@@ -72,6 +72,10 @@ class DummyServer < WEBrick::HTTPServer
       end
     end
 
+    get "/close" do |req, _res|
+      req.instance_variable_get(:@socket).close
+    end
+
     get "/params" do |req, res|
       next not_found(req, res) unless "foo=bar" == req.query_string
 

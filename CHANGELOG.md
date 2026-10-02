@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- (backported) Reconnect instead of reusing a persistent connection the server
+  closed or wrote to while it sat idle, which failed the next request with
+  "couldn't read response headers" or returned the server's stray 408
+  ([#420](https://github.com/httprb/http/issues/420),
+  [#459](https://github.com/httprb/http/issues/459))
+
 
 ## [5.3.1] - 2025-06-09
 

@@ -441,6 +441,81 @@ RSpec.describe HTTP::Client do
     end
   end
 
+  # Self-contained because "working with SSL" is disabled (#627)
+  describe "reusing a persistent TLS connection the server closed" do
+    let(:key) { OpenSSL::PKey::RSA.new(2048) }
+    let(:cert) do
+      OpenSSL::X509::Certificate.new.tap do |cert|
+        cert.version    = 2
+        cert.serial     = 1
+        cert.subject    = OpenSSL::X509::Name.parse("/CN=127.0.0.1")
+        cert.issuer     = cert.subject
+        cert.public_key = key.public_key
+        cert.not_before = Time.now - 60
+        cert.not_after  = Time.now + 3600
+        extensions = OpenSSL::X509::ExtensionFactory.new(cert, cert)
+        cert.add_extension(extensions.create_extension("subjectAltName", "IP:127.0.0.1"))
+        cert.sign(key, OpenSSL::Digest.new("SHA256"))
+      end
+    end
+    let(:tcp_server) { TCPServer.new("127.0.0.1", 0) }
+    let(:endpoint) { "https://127.0.0.1:#{tcp_server.addr[1]}" }
+    let(:server_connections) { Queue.new }
+
+    let(:client) do
+      context = OpenSSL::SSL::SSLContext.new
+      context.verify_mode = OpenSSL::SSL::VERIFY_PEER
+      context.cert_store  = OpenSSL::X509::Store.new.tap { |store| store.add_cert(cert) }
+      described_class.new(:persistent => endpoint, :ssl_context => context)
+    end
+
+    # Answers each request with the number of the connection it arrived on
+    let!(:server_thread) do
+      context = OpenSSL::SSL::SSLContext.new
+      context.cert = cert
+      context.key  = key
+      tls_server   = OpenSSL::SSL::SSLServer.new(tcp_server, context)
+
+      Thread.new do
+        (1..).each do |number|
+          connection = tls_server.accept
+          server_connections << connection
+          Thread.new { serve(connection, number.to_s) }
+        end
+      rescue IOError, SystemCallError, OpenSSL::SSL::SSLError
+        nil
+      end
+    end
+
+    after do
+      tcp_server.close
+      server_thread.join(1)
+    end
+
+    def serve(connection, body)
+      while connection.gets
+        loop do
+          header = connection.gets
+          break if header.nil? || header == "\r\n"
+        end
+        connection.write("HTTP/1.1 200 OK\r\nContent-Length: #{body.bytesize}\r\n\r\n#{body}")
+      end
+    rescue IOError, SystemCallError, OpenSSL::SSL::SSLError
+      nil
+    end
+
+    it "reconnects instead of sending the request on it" do
+      expect(client.get("#{endpoint}/").body.to_s).to eq("1")
+      client_socket = client.instance_variable_get(:@connection).instance_variable_get(:@socket).socket.to_io
+
+      server_connections.pop.close
+      expect(client_socket.wait_readable(5)).to be_truthy
+
+      expect(client.get("#{endpoint}/").body.to_s).to eq("2")
+      expect(client_socket).to be_closed
+    end
+  end
+
   describe "#perform" do
     let(:client) { described_class.new }
 

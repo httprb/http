@@ -154,20 +154,71 @@ RSpec.shared_context "HTTP handling" do
         it "transparently reopens", :flaky do
           first_socket_id = client.get("#{server.endpoint}/socket").body.to_s
           expect(first_socket_id).to_not eq("")
-          # Kill off the sockets we used
-          # rubocop:disable Style/RescueModifier
-          DummyServer::Servlet.sockets.each do |socket|
-            socket.close rescue nil
-          end
-          DummyServer::Servlet.sockets.clear
-          # rubocop:enable Style/RescueModifier
+          client_socket = idle_client_socket(client)
 
-          # Should error because we tried to use a bad socket
-          expect { client.get("#{server.endpoint}/socket").body.to_s }.to raise_error HTTP::ConnectionError
+          kill_server_sockets
+          wait_for_server_bytes(client_socket)
 
-          # Should succeed since we create a new socket
           second_socket_id = client.get("#{server.endpoint}/socket").body.to_s
           expect(second_socket_id).to_not eq(first_socket_id)
+          expect(client_socket).to be_closed
+        end
+
+        it "transparently reopens for a POST", :flaky do
+          client.get("#{server.endpoint}/socket").body.to_s
+          client_socket = idle_client_socket(client)
+
+          kill_server_sockets
+          wait_for_server_bytes(client_socket)
+
+          expect(client.post("#{server.endpoint}/echo-body", :body => "sent once").body.to_s).to eq("sent once")
+          expect(client_socket).to be_closed
+        end
+
+        [
+          [HTTP::Timeout::PerOperation, {:connect_timeout => 5, :read_timeout => 5, :write_timeout => 5}],
+          [HTTP::Timeout::Global, {:global_timeout => 5}]
+        ].each do |timeout_class, timeout_options|
+          context "with #{timeout_class}" do
+            let(:extra_options) { {:timeout_class => timeout_class, :timeout_options => timeout_options} }
+
+            it "transparently reopens", :flaky do
+              first_socket_id = client.get("#{server.endpoint}/socket").body.to_s
+              client_socket = idle_client_socket(client)
+
+              kill_server_sockets
+              wait_for_server_bytes(client_socket)
+
+              expect(client.get("#{server.endpoint}/socket").body.to_s).to_not eq(first_socket_id)
+              expect(client_socket).to be_closed
+            end
+          end
+        end
+      end
+
+      context "when the server responds while the connection is idle" do
+        it "reopens instead of reading that response", :flaky do
+          DummyServer::Servlet.sockets.clear
+          first_socket_id = client.get("#{server.endpoint}/socket").body.to_s
+          client_socket = idle_client_socket(client)
+
+          DummyServer::Servlet.sockets.each do |socket|
+            socket.write("HTTP/1.1 408 Request Timeout\r\nContent-Length: 0\r\n\r\n")
+          end
+          DummyServer::Servlet.sockets.clear
+          wait_for_server_bytes(client_socket)
+
+          response = client.get("#{server.endpoint}/socket")
+          expect(response.code).to eq(200)
+          expect(response.body.to_s).to_not eq(first_socket_id)
+        end
+      end
+
+      context "when the server closes the connection after receiving the request" do
+        it "raises" do
+          client.get("#{server.endpoint}/socket").body.to_s
+
+          expect { client.get("#{server.endpoint}/close") }.to raise_error(HTTP::ConnectionError)
         end
       end
 
@@ -186,5 +237,23 @@ RSpec.shared_context "HTTP handling" do
         expect(sockets_used.uniq.length).to eq(2)
       end
     end
+  end
+
+  def idle_client_socket(client)
+    client.instance_variable_get(:@connection).instance_variable_get(:@socket).socket.to_io
+  end
+
+  # Loopback delivers a close or write asynchronously; wait until it lands
+  def wait_for_server_bytes(socket)
+    expect(socket.wait_readable(5)).to be_truthy, "server bytes never reached the client socket"
+  end
+
+  def kill_server_sockets
+    DummyServer::Servlet.sockets.each do |socket|
+      socket.close
+    rescue IOError
+      nil
+    end
+    DummyServer::Servlet.sockets.clear
   end
 end

@@ -152,6 +152,26 @@ module HTTP
       !@conn_expires_at || @conn_expires_at < Time.now
     end
 
+    # Whether the server closed this idle connection or sent data on it
+    #
+    # Checks the socket without blocking. On an idle connection any readable
+    # data means it can't carry another request: an EOF, a reset, a TLS
+    # close_notify, or a response nobody asked for, such as the 408 some
+    # servers send before closing. Always false while a response is pending,
+    # because its unread body is expected data.
+    #
+    # @return [Boolean]
+    def stale?
+      return false if @pending_response
+
+      io = @socket.socket if @socket.respond_to?(:socket)
+      return false unless io.respond_to?(:to_io)
+
+      io.to_io.wait_readable(0) ? true : false
+    rescue IOError, SystemCallError
+      true
+    end
+
     private
 
     # Sets up SSL context and starts TLS if needed.

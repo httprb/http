@@ -128,7 +128,8 @@ module HTTP
 
       # We re-create the connection object because we want to let prior requests
       # lazily load the body as long as possible, and this mimics prior functionality.
-      return close if @connection && (!@connection.keep_alive? || @connection.expired?)
+      # A connection the server closed while idle still looks open until we read from it.
+      return close if @connection && (!@connection.keep_alive? || @connection.expired? || @connection.stale?)
 
       # If we get into a bad state (eg, Timeout.timeout ensure being killed)
       # close the connection to prevent potential for mixed responses.

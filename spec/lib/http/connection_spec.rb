@@ -85,4 +85,54 @@ RSpec.describe HTTP::Connection do
       expect(connection.finished_request?).to be true
     end
   end
+
+  describe "#stale?" do
+    let(:pair) { UNIXSocket.pair }
+    let(:io) { pair.first }
+    let(:peer) { pair.last }
+    let(:socket) { double(:connect => nil, :close => nil, :socket => io) }
+
+    after { pair.each { |s| s.close unless s.closed? } }
+
+    it "is false while the idle peer is still there" do
+      expect(connection.stale?).to be false
+    end
+
+    it "is true once the peer closed the idle connection" do
+      peer.close
+      expect(connection.stale?).to be true
+    end
+
+    it "is true once the peer sent data on the idle connection" do
+      peer.write("HTTP/1.1 408 Request Timeout\r\nContent-Length: 0\r\n\r\n")
+      expect(connection.stale?).to be true
+    end
+
+    it "is false while a response is pending, because its body is expected data" do
+      peer.write("unread body")
+      connection.instance_variable_set(:@pending_response, true)
+      expect(connection.stale?).to be false
+    end
+
+    it "is true when the socket is already closed" do
+      io.close
+      expect(connection.stale?).to be true
+    end
+
+    context "when the timeout class doesn't expose its socket" do
+      let(:socket) { double(:connect => nil, :close => nil) }
+
+      it "is false" do
+        expect(connection.stale?).to be false
+      end
+    end
+
+    context "when the exposed socket isn't an IO" do
+      let(:socket) { double(:connect => nil, :close => nil, :socket => Object.new) }
+
+      it "is false" do
+        expect(connection.stale?).to be false
+      end
+    end
+  end
 end
