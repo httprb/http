@@ -56,7 +56,7 @@ module HTTP
       def connect(socket_class, host, port, nodelay: false)
         reset_timer
         @socket = open_socket(socket_class, host, port, connect_timeout: effective_timeout(@connect_timeout))
-        @socket.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1) if nodelay
+        set_nodelay if nodelay
 
         log_time
       end

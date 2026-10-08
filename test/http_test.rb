@@ -524,7 +524,7 @@ class HTTPTest < Minitest::Test
 
   # .nodelay
 
-  def test_nodelay_sets_tcp_nodelay_on_underlying_socket
+  def test_tcp_nodelay_is_set_on_underlying_socket_unless_disabled
     socket_spy_class = Class.new(TCPSocket) do
       def self.setsockopt_calls
         @setsockopt_calls ||= []
@@ -538,10 +538,15 @@ class HTTPTest < Minitest::Test
 
     HTTP.default_options = { socket_class: socket_spy_class }
 
-    HTTP.get(dummy.endpoint)
+    HTTP.nodelay(false).get(dummy.endpoint)
 
     assert_equal [], socket_spy_class.setsockopt_calls
-    HTTP.nodelay.get(dummy.endpoint)
+    HTTP.nodelay(false).nodelay.get(dummy.endpoint)
+
+    assert_equal [[Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1]], socket_spy_class.setsockopt_calls
+    socket_spy_class.setsockopt_calls.clear
+
+    HTTP.get(dummy.endpoint)
 
     assert_equal [[Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1]], socket_spy_class.setsockopt_calls
   ensure

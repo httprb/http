@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `HTTP.nodelay` (and `HTTP::Session#nodelay`) now accepts an optional boolean,
+  so `HTTP.nodelay(false)` disables `TCP_NODELAY` for a session. ([#863])
+
+### Changed
+
+- `TCP_NODELAY` is now enabled by default, matching `Net::HTTP`, curl, and
+  most other HTTP clients. With Nagle's algorithm left on, the request sent
+  right after a TLS handshake was held back until the server acknowledged the
+  client's final handshake message, adding a round trip or a delayed-ACK
+  timeout (roughly 40-90 ms) to every HTTPS request on a new connection.
+  Requests are already coalesced into as few writes as possible, so Nagle's
+  algorithm offered no benefit. Use `HTTP.nodelay(false)`, or pass
+  `nodelay: false` to `HTTP::Client.new` or `HTTP::Options.new`, to restore
+  the previous behavior. Sockets from a custom
+  `socket_class` that do not support the option (e.g. UNIX sockets) are left
+  untouched. ([#863])
+
 ### Fixed
 
 - Building a default `Host` header now raises `HTTP::RequestError` when the
@@ -336,3 +355,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [6.0.2]: https://github.com/httprb/http/compare/v6.0.1...v6.0.2
 [6.0.1]: https://github.com/httprb/http/compare/v6.0.0...v6.0.1
 [6.0.0]: https://github.com/httprb/http/compare/v5.3.1...v6.0.0
+[#863]: https://github.com/httprb/http/issues/863

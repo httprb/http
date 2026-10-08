@@ -103,7 +103,7 @@ module HTTP
       # @return [void]
       def connect(socket_class, host, port, nodelay: false)
         @socket = open_socket(socket_class, host, port, connect_timeout: @connect_timeout)
-        @socket.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1) if nodelay
+        set_nodelay if nodelay
       end
 
       # Starts an SSL connection with connect timeout

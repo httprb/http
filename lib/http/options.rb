@@ -134,7 +134,7 @@ module HTTP
     def initialize(
       response: :auto,
       encoding: nil,
-      nodelay: false,
+      nodelay: true,
       keep_alive_timeout: 5,
       proxy: {},
       ssl: {},

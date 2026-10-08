@@ -27,6 +27,15 @@ class HTTPTimeoutGlobalTest < Minitest::Test
     assert_equal [Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1], setsockopt_args
   end
 
+  def test_connect_does_not_set_tcp_nodelay_by_default
+    called = false
+    tcp_socket = fake(setsockopt: ->(*) { called = true })
+
+    @timeout.connect(fake(open: tcp_socket), "example.com", 80)
+
+    refute called
+  end
+
   # -- #connect_ssl --
 
   def test_connect_ssl_completes_without_error

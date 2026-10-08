@@ -112,7 +112,7 @@ module HTTP
     def digest_auth: (user: String, pass: String) -> Session
     def default_options: () -> Options
     def default_options=: (Hash[Symbol, untyped] | Options opts) -> Options
-    def nodelay: () -> Session
+    def nodelay: (?bool enabled) -> Session
     def use: (*(Symbol | Hash[Symbol, Hash[Symbol, untyped]]) features) -> Session
     def retriable: (?tries: Integer?, ?delay: (Numeric | ^(Integer) -> Numeric)?, ?exceptions: Array[singleton(Exception)]?, ?retry_statuses: untyped, ?on_retry: (^(Request, Exception?, Response?) -> void)?, ?max_delay: Numeric?, ?should_retry: (^(Request, Exception?, Response?, Integer) -> bool)?) -> Session
 
@@ -1522,6 +1522,7 @@ module HTTP
       def open_socket: (untyped socket_class, String host, Integer port, ?connect_timeout: Numeric?) -> untyped
       def open_with_timeout: (untyped socket_class, String host, Integer port, Numeric connect_timeout) -> untyped
       def native_timeout?: (untyped socket_class) -> bool
+      def set_nodelay: () -> void
     end
 
     class PerOperation < Null

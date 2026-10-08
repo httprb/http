@@ -66,7 +66,7 @@ class HTTPOptionsMergeTest < Minitest::Test
         retriable:          nil,
         base_uri:           nil,
         socket_class:       HTTP::Options.default_socket_class,
-        nodelay:            false,
+        nodelay:            true,
         ssl_socket_class:   HTTP::Options.default_ssl_socket_class,
         ssl_context:        nil,
         encoding:           nil,

@@ -61,7 +61,7 @@ module HTTP
       # @return [void]
       def connect(socket_class, host, port, nodelay: false)
         @socket = open_socket(socket_class, host, port)
-        @socket.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1) if nodelay
+        set_nodelay if nodelay
       end
 
       # Starts a SSL connection on a socket
@@ -149,6 +149,21 @@ module HTTP
       alias << write
 
       private
+
+      # Disables Nagle's algorithm on the socket
+      #
+      # Custom socket classes that are not TCP sockets (e.g. UNIX sockets)
+      # or that do not expose socket options are left untouched.
+      #
+      # @api private
+      # @return [void]
+      def set_nodelay
+        return unless @socket.respond_to?(:setsockopt)
+
+        @socket.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1)
+      rescue Errno::EOPNOTSUPP, Errno::ENOPROTOOPT
+        nil
+      end
 
       # Retries reading on wait readable
       #

@@ -13,6 +13,52 @@ class HTTPTimeoutNullTest < Minitest::Test
     @timeout.instance_variable_set(:@socket, @socket)
   end
 
+  # -- #connect --
+
+  def test_connect_sets_tcp_nodelay_when_nodelay_is_true
+    setsockopt_args = nil
+    tcp_socket = fake(setsockopt: ->(*args) { setsockopt_args = args })
+
+    @timeout.connect(fake(open: tcp_socket), "example.com", 80, nodelay: true)
+
+    assert_equal [Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1], setsockopt_args
+  end
+
+  def test_connect_does_not_set_tcp_nodelay_by_default
+    called = false
+    tcp_socket = fake(setsockopt: ->(*) { called = true })
+
+    @timeout.connect(fake(open: tcp_socket), "example.com", 80)
+
+    refute called
+  end
+
+  def test_connect_with_nodelay_skips_sockets_without_setsockopt
+    plain_socket = fake(closed?: false)
+
+    @timeout.connect(fake(open: plain_socket), "example.com", 80, nodelay: true)
+
+    assert_same plain_socket, @timeout.socket
+  end
+
+  def test_connect_with_nodelay_ignores_sockets_that_do_not_support_the_option
+    [Errno::EOPNOTSUPP, Errno::ENOPROTOOPT].each do |error|
+      unix_socket = fake(setsockopt: ->(*) { raise error })
+
+      @timeout.connect(fake(open: unix_socket), "example.com", 80, nodelay: true)
+
+      assert_same unix_socket, @timeout.socket
+    end
+  end
+
+  def test_connect_with_nodelay_propagates_other_socket_errors
+    broken_socket = fake(setsockopt: ->(*) { raise Errno::EBADF })
+
+    assert_raises(Errno::EBADF) do
+      @timeout.connect(fake(open: broken_socket), "example.com", 80, nodelay: true)
+    end
+  end
+
   # -- #initialize --
 
   def test_initialize_stores_provided_options_compacted

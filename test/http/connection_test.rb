@@ -1411,7 +1411,7 @@ class HTTPConnectionTest < Minitest::Test
     assert_equal HTTP::Options.default_socket_class, connect_args[0]
     assert_equal "example.com", connect_args[1]
     assert_equal 80, connect_args[2]
-    refute connect_kwargs.fetch(:nodelay)
+    assert_true connect_kwargs.fetch(:nodelay)
   end
 
   def test_connect_socket_passes_timeout_options_to_timeout_class_new

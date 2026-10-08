@@ -305,15 +305,22 @@ module HTTP
       @default_options = HTTP::Options.new(opts)
     end
 
-    # Set TCP_NODELAY on the socket
+    # Set or clear TCP_NODELAY on the socket
     #
-    # @example
-    #   HTTP.nodelay.get("http://example.com")
+    # TCP_NODELAY is enabled by default, so this is mostly useful for
+    # disabling it with `nodelay(false)`.
     #
+    # @example Disable TCP_NODELAY
+    #   HTTP.nodelay(false).get("http://example.com")
+    #
+    # @example Re-enable TCP_NODELAY
+    #   session.nodelay.get("http://example.com")
+    #
+    # @param [Boolean] enabled whether to set TCP_NODELAY
     # @return [HTTP::Session]
     # @api public
-    def nodelay
-      branch default_options.with_nodelay(true)
+    def nodelay(enabled = true) # rubocop:disable Style/OptionalBooleanParameter
+      branch default_options.with_nodelay(enabled)
     end
 
     # Enable one or more features

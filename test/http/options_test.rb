@@ -82,10 +82,10 @@ class HTTPOptionsTest < Minitest::Test
     assert_equal 5, opts.keep_alive_timeout
   end
 
-  def test_initialize_defaults_nodelay_to_false
+  def test_initialize_defaults_nodelay_to_true
     opts = HTTP::Options.new
 
-    refute opts.nodelay
+    assert_true opts.nodelay
   end
 
   def test_initialize_defaults_headers_to_empty
