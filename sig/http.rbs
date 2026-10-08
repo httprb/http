@@ -1007,6 +1007,7 @@ module HTTP
       def to_i: () -> Integer
       def to_int: () -> Integer
       def <=>: (Numeric | Status other) -> Integer?
+      def coerce: (Numeric other) -> [Numeric, Integer]
       def hash: () -> Integer
       def reason: () -> String?
       def to_s: () -> String

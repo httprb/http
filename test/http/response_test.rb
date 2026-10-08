@@ -107,6 +107,18 @@ class HTTPResponseTest < Minitest::Test
     assert matched
   end
 
+  def test_deconstruct_keys_supports_range_pattern_on_status
+    response = build_response(status: 503)
+    matched = case response
+              in { status: 500..599 }
+                true
+              else
+                false
+              end
+
+    assert matched
+  end
+
   # ---------------------------------------------------------------------------
   # #deconstruct
   # ---------------------------------------------------------------------------

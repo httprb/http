@@ -120,6 +120,22 @@ module HTTP
         code <=> other.to_i
       end
 
+      # Numeric coercion protocol, letting Integer compare against Status
+      #
+      # Makes `Integer#<=>` (and thus `Range#===`) work with a Status,
+      # so range patterns like `in status: 500..599` match.
+      #
+      # @example
+      #   500 <=> Status.new(503)        # => -1
+      #   (500..599) === Status.new(503) # => true
+      #
+      # @param [Numeric] other
+      # @return [Array(Numeric, Integer)]
+      # @api public
+      def coerce(other)
+        [other, code]
+      end
+
       # Hash value based on status code
       #
       # @example
