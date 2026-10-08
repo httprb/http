@@ -34,7 +34,7 @@ end
 
 group :sig do
   gem "rbs",   ">= 4.1"
-  gem "steep", ">= 2"
+  gem "steep", ">= 2.1"
 end
 
 group :doc do

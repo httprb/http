@@ -54,7 +54,7 @@ module HTTP
       # @api public
       # @return [Integer]
       def size
-        @size ||= @ios.sum(&:size) # steep:ignore
+        @size ||= @ios.sum(&:size)
       end
 
       # Rewinds all IO objects and resets cursor
