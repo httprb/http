@@ -113,6 +113,11 @@ module HTTP
           res = yield
         rescue Exception => e
           err = e
+          # The raise_error feature converts an error response into a
+          # StatusError inside the attempt; recover the response so
+          # retry_statuses, delay calculation and OutOfRetriesError
+          # still see it.
+          res = e.response if e.is_a?(StatusError)
         end
 
         [err, res]
@@ -126,7 +131,7 @@ module HTTP
         if @should_retry_proc
           @should_retry_proc.call(req, err, res, attempt)
         elsif err
-          retry_exception?(err)
+          retry_exception?(err) || retriable_status_error?(err)
         else
           retry_response?(res)
         end
@@ -138,6 +143,15 @@ module HTTP
       # @return [Boolean]
       def retry_exception?(err)
         @exception_classes.any? { |e| err.is_a?(e) }
+      end
+
+      # Checks whether the error carries a response that warrants retry
+      #
+      # @param [Exception] err
+      # @api private
+      # @return [Boolean]
+      def retriable_status_error?(err)
+        err.is_a?(StatusError) && retry_response?(err.response)
       end
 
       # Checks whether the response status warrants retry
