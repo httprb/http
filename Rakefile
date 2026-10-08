@@ -35,6 +35,16 @@ task :steep do
   exit Steep::CLI.new(argv: ["check", "--log-level=fatal"], stdout: $stdout, stderr: $stderr, stdin: $stdin).run
 end
 
+desc "Validate RBS signatures"
+task :rbs_validate do
+  require "yaml"
+  libraries = YAML.load_file("sig/manifest.yaml").fetch("dependencies").flat_map { |dep| ["-r", dep.fetch("name")] }
+  system("bundle", "exec", "rbs", *libraries, "-I", "sig", "validate") or abort("RBS validation failed!")
+end
+
+desc "Validate RBS signatures and type check with Steep"
+task typecheck: %i[rbs_validate steep]
+
 desc "Generate HTTP status codes from IANA registry"
 task :generate_status_codes do
   require "http"
@@ -84,4 +94,4 @@ task :mutant do
   system("bundle", "exec", "mutant", "run", "--since", "main") or abort("Mutant failed!")
 end
 
-task default: %i[test mutant rubocop verify_measurements steep]
+task default: %i[test mutant rubocop verify_measurements typecheck]

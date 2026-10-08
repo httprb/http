@@ -382,16 +382,16 @@ module HTTP
         def size: () -> Integer
         def each: () { (String) -> void } -> self
                | () -> Enumerator[String, self]
-        def compress: () ?{ (String) -> void } -> void
+        def compress: () { (String) -> void } -> void
 
         private
 
-        def compressed_each: () { (String) -> void } -> void
-        def compress_all!: () -> void
+        def compressed_each: (Tempfile compressed) { (String) -> void } -> void
+        def compress_all!: () -> Tempfile
       end
 
       class GzippedBody < CompressedBody
-        def compress: () ?{ (String) -> void } -> void
+        def compress: () { (String) -> void } -> void
 
         class BlockIO
           @block: Proc
@@ -402,7 +402,7 @@ module HTTP
       end
 
       class DeflatedBody < CompressedBody
-        def compress: () ?{ (String) -> void } -> void
+        def compress: () { (String) -> void } -> void
       end
     end
 
@@ -902,7 +902,6 @@ module HTTP
       def loggable?: () -> bool
       def size: () -> Integer
       def each: () { (String) -> void } -> self
-             | () -> Enumerator[String, self]
       def ==: (untyped other) -> bool
 
       private
@@ -1300,6 +1299,7 @@ module HTTP
       DEFAULT_MIME: String
 
       @autoclose: bool
+      @io: untyped
 
       # Creates a new File from a path or IO object
       def initialize: (String | Pathname | untyped path_or_io, ?Hash[Symbol, untyped]? opts) -> void

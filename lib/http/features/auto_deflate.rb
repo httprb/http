@@ -116,8 +116,7 @@ module HTTP
         # @return [Integer]
         # @api public
         def size
-          compress_all! unless @compressed
-          @compressed.size
+          (@compressed || compress_all!).size
         end
 
         # Yields each chunk of compressed data
@@ -130,8 +129,8 @@ module HTTP
         def each(&block)
           return to_enum(:each) unless block
 
-          if @compressed
-            compressed_each(&block)
+          if (compressed = @compressed)
+            compressed_each(compressed, &block)
           else
             compress(&block)
           end
@@ -144,21 +143,22 @@ module HTTP
         # Yield each chunk from compressed data
         # @return [void]
         # @api private
-        def compressed_each
-          while (data = @compressed.read(Connection::BUFFER_SIZE))
+        def compressed_each(compressed)
+          while (data = compressed.read(Connection::BUFFER_SIZE))
             yield data
           end
         ensure
-          @compressed.close!
+          compressed.close!
         end
 
         # Compress all data to a tempfile
-        # @return [void]
+        # @return [Tempfile]
         # @api private
         def compress_all!
-          @compressed = Tempfile.new("http-compressed_body", binmode: true)
-          compress { |data| @compressed.write(data) }
-          @compressed.rewind
+          tempfile = @compressed = Tempfile.new("http-compressed_body", binmode: true)
+          compress { |data| tempfile.write(data) }
+          tempfile.rewind
+          tempfile
         end
       end
 

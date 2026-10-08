@@ -1,21 +1,5 @@
 # Overrides for stdlib RBS signatures
 
-class ::StringIO
-  # Override: Ruby's StringIO#read accepts nil outbuf
-  def read: (?int? length, ?string? buf) -> String?
-end
-
-class ::File
-  # Override: Ruby's File.new accepts keyword args like binmode:
-  def initialize: (string | _ToPath | int file_name, ?string | int mode, ?int perm, **untyped) -> void
-end
-
-class ::Pathname
-  # Override: Ruby's Pathname#open accepts keyword args like binmode:
-  def open: (?string | int mode, ?int perm, **untyped) -> ::File
-          | [T] (?string | int mode, ?int perm, **untyped) { (::File) -> T } -> T
-end
-
 # Stubs for external dependencies without RBS definitions
 
 module Addressable
@@ -73,13 +57,19 @@ module Addressable
   end
 end
 
-# Override: stdlib zlib RBS incorrectly marks level/strategy as required
+# Override: HTTP passes IO-like objects that only implement #write(String)
 module Zlib
   class GzipWriter
     private
 
     def initialize: (untyped io, ?Integer? level, ?Integer? strategy, **untyped opts) -> void
+                  | ...
   end
+end
+
+class IO
+  def self.copy_stream: (untyped src, untyped dst, ?Integer? copy_length, ?Integer? src_offset) -> Integer
+                      | ...
 end
 
 # Supplement: Numeric#to_i and #to_f are not in the stdlib RBS
@@ -102,7 +92,4 @@ class IO
   class EAGAINWaitReadable < Errno::EAGAIN
     include IO::WaitReadable
   end
-
-  def wait_readable: (?Numeric?) -> (IO | true | nil)
-  def wait_writable: (?Numeric?) -> (IO | true | nil)
 end
