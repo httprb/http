@@ -4,11 +4,11 @@ module HTTP
   # Configuration options for HTTP requests and clients
   class Options
     def_option :headers do |new_headers|
-      headers.merge(new_headers) # steep:ignore
+      headers.merge(new_headers)
     end
 
     def_option :encoding do |encoding|
-      self.encoding = Encoding.find(encoding) # steep:ignore
+      self.encoding = Encoding.find(encoding)
     end
 
     def_option :features, reader_only: true do |new_features|
@@ -28,7 +28,7 @@ module HTTP
         end
       end
 
-      features.merge(normalized_features) # steep:ignore
+      features.merge(normalized_features)
     end
 
     # Sets and normalizes features hash

@@ -25,6 +25,7 @@ module HTTP
                    | [T] (verb verb, String | URI uri, **untyped) { (Response) -> T } -> T
       end
 
+      def request: (verb verb, String | URI uri, **untyped) ?{ (Response) -> untyped } -> untyped
       def head: (String | URI uri, **untyped opts) -> Response
               | [T] (String | URI uri, **untyped opts) { (Response) -> T } -> T
       def get: (String | URI uri, **untyped opts) -> Response
@@ -300,7 +301,7 @@ module HTTP
     def inspect: () -> String
     def keys: () -> Array[String]
     def ==: (untyped other) -> bool
-    def each: () { (Array[String]) -> void } -> Headers
+    def each: () { ([String, String]) -> void } -> Headers
            | () -> Enumerator[Array[String], Headers]
     def empty?: () -> bool
     def hash: () -> Integer
@@ -413,7 +414,7 @@ module HTTP
 
       private
 
-      def inflated_response_options: (Response response) -> Hash[Symbol, untyped]
+      def inflated_response_options: (Response response) -> { status: Response::Status, version: String, headers: Headers, proxy_headers: Headers, connection: Connection?, body: Response::Body, request: Request }
       def supported_encoding?: (Response response) -> bool
     end
 
@@ -519,7 +520,7 @@ module HTTP
       def validate_binary_formatter!: (:stats | :base64 | ^(String) -> String formatter) -> (:stats | :base64 | ^(String) -> String)
       def log_request_details: (Request request) -> void
       def log_response_body_inline: (Response response) -> Response
-      def logged_response_options: (Response response) -> Hash[Symbol, untyped]
+      def logged_response_options: (Response response) -> { status: Response::Status, version: String, headers: Headers, proxy_headers: Headers, connection: Connection?, body: Response::Body, request: Request }
       def logged_body: (Response::Body body) -> Response::Body
       def format_binary: (String data) -> String
       def stringify_headers: (Headers headers) -> String
@@ -527,9 +528,9 @@ module HTTP
       class BodyLogger
         attr_reader connection: untyped
 
-        @formatter: (^(String) -> String)?
+        @formatter: (^(String) -> String | Method)?
 
-        def initialize: (untyped stream, untyped logger, ?formatter: (^(String) -> String)?) -> void
+        def initialize: (untyped stream, untyped logger, ?formatter: (^(String) -> String | Method)?) -> void
         def readpartial: (?Integer size, ?String? outbuf) -> String
       end
     end
@@ -620,7 +621,7 @@ module HTTP
 
     private
 
-    def self.def_option: (String | Symbol name, ?reader_only: bool) ?{ (untyped) -> untyped } -> void
+    def self.def_option: (String | Symbol name, ?reader_only: bool) ?{ (untyped) [self: Options] -> untyped } -> void
     def self.def_option_accessor: (String | Symbol name, reader_only: bool) -> void
 
     public
@@ -957,7 +958,7 @@ module HTTP
     attr_reader request: Request
     attr_reader proxy_headers: Headers
 
-    def initialize: (status: Integer | Symbol, version: String, ?headers: Hash[String | Symbol, untyped] | Headers, ?proxy_headers: Hash[String | Symbol, untyped] | Headers, ?connection: Connection?, ?encoding: Encoding?, ?body: untyped, ?request: Request?, ?uri: URI?) -> void
+    def initialize: (status: Integer | Symbol | Response::Status, version: String, ?headers: Hash[String | Symbol, untyped] | Headers, ?proxy_headers: Hash[String | Symbol, untyped] | Headers, ?connection: Connection?, ?encoding: Encoding?, ?body: untyped, ?request: Request?, ?uri: URI?) -> void
     def reason: () -> String?
     def code: () -> Integer
     def to_s: () -> String

@@ -19,6 +19,10 @@ end
 # Stubs for external dependencies without RBS definitions
 
 module Addressable
+  module IDNA
+    def self.to_ascii: (String) -> String
+  end
+
   class URI
     class InvalidURIError < StandardError
     end

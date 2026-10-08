@@ -17,7 +17,7 @@ module HTTP
       # @return [HTTP::Response, Object] the response, or block return value
       # @api public
       def head(uri, **, &)
-        request(:head, uri, **, &) # steep:ignore
+        request(:head, uri, **, &)
       end
 
       # Get a resource
@@ -31,7 +31,7 @@ module HTTP
       # @return [HTTP::Response, Object] the response, or block return value
       # @api public
       def get(uri, **, &)
-        request(:get, uri, **, &) # steep:ignore
+        request(:get, uri, **, &)
       end
 
       # Post to a resource
@@ -45,7 +45,7 @@ module HTTP
       # @return [HTTP::Response, Object] the response, or block return value
       # @api public
       def post(uri, **, &)
-        request(:post, uri, **, &) # steep:ignore
+        request(:post, uri, **, &)
       end
 
       # Put to a resource
@@ -59,7 +59,7 @@ module HTTP
       # @return [HTTP::Response, Object] the response, or block return value
       # @api public
       def put(uri, **, &)
-        request(:put, uri, **, &) # steep:ignore
+        request(:put, uri, **, &)
       end
 
       # Delete a resource
@@ -73,7 +73,7 @@ module HTTP
       # @return [HTTP::Response, Object] the response, or block return value
       # @api public
       def delete(uri, **, &)
-        request(:delete, uri, **, &) # steep:ignore
+        request(:delete, uri, **, &)
       end
 
       # Echo the request back to the client
@@ -87,7 +87,7 @@ module HTTP
       # @return [HTTP::Response, Object] the response, or block return value
       # @api public
       def trace(uri, **, &)
-        request(:trace, uri, **, &) # steep:ignore
+        request(:trace, uri, **, &)
       end
 
       # Return the methods supported on the given URI
@@ -101,7 +101,7 @@ module HTTP
       # @return [HTTP::Response, Object] the response, or block return value
       # @api public
       def options(uri, **, &)
-        request(:options, uri, **, &) # steep:ignore
+        request(:options, uri, **, &)
       end
 
       # Convert to a transparent TCP/IP tunnel
@@ -115,7 +115,7 @@ module HTTP
       # @return [HTTP::Response, Object] the response, or block return value
       # @api public
       def connect(uri, **, &)
-        request(:connect, uri, **, &) # steep:ignore
+        request(:connect, uri, **, &)
       end
 
       # Apply partial modifications to a resource
@@ -129,7 +129,7 @@ module HTTP
       # @return [HTTP::Response, Object] the response, or block return value
       # @api public
       def patch(uri, **, &)
-        request(:patch, uri, **, &) # steep:ignore
+        request(:patch, uri, **, &)
       end
     end
   end

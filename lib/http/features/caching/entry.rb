@@ -135,7 +135,7 @@ module HTTP
         # @return [void]
         # @api public
         def update_headers!(response_headers)
-          response_headers.each { |name, value| @headers[name] = value } # steep:ignore
+          response_headers.each { |name, value| @headers[name] = value }
         end
 
         private

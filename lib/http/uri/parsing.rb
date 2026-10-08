@@ -73,7 +73,7 @@ module HTTP
       return host if host.ascii_only?
 
       require_addressable
-      Addressable::IDNA.to_ascii(host) # steep:ignore
+      Addressable::IDNA.to_ascii(host)
     end
 
     private

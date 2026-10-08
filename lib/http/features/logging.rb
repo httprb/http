@@ -94,7 +94,7 @@ module HTTP
         logger.debug { stringify_headers(response.headers) }
         return response unless logger.debug?
 
-        Response.new(**logged_response_options(response)) # steep:ignore
+        Response.new(**logged_response_options(response))
       end
 
       private
@@ -159,7 +159,7 @@ module HTTP
       # @api private
       def logged_body(body)
         formatter = (method(:format_binary) unless body.loggable?)
-        stream = BodyLogger.new(body.instance_variable_get(:@stream), logger, formatter: formatter) # steep:ignore
+        stream = BodyLogger.new(body.instance_variable_get(:@stream), logger, formatter: formatter)
         Response::Body.new(stream, encoding: body.encoding)
       end
 
