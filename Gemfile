@@ -32,9 +32,12 @@ group :test do
   gem "yardstick"
 end
 
-group :sig do
-  gem "rbs",   ">= 4.1"
-  gem "steep", ">= 2.1"
+# Steep 2.1 requires Ruby 3.3 or newer
+if Gem.ruby_version >= Gem::Version.new("3.3")
+  group :sig do
+    gem "rbs",   ">= 4.1"
+    gem "steep", ">= 2.1"
+  end
 end
 
 group :doc do
