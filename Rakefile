@@ -89,9 +89,16 @@ task :generate_status_codes do
   end
 end
 
-desc "Run mutation testing with Mutant"
+desc "Run mutation testing with Mutant on code changed since main"
 task :mutant do
   system("bundle", "exec", "mutant", "run", "--since", "main") or abort("Mutant failed!")
+end
+
+namespace :mutant do
+  desc "Run mutation testing with Mutant on all subjects"
+  task :full do
+    system("bundle", "exec", "mutant", "run") or abort("Mutant failed!")
+  end
 end
 
 task default: %i[test mutant rubocop verify_measurements typecheck]
