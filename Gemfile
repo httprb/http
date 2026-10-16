@@ -15,7 +15,7 @@ group :test do
   gem "addressable", "~> 2.8"
   gem "logger"
 
-  gem "rubocop",             "~> 1.85"
+  gem "rubocop",             "~> 1.91"
   gem "rubocop-minitest",    "~> 0.36"
   gem "rubocop-performance", "~> 1.26"
   gem "rubocop-rake",        "~> 0.7.1"
