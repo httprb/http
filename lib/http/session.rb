@@ -2,7 +2,7 @@
 
 require "forwardable"
 
-require "http/cookie_jar"
+require "http/cookie"
 require "http/headers"
 require "http/redirector"
 require "http/request/builder"
