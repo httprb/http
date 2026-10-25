@@ -1,0 +1,92 @@
+name: Perf
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+
+# The Duel job runs the branch's code (its benchmarks too), so it only
+# reads. Commenting is the Comment job's, which runs none of it.
+permissions:
+  contents: read
+
+jobs:
+  duel:
+    name: Duel
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # the baseline comes from history, tags included
+          persist-credentials: false
+      # (And whatever else your tests need set up: packages, services.)
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+      # Against the main branch for a pull request, what was there before
+      # for a push, and the last release on a schedule (slow creep). Duel
+      # adds its report to the job's summary, and writes it to duel.md for
+      # the comment.
+      - name: Compare
+        env:
+          DUEL_BASE: ${{ github.event_name == 'schedule' && 'last-release' || github.event_name == 'push' && github.event.before || '' }}
+          # (Run by hand, it compares anyway: with nothing changed, the code
+          # with itself, which checks the setup.)
+          DUEL_FORCE: ${{ github.event_name == 'workflow_dispatch' && '1' || '' }}
+        run: |
+          # (A branch's first push, or one that rewrote history, has no
+          # commit before it here to compare against.)
+          if [ "$GITHUB_EVENT_NAME" = push ] && ! git cat-file -e "$DUEL_BASE^{commit}" 2>/dev/null; then
+            echo "::notice::No commit before this push to compare against"
+            exit 0
+          fi
+          bundle exec duel --markdown "$RUNNER_TEMP/duel.md"
+      # The report, for the Comment job.
+      - name: Keep the report
+        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: duel-report
+          path: ${{ runner.temp }}/duel.md
+          if-no-files-found: ignore # none when Duel didn't get to compare
+          retention-days: 1
+
+  # The report, as a comment on the pull request: one comment, updated on
+  # every push. This job checks nothing out and runs none of the branch's
+  # code, so it alone can write. (A pull request from a fork gets no
+  # comment, as its token can't write one: the Duel job's summary has the
+  # report.)
+  comment:
+    name: Comment
+    needs: duel
+    if: ${{ !cancelled() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write # to comment on the pull request with the report
+    steps:
+      - name: Get the report
+        id: report
+        continue-on-error: true # there's none when the Duel job failed before comparing
+        uses: actions/download-artifact@v8
+        with:
+          name: duel-report
+          path: ${{ runner.temp }}/report
+      - name: Comment on the pull request
+        if: steps.report.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          marker="<!-- duel -->"
+          { echo "$marker"; cat "$RUNNER_TEMP/report/duel.md"; } > "$RUNNER_TEMP/comment.md"
+          ids=$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
+            --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | startswith(\"$marker\"))) | .id")
+          if [ -n "$ids" ]; then
+            gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/${ids%%$'\n'*}" -F body=@"$RUNNER_TEMP/comment.md" > /dev/null
+          else
+            gh api --method POST "repos/$GITHUB_REPOSITORY/issues/$PR/comments" -F body=@"$RUNNER_TEMP/comment.md" > /dev/null
+          fi
