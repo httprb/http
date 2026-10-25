@@ -9,6 +9,10 @@ group :development do
   gem "debug", platform: :mri
 
   gem "nokogiri", require: false
+
+  # Duel requires Ruby 3.4 or later
+  gem "duel" if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new("3.4")
+  gem "stackprof", platforms: :mri
 end
 
 group :test do

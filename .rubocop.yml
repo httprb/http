@@ -13,6 +13,11 @@ AllCops:
   DisplayStyleGuide: true
   NewCops: enable
   TargetRubyVersion: 3.2
+  Include:
+    - '.duel.rb'
+inherit_mode:
+  merge:
+    - Include
 
 # Feature has no initialize, so super() is a no-op in subclasses
 Lint/MissingSuper:

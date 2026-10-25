@@ -12,6 +12,7 @@ Style/FormatStringToken:
 
 Style/OneClassPerFile:
   Exclude:
+    - 'duel/**/*.rb'
     - 'test/**/*.rb'
 
 Style/RescueModifier:

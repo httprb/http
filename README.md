@@ -7,6 +7,7 @@
 [![Mutant][mutant-image]][mutant-link]
 [![Test][test-image]][test-link]
 [![Typecheck][typecheck-image]][typecheck-link]
+[![Duel](https://raw.githubusercontent.com/sferik/duel-ruby/main/assets/badge.svg)](https://github.com/sferik/duel-ruby)
 
 [Documentation]
 
