@@ -102,3 +102,10 @@ namespace :mutant do
 end
 
 task default: %i[test mutant rubocop verify_measurements typecheck]
+
+begin
+  require "duel/rake_task"
+  Duel::RakeTask.new
+rescue LoadError
+  # Duel requires Ruby 3.4 or later
+end
