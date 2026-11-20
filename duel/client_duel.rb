@@ -85,6 +85,6 @@ end
 
 # Through the kernel, so judged on its counts alone.
 duel "client: GET over a loopback TCP connection",
-     only: :count, setup: loopback, before_sample: -> { @server.close_peers }, teardown: -> { @server.close } do
+     judge: :counted, setup: loopback, before_sample: -> { @server.close_peers }, teardown: -> { @server.close } do
   @http.get(api_url).to_s
 end
