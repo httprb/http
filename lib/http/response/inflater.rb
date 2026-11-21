@@ -25,6 +25,7 @@ module HTTP
       # @api public
       def initialize(connection)
         @connection = connection
+        @buffer = String.new(encoding: Encoding::BINARY)
       end
 
       # Read and inflate a chunk of the response body
@@ -32,17 +33,30 @@ module HTTP
       # @example
       #   inflater.readpartial # => "decompressed data"
       #
+      # @param size [Integer, *] maximum number of bytes to return
       # @return [String]
       # @raise [EOFError] when no more data left
       # @api public
-      def readpartial(*)
-        chunk = @connection.readpartial(*)
-        zstream.inflate(chunk)
+      def readpartial(size = nil, *)
+        loop do
+          return @buffer.slice!(0, size || @buffer.bytesize) unless @buffer.empty?
+
+          chunk = size ? @connection.readpartial(size, *) : @connection.readpartial(*)
+          raise EOFError if chunk.nil? || chunk.empty?
+
+          inflated = zstream.inflate(chunk)
+          next if inflated.empty?
+          return inflated unless size && inflated.bytesize > size
+
+          @buffer << inflated
+        end
       rescue EOFError
         unless zstream.closed?
           zstream.finished? ? zstream.finish : zstream.reset
           zstream.close
         end
+
+        return @buffer.slice!(0, size || @buffer.bytesize) unless @buffer.empty?
 
         raise
       end
