@@ -7,8 +7,8 @@ require "stringio"
 class HTTPResponseInflaterTest < Minitest::Test
   cover "HTTP::Response::Inflater*"
 
-  # Upper bound on decompressed bytes from one 1 KiB slice of deflate input
-  MAX_CHUNK_SIZE = 1_024 * 1_032
+  # Upper bound on decompressed bytes from one 4 KiB slice of deflate input
+  MAX_CHUNK_SIZE = 4_096 * 1_032
 
   def gzip(data)
     io = StringIO.new("".b)

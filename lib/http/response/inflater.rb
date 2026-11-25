@@ -8,10 +8,12 @@ module HTTP
     class Inflater
       # Largest slice of compressed input handed to zlib at once
       #
-      # Deflate can expand input by roughly 1032:1 at most, so a 1 KiB
-      # slice caps each decompressed chunk at about 1 MiB, however much
-      # compressed data a single read from the connection returns.
-      INPUT_SLICE_SIZE = 1_024
+      # Deflate can expand input by roughly 1032:1 at most, so a 4 KiB
+      # slice caps each decompressed chunk at about 4 MiB, however much
+      # compressed data a single read from the connection returns. Each
+      # slice is a call to zlib, which has a fixed cost, so smaller slices
+      # inflate a large body noticeably slower.
+      INPUT_SLICE_SIZE = 4_096
       private_constant :INPUT_SLICE_SIZE
 
       # The underlying connection
@@ -75,21 +77,31 @@ module HTTP
 
       # Replace the consumed input with a fresh read from the connection
       #
-      # The read is copied because a caller-supplied outbuf may be reused
-      # while part of its input is still pending.
+      # A read into a caller-supplied outbuf is copied, because the caller
+      # may reuse the outbuf while part of its input is still pending.
+      # Without one, the connection returns a new string, which is kept
+      # as it is.
       #
       # @return [void]
       # @api private
-      def fill_input(*)
-        @input  = @connection.readpartial(*).b
+      def fill_input(*args)
+        chunk   = @connection.readpartial(*args)
+        @input  = args[1] ? chunk.b : chunk
         @offset = 0
       end
 
       # Take the next slice of pending compressed input
+      #
+      # A read that fits in one slice is used whole, without slicing it.
+      #
       # @return [String]
       # @api private
       def next_slice
-        slice = String(@input.byteslice(@offset, INPUT_SLICE_SIZE))
+        slice = if @offset.zero? && @input.bytesize <= INPUT_SLICE_SIZE
+                  @input
+                else
+                  String(@input.byteslice(@offset, INPUT_SLICE_SIZE))
+                end
         @offset += INPUT_SLICE_SIZE
         slice
       end
