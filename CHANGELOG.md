@@ -38,6 +38,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   JVM could garbage-collect llhttp's native callback trampolines while a parser
   was still in use, after which `llhttp_execute` succeeded without invoking any
   callbacks. Callback procs are now retained for the lifetime of the parser.
+- With `auto_inflate`, each `readpartial` (and each chunk yielded by
+  `Body#each`) now returns at most about 1 MiB of decompressed data.
+  Previously a whole network read was inflated at once, so a highly
+  compressed 16 KiB read could expand to roughly 16 MiB in a single chunk,
+  defeating streaming as a way to bound memory use. Compressed input is now
+  inflated in 1 KiB slices. ([#865])
 
 ## [6.0.4] - 2026-07-14
 
@@ -343,6 +349,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#785]: https://github.com/httprb/http/issues/785
 [#826]: https://github.com/httprb/http/issues/826
 [#841]: https://github.com/httprb/http/pull/841
+[#865]: https://github.com/httprb/http/pull/865
 [#863]: https://github.com/httprb/http/issues/863
 
 [GHSA-r98x-p6m8-xcrv]: https://github.com/httprb/http/security/advisories/GHSA-r98x-p6m8-xcrv

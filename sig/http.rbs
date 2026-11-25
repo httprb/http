@@ -1049,7 +1049,11 @@ module HTTP
     end
 
     class Inflater
+      INPUT_SLICE_SIZE: Integer
+
       @zstream: Zlib::Inflate?
+      @input: String
+      @offset: Integer
 
       attr_reader connection: untyped
 
@@ -1058,6 +1062,9 @@ module HTTP
 
       private
 
+      def close_zstream: () -> void
+      def fill_input: (?Integer size, ?String? outbuf) -> void
+      def next_slice: () -> String
       def zstream: () -> Zlib::Inflate
     end
 
