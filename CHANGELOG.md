@@ -39,11 +39,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   was still in use, after which `llhttp_execute` succeeded without invoking any
   callbacks. Callback procs are now retained for the lifetime of the parser.
 - With `auto_inflate`, each `readpartial` (and each chunk yielded by
-  `Body#each`) now returns at most about 1 MiB of decompressed data.
+  `Body#each`) now returns at most about 4 MiB of decompressed data.
   Previously a whole network read was inflated at once, so a highly
   compressed 16 KiB read could expand to roughly 16 MiB in a single chunk,
   defeating streaming as a way to bound memory use. Compressed input is now
-  inflated in 1 KiB slices. ([#865])
+  inflated in 4 KiB slices. ([#865])
 
 ## [6.0.4] - 2026-07-14
 
