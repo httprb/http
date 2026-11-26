@@ -150,7 +150,12 @@ module HTTP
     # @api public
     def read_headers!
       until @parser.headers?
-        result = read_more(BUFFER_SIZE)
+        begin
+          result = read_more(BUFFER_SIZE)
+        rescue SocketReadError => e
+          raise ResponseHeaderError, "couldn't read response headers: #{e.message}", e.backtrace
+        end
+
         raise ResponseHeaderError, "couldn't read response headers" if result == :eof
       end
 

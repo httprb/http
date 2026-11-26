@@ -496,6 +496,20 @@ class HTTPConnectionTest < Minitest::Test
     assert_includes err.message, "couldn't read response headers"
   end
 
+  def test_read_headers_raises_response_header_error_on_malformed_header
+    req = build_req
+    raw_response = "HTTP/1.1 200 OK\r\nContent-Type: text\r\nver\r\n\r\n"
+    read_socket = fake(connect: nil, close: nil, readpartial: raw_response)
+    read_timeout_class = fake(new: read_socket)
+    read_opts = HTTP::Options.new(timeout_class: read_timeout_class)
+    conn = HTTP::Connection.new(req, read_opts)
+    conn.instance_variable_set(:@pending_response, true)
+
+    err = assert_raises(HTTP::ResponseHeaderError) { conn.read_headers! }
+    assert_includes err.message, "couldn't read response headers"
+    assert_includes err.message, "Invalid header token"
+  end
+
   def test_read_headers_calls_set_keep_alive_after_reading
     req = build_req
     raw_response = "HTTP/1.1 200 OK\r\nContent-Length: 0\r\n\r\n"
