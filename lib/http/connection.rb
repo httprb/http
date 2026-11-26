@@ -132,9 +132,8 @@ module HTTP
       unless chunk
         eof = read_more(size) == :eof
         check_premature_eof(eof)
-        finished = eof || @parser.finished?
-        chunk    = @parser.read(size) || "".b
-        finish_response if finished
+        chunk = @parser.read(size) || "".b
+        finish_response if eof || @parser.finished?
       end
 
       outbuf ? outbuf.replace(chunk) : chunk
@@ -150,16 +149,12 @@ module HTTP
     # @api public
     def read_headers!
       until @parser.headers?
-        begin
-          result = read_more(BUFFER_SIZE)
-        rescue SocketReadError => e
-          raise ResponseHeaderError, "couldn't read response headers: #{e.message}", e.backtrace
-        end
-
-        raise ResponseHeaderError, "couldn't read response headers" if result == :eof
+        raise ResponseHeaderError, "couldn't read response headers" if read_more(BUFFER_SIZE) == :eof
       end
 
       set_keep_alive
+    rescue SocketReadError => e
+      raise ResponseHeaderError, "couldn't read response headers: #{e.message}", e.backtrace
     end
 
     # Callback for when we've reached the end of a response
